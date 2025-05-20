@@ -207,17 +207,6 @@ with st.container():
             )
         )
 
-        # Add secondary x-axis for the range slider with matching date format
-        fig.update_xaxes(
-            rangeslider=dict(
-                tickformat=tickformat,
-                tickmode="auto",
-                nticks=10,
-                tickfont=dict(size=10)
-            ),
-            row=1, col=1
-        )
-
         # Show the figure with more vertical space
         st.plotly_chart(fig, use_container_width=True)
 
