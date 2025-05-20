@@ -137,7 +137,7 @@ with st.container(border=True):
             y=y_fit * 0.4,
             mode='lines',
             name='-60% Deviation',
-            line=dict(color='rgba(255,165,0,0.8)', dash='dot', width=1),
+            line=dict(color='rgba(150, 150, 150, 0.8)', dash='dot', width=1),  # Changed to grey
             hoverinfo='skip'
         ))
         fig.add_trace(go.Scatter(
@@ -145,7 +145,7 @@ with st.container(border=True):
             y=y_fit * 2.2,
             mode='lines',
             name='+120% Deviation',
-            line=dict(color='rgba(255,165,0,0.8)', dash='dot', width=1),
+            line=dict(color='rgba(150, 150, 150, 0.8)', dash='dot', width=1),  # Changed to grey
             hoverinfo='skip'
         ))
 
