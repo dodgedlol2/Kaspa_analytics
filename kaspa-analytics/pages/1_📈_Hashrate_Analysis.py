@@ -23,30 +23,63 @@ except Exception as e:
     st.error(f"Failed to calculate power law: {str(e)}")
     st.stop()
 
-# ====== SIMPLIFIED CONTROLS ======
-with st.container():
-    # Create columns for controls
-    col1, col2, col3 = st.columns([2, 2, 6])
-    
-    with col1:
-        y_scale = st.radio("Hashrate scale:", ["Linear", "Log"], 
-                          index=1, horizontal=True,
-                          help="Linear or logarithmic Y-axis scale")
-    
-    with col2:
-        x_scale_type = st.radio("Time scale:", ["Linear", "Log"], 
-                               index=0, horizontal=True,
-                               help="Linear or logarithmic X-axis scale")
-    
-    with col3:
-        show_bands = st.toggle("Show Deviation Bands", value=False,
-                             help="Show ± deviation bands around the fit")
+# Custom CSS for professional styling
+st.markdown("""
+<style>
+    div[data-testid="stHorizontalBlock"] {
+        gap: 0.5rem;
+    }
+    .stRadio > div {
+        flex-direction: row;
+        gap: 0.5rem;
+    }
+    .stRadio [role="radiogroup"] {
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .stRadio [data-testid="stMarkdownContainer"] p {
+        margin-bottom: 0;
+        font-weight: 500;
+    }
+</style>
+""", unsafe_allow_html=True)
 
-# ====== ENHANCED CHART CONTAINER ======
+# ====== PROFESSIONAL CHART CONTAINER ======
 with st.container(border=True):
-    # Title integrated into the container
-    st.markdown("### Kaspa Hashrate Analysis")
+    # Header with title and integrated controls
+    header_cols = st.columns([3, 2, 2, 1])
     
+    with header_cols[0]:
+        st.markdown("### Kaspa Hashrate", help="Network hashrate growth over time")
+    
+    with header_cols[1]:
+        y_scale = st.radio(
+            "Hashrate:",
+            ["Linear", "Log"],
+            index=1,
+            horizontal=True,
+            label_visibility="collapsed",
+            key="y_scale"
+        )
+    
+    with header_cols[2]:
+        x_scale_type = st.radio(
+            "Time:",
+            ["Linear", "Log"],
+            index=0,
+            horizontal=True,
+            label_visibility="collapsed",
+            key="x_scale"
+        )
+    
+    with header_cols[3]:
+        show_bands = st.toggle(
+            "Bands",
+            value=False,
+            help="Show deviation bands",
+            key="bands_toggle"
+        )
+
     # Create figure with enhanced grid
     fig = go.Figure()
 
@@ -64,7 +97,7 @@ with st.container(border=True):
         y=df['Hashrate_PH'],
         mode='lines',
         name='Hashrate (PH/s)',
-        line=dict(color='#00FFCC', width=2),
+        line=dict(color='#00FFCC', width=2.5),
         hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Hashrate</b>: %{y:.2f} PH/s<extra></extra>',
         text=df['Date']
     ))
@@ -83,7 +116,7 @@ with st.container(border=True):
         y=y_fit,
         mode='lines',
         name=f'Power-Law Fit (R²={r2:.3f})',
-        line=dict(color='orange', dash='dot', width=1.5)
+        line=dict(color='orange', dash='dot', width=1.8)
     ))
     
     # Deviation bands (only shown when toggled)
@@ -92,16 +125,16 @@ with st.container(border=True):
             x=fit_x,
             y=y_fit * 0.4,
             mode='lines',
-            name='-60% Deviation',
-            line=dict(color='rgba(255,165,0,0.8)', dash='dot', width=1),
+            name='-60%',
+            line=dict(color='rgba(255,165,0,0.8)', dash='dot', width=1.2),
             hoverinfo='skip'
         ))
         fig.add_trace(go.Scatter(
             x=fit_x,
             y=y_fit * 2.2,
             mode='lines',
-            name='+120% Deviation',
-            line=dict(color='rgba(255,165,0,0.8)', dash='dot', width=1),
+            name='+120%',
+            line=dict(color='rgba(255,165,0,0.8)', dash='dot', width=1.2),
             hoverinfo='skip'
         ))
 
@@ -110,8 +143,8 @@ with st.container(border=True):
         template='plotly_dark',
         hovermode='x unified',
         height=600,
-        margin=dict(l=20, r=20, t=60, b=20),
-        yaxis_title='Hashrate (PH/s)',
+        margin=dict(l=20, r=20, t=20, b=20),  # Reduced top margin
+        yaxis_title='PH/s',
         xaxis_title=x_title,
         xaxis=dict(
             type="log" if x_scale_type == "Log" else None,
@@ -140,7 +173,8 @@ with st.container(border=True):
             yanchor="bottom",
             y=1.02,
             xanchor="right",
-            x=1
+            x=1,
+            font=dict(size=10)
         )
     )
 
