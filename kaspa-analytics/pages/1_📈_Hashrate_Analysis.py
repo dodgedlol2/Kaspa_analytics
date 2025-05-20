@@ -6,30 +6,6 @@ from utils import fit_power_law, load_data
 
 st.set_page_config(layout="wide")
 
-# Custom CSS to position the buttons
-st.markdown("""
-<style>
-    .scale-button {
-        position: absolute;
-        z-index: 1000;
-        font-size: 12px !important;
-        padding: 0.15em 0.4em !important;
-        min-width: 0 !important;
-    }
-    #y-scale-btn {
-        left: 70px;
-        top: 80px;
-    }
-    #x-scale-btn {
-        right: 70px;
-        bottom: 80px;
-    }
-    .stPlotlyChart {
-        position: relative;
-    }
-</style>
-""", unsafe_allow_html=True)
-
 # Data loading and processing
 if 'df' not in st.session_state or 'genesis_date' not in st.session_state:
     try:
@@ -47,30 +23,37 @@ except Exception as e:
     st.error(f"Failed to calculate power law: {str(e)}")
     st.stop()
 
-# Initialize session state for toggles
-if 'y_log' not in st.session_state:
-    st.session_state.y_log = True
-if 'x_log' not in st.session_state:
-    st.session_state.x_log = False
-if 'show_bands' not in st.session_state:
-    st.session_state.show_bands = False
+# ====== SIMPLIFIED CONTROLS ======
+with st.container():
+    # Create columns for controls
+    col1, col2, col3 = st.columns([1, 1, 8])
+    
+    with col1:
+        st.markdown("**Y-scale**", help="Hashrate scale")
+        y_scale = st.toggle("L", value=True, key="y_scale", 
+                           help="Logarithmic (L) or Linear (A) Y-axis scale")
+        y_scale = "Log" if y_scale else "Linear"
+    
+    with col2:
+        st.markdown("**X-scale**", help="Time scale")
+        x_scale_type = st.toggle("L", value=False, key="x_scale", 
+                                help="Logarithmic (L) or Linear (A) X-axis scale")
+        x_scale_type = "Log" if x_scale_type else "Linear"
+    
+    with col3:
+        show_bands = st.toggle("Show Deviation Bands", value=False,
+                              help="Show ± deviation bands around the fit")
 
-# Callback functions
-def toggle_y_scale():
-    st.session_state.y_log = not st.session_state.y_log
-
-def toggle_x_scale():
-    st.session_state.x_log = not st.session_state.x_log
-
-# ====== CHART CONTAINER ======
+# ====== ENHANCED CHART CONTAINER ======
 with st.container(border=True):
+    # Title integrated into the container
     st.markdown("### Kaspa Hashrate Analysis")
     
-    # Create figure
+    # Create figure with enhanced grid
     fig = go.Figure()
 
-    # Determine x-axis values
-    if st.session_state.x_log:
+    # Determine x-axis values based on scale type
+    if x_scale_type == "Log":
         x_values = df['days_from_genesis']
         x_title = "Days Since Genesis (Log Scale)"
     else:
@@ -88,11 +71,11 @@ with st.container(border=True):
         text=df['Date']
     ))
 
-    # Power-law fit
+    # Power-law fit (always shown)
     x_fit = np.linspace(df['days_from_genesis'].min(), df['days_from_genesis'].max(), 100)
     y_fit = a * np.power(x_fit, b)
     
-    if st.session_state.x_log:
+    if x_scale_type == "Log":
         fit_x = x_fit
     else:
         fit_x = [genesis_date + pd.Timedelta(days=int(d)) for d in x_fit]
@@ -105,8 +88,8 @@ with st.container(border=True):
         line=dict(color='orange', dash='dot', width=1.5)
     ))
     
-    # Deviation bands
-    if st.session_state.show_bands:
+    # Deviation bands (only shown when toggled)
+    if show_bands:
         fig.add_trace(go.Scatter(
             x=fit_x,
             y=y_fit * 0.4,
@@ -124,25 +107,35 @@ with st.container(border=True):
             hoverinfo='skip'
         ))
 
-    # Chart layout
+    # Enhanced layout
     fig.update_layout(
         template='plotly_dark',
         hovermode='x unified',
         height=600,
-        margin=dict(l=80, r=80, t=80, b=80),  # Extra margin for buttons
+        margin=dict(l=20, r=20, t=60, b=20),
         yaxis_title='Hashrate (PH/s)',
         xaxis_title=x_title,
         xaxis=dict(
-            type="log" if st.session_state.x_log else None,
+            type="log" if x_scale_type == "Log" else None,
             showgrid=True,
             gridwidth=1,
-            gridcolor='rgba(100,100,100,0.2)'
+            gridcolor='rgba(100,100,100,0.2)',
+            minor=dict(
+                ticklen=6,
+                gridcolor='rgba(100,100,100,0.1)',
+                gridwidth=0.5
+            )
         ),
         yaxis=dict(
-            type="log" if st.session_state.y_log else "linear",
+            type="log" if y_scale == "Log" else "linear",
             showgrid=True,
             gridwidth=1,
-            gridcolor='rgba(100,100,100,0.2)'
+            gridcolor='rgba(100,100,100,0.2)',
+            minor=dict(
+                ticklen=6,
+                gridcolor='rgba(100,100,100,0.1)',
+                gridwidth=0.5
+            )
         ),
         legend=dict(
             orientation="h",
@@ -153,36 +146,10 @@ with st.container(border=True):
         )
     )
 
-    # Display the chart
-    chart_container = st.plotly_chart(fig, use_container_width=True)
+    # Show the figure
+    st.plotly_chart(fig, use_container_width=True)
 
-    # Add the scale buttons (using columns as containers)
-    col1, col2 = st.columns([1, 1])
-    
-    with col1:
-        st.button("Y: L" if st.session_state.y_log else "Y: A",
-                on_click=toggle_y_scale,
-                key="y_scale_btn",
-                help="Toggle Y-axis scale (Log/Linear)",
-                kwargs={'class': 'scale-button'},
-                )
-    
-    with col2:
-        st.button("X: L" if st.session_state.x_log else "X: A",
-                on_click=toggle_x_scale,
-                key="x_scale_btn",
-                help="Toggle X-axis scale (Log/Linear)",
-                kwargs={'class': 'scale-button'},
-                )
-
-# Controls below the chart
-with st.container():
-    st.toggle("Show Deviation Bands", 
-             value=st.session_state.show_bands,
-             key="show_bands",
-             help="Show ± deviation bands around the fit")
-
-# Stats cards
+# Stats in minimal cards
 cols = st.columns(3)
 with cols[0].container(border=True):
     st.metric("Power-Law Slope", f"{b:.3f}")
