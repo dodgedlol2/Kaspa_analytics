@@ -6,12 +6,18 @@ from utils import fit_power_law, load_data
 
 st.set_page_config(layout="wide")
 
-# Custom CSS for floating buttons
+# Custom CSS for professional styling
 st.markdown("""
 <style>
-    .chart-controls {
+    .chart-wrapper {
+        position: relative;
+    }
+    .scale-controls {
         position: absolute;
         z-index: 100;
+        background: rgba(30, 30, 30, 0.7);
+        border-radius: 4px;
+        padding: 4px;
     }
     .y-scale-controls {
         top: 10px;
@@ -26,10 +32,11 @@ st.markdown("""
         border-radius: 4px !important;
         padding: 0.15rem 0.5rem !important;
         font-size: 0.8rem !important;
-        background-color: rgba(30, 30, 30, 0.7) !important;
+        background-color: transparent !important;
         color: white !important;
         min-width: 24px !important;
         height: 24px !important;
+        margin: 0 2px !important;
     }
     .scale-btn:hover {
         background-color: rgba(45, 52, 54, 0.9) !important;
@@ -82,16 +89,25 @@ except Exception as e:
 
 # Initialize session state for scale toggles
 if 'y_scale_type' not in st.session_state:
-    st.session_state.y_scale_type = "log"  # Must be lowercase
+    st.session_state.y_scale_type = "log"
 if 'x_scale_type' not in st.session_state:
-    st.session_state.x_scale_type = "linear"  # Must be lowercase
+    st.session_state.x_scale_type = "linear"
 if 'show_bands' not in st.session_state:
     st.session_state.show_bands = False
 
+# Callback functions for button clicks
+def set_y_scale(scale_type):
+    st.session_state.y_scale_type = scale_type
+
+def set_x_scale(scale_type):
+    st.session_state.x_scale_type = scale_type
+
 # ====== PROFESSIONAL CHART CONTAINER ======
 with st.container(border=True):
-    # Title
     st.markdown("### Kaspa Hashrate")
+    
+    # Create a wrapper div for the chart and controls
+    st.markdown('<div class="chart-wrapper">', unsafe_allow_html=True)
     
     # Create figure with enhanced grid
     fig = go.Figure()
@@ -171,7 +187,7 @@ with st.container(border=True):
         },
         'xaxis': {
             'title': x_title,
-            'type': st.session_state.x_scale_type if st.session_state.x_scale_type == "log" else None,
+            'type': st.session_state.x_scale_type if st.session_state.x_scale_type == "log" else "date",
             'showgrid': True,
             'gridwidth': 1,
             'gridcolor': 'rgba(100,100,100,0.2)',
@@ -191,49 +207,44 @@ with st.container(border=True):
         }
     }
     
-    # Special handling for linear x-axis (date type)
-    if st.session_state.x_scale_type == "linear":
-        layout_updates['xaxis']['type'] = 'date'
-    
     fig.update_layout(**layout_updates)
 
-    # Create a container for the chart and floating buttons
-    chart_container = st.container()
-    with chart_container:
-        # Display the chart
-        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
-        
-        # Y-axis scale controls (top-left)
-        y_col1, y_col2 = st.columns([1, 19])
-        with y_col1:
-            st.markdown(f"""
-            <div class="chart-controls y-scale-controls">
-                <div class="scale-btn-container" style="display: inline-block; position: relative;">
-                    <button class="scale-btn {'active' if st.session_state.y_scale_type == 'linear' else ''}" onclick="st.session_state.y_scale_type='linear'">A</button>
-                    <span class="scale-btn-tooltip">Autoscale/Linear</span>
-                </div>
-                <div class="scale-btn-container" style="display: inline-block; position: relative; margin-left: 4px;">
-                    <button class="scale-btn {'active' if st.session_state.y_scale_type == 'log' else ''}" onclick="st.session_state.y_scale_type='log'">L</button>
-                    <span class="scale-btn-tooltip">Logarithmic Scale</span>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-        
-        # X-axis scale controls (bottom-right)
-        x_col1, x_col2 = st.columns([19, 1])
-        with x_col2:
-            st.markdown(f"""
-            <div class="chart-controls x-scale-controls">
-                <div class="scale-btn-container" style="display: inline-block; position: relative;">
-                    <button class="scale-btn {'active' if st.session_state.x_scale_type == 'linear' else ''}" onclick="st.session_state.x_scale_type='linear'">A</button>
-                    <span class="scale-btn-tooltip">Autoscale/Linear</span>
-                </div>
-                <div class="scale-btn-container" style="display: inline-block; position: relative; margin-left: 4px;">
-                    <button class="scale-btn {'active' if st.session_state.x_scale_type == 'log' else ''}" onclick="st.session_state.x_scale_type='log'">L</button>
-                    <span class="scale-btn-tooltip">Logarithmic Scale</span>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+    # Display the chart
+    st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+    
+    # Y-axis scale controls (top-left)
+    st.markdown(f"""
+    <div class="scale-controls y-scale-controls">
+        <div class="scale-btn-container" style="display: inline-block; position: relative;">
+            <button class="scale-btn {'active' if st.session_state.y_scale_type == 'linear' else ''}" 
+                    onclick="(function() {{ const event = new CustomEvent('setYScale', {{ detail: 'linear' }}); window.dispatchEvent(event); }})()">A</button>
+            <span class="scale-btn-tooltip">Autoscale/Linear</span>
+        </div>
+        <div class="scale-btn-container" style="display: inline-block; position: relative;">
+            <button class="scale-btn {'active' if st.session_state.y_scale_type == 'log' else ''}" 
+                    onclick="(function() {{ const event = new CustomEvent('setYScale', {{ detail: 'log' }}); window.dispatchEvent(event); }})()">L</button>
+            <span class="scale-btn-tooltip">Logarithmic Scale</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # X-axis scale controls (bottom-right)
+    st.markdown(f"""
+    <div class="scale-controls x-scale-controls">
+        <div class="scale-btn-container" style="display: inline-block; position: relative;">
+            <button class="scale-btn {'active' if st.session_state.x_scale_type == 'linear' else ''}" 
+                    onclick="(function() {{ const event = new CustomEvent('setXScale', {{ detail: 'linear' }}); window.dispatchEvent(event); }})()">A</button>
+            <span class="scale-btn-tooltip">Autoscale/Linear</span>
+        </div>
+        <div class="scale-btn-container" style="display: inline-block; position: relative;">
+            <button class="scale-btn {'active' if st.session_state.x_scale_type == 'log' else ''}" 
+                    onclick="(function() {{ const event = new CustomEvent('setXScale', {{ detail: 'log' }}); window.dispatchEvent(event); }})()">L</button>
+            <span class="scale-btn-tooltip">Logarithmic Scale</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)  # Close chart-wrapper
 
 # Stats in minimal cards
 cols = st.columns(3)
@@ -247,14 +258,21 @@ with cols[2].container(border=True):
 # JavaScript to handle button clicks
 st.markdown("""
 <script>
-    // Add event listeners to buttons
+    // Handle custom events from buttons
+    window.addEventListener('setYScale', function(e) {
+        Streamlit.setComponentValue({y_scale_type: e.detail});
+    });
+    window.addEventListener('setXScale', function(e) {
+        Streamlit.setComponentValue({x_scale_type: e.detail});
+    });
+    
+    // Force rerun when buttons are clicked
     document.addEventListener('DOMContentLoaded', function() {
         const buttons = document.querySelectorAll('.scale-btn');
         buttons.forEach(button => {
             button.addEventListener('click', function() {
                 setTimeout(() => {
-                    // Force Streamlit to re-run
-                    Streamlit.setComponentValue(Date.now());
+                    Streamlit.setComponentValue({forceRerun: Date.now()});
                 }, 100);
             });
         });
