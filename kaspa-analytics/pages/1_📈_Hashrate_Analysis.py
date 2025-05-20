@@ -25,18 +25,18 @@ except Exception as e:
 
 # ====== SIMPLIFIED CONTROLS ======
 with st.container():
-    # Create columns for controls - now just for scale options
+    # Create columns for controls
     col1, col2, spacer = st.columns([2, 2, 6])
     
     with col1:
         y_scale = st.radio("Hashrate scale:", ["Linear", "Log"], 
-                          index=1, horizontal=True,
-                          help="Linear or logarithmic Y-axis scale")
+                         index=1, horizontal=True,
+                         help="Linear or logarithmic Y-axis scale")
     
     with col2:
-        x_scale = st.radio("Time scale:", ["Date", "Days"], 
-                          index=0, horizontal=True,
-                          help="Linear or logarithmic X-axis scale")
+        x_scale_type = st.radio("Time scale:", ["Linear", "Log"], 
+                              index=0, horizontal=True,
+                              help="Linear or logarithmic X-axis scale")
 
 # ====== ENHANCED CHART CONTAINER ======
 with st.container(border=True):
@@ -46,9 +46,17 @@ with st.container(border=True):
     # Create figure with enhanced grid
     fig = go.Figure()
 
+    # Determine x-axis values based on scale type
+    if x_scale_type == "Log":
+        x_values = df['days_from_genesis']
+        x_title = "Days Since Genesis (Log Scale)"
+    else:
+        x_values = df['Date']
+        x_title = "Date"
+
     # Main trace
     fig.add_trace(go.Scatter(
-        x=df['days_from_genesis'] if x_scale == "Days" else df['Date'],
+        x=x_values,
         y=df['Hashrate_PH'],
         mode='lines',
         name='Hashrate (PH/s)',
@@ -61,7 +69,10 @@ with st.container(border=True):
     x_fit = np.linspace(df['days_from_genesis'].min(), df['days_from_genesis'].max(), 100)
     y_fit = a * np.power(x_fit, b)
     
-    fit_x = x_fit if x_scale == "Days" else [genesis_date + pd.Timedelta(days=int(d)) for d in x_fit]
+    if x_scale_type == "Log":
+        fit_x = x_fit
+    else:
+        fit_x = [genesis_date + pd.Timedelta(days=int(d)) for d in x_fit]
     
     fig.add_trace(go.Scatter(
         x=fit_x,
@@ -96,8 +107,9 @@ with st.container(border=True):
         height=600,
         margin=dict(l=20, r=20, t=60, b=20),
         yaxis_title='Hashrate (PH/s)',
-        xaxis_title=x_scale,
+        xaxis_title=x_title,
         xaxis=dict(
+            type="log" if x_scale_type == "Log" else None,
             showgrid=True,
             gridwidth=1,
             gridcolor='rgba(100,100,100,0.2)',
