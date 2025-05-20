@@ -2,10 +2,12 @@ import streamlit as st
 import plotly.graph_objects as go
 import numpy as np
 from utils import fit_power_law
+from utils import load_data
 
-st.title("Kaspa Hashrate Analysis")
+# Initialize data if not loaded
+if 'df' not in st.session_state:
+    st.session_state.df, st.session_state.genesis_date = load_data()
 
-# Get data from session state
 df = st.session_state.df
 genesis_date = st.session_state.genesis_date
 
