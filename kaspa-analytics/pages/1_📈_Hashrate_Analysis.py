@@ -37,21 +37,22 @@ with st.container(border=True):
         c1, c2, c3, _ = st.columns([1, 1, 2, 4])
         
         with c1:
-            st.markdown("**Y-scale**", help="Hashrate scale")
+            st.markdown("**Hashrate-scale**", help="Toggle between logarithmic and linear scale for hashrate")
             y_scale = st.toggle("L", value=True, key="y_scale", 
                               help="Logarithmic (L) or Linear (A) Y-axis scale",
                               label_visibility="collapsed")
             y_scale = "Log" if y_scale else "Linear"
         
         with c2:
-            st.markdown("**X-scale**", help="Time scale")
+            st.markdown("**Time-scale**", help="Toggle between logarithmic and linear scale for time")
             x_scale_type = st.toggle("L", value=False, key="x_scale", 
                                     help="Logarithmic (L) or Linear (A) X-axis scale",
                                     label_visibility="collapsed")
             x_scale_type = "Log" if x_scale_type else "Linear"
         
         with c3:
-            show_bands = st.toggle("Show Bands", value=False,
+            st.markdown("**Deviations**", help="Show/hide deviation bands around the fit")
+            show_bands = st.toggle("", value=False,
                                   help="Show ± deviation bands around the fit",
                                   label_visibility="collapsed")
 
