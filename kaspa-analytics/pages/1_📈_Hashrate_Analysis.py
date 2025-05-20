@@ -23,32 +23,38 @@ except Exception as e:
     st.error(f"Failed to calculate power law: {str(e)}")
     st.stop()
 
-# ====== SIMPLIFIED CONTROLS ======
-with st.container():
-    # Create columns for controls
-    col1, col2, col3 = st.columns([1, 1, 8])
-    
-    with col1:
-        st.markdown("**Y-scale**", help="Hashrate scale")
-        y_scale = st.toggle("L", value=True, key="y_scale", 
-                           help="Logarithmic (L) or Linear (A) Y-axis scale")
-        y_scale = "Log" if y_scale else "Linear"
-    
-    with col2:
-        st.markdown("**X-scale**", help="Time scale")
-        x_scale_type = st.toggle("L", value=False, key="x_scale", 
-                                help="Logarithmic (L) or Linear (A) X-axis scale")
-        x_scale_type = "Log" if x_scale_type else "Linear"
-    
-    with col3:
-        show_bands = st.toggle("Show Deviation Bands", value=False,
-                              help="Show ± deviation bands around the fit")
-
 # ====== ENHANCED CHART CONTAINER ======
 with st.container(border=True):
-    # Title integrated into the container
-    st.markdown("### Kaspa Hashrate Analysis")
+    # Create columns for title and controls
+    title_col, control_col = st.columns([3, 7])
     
+    with title_col:
+        # Smaller title
+        st.markdown("## Kaspa Hashrate", help="Kaspa network hashrate over time")
+    
+    with control_col:
+        # Compact controls in columns
+        c1, c2, c3, _ = st.columns([1, 1, 2, 4])
+        
+        with c1:
+            st.markdown("**Y-scale**", help="Hashrate scale")
+            y_scale = st.toggle("L", value=True, key="y_scale", 
+                              help="Logarithmic (L) or Linear (A) Y-axis scale",
+                              label_visibility="collapsed")
+            y_scale = "Log" if y_scale else "Linear"
+        
+        with c2:
+            st.markdown("**X-scale**", help="Time scale")
+            x_scale_type = st.toggle("L", value=False, key="x_scale", 
+                                    help="Logarithmic (L) or Linear (A) X-axis scale",
+                                    label_visibility="collapsed")
+            x_scale_type = "Log" if x_scale_type else "Linear"
+        
+        with c3:
+            show_bands = st.toggle("Show Bands", value=False,
+                                  help="Show ± deviation bands around the fit",
+                                  label_visibility="collapsed")
+
     # Create figure with enhanced grid
     fig = go.Figure()
 
