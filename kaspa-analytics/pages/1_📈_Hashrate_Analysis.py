@@ -6,73 +6,37 @@ from utils import fit_power_law, load_data
 
 st.set_page_config(layout="wide")
 
-# Custom CSS for professional styling
+# Custom CSS for button styling
 st.markdown("""
 <style>
-    .chart-wrapper {
-        position: relative;
+    .scale-toggle {
+        background-color: rgba(0, 255, 204, 0.2) !important;
+        border: 1px solid #00FFCC !important;
+        border-radius: 12px !important;
+        padding: 0.15rem 0.75rem !important;
+        font-size: 0.8rem !important;
+        color: white !important;
+        height: 28px !important;
+        min-width: 60px !important;
     }
-    .scale-controls {
+    .scale-toggle:hover {
+        background-color: rgba(0, 255, 204, 0.3) !important;
+        border-color: #00FFCC !important;
+    }
+    .scale-toggle.st-emotion-cache-1gj0q5z {
+        background-color: rgba(0, 255, 204, 0.4) !important;
+    }
+    .y-scale-container {
         position: absolute;
-        z-index: 100;
-        background: rgba(30, 30, 30, 0.7);
-        border-radius: 4px;
-        padding: 4px;
-        display: flex;
-        gap: 4px;
-    }
-    .y-scale-controls {
-        top: 10px;
+        top: 40px;
         left: 10px;
+        z-index: 100;
     }
-    .x-scale-controls {
+    .x-scale-container {
+        position: absolute;
         bottom: 10px;
         right: 10px;
-    }
-    .scale-btn {
-        border: 1px solid #636e72 !important;
-        border-radius: 4px !important;
-        padding: 0.15rem 0.5rem !important;
-        font-size: 0.8rem !important;
-        background-color: transparent !important;
-        color: white !important;
-        min-width: 24px !important;
-        height: 24px !important;
-        margin: 0 !important;
-        cursor: pointer;
-    }
-    .scale-btn:hover {
-        background-color: rgba(45, 52, 54, 0.9) !important;
-        border-color: #00FFCC !important;
-    }
-    .scale-btn.active {
-        background-color: rgba(0, 255, 204, 0.2) !important;
-        border-color: #00FFCC !important;
-    }
-    .scale-btn-tooltip {
-        visibility: hidden;
-        width: 120px;
-        background-color: #2d3436;
-        color: #fff;
-        text-align: center;
-        border-radius: 4px;
-        padding: 4px;
-        position: absolute;
-        z-index: 1;
-        bottom: 125%;
-        left: 50%;
-        transform: translateX(-50%);
-        opacity: 0;
-        transition: opacity 0.3s;
-        font-size: 12px;
-    }
-    .scale-btn-container {
-        position: relative;
-        display: inline-block;
-    }
-    .scale-btn-container:hover .scale-btn-tooltip {
-        visibility: visible;
-        opacity: 1;
+        z-index: 100;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -96,166 +60,124 @@ except Exception as e:
 
 # Initialize session state for scale toggles
 if 'y_scale' not in st.session_state:
-    st.session_state.y_scale = "log"
+    st.session_state.y_scale = False  # False = Linear, True = Log
 if 'x_scale' not in st.session_state:
-    st.session_state.x_scale = "linear"
-if 'show_bands' not in st.session_state:
-    st.session_state.show_bands = False
+    st.session_state.x_scale = False  # False = Linear, True = Log
 
-# Create columns for the scale toggles
-col1, col2 = st.columns(2)
-with col1:
-    y_scale = st.radio(
-        "Y-axis scale:",
-        ["Linear", "Log"],
-        index=1 if st.session_state.y_scale == "log" else 0,
-        key="y_scale_radio",
-        horizontal=True,
-        label_visibility="collapsed"
-    )
-    st.session_state.y_scale = y_scale.lower()
-
-with col2:
-    x_scale = st.radio(
-        "X-axis scale:",
-        ["Linear", "Log"],
-        index=1 if st.session_state.x_scale == "log" else 0,
-        key="x_scale_radio",
-        horizontal=True,
-        label_visibility="collapsed"
-    )
-    st.session_state.x_scale = x_scale.lower()
-
-# ====== PROFESSIONAL CHART CONTAINER ======
+# ====== CHART CONTAINER ======
 with st.container(border=True):
     st.markdown("### Kaspa Hashrate")
     
-    # Create figure with enhanced grid
-    fig = go.Figure()
-
-    # Determine x-axis values based on scale type
-    if st.session_state.x_scale == "log":
-        x_values = df['days_from_genesis']
-        x_title = "Days Since Genesis (Log Scale)"
-    else:
-        x_values = df['Date']
-        x_title = "Date"
-
-    # Main trace
-    fig.add_trace(go.Scatter(
-        x=x_values,
-        y=df['Hashrate_PH'],
-        mode='lines',
-        name='Hashrate (PH/s)',
-        line=dict(color='#00FFCC', width=2.5),
-        hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Hashrate</b>: %{y:.2f} PH/s<extra></extra>',
-        text=df['Date']
-    ))
-
-    # Power-law fit (always shown)
-    x_fit = np.linspace(df['days_from_genesis'].min(), df['days_from_genesis'].max(), 100)
-    y_fit = a * np.power(x_fit, b)
+    # Create columns for the chart and controls
+    chart_col, _ = st.columns([20, 1])
     
-    if st.session_state.x_scale == "log":
-        fit_x = x_fit
-    else:
-        fit_x = [genesis_date + pd.Timedelta(days=int(d)) for d in x_fit]
-    
-    fig.add_trace(go.Scatter(
-        x=fit_x,
-        y=y_fit,
-        mode='lines',
-        name=f'Power-Law Fit (R²={r2:.3f})',
-        line=dict(color='orange', dash='dot', width=1.8)
-    ))
-    
-    # Deviation bands (only shown when toggled)
-    if st.session_state.show_bands:
+    with chart_col:
+        # Create figure
+        fig = go.Figure()
+
+        # Determine x-axis values based on scale type
+        if st.session_state.x_scale:
+            x_values = df['days_from_genesis']
+            x_title = "Days Since Genesis (Log Scale)"
+        else:
+            x_values = df['Date']
+            x_title = "Date"
+
+        # Main trace
         fig.add_trace(go.Scatter(
-            x=fit_x,
-            y=y_fit * 0.4,
+            x=x_values,
+            y=df['Hashrate_PH'],
             mode='lines',
-            name='-60%',
-            line=dict(color='rgba(255,165,0,0.8)', dash='dot', width=1.2),
-            hoverinfo='skip'
-        ))
-        fig.add_trace(go.Scatter(
-            x=fit_x,
-            y=y_fit * 2.2,
-            mode='lines',
-            name='+120%',
-            line=dict(color='rgba(255,165,0,0.8)', dash='dot', width=1.2),
-            hoverinfo='skip'
+            name='Hashrate (PH/s)',
+            line=dict(color='#00FFCC', width=2.5),
+            hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Hashrate</b>: %{y:.2f} PH/s<extra></extra>',
+            text=df['Date']
         ))
 
-    # Enhanced layout
-    fig.update_layout(
-        template='plotly_dark',
-        hovermode='x unified',
-        height=600,
-        margin=dict(l=20, r=20, t=40, b=40),
-        yaxis_title='PH/s',
-        xaxis_title=x_title,
-        xaxis=dict(
-            type=st.session_state.x_scale if st.session_state.x_scale == "log" else "date",
-            showgrid=True,
-            gridwidth=1,
-            gridcolor='rgba(100,100,100,0.2)',
-            minor=dict(
-                ticklen=6,
-                gridcolor='rgba(100,100,100,0.1)',
-                gridwidth=0.5
-            )
-        ),
-        yaxis=dict(
-            type=st.session_state.y_scale,
-            showgrid=True,
-            gridwidth=1,
-            gridcolor='rgba(100,100,100,0.2)',
-            minor=dict(
-                ticklen=6,
-                gridcolor='rgba(100,100,100,0.1)',
-                gridwidth=0.5
-            )
-        ),
-        legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=1.02,
-            xanchor="right",
-            x=1,
-            font=dict(size=10)
+        # Power-law fit
+        x_fit = np.linspace(df['days_from_genesis'].min(), df['days_from_genesis'].max(), 100)
+        y_fit = a * np.power(x_fit, b)
+        
+        if st.session_state.x_scale:
+            fit_x = x_fit
+        else:
+            fit_x = [genesis_date + pd.Timedelta(days=int(d)) for d in x_fit]
+        
+        fig.add_trace(go.Scatter(
+            x=fit_x,
+            y=y_fit,
+            mode='lines',
+            name=f'Power-Law Fit (R²={r2:.3f})',
+            line=dict(color='orange', dash='dot', width=1.8)
+        ))
+
+        # Layout configuration
+        fig.update_layout(
+            template='plotly_dark',
+            hovermode='x unified',
+            height=600,
+            margin=dict(l=20, r=20, t=40, b=40),
+            yaxis_title='PH/s',
+            xaxis_title=x_title,
+            xaxis=dict(
+                type='log' if st.session_state.x_scale else 'date',
+                showgrid=True,
+                gridwidth=1,
+                gridcolor='rgba(100,100,100,0.2)',
+                minor=dict(
+                    ticklen=6,
+                    gridcolor='rgba(100,100,100,0.1)',
+                    gridwidth=0.5
+                )
+            ),
+            yaxis=dict(
+                type='log' if st.session_state.y_scale else 'linear',
+                showgrid=True,
+                gridwidth=1,
+                gridcolor='rgba(100,100,100,0.2)',
+                minor=dict(
+                    ticklen=6,
+                    gridcolor='rgba(100,100,100,0.1)',
+                    gridwidth=0.5
+                )
+            ),
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+                xanchor="right",
+                x=1,
+                font=dict(size=10)
         )
-    )
 
-    # Display the chart
-    st.plotly_chart(fig, use_container_width=True)
+        # Display the chart
+        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
-    # Floating buttons (visual only - functionality handled by the radio buttons)
-    st.markdown(f"""
-    <div class="chart-wrapper">
-        <div class="scale-controls y-scale-controls">
-            <div class="scale-btn-container">
-                <button class="scale-btn {'active' if st.session_state.y_scale == 'linear' else ''}">A</button>
-                <span class="scale-btn-tooltip">Autoscale/Linear</span>
-            </div>
-            <div class="scale-btn-container">
-                <button class="scale-btn {'active' if st.session_state.y_scale == 'log' else ''}">L</button>
-                <span class="scale-btn-tooltip">Logarithmic Scale</span>
-            </div>
-        </div>
-        <div class="scale-controls x-scale-controls">
-            <div class="scale-btn-container">
-                <button class="scale-btn {'active' if st.session_state.x_scale == 'linear' else ''}">A</button>
-                <span class="scale-btn-tooltip">Autoscale/Linear</span>
-            </div>
-            <div class="scale-btn-container">
-                <button class="scale-btn {'active' if st.session_state.x_scale == 'log' else ''}">L</button>
-                <span class="scale-btn-tooltip">Logarithmic Scale</span>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+        # Y-axis scale toggle (left side)
+        with st.container():
+            st.markdown('<div class="y-scale-container">', unsafe_allow_html=True)
+            st.session_state.y_scale = st.toggle(
+                "Y Scale",
+                value=st.session_state.y_scale,
+                key="y_toggle",
+                label_visibility="collapsed",
+                help="Toggle between Linear (A) and Logarithmic (L) scale",
+                format_func=lambda x: "L" if x else "A"
+            )
+            st.markdown('</div>', unsafe_allow_html=True)
+
+        # X-axis scale toggle (right side)
+        with st.container():
+            st.markdown('<div class="x-scale-container">', unsafe_allow_html=True)
+            st.session_state.x_scale = st.toggle(
+                "X Scale",
+                value=st.session_state.x_scale,
+                key="x_toggle",
+                label_visibility="collapsed",
+                help="Toggle between Linear (A) and Logarithmic (L) scale",
+                format_func=lambda x: "L" if x else "A"
+            )
+            st.markdown('</div>', unsafe_allow_html=True)
 
 # Stats in minimal cards
 cols = st.columns(3)
