@@ -7,6 +7,17 @@ st.set_page_config(
     layout="wide"
 )
 
+# Force dark mode on first visit
+if 'dark_mode' not in st.session_state:
+    st.session_state.dark_mode = True
+    st.markdown("""
+    <style>
+        .stApp {
+            background-color: #0E1117;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
 st.title("Kaspa Network Analytics Dashboard")
 st.markdown("""
 Welcome to the Kaspa network analytics dashboard. Use the sidebar to navigate between different metrics.
