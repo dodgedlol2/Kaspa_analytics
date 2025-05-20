@@ -23,7 +23,7 @@ except Exception as e:
     st.error(f"Failed to calculate power law: {str(e)}")
     st.stop()
 
-# Custom CSS for precise alignment
+# Custom CSS for perfect alignment
 st.markdown("""
 <style>
     .control-block {
@@ -38,9 +38,9 @@ st.markdown("""
         flex-direction: column;
         justify-content: center;
     }
-    .title-spacing {
+    .title-container {
         padding-left: 40px;
-        padding-top: 12px;
+        margin-top: -8px;  /* This moves the title up */
     }
     .control-label {
         font-size: 13px !important;
@@ -55,9 +55,6 @@ st.markdown("""
         width: 100% !important;
         font-size: 12px !important;
     }
-    .controls-container {
-        padding-top: 12px;
-    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -67,30 +64,29 @@ with st.container(border=True):
     title_col, control_col = st.columns([2, 8])
     
     with title_col:
-        # Title with vertical alignment
-        st.markdown('<div class="title-spacing"><h2>Kaspa Hashrate</h2></div>', unsafe_allow_html=True)
+        # Title moved up to align with controls
+        st.markdown('<div class="title-container"><h2>Kaspa Hashrate</h2></div>', unsafe_allow_html=True)
     
     with control_col:
-        # Controls with matching vertical alignment
-        with st.container():
-            cols = st.columns([1.5, 1.5, 1.5, 4])
-            
-            with cols[0]:
-                with st.container(border=True):
-                    st.markdown('<div class="control-label">Hashrate Scale</div>', unsafe_allow_html=True)
-                    y_scale = st.toggle("Log / Linear", value=True, key="y_scale")
-                    y_scale = "Log" if y_scale else "Linear"
-            
-            with cols[1]:
-                with st.container(border=True):
-                    st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
-                    x_scale_type = st.toggle("Log / Linear", value=False, key="x_scale")
-                    x_scale_type = "Log" if x_scale_type else "Linear"
-            
-            with cols[2]:
-                with st.container(border=True):
-                    st.markdown('<div class="control-label">Deviation Bands</div>', unsafe_allow_html=True)
-                    show_bands = st.toggle("Show / Hide", value=False)
+        # Control blocks - now aligned with title
+        cols = st.columns([1.5, 1.5, 1.5, 4])
+        
+        with cols[0]:
+            with st.container(border=True):
+                st.markdown('<div class="control-label">Hashrate Scale</div>', unsafe_allow_html=True)
+                y_scale = st.toggle("Log / Linear", value=True, key="y_scale")
+                y_scale = "Log" if y_scale else "Linear"
+        
+        with cols[1]:
+            with st.container(border=True):
+                st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
+                x_scale_type = st.toggle("Log / Linear", value=False, key="x_scale")
+                x_scale_type = "Log" if x_scale_type else "Linear"
+        
+        with cols[2]:
+            with st.container(border=True):
+                st.markdown('<div class="control-label">Deviation Bands</div>', unsafe_allow_html=True)
+                show_bands = st.toggle("Show / Hide", value=False)
 
     # Create figure with enhanced grid
     fig = go.Figure()
