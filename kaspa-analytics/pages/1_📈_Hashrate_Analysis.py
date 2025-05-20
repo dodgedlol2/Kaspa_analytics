@@ -23,34 +23,40 @@ except Exception as e:
     st.error(f"Failed to calculate power law: {str(e)}")
     st.stop()
 
-# Custom CSS for better spacing and borders
+# Custom CSS for precise alignment
 st.markdown("""
 <style>
     .control-block {
-        padding: 10px 15px;
+        padding: 8px 12px;
         border-radius: 8px;
         border: 1px solid #2b3137;
         background-color: #0e1117;
         margin-right: 15px;
-        min-width: 180px;
-        height: 90px;
+        min-width: 160px;
+        height: 85px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
     .title-spacing {
         padding-left: 40px;
+        padding-top: 12px;
     }
     .control-label {
-        font-size: 14px !important;
-        margin-bottom: 8px !important;
+        font-size: 13px !important;
+        margin-bottom: 6px !important;
         white-space: nowrap;
+        font-weight: 500;
     }
     .stToggle {
         width: 100%;
     }
-    .stToggle label {
-        width: 100%;
-    }
     .stToggle button {
         width: 100% !important;
+        font-size: 12px !important;
+    }
+    .controls-container {
+        padding-top: 12px;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -58,37 +64,33 @@ st.markdown("""
 # ====== ENHANCED CHART CONTAINER ======
 with st.container(border=True):
     # Create columns for title and controls
-    title_col, control_col = st.columns([2, 8])  # More space for controls
+    title_col, control_col = st.columns([2, 8])
     
     with title_col:
-        # Smaller title with left padding
+        # Title with vertical alignment
         st.markdown('<div class="title-spacing"><h2>Kaspa Hashrate</h2></div>', unsafe_allow_html=True)
     
     with control_col:
-        # Control blocks with proper spacing
-        control_container = st.container()
-        with control_container:
-            cols = st.columns([1.5, 1.5, 1.5, 4])  # Wider columns for controls
+        # Controls with matching vertical alignment
+        with st.container():
+            cols = st.columns([1.5, 1.5, 1.5, 4])
             
             with cols[0]:
                 with st.container(border=True):
                     st.markdown('<div class="control-label">Hashrate Scale</div>', unsafe_allow_html=True)
-                    y_scale = st.toggle("Log / Linear", value=True, key="y_scale", 
-                                      help="Toggle between logarithmic and linear Y-axis scale")
+                    y_scale = st.toggle("Log / Linear", value=True, key="y_scale")
                     y_scale = "Log" if y_scale else "Linear"
             
             with cols[1]:
                 with st.container(border=True):
                     st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
-                    x_scale_type = st.toggle("Log / Linear", value=False, key="x_scale", 
-                                           help="Toggle between logarithmic and linear X-axis scale")
+                    x_scale_type = st.toggle("Log / Linear", value=False, key="x_scale")
                     x_scale_type = "Log" if x_scale_type else "Linear"
             
             with cols[2]:
                 with st.container(border=True):
                     st.markdown('<div class="control-label">Deviation Bands</div>', unsafe_allow_html=True)
-                    show_bands = st.toggle("Show / Hide", value=False,
-                                         help="Toggle deviation bands visibility")
+                    show_bands = st.toggle("Show / Hide", value=False)
 
     # Create figure with enhanced grid
     fig = go.Figure()
