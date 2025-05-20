@@ -1,18 +1,29 @@
 import streamlit as st
 import plotly.graph_objects as go
 import numpy as np
-from utils import fit_power_law
-from utils import load_data
+import pandas as pd  # Added missing import
+from utils import fit_power_law, load_data  # Added load_data import
 
-# Initialize data if not loaded
-if 'df' not in st.session_state:
-    st.session_state.df, st.session_state.genesis_date = load_data()
+st.title("Kaspa Hashrate Analysis")
 
+# Initialize or load data
+if 'df' not in st.session_state or 'genesis_date' not in st.session_state:
+    try:
+        st.session_state.df, st.session_state.genesis_date = load_data()
+    except Exception as e:
+        st.error(f"Failed to load data: {str(e)}")
+        st.stop()
+
+# Get data from session state
 df = st.session_state.df
 genesis_date = st.session_state.genesis_date
 
 # Fit power law
-a, b, r2 = fit_power_law(df)
+try:
+    a, b, r2 = fit_power_law(df)
+except Exception as e:
+    st.error(f"Failed to calculate power law: {str(e)}")
+    st.stop()
 
 # Controls
 col1, col2 = st.columns(2)
@@ -38,35 +49,38 @@ fig.add_trace(go.Scatter(
 
 # Power-law fit
 if show_fit:
-    x_fit = np.linspace(df['days_from_genesis'].min(), df['days_from_genesis'].max(), 100)
-    y_fit = a * np.power(x_fit, b)
-    
-    fig.add_trace(go.Scatter(
-        x=[genesis_date + pd.Timedelta(days=int(d)) for d in x_fit],
-        y=y_fit,
-        mode='lines',
-        name=f'Power-Law Fit (R²={r2:.3f})',
-        line=dict(color='orange', dash='dot', width=1)
-    ))
-    
-    if show_bands:
-        fig.add_trace(go.Scatter(
-            x=[genesis_date + pd.Timedelta(days=int(d)) for d in x_fit],
-            y=y_fit * 0.4,
-            mode='lines',
-            name='-60% Band',
-            line=dict(color='rgba(255,165,0,0.3)'),
-            fill=None
-        ))
+    try:
+        x_fit = np.linspace(df['days_from_genesis'].min(), df['days_from_genesis'].max(), 100)
+        y_fit = a * np.power(x_fit, b)
         
         fig.add_trace(go.Scatter(
             x=[genesis_date + pd.Timedelta(days=int(d)) for d in x_fit],
-            y=y_fit * 2.2,
+            y=y_fit,
             mode='lines',
-            name='+120% Band',
-            line=dict(color='rgba(255,165,0,0.3)'),
-            fill='tonexty'
+            name=f'Power-Law Fit (R²={r2:.3f})',
+            line=dict(color='orange', dash='dot', width=1)
         ))
+        
+        if show_bands:
+            fig.add_trace(go.Scatter(
+                x=[genesis_date + pd.Timedelta(days=int(d)) for d in x_fit],
+                y=y_fit * 0.4,
+                mode='lines',
+                name='-60% Band',
+                line=dict(color='rgba(255,165,0,0.3)'),
+                fill=None
+            ))
+            
+            fig.add_trace(go.Scatter(
+                x=[genesis_date + pd.Timedelta(days=int(d)) for d in x_fit],
+                y=y_fit * 2.2,
+                mode='lines',
+                name='+120% Band',
+                line=dict(color='rgba(255,165,0,0.3)'),
+                fill='tonexty'
+            ))
+    except Exception as e:
+        st.warning(f"Couldn't display power law fit: {str(e)}")
 
 # Update layout
 fig.update_layout(
