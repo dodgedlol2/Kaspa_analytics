@@ -26,17 +26,21 @@ except Exception as e:
 # ====== SIMPLIFIED CONTROLS ======
 with st.container():
     # Create columns for controls
-    col1, col2, spacer = st.columns([2, 2, 6])
+    col1, col2, col3 = st.columns([2, 2, 6])
     
     with col1:
         y_scale = st.radio("Hashrate scale:", ["Linear", "Log"], 
-                         index=1, horizontal=True,
-                         help="Linear or logarithmic Y-axis scale")
+                          index=1, horizontal=True,
+                          help="Linear or logarithmic Y-axis scale")
     
     with col2:
         x_scale_type = st.radio("Time scale:", ["Linear", "Log"], 
-                              index=0, horizontal=True,
-                              help="Linear or logarithmic X-axis scale")
+                               index=0, horizontal=True,
+                               help="Linear or logarithmic X-axis scale")
+    
+    with col3:
+        show_bands = st.toggle("Show Deviation Bands", value=False,
+                             help="Show ± deviation bands around the fit")
 
 # ====== ENHANCED CHART CONTAINER ======
 with st.container(border=True):
@@ -65,7 +69,7 @@ with st.container(border=True):
         text=df['Date']
     ))
 
-    # Power-law fit (always shown now)
+    # Power-law fit (always shown)
     x_fit = np.linspace(df['days_from_genesis'].min(), df['days_from_genesis'].max(), 100)
     y_fit = a * np.power(x_fit, b)
     
@@ -82,23 +86,24 @@ with st.container(border=True):
         line=dict(color='orange', dash='dot', width=1.5)
     ))
     
-    # Deviation bands (always shown now)
-    fig.add_trace(go.Scatter(
-        x=fit_x,
-        y=y_fit * 0.4,
-        mode='lines',
-        name='-60% Band',
-        line=dict(color='rgba(255,165,0,0.3)'),
-        fill=None
-    ))
-    fig.add_trace(go.Scatter(
-        x=fit_x,
-        y=y_fit * 2.2,
-        mode='lines',
-        name='+120% Band',
-        line=dict(color='rgba(255,165,0,0.3)'),
-        fill='tonexty'
-    ))
+    # Deviation bands (only shown when toggled)
+    if show_bands:
+        fig.add_trace(go.Scatter(
+            x=fit_x,
+            y=y_fit * 0.4,
+            mode='lines',
+            name='-60% Deviation',
+            line=dict(color='rgba(255,165,0,0.8)', dash='dot', width=1),
+            hoverinfo='skip'
+        ))
+        fig.add_trace(go.Scatter(
+            x=fit_x,
+            y=y_fit * 2.2,
+            mode='lines',
+            name='+120% Deviation',
+            line=dict(color='rgba(255,165,0,0.8)', dash='dot', width=1),
+            hoverinfo='skip'
+        ))
 
     # Enhanced layout
     fig.update_layout(
