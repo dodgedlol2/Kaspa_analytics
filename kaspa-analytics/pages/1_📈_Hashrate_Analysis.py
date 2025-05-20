@@ -23,38 +23,59 @@ except Exception as e:
     st.error(f"Failed to calculate power law: {str(e)}")
     st.stop()
 
+# Custom CSS for better spacing and borders
+st.markdown("""
+<style>
+    .control-block {
+        padding: 8px 12px;
+        border-radius: 8px;
+        border: 1px solid #2b3137;
+        background-color: #0e1117;
+        margin-right: 12px;
+    }
+    .title-spacing {
+        padding-left: 40px;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # ====== ENHANCED CHART CONTAINER ======
 with st.container(border=True):
     # Create columns for title and controls
     title_col, control_col = st.columns([3, 7])
     
     with title_col:
-        # Smaller title
-        st.markdown("## Kaspa Hashrate", help="Kaspa network hashrate over time")
+        # Smaller title with left padding
+        st.markdown('<div class="title-spacing"><h2>Kaspa Hashrate</h2></div>', unsafe_allow_html=True)
     
     with control_col:
-        # Compact controls in columns
-        c1, c2, c3, _ = st.columns([1, 1, 2, 4])
-        
-        with c1:
-            st.markdown("**Hashrate-scale**", help="Toggle between logarithmic and linear scale for hashrate")
-            y_scale = st.toggle("L", value=True, key="y_scale", 
-                              help="Logarithmic (L) or Linear (A) Y-axis scale",
-                              label_visibility="collapsed")
-            y_scale = "Log" if y_scale else "Linear"
-        
-        with c2:
-            st.markdown("**Time-scale**", help="Toggle between logarithmic and linear scale for time")
-            x_scale_type = st.toggle("L", value=False, key="x_scale", 
-                                    help="Logarithmic (L) or Linear (A) X-axis scale",
-                                    label_visibility="collapsed")
-            x_scale_type = "Log" if x_scale_type else "Linear"
-        
-        with c3:
-            st.markdown("**Deviations**", help="Show/hide deviation bands around the fit")
-            show_bands = st.toggle("", value=False,
-                                  help="Show ± deviation bands around the fit",
-                                  label_visibility="collapsed")
+        # Control blocks with proper spacing
+        control_container = st.container()
+        with control_container:
+            cols = st.columns([1,1,1,5])
+            
+            with cols[0]:
+                with st.container(border=True, height=80):
+                    st.markdown("**Hashrate-scale**", help="Toggle between logarithmic and linear scale for hashrate")
+                    y_scale = st.toggle("Log/Linear", value=True, key="y_scale", 
+                                      help="Logarithmic (L) or Linear (A) Y-axis scale",
+                                      label_visibility="collapsed")
+                    y_scale = "Log" if y_scale else "Linear"
+            
+            with cols[1]:
+                with st.container(border=True, height=80):
+                    st.markdown("**Time-scale**", help="Toggle between logarithmic and linear scale for time")
+                    x_scale_type = st.toggle("Log/Linear", value=False, key="x_scale", 
+                                            help="Logarithmic (L) or Linear (A) X-axis scale",
+                                            label_visibility="collapsed")
+                    x_scale_type = "Log" if x_scale_type else "Linear"
+            
+            with cols[2]:
+                with st.container(border=True, height=80):
+                    st.markdown("**Deviations**", help="Show/hide deviation bands around the fit")
+                    show_bands = st.toggle("On/Off", value=False,
+                                        help="Show ± deviation bands around the fit",
+                                        label_visibility="collapsed")
 
     # Create figure with enhanced grid
     fig = go.Figure()
