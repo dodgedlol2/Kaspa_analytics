@@ -168,7 +168,9 @@ with st.container():
                 rangeslider=dict(
                     visible=True,
                     thickness=0.1,  # Thicker slider handle
-                    bgcolor='rgba(150,150,150,0.3)'
+                    bgcolor='rgba(150,150,150,0.3)',
+                    bordercolor="#444",
+                    borderwidth=1
                 ),
                 type="log" if x_scale_type == "Log" else None,
                 showgrid=True,
@@ -197,19 +199,6 @@ with st.container():
                 y=1.02,
                 xanchor="right",
                 x=1
-            )
-        )
-
-        # Custom range slider styling
-        fig.update_xaxes(
-            rangeslider=dict(
-                bordercolor="#444",
-                borderwidth=1,
-                range=[df['days_from_genesis'].min(), df['days_from_genesis'].max()],
-                autorange=False,
-                tickformat="%d %b %Y" if x_scale_type != "Log" else None,
-                tickmode="auto",
-                nticks=10
             )
         )
 
