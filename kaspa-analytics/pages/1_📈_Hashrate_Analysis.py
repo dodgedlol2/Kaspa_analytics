@@ -1,10 +1,10 @@
 import streamlit as st
 import plotly.graph_objects as go
 import numpy as np
-import pandas as pd  # Added missing import
-from utils import fit_power_law, load_data  # Added load_data import
+import pandas as pd
+from utils import fit_power_law, load_data
 
-st.set_page_config(layout="wide")  # Ensures consistency
+st.set_page_config(layout="wide")
 
 st.title("Kaspa Hashrate Analysis")
 
@@ -40,9 +40,12 @@ with col2:
 # Create figure
 fig = go.Figure()
 
+# Convert dates to numeric values (days since genesis) for log scale
+x_values = df['days_from_genesis'] if x_scale == "Log" else df['Date']
+
 # Main trace
 fig.add_trace(go.Scatter(
-    x=df['Date'],
+    x=x_values,
     y=df['Hashrate_PH'],
     mode='lines',
     name='Hashrate (PH/s)',
@@ -55,8 +58,10 @@ if show_fit:
         x_fit = np.linspace(df['days_from_genesis'].min(), df['days_from_genesis'].max(), 100)
         y_fit = a * np.power(x_fit, b)
         
+        fit_x_values = x_fit if x_scale == "Log" else [genesis_date + pd.Timedelta(days=int(d)) for d in x_fit]
+        
         fig.add_trace(go.Scatter(
-            x=[genesis_date + pd.Timedelta(days=int(d)) for d in x_fit],
+            x=fit_x_values,
             y=y_fit,
             mode='lines',
             name=f'Power-Law Fit (R²={r2:.3f})',
@@ -65,7 +70,7 @@ if show_fit:
         
         if show_bands:
             fig.add_trace(go.Scatter(
-                x=[genesis_date + pd.Timedelta(days=int(d)) for d in x_fit],
+                x=fit_x_values,
                 y=y_fit * 0.4,
                 mode='lines',
                 name='-60% Band',
@@ -74,7 +79,7 @@ if show_fit:
             ))
             
             fig.add_trace(go.Scatter(
-                x=[genesis_date + pd.Timedelta(days=int(d)) for d in x_fit],
+                x=fit_x_values,
                 y=y_fit * 2.2,
                 mode='lines',
                 name='+120% Band',
@@ -90,15 +95,27 @@ fig.update_layout(
     hovermode='x unified',
     height=700,
     title="Kaspa Hashrate Growth",
-    xaxis_title='Date',
     yaxis_title='Hashrate (PH/s)'
 )
 
-# Apply scale selections
+# Custom x-axis handling
+if x_scale == "Log":
+    fig.update_xaxes(
+        type="log",
+        title_text="Days Since Genesis (Log Scale)",
+        tickvals=np.logspace(
+            np.log10(df['days_from_genesis'].min()),
+            np.log10(df['days_from_genesis'].max()),
+            num=10
+        ),
+        tickformat=".0f"
+    )
+else:
+    fig.update_xaxes(title_text='Date')
+
+# Y-axis scaling
 if y_scale == "Log":
     fig.update_yaxes(type="log")
-if x_scale == "Log":
-    fig.update_xaxes(type="log")
 
 # Show the figure
 st.plotly_chart(fig, use_container_width=True)
