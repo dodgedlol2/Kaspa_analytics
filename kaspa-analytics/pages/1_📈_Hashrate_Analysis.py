@@ -4,6 +4,17 @@ import numpy as np
 import pandas as pd
 from utils import fit_power_law, load_data
 
+# Force dark mode on first visit
+if 'dark_mode' not in st.session_state:
+    st.session_state.dark_mode = True
+    st.markdown("""
+    <style>
+        .stApp {
+            background-color: #0E1117;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
 st.set_page_config(layout="wide")
 st.title("Kaspa Hashrate Analysis")
 
