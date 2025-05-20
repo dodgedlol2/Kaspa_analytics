@@ -81,10 +81,10 @@ except Exception as e:
     st.stop()
 
 # Initialize session state for scale toggles
-if 'y_scale' not in st.session_state:
-    st.session_state.y_scale = "log"
-if 'x_scale' not in st.session_state:
-    st.session_state.x_scale = "linear"
+if 'y_scale_type' not in st.session_state:
+    st.session_state.y_scale_type = "log"  # Must be lowercase
+if 'x_scale_type' not in st.session_state:
+    st.session_state.x_scale_type = "linear"  # Must be lowercase
 if 'show_bands' not in st.session_state:
     st.session_state.show_bands = False
 
@@ -97,7 +97,7 @@ with st.container(border=True):
     fig = go.Figure()
 
     # Determine x-axis values based on scale type
-    if st.session_state.x_scale == "log":
+    if st.session_state.x_scale_type == "log":
         x_values = df['days_from_genesis']
         x_title = "Days Since Genesis (Log Scale)"
     else:
@@ -119,7 +119,7 @@ with st.container(border=True):
     x_fit = np.linspace(df['days_from_genesis'].min(), df['days_from_genesis'].max(), 100)
     y_fit = a * np.power(x_fit, b)
     
-    if st.session_state.x_scale == "log":
+    if st.session_state.x_scale_type == "log":
         fit_x = x_fit
     else:
         fit_x = [genesis_date + pd.Timedelta(days=int(d)) for d in x_fit]
@@ -151,45 +151,51 @@ with st.container(border=True):
             hoverinfo='skip'
         ))
 
-    # Enhanced layout
-    fig.update_layout(
-        template='plotly_dark',
-        hovermode='x unified',
-        height=600,
-        margin=dict(l=20, r=20, t=40, b=40),  # Extra margin for buttons
-        yaxis_title='PH/s',
-        xaxis_title=x_title,
-        xaxis=dict(
-            type=st.session_state.x_scale,
-            showgrid=True,
-            gridwidth=1,
-            gridcolor='rgba(100,100,100,0.2)',
-            minor=dict(
-                ticklen=6,
-                gridcolor='rgba(100,100,100,0.1)',
-                gridwidth=0.5
-            )
-        ),
-        yaxis=dict(
-            type=st.session_state.y_scale,
-            showgrid=True,
-            gridwidth=1,
-            gridcolor='rgba(100,100,100,0.2)',
-            minor=dict(
-                ticklen=6,
-                gridcolor='rgba(100,100,100,0.1)',
-                gridwidth=0.5
-            )
-        ),
-        legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=1.02,
-            xanchor="right",
-            x=1,
-            font=dict(size=10)
-        )
-    )
+    # Enhanced layout with proper axis type handling
+    layout_updates = {
+        'template': 'plotly_dark',
+        'hovermode': 'x unified',
+        'height': 600,
+        'margin': dict(l=20, r=20, t=40, b=40),
+        'yaxis': {
+            'title': 'PH/s',
+            'type': st.session_state.y_scale_type,
+            'showgrid': True,
+            'gridwidth': 1,
+            'gridcolor': 'rgba(100,100,100,0.2)',
+            'minor': {
+                'ticklen': 6,
+                'gridcolor': 'rgba(100,100,100,0.1)',
+                'gridwidth': 0.5
+            }
+        },
+        'xaxis': {
+            'title': x_title,
+            'type': st.session_state.x_scale_type if st.session_state.x_scale_type == "log" else None,
+            'showgrid': True,
+            'gridwidth': 1,
+            'gridcolor': 'rgba(100,100,100,0.2)',
+            'minor': {
+                'ticklen': 6,
+                'gridcolor': 'rgba(100,100,100,0.1)',
+                'gridwidth': 0.5
+            }
+        },
+        'legend': {
+            'orientation': "h",
+            'yanchor': "bottom",
+            'y': 1.02,
+            'xanchor': "right",
+            'x': 1,
+            'font': dict(size=10)
+        }
+    }
+    
+    # Special handling for linear x-axis (date type)
+    if st.session_state.x_scale_type == "linear":
+        layout_updates['xaxis']['type'] = 'date'
+    
+    fig.update_layout(**layout_updates)
 
     # Create a container for the chart and floating buttons
     chart_container = st.container()
@@ -203,11 +209,11 @@ with st.container(border=True):
             st.markdown(f"""
             <div class="chart-controls y-scale-controls">
                 <div class="scale-btn-container" style="display: inline-block; position: relative;">
-                    <button class="scale-btn {'active' if st.session_state.y_scale == 'linear' else ''}" onclick="st.session_state.y_scale='linear'">A</button>
+                    <button class="scale-btn {'active' if st.session_state.y_scale_type == 'linear' else ''}" onclick="st.session_state.y_scale_type='linear'">A</button>
                     <span class="scale-btn-tooltip">Autoscale/Linear</span>
                 </div>
                 <div class="scale-btn-container" style="display: inline-block; position: relative; margin-left: 4px;">
-                    <button class="scale-btn {'active' if st.session_state.y_scale == 'log' else ''}" onclick="st.session_state.y_scale='log'">L</button>
+                    <button class="scale-btn {'active' if st.session_state.y_scale_type == 'log' else ''}" onclick="st.session_state.y_scale_type='log'">L</button>
                     <span class="scale-btn-tooltip">Logarithmic Scale</span>
                 </div>
             </div>
@@ -219,11 +225,11 @@ with st.container(border=True):
             st.markdown(f"""
             <div class="chart-controls x-scale-controls">
                 <div class="scale-btn-container" style="display: inline-block; position: relative;">
-                    <button class="scale-btn {'active' if st.session_state.x_scale == 'linear' else ''}" onclick="st.session_state.x_scale='linear'">A</button>
+                    <button class="scale-btn {'active' if st.session_state.x_scale_type == 'linear' else ''}" onclick="st.session_state.x_scale_type='linear'">A</button>
                     <span class="scale-btn-tooltip">Autoscale/Linear</span>
                 </div>
                 <div class="scale-btn-container" style="display: inline-block; position: relative; margin-left: 4px;">
-                    <button class="scale-btn {'active' if st.session_state.x_scale == 'log' else ''}" onclick="st.session_state.x_scale='log'">L</button>
+                    <button class="scale-btn {'active' if st.session_state.x_scale_type == 'log' else ''}" onclick="st.session_state.x_scale_type='log'">L</button>
                     <span class="scale-btn-tooltip">Logarithmic Scale</span>
                 </div>
             </div>
@@ -246,12 +252,9 @@ st.markdown("""
         const buttons = document.querySelectorAll('.scale-btn');
         buttons.forEach(button => {
             button.addEventListener('click', function() {
-                // The actual state change is handled by the onclick in the button HTML
-                // This ensures the UI updates immediately
                 setTimeout(() => {
-                    const event = new Event('input', { bubbles: true });
-                    this.dispatchEvent(event);
-                    Streamlit.setComponentValue({});
+                    // Force Streamlit to re-run
+                    Streamlit.setComponentValue(Date.now());
                 }, 100);
             });
         });
