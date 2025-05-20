@@ -23,37 +23,23 @@ except Exception as e:
     st.error(f"Failed to calculate power law: {str(e)}")
     st.stop()
 
-# ====== SIMPLIFIED CONTROLS ======
-with st.container():
-    # Create columns for controls
-    col1, col2, col3 = st.columns([1, 1, 8])
-    
-    with col1:
-        st.markdown("**Y-scale**", help="Hashrate scale")
-        y_scale = st.toggle("L", value=True, key="y_scale", 
-                           help="Logarithmic (L) or Linear (A) Y-axis scale")
-        y_scale = "Log" if y_scale else "Linear"
-    
-    with col2:
-        st.markdown("**X-scale**", help="Time scale")
-        x_scale_type = st.toggle("L", value=False, key="x_scale", 
-                                help="Logarithmic (L) or Linear (A) X-axis scale")
-        x_scale_type = "Log" if x_scale_type else "Linear"
-    
-    with col3:
-        show_bands = st.toggle("Show Deviation Bands", value=False,
-                              help="Show ± deviation bands around the fit")
+# Initialize session state for toggles if not exists
+if 'y_log' not in st.session_state:
+    st.session_state.y_log = True
+if 'x_log' not in st.session_state:
+    st.session_state.x_log = False
+if 'show_bands' not in st.session_state:
+    st.session_state.show_bands = False
 
-# ====== ENHANCED CHART CONTAINER ======
+# ====== CHART CONTAINER ======
 with st.container(border=True):
-    # Title integrated into the container
     st.markdown("### Kaspa Hashrate Analysis")
     
-    # Create figure with enhanced grid
+    # Create figure
     fig = go.Figure()
 
     # Determine x-axis values based on scale type
-    if x_scale_type == "Log":
+    if st.session_state.x_log:
         x_values = df['days_from_genesis']
         x_title = "Days Since Genesis (Log Scale)"
     else:
@@ -71,11 +57,11 @@ with st.container(border=True):
         text=df['Date']
     ))
 
-    # Power-law fit (always shown)
+    # Power-law fit
     x_fit = np.linspace(df['days_from_genesis'].min(), df['days_from_genesis'].max(), 100)
     y_fit = a * np.power(x_fit, b)
     
-    if x_scale_type == "Log":
+    if st.session_state.x_log:
         fit_x = x_fit
     else:
         fit_x = [genesis_date + pd.Timedelta(days=int(d)) for d in x_fit]
@@ -88,8 +74,8 @@ with st.container(border=True):
         line=dict(color='orange', dash='dot', width=1.5)
     ))
     
-    # Deviation bands (only shown when toggled)
-    if show_bands:
+    # Deviation bands
+    if st.session_state.show_bands:
         fig.add_trace(go.Scatter(
             x=fit_x,
             y=y_fit * 0.4,
@@ -107,35 +93,25 @@ with st.container(border=True):
             hoverinfo='skip'
         ))
 
-    # Enhanced layout
+    # Add annotation buttons that will work as toggles
     fig.update_layout(
         template='plotly_dark',
         hovermode='x unified',
         height=600,
-        margin=dict(l=20, r=20, t=60, b=20),
+        margin=dict(l=60, r=60, t=60, b=60),  # Add margin for buttons
         yaxis_title='Hashrate (PH/s)',
         xaxis_title=x_title,
         xaxis=dict(
-            type="log" if x_scale_type == "Log" else None,
+            type="log" if st.session_state.x_log else None,
             showgrid=True,
             gridwidth=1,
-            gridcolor='rgba(100,100,100,0.2)',
-            minor=dict(
-                ticklen=6,
-                gridcolor='rgba(100,100,100,0.1)',
-                gridwidth=0.5
-            )
+            gridcolor='rgba(100,100,100,0.2)'
         ),
         yaxis=dict(
-            type="log" if y_scale == "Log" else "linear",
+            type="log" if st.session_state.y_log else "linear",
             showgrid=True,
             gridwidth=1,
-            gridcolor='rgba(100,100,100,0.2)',
-            minor=dict(
-                ticklen=6,
-                gridcolor='rgba(100,100,100,0.1)',
-                gridwidth=0.5
-            )
+            gridcolor='rgba(100,100,100,0.2)'
         ),
         legend=dict(
             orientation="h",
@@ -143,11 +119,55 @@ with st.container(border=True):
             y=1.02,
             xanchor="right",
             x=1
-        )
+        ),
+        annotations=[
+            # Y-axis scale toggle (top-left)
+            dict(
+                x=0.01, y=1.05,
+                xref="paper", yref="paper",
+                text="<b>Y: L</b>" if st.session_state.y_log else "<b>Y: A</b>",
+                showarrow=False,
+                font=dict(size=12, color="white"),
+                bgcolor="rgba(30,30,30,0.7)",
+                bordercolor="rgba(255,255,255,0.3)",
+                borderwidth=1,
+                borderpad=4,
+                clicktoshow="onoff"
+            ),
+            # X-axis scale toggle (bottom-right)
+            dict(
+                x=0.99, y=0.01,
+                xref="paper", yref="paper",
+                text="<b>X: L</b>" if st.session_state.x_log else "<b>X: A</b>",
+                showarrow=False,
+                font=dict(size=12, color="white"),
+                bgcolor="rgba(30,30,30,0.7)",
+                bordercolor="rgba(255,255,255,0.3)",
+                borderwidth=1,
+                borderpad=4,
+                clicktoshow="onoff"
+            )
+        ]
     )
 
-    # Show the figure
-    st.plotly_chart(fig, use_container_width=True)
+    # Display the chart
+    chart = st.plotly_chart(fig, use_container_width=True)
+
+    # Check for clicks on the annotations
+    if chart._clicked_annotation_data is not None:
+        clicked_text = chart._clicked_annotation_data.get("text", "")
+        if "Y:" in clicked_text:
+            st.session_state.y_log = not st.session_state.y_log
+        elif "X:" in clicked_text:
+            st.session_state.x_log = not st.session_state.x_log
+        st.rerun()
+
+# Controls below the chart
+with st.container():
+    st.toggle("Show Deviation Bands", 
+              value=st.session_state.show_bands,
+              key="show_bands",
+              help="Show ± deviation bands around the fit")
 
 # Stats in minimal cards
 cols = st.columns(3)
