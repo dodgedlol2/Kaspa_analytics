@@ -4,6 +4,8 @@ import numpy as np
 import pandas as pd  # Added missing import
 from utils import fit_power_law, load_data  # Added load_data import
 
+st.set_page_config(layout="wide")  # Ensures consistency
+
 st.title("Kaspa Hashrate Analysis")
 
 # Initialize or load data
