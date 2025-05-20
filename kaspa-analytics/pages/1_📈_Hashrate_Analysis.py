@@ -6,6 +6,35 @@ from utils import fit_power_law, load_data
 
 st.set_page_config(layout="wide")
 
+# Custom CSS for professional styling
+st.markdown("""
+<style>
+    .header-section {
+        border-bottom: 1px solid #2d3436;
+        padding-bottom: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    .control-button {
+        border: 1px solid #636e72 !important;
+        border-radius: 6px !important;
+        padding: 0.25rem 0.75rem !important;
+        font-size: 0.9rem !important;
+    }
+    .control-button label {
+        font-weight: 500 !important;
+        margin-bottom: 0 !important;
+    }
+    .stRadio [role="radiogroup"] {
+        gap: 0.5rem !important;
+    }
+    .stToggle button {
+        border: 1px solid #636e72 !important;
+        border-radius: 6px !important;
+        padding: 0.25rem 0.75rem !important;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # Data loading and processing
 if 'df' not in st.session_state or 'genesis_date' not in st.session_state:
     try:
@@ -23,62 +52,50 @@ except Exception as e:
     st.error(f"Failed to calculate power law: {str(e)}")
     st.stop()
 
-# Custom CSS for professional styling
-st.markdown("""
-<style>
-    div[data-testid="stHorizontalBlock"] {
-        gap: 0.5rem;
-    }
-    .stRadio > div {
-        flex-direction: row;
-        gap: 0.5rem;
-    }
-    .stRadio [role="radiogroup"] {
-        align-items: center;
-        gap: 0.5rem;
-    }
-    .stRadio [data-testid="stMarkdownContainer"] p {
-        margin-bottom: 0;
-        font-weight: 500;
-    }
-</style>
-""", unsafe_allow_html=True)
-
 # ====== PROFESSIONAL CHART CONTAINER ======
 with st.container(border=True):
-    # Header with title and integrated controls
-    header_cols = st.columns([3, 2, 2, 1])
-    
-    with header_cols[0]:
-        st.markdown("### Kaspa Hashrate", help="Network hashrate growth over time")
-    
-    with header_cols[1]:
-        y_scale = st.radio(
-            "Hashrate:",
-            ["Linear", "Log"],
-            index=1,
-            horizontal=True,
-            label_visibility="collapsed",
-            key="y_scale"
-        )
-    
-    with header_cols[2]:
-        x_scale_type = st.radio(
-            "Time:",
-            ["Linear", "Log"],
-            index=0,
-            horizontal=True,
-            label_visibility="collapsed",
-            key="x_scale"
-        )
-    
-    with header_cols[3]:
-        show_bands = st.toggle(
-            "Bands",
-            value=False,
-            help="Show deviation bands",
-            key="bands_toggle"
-        )
+    # Header section with dedicated border
+    with st.container():
+        st.markdown('<div class="header-section">', unsafe_allow_html=True)
+        
+        # Header columns
+        header_cols = st.columns([3, 2, 2, 1.5])
+        
+        with header_cols[0]:
+            st.markdown("### Kaspa Hashrate")
+        
+        with header_cols[1]:
+            st.markdown("**Scale:**", help="Hashrate scale type")
+            y_scale = st.radio(
+                "Hashrate Scale",
+                ["Linear", "Log"],
+                index=1,
+                horizontal=True,
+                label_visibility="collapsed",
+                key="y_scale"
+            )
+        
+        with header_cols[2]:
+            st.markdown("**Time:**", help="Time scale type")
+            x_scale_type = st.radio(
+                "Time Scale",
+                ["Linear", "Log"],
+                index=0,
+                horizontal=True,
+                label_visibility="collapsed",
+                key="x_scale"
+            )
+        
+        with header_cols[3]:
+            st.markdown("**Bands:**", help="Deviation bands visibility")
+            show_bands = st.toggle(
+                "Show Bands",
+                value=False,
+                label_visibility="collapsed",
+                key="bands_toggle"
+            )
+        
+        st.markdown('</div>', unsafe_allow_html=True)
 
     # Create figure with enhanced grid
     fig = go.Figure()
@@ -143,7 +160,7 @@ with st.container(border=True):
         template='plotly_dark',
         hovermode='x unified',
         height=600,
-        margin=dict(l=20, r=20, t=20, b=20),  # Reduced top margin
+        margin=dict(l=20, r=20, t=20, b=20),
         yaxis_title='PH/s',
         xaxis_title=x_title,
         xaxis=dict(
