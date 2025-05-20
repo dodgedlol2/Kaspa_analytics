@@ -105,9 +105,13 @@ with st.container():
         if x_scale_type == "Log":
             x_values = df['days_from_genesis']
             x_title = "Days Since Genesis (Log Scale)"
+            tickformat = None
+            hoverformat = None
         else:
             x_values = df['Date']
             x_title = "Date"
+            tickformat = "%b %Y"
+            hoverformat = "%b %d, %Y"
 
         # Main trace
         fig.add_trace(go.Scatter(
@@ -180,7 +184,8 @@ with st.container():
                     ticklen=6,
                     gridcolor='rgba(100,100,100,0.1)',
                     gridwidth=0.5
-                )
+                ),
+                tickformat=tickformat
             ),
             yaxis=dict(
                 type="log" if y_scale == "Log" else "linear",
@@ -200,6 +205,17 @@ with st.container():
                 xanchor="right",
                 x=1
             )
+        )
+
+        # Add secondary x-axis for the range slider with matching date format
+        fig.update_xaxes(
+            rangeslider=dict(
+                tickformat=tickformat,
+                tickmode="auto",
+                nticks=10,
+                tickfont=dict(size=10)
+            ),
+            row=1, col=1
         )
 
         # Show the figure with more vertical space
