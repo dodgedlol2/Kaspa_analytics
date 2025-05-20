@@ -27,14 +27,30 @@ except Exception as e:
 st.markdown("""
 <style>
     .control-block {
-        padding: 8px 12px;
+        padding: 10px 15px;
         border-radius: 8px;
         border: 1px solid #2b3137;
         background-color: #0e1117;
-        margin-right: 12px;
+        margin-right: 15px;
+        min-width: 180px;
+        height: 90px;
     }
     .title-spacing {
         padding-left: 40px;
+    }
+    .control-label {
+        font-size: 14px !important;
+        margin-bottom: 8px !important;
+        white-space: nowrap;
+    }
+    .stToggle {
+        width: 100%;
+    }
+    .stToggle label {
+        width: 100%;
+    }
+    .stToggle button {
+        width: 100% !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -42,7 +58,7 @@ st.markdown("""
 # ====== ENHANCED CHART CONTAINER ======
 with st.container(border=True):
     # Create columns for title and controls
-    title_col, control_col = st.columns([3, 7])
+    title_col, control_col = st.columns([2, 8])  # More space for controls
     
     with title_col:
         # Smaller title with left padding
@@ -52,30 +68,27 @@ with st.container(border=True):
         # Control blocks with proper spacing
         control_container = st.container()
         with control_container:
-            cols = st.columns([1,1,1,5])
+            cols = st.columns([1.5, 1.5, 1.5, 4])  # Wider columns for controls
             
             with cols[0]:
-                with st.container(border=True, height=80):
-                    st.markdown("**Hashrate-scale**", help="Toggle between logarithmic and linear scale for hashrate")
-                    y_scale = st.toggle("Log/Linear", value=True, key="y_scale", 
-                                      help="Logarithmic (L) or Linear (A) Y-axis scale",
-                                      label_visibility="collapsed")
+                with st.container(border=True):
+                    st.markdown('<div class="control-label">Hashrate Scale</div>', unsafe_allow_html=True)
+                    y_scale = st.toggle("Log / Linear", value=True, key="y_scale", 
+                                      help="Toggle between logarithmic and linear Y-axis scale")
                     y_scale = "Log" if y_scale else "Linear"
             
             with cols[1]:
-                with st.container(border=True, height=80):
-                    st.markdown("**Time-scale**", help="Toggle between logarithmic and linear scale for time")
-                    x_scale_type = st.toggle("Log/Linear", value=False, key="x_scale", 
-                                            help="Logarithmic (L) or Linear (A) X-axis scale",
-                                            label_visibility="collapsed")
+                with st.container(border=True):
+                    st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
+                    x_scale_type = st.toggle("Log / Linear", value=False, key="x_scale", 
+                                           help="Toggle between logarithmic and linear X-axis scale")
                     x_scale_type = "Log" if x_scale_type else "Linear"
             
             with cols[2]:
-                with st.container(border=True, height=80):
-                    st.markdown("**Deviations**", help="Show/hide deviation bands around the fit")
-                    show_bands = st.toggle("On/Off", value=False,
-                                        help="Show ± deviation bands around the fit",
-                                        label_visibility="collapsed")
+                with st.container(border=True):
+                    st.markdown('<div class="control-label">Deviation Bands</div>', unsafe_allow_html=True)
+                    show_bands = st.toggle("Show / Hide", value=False,
+                                         help="Toggle deviation bands visibility")
 
     # Create figure with enhanced grid
     fig = go.Figure()
