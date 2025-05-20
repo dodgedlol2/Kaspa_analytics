@@ -5,7 +5,6 @@ import pandas as pd
 from utils import fit_power_law, load_data
 
 st.set_page_config(layout="wide")
-st.title("Kaspa Hashrate Analysis")
 
 # Data loading and processing
 if 'df' not in st.session_state or 'genesis_date' not in st.session_state:
@@ -24,89 +23,81 @@ except Exception as e:
     st.error(f"Failed to calculate power law: {str(e)}")
     st.stop()
 
-# ====== NEW PROFESSIONAL CONTROLS ======
+# ====== SIMPLIFIED CONTROLS ======
 with st.container():
-    # Create columns for controls
-    col1, col2, col3, col4 = st.columns([2, 2, 2, 4])
+    # Create columns for controls - now just for scale options
+    col1, col2, spacer = st.columns([2, 2, 6])
     
     with col1:
-        st.markdown("**Chart Settings**", help="Configure visualization options")
-        show_fit = st.toggle("Power-Law Fit", value=True, 
-                           help="Show the power-law regression line")
-        show_bands = st.toggle("Deviation Bands", value=True,
-                              help="Show ± deviation bands around the fit")
-    
-    with col2:
-        st.markdown("**Axis Scaling**", help="Adjust axis scale types")
-        y_scale = st.radio("Y-axis:", ["Linear", "Log"], 
+        y_scale = st.radio("Hashrate scale:", ["Linear", "Log"], 
                           index=1, horizontal=True,
                           help="Linear or logarithmic Y-axis scale")
     
-    with col3:
-        st.markdown("**Display Options**")
-        x_scale = st.radio("X-axis:", ["Linear", "Log"], 
+    with col2:
+        x_scale = st.radio("Time scale:", ["Date", "Days"], 
                           index=0, horizontal=True,
                           help="Linear or logarithmic X-axis scale")
 
 # ====== ENHANCED CHART CONTAINER ======
-with st.container(border=True):  # New border around the chart
+with st.container(border=True):
+    # Title integrated into the container
+    st.markdown("### Kaspa Hashrate Analysis")
+    
     # Create figure with enhanced grid
     fig = go.Figure()
 
-    # Main trace (now with hover improvements)
+    # Main trace
     fig.add_trace(go.Scatter(
-        x=df['days_from_genesis'] if x_scale == "Log" else df['Date'],
+        x=df['days_from_genesis'] if x_scale == "Days" else df['Date'],
         y=df['Hashrate_PH'],
         mode='lines',
         name='Hashrate (PH/s)',
         line=dict(color='#00FFCC', width=2),
         hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Hashrate</b>: %{y:.2f} PH/s<extra></extra>',
-        text=df['Date']  # Shows dates in hover even in log mode
+        text=df['Date']
     ))
 
-    # Power-law fit
-    if show_fit:
-        x_fit = np.linspace(df['days_from_genesis'].min(), df['days_from_genesis'].max(), 100)
-        y_fit = a * np.power(x_fit, b)
-        
-        fit_x = x_fit if x_scale == "Log" else [genesis_date + pd.Timedelta(days=int(d)) for d in x_fit]
-        
-        fig.add_trace(go.Scatter(
-            x=fit_x,
-            y=y_fit,
-            mode='lines',
-            name=f'Power-Law Fit (R²={r2:.3f})',
-            line=dict(color='orange', dash='dot', width=1.5)
-        ))
-        
-        if show_bands:
-            fig.add_trace(go.Scatter(
-                x=fit_x,
-                y=y_fit * 0.4,
-                mode='lines',
-                name='-60% Band',
-                line=dict(color='rgba(255,165,0,0.3)'),
-                fill=None
-            ))
-            fig.add_trace(go.Scatter(
-                x=fit_x,
-                y=y_fit * 2.2,
-                mode='lines',
-                name='+120% Band',
-                line=dict(color='rgba(255,165,0,0.3)'),
-                fill='tonexty'
-            ))
+    # Power-law fit (always shown now)
+    x_fit = np.linspace(df['days_from_genesis'].min(), df['days_from_genesis'].max(), 100)
+    y_fit = a * np.power(x_fit, b)
+    
+    fit_x = x_fit if x_scale == "Days" else [genesis_date + pd.Timedelta(days=int(d)) for d in x_fit]
+    
+    fig.add_trace(go.Scatter(
+        x=fit_x,
+        y=y_fit,
+        mode='lines',
+        name=f'Power-Law Fit (R²={r2:.3f})',
+        line=dict(color='orange', dash='dot', width=1.5)
+    ))
+    
+    # Deviation bands (always shown now)
+    fig.add_trace(go.Scatter(
+        x=fit_x,
+        y=y_fit * 0.4,
+        mode='lines',
+        name='-60% Band',
+        line=dict(color='rgba(255,165,0,0.3)'),
+        fill=None
+    ))
+    fig.add_trace(go.Scatter(
+        x=fit_x,
+        y=y_fit * 2.2,
+        mode='lines',
+        name='+120% Band',
+        line=dict(color='rgba(255,165,0,0.3)'),
+        fill='tonexty'
+    ))
 
-    # Enhanced layout with proper grid lines
+    # Enhanced layout
     fig.update_layout(
         template='plotly_dark',
         hovermode='x unified',
         height=600,
-        margin=dict(l=20, r=20, t=40, b=20),
-        title=None,  # Removed as we have our own title
+        margin=dict(l=20, r=20, t=60, b=20),
         yaxis_title='Hashrate (PH/s)',
+        xaxis_title=x_scale,
         xaxis=dict(
-            title='Days Since Genesis' if x_scale == "Log" else 'Date',
             showgrid=True,
             gridwidth=1,
             gridcolor='rgba(100,100,100,0.2)',
@@ -117,6 +108,7 @@ with st.container(border=True):  # New border around the chart
             )
         ),
         yaxis=dict(
+            type="log" if y_scale == "Log" else "linear",
             showgrid=True,
             gridwidth=1,
             gridcolor='rgba(100,100,100,0.2)',
@@ -135,46 +127,14 @@ with st.container(border=True):  # New border around the chart
         )
     )
 
-    # Advanced log scaling configuration
-    if x_scale == "Log":
-        fig.update_xaxes(
-            type="log",
-            tickmode='auto',
-            nticks=10,
-            minor=dict(
-                ticklen=4,
-                tickcolor='rgba(200,200,200,0.5)',
-                tickmode='auto',
-                nticks=8
-            )
-        )
-
-    if y_scale == "Log":
-        fig.update_yaxes(
-            type="log",
-            tickmode='auto',
-            nticks=10,
-            minor=dict(
-                ticklen=4,
-                tickcolor='rgba(200,200,200,0.5)',
-                tickmode='auto',
-                nticks=8
-            )
-        )
-
     # Show the figure
     st.plotly_chart(fig, use_container_width=True)
 
-# Stats in a clean card-like layout
-st.subheader("Model Statistics")
+# Stats in minimal cards
 cols = st.columns(3)
 with cols[0].container(border=True):
-    st.metric("Power-Law Slope", f"{b:.3f}", help="Exponent in the power-law equation")
+    st.metric("Power-Law Slope", f"{b:.3f}")
 with cols[1].container(border=True):
-    st.metric("Model Fit (R²)", f"{r2:.3f}", help="Goodness of fit (1.0 is perfect fit)")
+    st.metric("Model Fit (R²)", f"{r2:.3f}")
 with cols[2].container(border=True):
-    st.metric("Current Hashrate", f"{df['Hashrate_PH'].iloc[-1]:.2f} PH/s", 
-             help="Most recent hashrate measurement")
-
-# Add some space at the bottom
-st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
+    st.metric("Current Hashrate", f"{df['Hashrate_PH'].iloc[-1]:.2f} PH/s")
