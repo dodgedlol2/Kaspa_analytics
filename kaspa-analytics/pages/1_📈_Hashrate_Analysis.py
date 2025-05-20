@@ -26,21 +26,23 @@ except Exception as e:
 # ====== SIMPLIFIED CONTROLS ======
 with st.container():
     # Create columns for controls
-    col1, col2, col3 = st.columns([2, 2, 6])
+    col1, col2, col3 = st.columns([1, 1, 8])
     
     with col1:
-        y_scale = st.radio("Hashrate scale:", ["Linear", "Log"], 
-                          index=1, horizontal=True,
-                          help="Linear or logarithmic Y-axis scale")
+        st.markdown("**Y-scale**", help="Hashrate scale")
+        y_scale = st.toggle("L", value=True, key="y_scale", 
+                           help="Logarithmic (L) or Linear (A) Y-axis scale")
+        y_scale = "Log" if y_scale else "Linear"
     
     with col2:
-        x_scale_type = st.radio("Time scale:", ["Linear", "Log"], 
-                               index=0, horizontal=True,
-                               help="Linear or logarithmic X-axis scale")
+        st.markdown("**X-scale**", help="Time scale")
+        x_scale_type = st.toggle("L", value=False, key="x_scale", 
+                                help="Logarithmic (L) or Linear (A) X-axis scale")
+        x_scale_type = "Log" if x_scale_type else "Linear"
     
     with col3:
         show_bands = st.toggle("Show Deviation Bands", value=False,
-                             help="Show ± deviation bands around the fit")
+                              help="Show ± deviation bands around the fit")
 
 # ====== ENHANCED CHART CONTAINER ======
 with st.container(border=True):
