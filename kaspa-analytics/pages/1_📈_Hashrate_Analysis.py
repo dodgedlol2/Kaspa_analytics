@@ -6,31 +6,59 @@ from utils import fit_power_law, load_data
 
 st.set_page_config(layout="wide")
 
-# Custom CSS for professional styling
+# Custom CSS for floating buttons
 st.markdown("""
 <style>
-    .header-section {
-        border-bottom: 1px solid #2d3436;
-        padding-bottom: 0.5rem;
-        margin-bottom: 0.5rem;
+    .chart-controls {
+        position: absolute;
+        z-index: 100;
     }
-    .control-button {
+    .y-scale-controls {
+        top: 10px;
+        left: 10px;
+    }
+    .x-scale-controls {
+        bottom: 10px;
+        right: 10px;
+    }
+    .scale-btn {
         border: 1px solid #636e72 !important;
-        border-radius: 6px !important;
-        padding: 0.25rem 0.75rem !important;
-        font-size: 0.9rem !important;
+        border-radius: 4px !important;
+        padding: 0.15rem 0.5rem !important;
+        font-size: 0.8rem !important;
+        background-color: rgba(30, 30, 30, 0.7) !important;
+        color: white !important;
+        min-width: 24px !important;
+        height: 24px !important;
     }
-    .control-button label {
-        font-weight: 500 !important;
-        margin-bottom: 0 !important;
+    .scale-btn:hover {
+        background-color: rgba(45, 52, 54, 0.9) !important;
+        border-color: #00FFCC !important;
     }
-    .stRadio [role="radiogroup"] {
-        gap: 0.5rem !important;
+    .scale-btn.active {
+        background-color: rgba(0, 255, 204, 0.2) !important;
+        border-color: #00FFCC !important;
     }
-    .stToggle button {
-        border: 1px solid #636e72 !important;
-        border-radius: 6px !important;
-        padding: 0.25rem 0.75rem !important;
+    .scale-btn-tooltip {
+        visibility: hidden;
+        width: 120px;
+        background-color: #2d3436;
+        color: #fff;
+        text-align: center;
+        border-radius: 4px;
+        padding: 4px;
+        position: absolute;
+        z-index: 1;
+        bottom: 125%;
+        left: 50%;
+        transform: translateX(-50%);
+        opacity: 0;
+        transition: opacity 0.3s;
+        font-size: 12px;
+    }
+    .scale-btn-container:hover .scale-btn-tooltip {
+        visibility: visible;
+        opacity: 1;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -52,56 +80,24 @@ except Exception as e:
     st.error(f"Failed to calculate power law: {str(e)}")
     st.stop()
 
+# Initialize session state for scale toggles
+if 'y_scale' not in st.session_state:
+    st.session_state.y_scale = "log"
+if 'x_scale' not in st.session_state:
+    st.session_state.x_scale = "linear"
+if 'show_bands' not in st.session_state:
+    st.session_state.show_bands = False
+
 # ====== PROFESSIONAL CHART CONTAINER ======
 with st.container(border=True):
-    # Header section with dedicated border
-    with st.container():
-        st.markdown('<div class="header-section">', unsafe_allow_html=True)
-        
-        # Header columns
-        header_cols = st.columns([3, 2, 2, 1.5])
-        
-        with header_cols[0]:
-            st.markdown("### Kaspa Hashrate")
-        
-        with header_cols[1]:
-            st.markdown("**Scale:**", help="Hashrate scale type")
-            y_scale = st.radio(
-                "Hashrate Scale",
-                ["Linear", "Log"],
-                index=1,
-                horizontal=True,
-                label_visibility="collapsed",
-                key="y_scale"
-            )
-        
-        with header_cols[2]:
-            st.markdown("**Time:**", help="Time scale type")
-            x_scale_type = st.radio(
-                "Time Scale",
-                ["Linear", "Log"],
-                index=0,
-                horizontal=True,
-                label_visibility="collapsed",
-                key="x_scale"
-            )
-        
-        with header_cols[3]:
-            st.markdown("**Bands:**", help="Deviation bands visibility")
-            show_bands = st.toggle(
-                "Show Bands",
-                value=False,
-                label_visibility="collapsed",
-                key="bands_toggle"
-            )
-        
-        st.markdown('</div>', unsafe_allow_html=True)
-
+    # Title
+    st.markdown("### Kaspa Hashrate")
+    
     # Create figure with enhanced grid
     fig = go.Figure()
 
     # Determine x-axis values based on scale type
-    if x_scale_type == "Log":
+    if st.session_state.x_scale == "log":
         x_values = df['days_from_genesis']
         x_title = "Days Since Genesis (Log Scale)"
     else:
@@ -123,7 +119,7 @@ with st.container(border=True):
     x_fit = np.linspace(df['days_from_genesis'].min(), df['days_from_genesis'].max(), 100)
     y_fit = a * np.power(x_fit, b)
     
-    if x_scale_type == "Log":
+    if st.session_state.x_scale == "log":
         fit_x = x_fit
     else:
         fit_x = [genesis_date + pd.Timedelta(days=int(d)) for d in x_fit]
@@ -137,7 +133,7 @@ with st.container(border=True):
     ))
     
     # Deviation bands (only shown when toggled)
-    if show_bands:
+    if st.session_state.show_bands:
         fig.add_trace(go.Scatter(
             x=fit_x,
             y=y_fit * 0.4,
@@ -160,11 +156,11 @@ with st.container(border=True):
         template='plotly_dark',
         hovermode='x unified',
         height=600,
-        margin=dict(l=20, r=20, t=20, b=20),
+        margin=dict(l=20, r=20, t=40, b=40),  # Extra margin for buttons
         yaxis_title='PH/s',
         xaxis_title=x_title,
         xaxis=dict(
-            type="log" if x_scale_type == "Log" else None,
+            type=st.session_state.x_scale,
             showgrid=True,
             gridwidth=1,
             gridcolor='rgba(100,100,100,0.2)',
@@ -175,7 +171,7 @@ with st.container(border=True):
             )
         ),
         yaxis=dict(
-            type="log" if y_scale == "Log" else "linear",
+            type=st.session_state.y_scale,
             showgrid=True,
             gridwidth=1,
             gridcolor='rgba(100,100,100,0.2)',
@@ -195,8 +191,47 @@ with st.container(border=True):
         )
     )
 
-    # Show the figure
-    st.plotly_chart(fig, use_container_width=True)
+    # Create a container for the chart and floating buttons
+    chart_container = st.container()
+    with chart_container:
+        # Display the chart
+        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+        
+        # Y-axis scale controls (top-left)
+        y_col1, y_col2 = st.columns([1, 19])
+        with y_col1:
+            st.markdown("""
+            <div class="chart-controls y-scale-controls">
+                <div class="scale-btn-container" style="display: inline-block; position: relative;">
+                    <button class="scale-btn %s" onclick="st.session_state.y_scale='linear'">A</button>
+                    <span class="scale-btn-tooltip">Autoscale/Linear</span>
+                </div>
+                <div class="scale-btn-container" style="display: inline-block; position: relative; margin-left: 4px;">
+                    <button class="scale-btn %s" onclick="st.session_state.y_scale='log'">L</button>
+                    <span class="scale-btn-tooltip">Logarithmic Scale</span>
+                </div>
+            </div>
+            """ % ("active" if st.session_state.y_scale == "linear" else "", 
+                  "active" if st.session_state.y_scale == "log" else ""),
+            unsafe_allow_html=True)
+        
+        # X-axis scale controls (bottom-right)
+        x_col1, x_col2 = st.columns([19, 1])
+        with x_col2:
+            st.markdown("""
+            <div class="chart-controls x-scale-controls">
+                <div class="scale-btn-container" style="display: inline-block; position: relative;">
+                    <button class="scale-btn %s" onclick="st.session_state.x_scale='linear'">A</button>
+                    <span class="scale-btn-tooltip">Autoscale/Linear</span>
+                </div>
+                <div class="scale-btn-container" style="display: inline-block; position: relative; margin-left: 4px;">
+                    <button class="scale-btn %s" onclick="st.session_state.x_scale='log'">L</button>
+                    <span class="scale-btn-tooltip">Logarithmic Scale</span>
+                </div>
+            </div>
+            """ % ("active" if st.session_state.x_scale == "linear" else "", 
+                  "active" if st.session_state.x_scale == "log" else ""),
+            unsafe_allow_html=True)
 
 # Stats in minimal cards
 cols = st.columns(3)
@@ -206,3 +241,29 @@ with cols[1].container(border=True):
     st.metric("Model Fit (R²)", f"{r2:.3f}")
 with cols[2].container(border=True):
     st.metric("Current Hashrate", f"{df['Hashrate_PH'].iloc[-1]:.2f} PH/s")
+
+# JavaScript to handle button clicks
+st.markdown("""
+<script>
+    // Function to handle button clicks
+    function handleScaleButtonClick(scaleType, axis) {
+        if (axis === 'y') {
+            Streamlit.setComponentValue({'y_scale': scaleType});
+        } else {
+            Streamlit.setComponentValue({'x_scale': scaleType});
+        }
+    }
+    
+    // Add event listeners to buttons
+    document.addEventListener('DOMContentLoaded', function() {
+        const buttons = document.querySelectorAll('.scale-btn');
+        buttons.forEach(button => {
+            button.addEventListener('click', function() {
+                // The actual state change is handled by the onclick in the button HTML
+                // This ensures the UI updates immediately
+                setTimeout(() => Streamlit.rerun(), 100);
+            });
+        });
+    });
+</script>
+""", unsafe_allow_html=True)
