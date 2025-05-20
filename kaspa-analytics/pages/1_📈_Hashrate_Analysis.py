@@ -7,7 +7,7 @@ from utils import fit_power_law, load_data
 st.set_page_config(layout="wide")
 st.title("Kaspa Hashrate Analysis")
 
-# Data loading and processing
+# Data loading and processing (unchanged)
 if 'df' not in st.session_state or 'genesis_date' not in st.session_state:
     try:
         st.session_state.df, st.session_state.genesis_date = load_data()
@@ -24,7 +24,7 @@ except Exception as e:
     st.error(f"Failed to calculate power law: {str(e)}")
     st.stop()
 
-# Controls
+# Controls (unchanged)
 col1, col2 = st.columns(2)
 with col1:
     show_fit = st.checkbox("Show Power-Law Fit", True)
@@ -36,7 +36,7 @@ with col2:
 # Create figure with enhanced grid
 fig = go.Figure()
 
-# Main trace
+# Main trace (now with hover improvements)
 fig.add_trace(go.Scatter(
     x=df['days_from_genesis'] if x_scale == "Log" else df['Date'],
     y=df['Hashrate_PH'],
@@ -44,16 +44,16 @@ fig.add_trace(go.Scatter(
     name='Hashrate (PH/s)',
     line=dict(color='#00FFCC', width=2),
     hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Hashrate</b>: %{y:.2f} PH/s<extra></extra>',
-    text=df['Date']
+    text=df['Date']  # Shows dates in hover even in log mode
 ))
 
-# Power-law fit
+# Power-law fit (unchanged)
 if show_fit:
     x_fit = np.linspace(df['days_from_genesis'].min(), df['days_from_genesis'].max(), 100)
     y_fit = a * np.power(x_fit, b)
-    
+
     fit_x = x_fit if x_scale == "Log" else [genesis_date + pd.Timedelta(days=int(d)) for d in x_fit]
-    
+
     fig.add_trace(go.Scatter(
         x=fit_x,
         y=y_fit,
@@ -61,7 +61,7 @@ if show_fit:
         name=f'Power-Law Fit (R²={r2:.3f})',
         line=dict(color='orange', dash='dot', width=1)
     ))
-    
+
     if show_bands:
         fig.add_trace(go.Scatter(
             x=fit_x,
@@ -80,14 +80,14 @@ if show_fit:
             fill='tonexty'
         ))
 
-# Enhanced layout with professional tick marks
+# Updated figure configuration (replace your existing layout code)
+# Enhanced layout with proper grid lines
 fig.update_layout(
     template='plotly_dark',
     hovermode='x unified',
     height=700,
     title="Kaspa Hashrate Growth",
     yaxis_title='Hashrate (PH/s)',
-    margin=dict(l=50, r=50, b=80, t=80),
     xaxis=dict(
         title='Days Since Genesis' if x_scale == "Log" else 'Date',
         showgrid=True,
@@ -95,16 +95,15 @@ fig.update_layout(
         gridcolor='rgba(100,100,100,0.2)',
         showline=True,
         linewidth=2,
-        linecolor='#444',
-        mirror=True,
-        ticks='inside',
-        ticklen=10,
-        tickwidth=2,
-        tickcolor='#00FFCC',
+        linecolor='rgba(200,200,200,0.5)',
+        mirror=True,  # Shows ticks on all sides
+        ticks='inside',  # Puts ticks inside the graph
+        ticklen=10,  # Base length
+        tickwidth=2,  # Base width
         minor=dict(
-            ticklen=5,
+            ticklen=6,
             tickwidth=1,
-            tickcolor='rgba(200,200,200,0.5)',
+            tickcolor='rgba(200,200,200,0.7)',
             gridcolor='rgba(100,100,100,0.1)',
             gridwidth=0.5
         )
@@ -115,45 +114,53 @@ fig.update_layout(
         gridcolor='rgba(100,100,100,0.2)',
         showline=True,
         linewidth=2,
-        linecolor='#444',
+        linecolor='rgba(200,200,200,0.5)',
         mirror=True,
         ticks='inside',
         ticklen=10,
         tickwidth=2,
-        tickcolor='#00FFCC',
         minor=dict(
-            ticklen=5,
+            ticklen=6,
             tickwidth=1,
-            tickcolor='rgba(200,200,200,0.5)',
+            tickcolor='rgba(200,200,200,0.7)',
             gridcolor='rgba(100,100,100,0.1)',
             gridwidth=0.5
         )
     )
 )
 
-# Enhanced logarithmic scaling with magnitude-based ticks
+# Enhanced log scale tick marks
+# Advanced log scaling configuration
 if x_scale == "Log":
     fig.update_xaxes(
         type="log",
         tickmode='array',
         tickvals=np.concatenate([
-            [1, 2, 5],
-            [10, 20, 50],
-            [100, 200, 500],
-            [1000]
+            [1, 2, 3, 4, 5, 6, 7, 8, 9],
+            [10, 20, 30, 40, 50, 60, 70, 80, 90],
+            [100, 200, 300, 400, 500, 600, 700, 800, 900]
         ]),
-        ticktext=['1', '2', '5', '10', '20', '50', '100', '200', '500', '1000'],
-        ticklen=[12 if v in [1,10,100,1000] else 8 for v in [1,2,5,10,20,50,100,200,500,1000]],
-        tickwidth=[2.5 if v in [1,10,100,1000] else 1.8 for v in [1,2,5,10,20,50,100,200,500,1000]],
+        ticktext=np.concatenate([
+            ['1', '2', '3', '4', '5', '6', '7', '8', '9'],
+            ['10', '', '', '', '', '', '', '', ''],
+            ['100', '', '', '', '', '', '', '', '']
+        ]),
+        ticklen=[8 if i%9==0 else 6 for i in range(27)],  # Longer at decades
+        tickwidth=[2 if i%9==0 else 1.5 for i in range(27)],
+        tickmode='auto',
+        nticks=10,
         minor=dict(
             tickvals=np.concatenate([
-                np.linspace(1, 10, 9),
-                np.linspace(10, 100, 9),
-                np.linspace(100, 1000, 9)
+                np.linspace(1, 10, 90),
+                np.linspace(10, 100, 90),
+                np.linspace(100, 1000, 90)
             ]),
             ticklen=4,
             tickwidth=1,
             tickcolor='rgba(200,200,200,0.5)'
+            tickcolor='rgba(200,200,200,0.5)',
+            tickmode='auto',
+            nticks=8
         )
     )
 
@@ -161,26 +168,32 @@ if y_scale == "Log":
     fig.update_yaxes(
         type="log",
         tickmode='array',
-        tickvals=[1, 2, 5, 10, 20, 50, 100, 200, 500, 1000],
-        ticktext=['1', '2', '5', '10', '20', '50', '100', '200', '500', '1000'],
-        ticklen=[12 if v in [1,10,100,1000] else 8 for v in [1,2,5,10,20,50,100,200,500,1000]],
-        tickwidth=[2.5 if v in [1,10,100,1000] else 1.8 for v in [1,2,5,10,20,50,100,200,500,1000]],
+        tickvals=[1, 10, 100, 1000],
+        ticktext=['1', '10', '100', '1000'],
+        ticklen=12,  # Longer at decades
+        tickwidth=2.5,
+        tickmode='auto',
+        nticks=10,
         minor=dict(
             tickvals=np.concatenate([
                 np.linspace(1, 10, 9),
                 np.linspace(10, 100, 9),
                 np.linspace(100, 1000, 9)
             ]),
-            ticklen=4,
-            tickwidth=1,
+            ticklen=6,
+            tickwidth=1.5,
             tickcolor='rgba(200,200,200,0.5)'
+            ticklen=4,
+            tickcolor='rgba(200,200,200,0.5)',
+            tickmode='auto',
+            nticks=8
         )
     )
 
 # Show the figure
 st.plotly_chart(fig, use_container_width=True)
 
-# Stats
+# Stats (unchanged)
 st.subheader("Model Statistics")
 cols = st.columns(3)
 cols[0].metric("Power-Law Slope", f"{b:.3f}")
