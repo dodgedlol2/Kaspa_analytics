@@ -6,6 +6,30 @@ from utils import fit_power_law, load_data
 
 st.set_page_config(layout="wide")
 
+# Custom CSS to position the buttons
+st.markdown("""
+<style>
+    .scale-button {
+        position: absolute;
+        z-index: 1000;
+        font-size: 12px !important;
+        padding: 0.15em 0.4em !important;
+        min-width: 0 !important;
+    }
+    #y-scale-btn {
+        left: 70px;
+        top: 80px;
+    }
+    #x-scale-btn {
+        right: 70px;
+        bottom: 80px;
+    }
+    .stPlotlyChart {
+        position: relative;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # Data loading and processing
 if 'df' not in st.session_state or 'genesis_date' not in st.session_state:
     try:
@@ -23,7 +47,7 @@ except Exception as e:
     st.error(f"Failed to calculate power law: {str(e)}")
     st.stop()
 
-# Initialize session state for toggles if not exists
+# Initialize session state for toggles
 if 'y_log' not in st.session_state:
     st.session_state.y_log = True
 if 'x_log' not in st.session_state:
@@ -31,7 +55,7 @@ if 'x_log' not in st.session_state:
 if 'show_bands' not in st.session_state:
     st.session_state.show_bands = False
 
-# Callback functions for the toggle buttons
+# Callback functions
 def toggle_y_scale():
     st.session_state.y_log = not st.session_state.y_log
 
@@ -42,27 +66,10 @@ def toggle_x_scale():
 with st.container(border=True):
     st.markdown("### Kaspa Hashrate Analysis")
     
-    # Create columns for the scale buttons (positioned absolutely)
-    col1, col2 = st.columns([1, 1])
-    
-    with col1:
-        # Y-scale button positioned near Y-axis
-        st.button("Y: L" if st.session_state.y_log else "Y: A", 
-                 on_click=toggle_y_scale,
-                 key="y_scale_button",
-                 help="Toggle Y-axis scale (Log/Linear)")
-    
-    with col2:
-        # X-scale button positioned near X-axis
-        st.button("X: L" if st.session_state.x_log else "X: A", 
-                 on_click=toggle_x_scale,
-                 key="x_scale_button",
-                 help="Toggle X-axis scale (Log/Linear)")
-    
     # Create figure
     fig = go.Figure()
 
-    # Determine x-axis values based on scale type
+    # Determine x-axis values
     if st.session_state.x_log:
         x_values = df['days_from_genesis']
         x_title = "Days Since Genesis (Log Scale)"
@@ -117,12 +124,12 @@ with st.container(border=True):
             hoverinfo='skip'
         ))
 
-    # Enhanced layout
+    # Chart layout
     fig.update_layout(
         template='plotly_dark',
         hovermode='x unified',
         height=600,
-        margin=dict(l=60, r=60, t=60, b=60),
+        margin=dict(l=80, r=80, t=80, b=80),  # Extra margin for buttons
         yaxis_title='Hashrate (PH/s)',
         xaxis_title=x_title,
         xaxis=dict(
@@ -146,17 +153,36 @@ with st.container(border=True):
         )
     )
 
-    # Show the figure
-    st.plotly_chart(fig, use_container_width=True)
+    # Display the chart
+    chart_container = st.plotly_chart(fig, use_container_width=True)
+
+    # Add the scale buttons (using columns as containers)
+    col1, col2 = st.columns([1, 1])
+    
+    with col1:
+        st.button("Y: L" if st.session_state.y_log else "Y: A",
+                on_click=toggle_y_scale,
+                key="y_scale_btn",
+                help="Toggle Y-axis scale (Log/Linear)",
+                kwargs={'class': 'scale-button'},
+                )
+    
+    with col2:
+        st.button("X: L" if st.session_state.x_log else "X: A",
+                on_click=toggle_x_scale,
+                key="x_scale_btn",
+                help="Toggle X-axis scale (Log/Linear)",
+                kwargs={'class': 'scale-button'},
+                )
 
 # Controls below the chart
 with st.container():
     st.toggle("Show Deviation Bands", 
-              value=st.session_state.show_bands,
-              key="show_bands",
-              help="Show ± deviation bands around the fit")
+             value=st.session_state.show_bands,
+             key="show_bands",
+             help="Show ± deviation bands around the fit")
 
-# Stats in minimal cards
+# Stats cards
 cols = st.columns(3)
 with cols[0].container(border=True):
     st.metric("Power-Law Slope", f"{b:.3f}")
