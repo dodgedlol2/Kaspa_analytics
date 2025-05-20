@@ -11,7 +11,6 @@ st.markdown("""
 <style>
     .chart-wrapper {
         position: relative;
-        margin-bottom: 20px;
     }
     .scale-controls {
         position: absolute;
@@ -96,163 +95,167 @@ except Exception as e:
     st.stop()
 
 # Initialize session state for scale toggles
-if 'y_scale_type' not in st.session_state:
-    st.session_state.y_scale_type = "log"
-if 'x_scale_type' not in st.session_state:
-    st.session_state.x_scale_type = "linear"
+if 'y_scale' not in st.session_state:
+    st.session_state.y_scale = "log"
+if 'x_scale' not in st.session_state:
+    st.session_state.x_scale = "linear"
 if 'show_bands' not in st.session_state:
     st.session_state.show_bands = False
 
-# Callback functions for button clicks
-def set_y_scale(scale_type):
-    st.session_state.y_scale_type = scale_type
-    st.rerun()
+# Create columns for the scale toggles
+col1, col2 = st.columns(2)
+with col1:
+    y_scale = st.radio(
+        "Y-axis scale:",
+        ["Linear", "Log"],
+        index=1 if st.session_state.y_scale == "log" else 0,
+        key="y_scale_radio",
+        horizontal=True,
+        label_visibility="collapsed"
+    )
+    st.session_state.y_scale = y_scale.lower()
 
-def set_x_scale(scale_type):
-    st.session_state.x_scale_type = scale_type
-    st.rerun()
+with col2:
+    x_scale = st.radio(
+        "X-axis scale:",
+        ["Linear", "Log"],
+        index=1 if st.session_state.x_scale == "log" else 0,
+        key="x_scale_radio",
+        horizontal=True,
+        label_visibility="collapsed"
+    )
+    st.session_state.x_scale = x_scale.lower()
 
 # ====== PROFESSIONAL CHART CONTAINER ======
 with st.container(border=True):
     st.markdown("### Kaspa Hashrate")
     
-    # Create a wrapper div for the chart and controls
-    chart_container = st.container()
-    with chart_container:
-        # Create figure with enhanced grid
-        fig = go.Figure()
+    # Create figure with enhanced grid
+    fig = go.Figure()
 
-        # Determine x-axis values based on scale type
-        if st.session_state.x_scale_type == "log":
-            x_values = df['days_from_genesis']
-            x_title = "Days Since Genesis (Log Scale)"
-        else:
-            x_values = df['Date']
-            x_title = "Date"
+    # Determine x-axis values based on scale type
+    if st.session_state.x_scale == "log":
+        x_values = df['days_from_genesis']
+        x_title = "Days Since Genesis (Log Scale)"
+    else:
+        x_values = df['Date']
+        x_title = "Date"
 
-        # Main trace
-        fig.add_trace(go.Scatter(
-            x=x_values,
-            y=df['Hashrate_PH'],
-            mode='lines',
-            name='Hashrate (PH/s)',
-            line=dict(color='#00FFCC', width=2.5),
-            hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Hashrate</b>: %{y:.2f} PH/s<extra></extra>',
-            text=df['Date']
-        ))
+    # Main trace
+    fig.add_trace(go.Scatter(
+        x=x_values,
+        y=df['Hashrate_PH'],
+        mode='lines',
+        name='Hashrate (PH/s)',
+        line=dict(color='#00FFCC', width=2.5),
+        hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Hashrate</b>: %{y:.2f} PH/s<extra></extra>',
+        text=df['Date']
+    ))
 
-        # Power-law fit (always shown)
-        x_fit = np.linspace(df['days_from_genesis'].min(), df['days_from_genesis'].max(), 100)
-        y_fit = a * np.power(x_fit, b)
-        
-        if st.session_state.x_scale_type == "log":
-            fit_x = x_fit
-        else:
-            fit_x = [genesis_date + pd.Timedelta(days=int(d)) for d in x_fit]
-        
+    # Power-law fit (always shown)
+    x_fit = np.linspace(df['days_from_genesis'].min(), df['days_from_genesis'].max(), 100)
+    y_fit = a * np.power(x_fit, b)
+    
+    if st.session_state.x_scale == "log":
+        fit_x = x_fit
+    else:
+        fit_x = [genesis_date + pd.Timedelta(days=int(d)) for d in x_fit]
+    
+    fig.add_trace(go.Scatter(
+        x=fit_x,
+        y=y_fit,
+        mode='lines',
+        name=f'Power-Law Fit (R²={r2:.3f})',
+        line=dict(color='orange', dash='dot', width=1.8)
+    ))
+    
+    # Deviation bands (only shown when toggled)
+    if st.session_state.show_bands:
         fig.add_trace(go.Scatter(
             x=fit_x,
-            y=y_fit,
+            y=y_fit * 0.4,
             mode='lines',
-            name=f'Power-Law Fit (R²={r2:.3f})',
-            line=dict(color='orange', dash='dot', width=1.8)
+            name='-60%',
+            line=dict(color='rgba(255,165,0,0.8)', dash='dot', width=1.2),
+            hoverinfo='skip'
         ))
-        
-        # Deviation bands (only shown when toggled)
-        if st.session_state.show_bands:
-            fig.add_trace(go.Scatter(
-                x=fit_x,
-                y=y_fit * 0.4,
-                mode='lines',
-                name='-60%',
-                line=dict(color='rgba(255,165,0,0.8)', dash='dot', width=1.2),
-                hoverinfo='skip'
-            ))
-            fig.add_trace(go.Scatter(
-                x=fit_x,
-                y=y_fit * 2.2,
-                mode='lines',
-                name='+120%',
-                line=dict(color='rgba(255,165,0,0.8)', dash='dot', width=1.2),
-                hoverinfo='skip'
-            ))
+        fig.add_trace(go.Scatter(
+            x=fit_x,
+            y=y_fit * 2.2,
+            mode='lines',
+            name='+120%',
+            line=dict(color='rgba(255,165,0,0.8)', dash='dot', width=1.2),
+            hoverinfo='skip'
+        ))
 
-        # Enhanced layout with proper axis type handling
-        layout_updates = {
-            'template': 'plotly_dark',
-            'hovermode': 'x unified',
-            'height': 600,
-            'margin': dict(l=20, r=20, t=40, b=40),
-            'yaxis': {
-                'title': 'PH/s',
-                'type': st.session_state.y_scale_type,
-                'showgrid': True,
-                'gridwidth': 1,
-                'gridcolor': 'rgba(100,100,100,0.2)',
-                'minor': {
-                    'ticklen': 6,
-                    'gridcolor': 'rgba(100,100,100,0.1)',
-                    'gridwidth': 0.5
-                }
-            },
-            'xaxis': {
-                'title': x_title,
-                'type': st.session_state.x_scale_type if st.session_state.x_scale_type == "log" else "date",
-                'showgrid': True,
-                'gridwidth': 1,
-                'gridcolor': 'rgba(100,100,100,0.2)',
-                'minor': {
-                    'ticklen': 6,
-                    'gridcolor': 'rgba(100,100,100,0.1)',
-                    'gridwidth': 0.5
-                }
-            },
-            'legend': {
-                'orientation': "h",
-                'yanchor': "bottom",
-                'y': 1.02,
-                'xanchor': "right",
-                'x': 1,
-                'font': dict(size=10)
-            }
-        }
-        
-        fig.update_layout(**layout_updates)
+    # Enhanced layout
+    fig.update_layout(
+        template='plotly_dark',
+        hovermode='x unified',
+        height=600,
+        margin=dict(l=20, r=20, t=40, b=40),
+        yaxis_title='PH/s',
+        xaxis_title=x_title,
+        xaxis=dict(
+            type=st.session_state.x_scale if st.session_state.x_scale == "log" else "date",
+            showgrid=True,
+            gridwidth=1,
+            gridcolor='rgba(100,100,100,0.2)',
+            minor=dict(
+                ticklen=6,
+                gridcolor='rgba(100,100,100,0.1)',
+                gridwidth=0.5
+            )
+        ),
+        yaxis=dict(
+            type=st.session_state.y_scale,
+            showgrid=True,
+            gridwidth=1,
+            gridcolor='rgba(100,100,100,0.2)',
+            minor=dict(
+                ticklen=6,
+                gridcolor='rgba(100,100,100,0.1)',
+                gridwidth=0.5
+            )
+        ),
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1,
+            font=dict(size=10)
+        )
+    )
 
-        # Display the chart
-        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+    # Display the chart
+    st.plotly_chart(fig, use_container_width=True)
 
-        # Y-axis scale controls (top-left)
-        st.markdown(f"""
+    # Floating buttons (visual only - functionality handled by the radio buttons)
+    st.markdown(f"""
+    <div class="chart-wrapper">
         <div class="scale-controls y-scale-controls">
             <div class="scale-btn-container">
-                <button class="scale-btn {'active' if st.session_state.y_scale_type == 'linear' else ''}" 
-                        onclick="parent.setYScale('linear')">A</button>
+                <button class="scale-btn {'active' if st.session_state.y_scale == 'linear' else ''}">A</button>
                 <span class="scale-btn-tooltip">Autoscale/Linear</span>
             </div>
             <div class="scale-btn-container">
-                <button class="scale-btn {'active' if st.session_state.y_scale_type == 'log' else ''}" 
-                        onclick="parent.setYScale('log')">L</button>
+                <button class="scale-btn {'active' if st.session_state.y_scale == 'log' else ''}">L</button>
                 <span class="scale-btn-tooltip">Logarithmic Scale</span>
             </div>
         </div>
-        """, unsafe_allow_html=True)
-        
-        # X-axis scale controls (bottom-right)
-        st.markdown(f"""
         <div class="scale-controls x-scale-controls">
             <div class="scale-btn-container">
-                <button class="scale-btn {'active' if st.session_state.x_scale_type == 'linear' else ''}" 
-                        onclick="parent.setXScale('linear')">A</button>
+                <button class="scale-btn {'active' if st.session_state.x_scale == 'linear' else ''}">A</button>
                 <span class="scale-btn-tooltip">Autoscale/Linear</span>
             </div>
             <div class="scale-btn-container">
-                <button class="scale-btn {'active' if st.session_state.x_scale_type == 'log' else ''}" 
-                        onclick="parent.setXScale('log')">L</button>
+                <button class="scale-btn {'active' if st.session_state.x_scale == 'log' else ''}">L</button>
                 <span class="scale-btn-tooltip">Logarithmic Scale</span>
             </div>
         </div>
-        """, unsafe_allow_html=True)
+    </div>
+    """, unsafe_allow_html=True)
 
 # Stats in minimal cards
 cols = st.columns(3)
@@ -262,28 +265,3 @@ with cols[1].container(border=True):
     st.metric("Model Fit (R²)", f"{r2:.3f}")
 with cols[2].container(border=True):
     st.metric("Current Hashrate", f"{df['Hashrate_PH'].iloc[-1]:.2f} PH/s")
-
-# JavaScript to handle button clicks
-st.markdown("""
-<script>
-    // Create functions in parent window scope
-    window.setYScale = function(scaleType) {
-        const event = new CustomEvent('setYScale', { detail: scaleType });
-        window.dispatchEvent(event);
-    };
-    
-    window.setXScale = function(scaleType) {
-        const event = new CustomEvent('setXScale', { detail: scaleType });
-        window.dispatchEvent(event);
-    };
-
-    // Handle custom events from buttons
-    window.addEventListener('setYScale', function(e) {
-        Streamlit.setComponentValue({y_scale_type: e.detail});
-    });
-    
-    window.addEventListener('setXScale', function(e) {
-        Streamlit.setComponentValue({x_scale_type: e.detail});
-    });
-</script>
-""", unsafe_allow_html=True)
