@@ -76,19 +76,19 @@ with st.container(border=True):
         with cols[0]:
             with st.container(border=True):
                 st.markdown('<div class="control-label">Hashrate Scale</div>', unsafe_allow_html=True)
-                y_scale = st.toggle("Log / Linear", value=True, key="y_scale")
+                y_scale = st.toggle("Linear/Log", value=True, key="y_scale")
                 y_scale = "Log" if y_scale else "Linear"
         
         with cols[1]:
             with st.container(border=True):
                 st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
-                x_scale_type = st.toggle("Log / Linear", value=False, key="x_scale")
+                x_scale_type = st.toggle("Linear/Log", value=False, key="x_scale")
                 x_scale_type = "Log" if x_scale_type else "Linear"
         
         with cols[2]:
             with st.container(border=True):
                 st.markdown('<div class="control-label">Deviation Bands</div>', unsafe_allow_html=True)
-                show_bands = st.toggle("Show / Hide", value=False)
+                show_bands = st.toggle("Hide/Show", value=False)
         st.markdown('</div>', unsafe_allow_html=True)
 
     # Create figure with enhanced grid
