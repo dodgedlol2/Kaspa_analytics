@@ -23,7 +23,7 @@ except Exception as e:
     st.error(f"Failed to calculate power law: {str(e)}")
     st.stop()
 
-# Custom CSS for perfect alignment
+# Custom CSS for precise alignment
 st.markdown("""
 <style>
     .control-block {
@@ -38,9 +38,8 @@ st.markdown("""
         flex-direction: column;
         justify-content: center;
     }
-    .title-container {
+    .title-spacing {
         padding-left: 40px;
-        margin-top: -8px;  /* This moves the title up */
     }
     .control-label {
         font-size: 13px !important;
@@ -55,6 +54,9 @@ st.markdown("""
         width: 100% !important;
         font-size: 12px !important;
     }
+    .controls-wrapper {
+        padding-top: 11px; /* 0.3cm ≈ 11px */
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -64,11 +66,11 @@ with st.container(border=True):
     title_col, control_col = st.columns([2, 8])
     
     with title_col:
-        # Title moved up to align with controls
-        st.markdown('<div class="title-container"><h2>Kaspa Hashrate</h2></div>', unsafe_allow_html=True)
+        st.markdown('<div class="title-spacing"><h2>Kaspa Hashrate</h2></div>', unsafe_allow_html=True)
     
     with control_col:
-        # Control blocks - now aligned with title
+        # Wrapper div to move controls down
+        st.markdown('<div class="controls-wrapper">', unsafe_allow_html=True)
         cols = st.columns([1.5, 1.5, 1.5, 4])
         
         with cols[0]:
@@ -87,6 +89,7 @@ with st.container(border=True):
             with st.container(border=True):
                 st.markdown('<div class="control-label">Deviation Bands</div>', unsafe_allow_html=True)
                 show_bands = st.toggle("Show / Hide", value=False)
+        st.markdown('</div>', unsafe_allow_html=True)
 
     # Create figure with enhanced grid
     fig = go.Figure()
