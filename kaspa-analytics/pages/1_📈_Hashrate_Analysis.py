@@ -31,9 +31,33 @@ if 'x_log' not in st.session_state:
 if 'show_bands' not in st.session_state:
     st.session_state.show_bands = False
 
+# Callback functions for the toggle buttons
+def toggle_y_scale():
+    st.session_state.y_log = not st.session_state.y_log
+
+def toggle_x_scale():
+    st.session_state.x_log = not st.session_state.x_log
+
 # ====== CHART CONTAINER ======
 with st.container(border=True):
     st.markdown("### Kaspa Hashrate Analysis")
+    
+    # Create columns for the scale buttons (positioned absolutely)
+    col1, col2 = st.columns([1, 1])
+    
+    with col1:
+        # Y-scale button positioned near Y-axis
+        st.button("Y: L" if st.session_state.y_log else "Y: A", 
+                 on_click=toggle_y_scale,
+                 key="y_scale_button",
+                 help="Toggle Y-axis scale (Log/Linear)")
+    
+    with col2:
+        # X-scale button positioned near X-axis
+        st.button("X: L" if st.session_state.x_log else "X: A", 
+                 on_click=toggle_x_scale,
+                 key="x_scale_button",
+                 help="Toggle X-axis scale (Log/Linear)")
     
     # Create figure
     fig = go.Figure()
@@ -93,12 +117,12 @@ with st.container(border=True):
             hoverinfo='skip'
         ))
 
-    # Add annotation buttons that will work as toggles
+    # Enhanced layout
     fig.update_layout(
         template='plotly_dark',
         hovermode='x unified',
         height=600,
-        margin=dict(l=60, r=60, t=60, b=60),  # Add margin for buttons
+        margin=dict(l=60, r=60, t=60, b=60),
         yaxis_title='Hashrate (PH/s)',
         xaxis_title=x_title,
         xaxis=dict(
@@ -119,48 +143,11 @@ with st.container(border=True):
             y=1.02,
             xanchor="right",
             x=1
-        ),
-        annotations=[
-            # Y-axis scale toggle (top-left)
-            dict(
-                x=0.01, y=1.05,
-                xref="paper", yref="paper",
-                text="<b>Y: L</b>" if st.session_state.y_log else "<b>Y: A</b>",
-                showarrow=False,
-                font=dict(size=12, color="white"),
-                bgcolor="rgba(30,30,30,0.7)",
-                bordercolor="rgba(255,255,255,0.3)",
-                borderwidth=1,
-                borderpad=4,
-                clicktoshow="onoff"
-            ),
-            # X-axis scale toggle (bottom-right)
-            dict(
-                x=0.99, y=0.01,
-                xref="paper", yref="paper",
-                text="<b>X: L</b>" if st.session_state.x_log else "<b>X: A</b>",
-                showarrow=False,
-                font=dict(size=12, color="white"),
-                bgcolor="rgba(30,30,30,0.7)",
-                bordercolor="rgba(255,255,255,0.3)",
-                borderwidth=1,
-                borderpad=4,
-                clicktoshow="onoff"
-            )
-        ]
+        )
     )
 
-    # Display the chart
-    chart = st.plotly_chart(fig, use_container_width=True)
-
-    # Check for clicks on the annotations
-    if chart._clicked_annotation_data is not None:
-        clicked_text = chart._clicked_annotation_data.get("text", "")
-        if "Y:" in clicked_text:
-            st.session_state.y_log = not st.session_state.y_log
-        elif "X:" in clicked_text:
-            st.session_state.x_log = not st.session_state.x_log
-        st.rerun()
+    # Show the figure
+    st.plotly_chart(fig, use_container_width=True)
 
 # Controls below the chart
 with st.container():
