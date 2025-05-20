@@ -200,38 +200,34 @@ with st.container(border=True):
         # Y-axis scale controls (top-left)
         y_col1, y_col2 = st.columns([1, 19])
         with y_col1:
-            st.markdown("""
+            st.markdown(f"""
             <div class="chart-controls y-scale-controls">
                 <div class="scale-btn-container" style="display: inline-block; position: relative;">
-                    <button class="scale-btn %s" onclick="st.session_state.y_scale='linear'">A</button>
+                    <button class="scale-btn {'active' if st.session_state.y_scale == 'linear' else ''}" onclick="st.session_state.y_scale='linear'">A</button>
                     <span class="scale-btn-tooltip">Autoscale/Linear</span>
                 </div>
                 <div class="scale-btn-container" style="display: inline-block; position: relative; margin-left: 4px;">
-                    <button class="scale-btn %s" onclick="st.session_state.y_scale='log'">L</button>
+                    <button class="scale-btn {'active' if st.session_state.y_scale == 'log' else ''}" onclick="st.session_state.y_scale='log'">L</button>
                     <span class="scale-btn-tooltip">Logarithmic Scale</span>
                 </div>
             </div>
-            """ % ("active" if st.session_state.y_scale == "linear" else "", 
-                  "active" if st.session_state.y_scale == "log" else ""),
-            unsafe_allow_html=True)
+            """, unsafe_allow_html=True)
         
         # X-axis scale controls (bottom-right)
         x_col1, x_col2 = st.columns([19, 1])
         with x_col2:
-            st.markdown("""
+            st.markdown(f"""
             <div class="chart-controls x-scale-controls">
                 <div class="scale-btn-container" style="display: inline-block; position: relative;">
-                    <button class="scale-btn %s" onclick="st.session_state.x_scale='linear'">A</button>
+                    <button class="scale-btn {'active' if st.session_state.x_scale == 'linear' else ''}" onclick="st.session_state.x_scale='linear'">A</button>
                     <span class="scale-btn-tooltip">Autoscale/Linear</span>
                 </div>
                 <div class="scale-btn-container" style="display: inline-block; position: relative; margin-left: 4px;">
-                    <button class="scale-btn %s" onclick="st.session_state.x_scale='log'">L</button>
+                    <button class="scale-btn {'active' if st.session_state.x_scale == 'log' else ''}" onclick="st.session_state.x_scale='log'">L</button>
                     <span class="scale-btn-tooltip">Logarithmic Scale</span>
                 </div>
             </div>
-            """ % ("active" if st.session_state.x_scale == "linear" else "", 
-                  "active" if st.session_state.x_scale == "log" else ""),
-            unsafe_allow_html=True)
+            """, unsafe_allow_html=True)
 
 # Stats in minimal cards
 cols = st.columns(3)
@@ -245,15 +241,6 @@ with cols[2].container(border=True):
 # JavaScript to handle button clicks
 st.markdown("""
 <script>
-    // Function to handle button clicks
-    function handleScaleButtonClick(scaleType, axis) {
-        if (axis === 'y') {
-            Streamlit.setComponentValue({'y_scale': scaleType});
-        } else {
-            Streamlit.setComponentValue({'x_scale': scaleType});
-        }
-    }
-    
     // Add event listeners to buttons
     document.addEventListener('DOMContentLoaded', function() {
         const buttons = document.querySelectorAll('.scale-btn');
@@ -261,7 +248,11 @@ st.markdown("""
             button.addEventListener('click', function() {
                 // The actual state change is handled by the onclick in the button HTML
                 // This ensures the UI updates immediately
-                setTimeout(() => Streamlit.rerun(), 100);
+                setTimeout(() => {
+                    const event = new Event('input', { bubbles: true });
+                    this.dispatchEvent(event);
+                    Streamlit.setComponentValue({});
+                }, 100);
             });
         });
     });
