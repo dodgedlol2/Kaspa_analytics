@@ -222,23 +222,44 @@ with st.container():
     if 'time_range' not in st.session_state:
         st.session_state.time_range = "All"
     
-    # Create container for time range buttons
-    st.markdown('<div class="time-range-container">', unsafe_allow_html=True)
+   # Create container for time range buttons
+    st.markdown("""
+    <style>
+        .time-range-btn {
+            font-size: 10px !important;
+            padding: 0px 3px !important;
+            margin: 0px 1px !important;
+            min-width: 24px !important;
+            height: 20px !important;
+            border-radius: 2px !important;
+            border: none !important;
+            background-color: transparent !important;
+            color: #e0e0e0 !important;
+        }
+        .time-range-btn:hover {
+            color: #00FFCC !important;
+        }
+        .time-range-btn.active {
+            color: #00FFCC !important;
+            text-decoration: underline;
+            font-weight: 500 !important;
+        }
+    </style>
+    <div style="display: flex; justify-content: flex-end; gap: 0px;">
+    """, unsafe_allow_html=True)
     
-    # Create buttons using columns
-    cols = st.columns(len(time_ranges))
-    for i, tr in enumerate(time_ranges):
-        with cols[i]:
-            if st.button(
-                tr,
-                key=f"time_range_{tr}",
-                type="primary" if st.session_state.time_range == tr else "secondary",
-                use_container_width=True
-            ):
-                st.session_state.time_range = tr
-                st.rerun()
+  # Create buttons
+    for tr in time_ranges:
+        is_active = "active" if st.session_state.time_range == tr else ""
+        if st.button(
+            tr,
+            key=f"time_range_{tr}",
+            type="secondary"  # This makes them minimal by default
+        ):
+            st.session_state.time_range = tr
+            st.rerun()
     
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
 
     # Get the selected time range
     time_range = st.session_state.time_range
