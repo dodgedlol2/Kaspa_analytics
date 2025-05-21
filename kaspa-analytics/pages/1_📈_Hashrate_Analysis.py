@@ -64,6 +64,10 @@ st.markdown("""
     .plotly-rangeslider {
         height: 80px !important;
     }
+    /* Plotly chart background (override dark theme) */
+    .js-plotly-plot .plotly {
+        background-color: #000000 !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
