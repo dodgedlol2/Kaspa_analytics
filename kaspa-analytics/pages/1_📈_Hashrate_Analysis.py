@@ -140,6 +140,15 @@ st.markdown("""
     .range-slider .handle:after {
         background-color: #00FFCC !important;
     }
+    
+    /* Metrics container styling */
+    .metrics-container {
+        width: calc(100% - 40px) !important;
+        margin-left: 20px !important;
+        margin-right: 20px !important;
+        margin-top: 10px !important;
+        margin-bottom: 0px !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -303,8 +312,8 @@ with st.container():
 
     st.plotly_chart(fig, use_container_width=True)
 
-# Stats in cards with matching styling
-st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
+# Stats in cards with matching styling - now aligned with main panel
+st.markdown('<div class="metrics-container">', unsafe_allow_html=True)
 cols = st.columns(3)
 with cols[0]:
     st.metric("Power-Law Slope", f"{b:.3f}")
@@ -312,3 +321,4 @@ with cols[1]:
     st.metric("Model Fit (R²)", f"{r2:.3f}")
 with cols[2]:
     st.metric("Current Hashrate", f"{df['Hashrate_PH'].iloc[-1]:.2f} PH/s")
+st.markdown('</div>', unsafe_allow_html=True)
