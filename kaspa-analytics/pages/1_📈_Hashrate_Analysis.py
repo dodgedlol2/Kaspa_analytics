@@ -125,6 +125,19 @@ st.markdown("""
     .st-cg {
         background-color: #00FFCC !important;
     }
+    
+    /* Button styling */
+    .stButton button {
+        background-color: #1a1e25 !important;
+        color: #00FFCC !important;
+        border: 1px solid #2b3137 !important;
+    }
+    
+    .stButton button:hover {
+        background-color: #2b3137 !important;
+        color: #00FFCC !important;
+        border: 1px solid #00FFCC !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -138,7 +151,7 @@ with st.container():
 
     with control_col:
         st.markdown('<div class="controls-wrapper">', unsafe_allow_html=True)
-        cols = st.columns([1.5, 1.5, 1.5, 4])
+        cols = st.columns([1.5, 1.5, 1.5, 1.5, 3])
 
         with cols[0]:
             with st.container():
@@ -156,6 +169,11 @@ with st.container():
             with st.container():
                 st.markdown('<div class="control-label">Deviation Bands</div>', unsafe_allow_html=True)
                 show_bands = st.toggle("Hide/Show", value=False, key="bands_toggle")
+
+        with cols[3]:
+            with st.container():
+                st.markdown('<div class="control-label">Auto Scale Y-Axis</div>', unsafe_allow_html=True)
+                auto_scale = st.toggle("Off/On", value=True, key="auto_scale")
 
         st.markdown('</div>', unsafe_allow_html=True)
 
@@ -269,7 +287,9 @@ with st.container():
                 gridwidth=0.5
             ),
             linecolor='#2b3137',
-            zerolinecolor='#2b3137'
+            zerolinecolor='#2b3137',
+            autorange=True if auto_scale else None,
+            fixedrange=False
         ),
         legend=dict(
             orientation="h",
@@ -286,7 +306,60 @@ with st.container():
         )
     )
 
-    st.plotly_chart(fig, use_container_width=True)
+    # Add reset zoom button
+    st.markdown("""
+    <script>
+    // Function to reset zoom
+    function resetZoom() {
+        const plotElement = document.querySelector('.plotly-graph-div.js-plotly-plot');
+        if (plotElement) {
+            Plotly.relayout(plotElement, {
+                'xaxis.autorange': true,
+                'yaxis.autorange': true
+            });
+        }
+    }
+    </script>
+    """, unsafe_allow_html=True)
+
+    # Display the chart and reset button
+    chart_container = st.container()
+    with chart_container:
+        st.plotly_chart(fig, use_container_width=True, config={'scrollZoom': True})
+        
+        # Add reset button with custom styling
+        reset_col, _ = st.columns([1, 9])
+        with reset_col:
+            if st.button('Reset Zoom', key='reset_zoom'):
+                # This will trigger the JavaScript reset function
+                st.markdown("""
+                <script>
+                resetZoom();
+                </script>
+                """, unsafe_allow_html=True)
+
+    # JavaScript for auto-scaling Y-axis when X-axis is zoomed
+    st.markdown("""
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const plotElement = document.querySelector('.plotly-graph-div.js-plotly-plot');
+        if (plotElement) {
+            plotElement.on('plotly_relayout', function(eventdata) {
+                // Check if x-axis range was changed (zoomed)
+                if (eventdata['xaxis.range[0]'] || eventdata['xaxis.range[1]']) {
+                    // Auto-scale y-axis if setting is enabled
+                    const autoScale = %s;
+                    if (autoScale) {
+                        Plotly.relayout(plotElement, {
+                            'yaxis.autorange': true
+                        });
+                    }
+                }
+            });
+        }
+    });
+    </script>
+    """ % ('true' if auto_scale else 'false'), unsafe_allow_html=True)
 
 # Stats in cards with matching styling
 st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
