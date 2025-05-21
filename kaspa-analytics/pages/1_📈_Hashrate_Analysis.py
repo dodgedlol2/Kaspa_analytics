@@ -151,44 +151,15 @@ st.markdown("""
         margin-bottom: 0px !important;
     }
     
-    /* Time range selector styling */
-    .time-range-selector {
-        position: absolute;
-        right: 30px;
-        top: 20px;
-        z-index: 100;
-        background-color: transparent !important;
-        border-radius: 0 !important;
-        padding: 0 !important;
-        border: none !important;
+    /* Custom segmented control styling */
+    .st-emotion-cache-1q7gvpp {
+        gap: 0px !important;
     }
     
-    .time-range-button {
+    .st-emotion-cache-1q7gvpp button {
+        padding: 0px 8px !important;
         font-size: 11px !important;
-        padding: 0px 4px !important;
-        border-radius: 3px !important;
-        transition: all 0.2s ease !important;
-        background-color: transparent !important;
-        color: #e0e0e0 !important;
-        border: none !important;
-        margin: 0 1px !important;
-        min-width: 24px;
-        height: 20px;
-    }
-    
-    .time-range-button:hover {
-        color: #00FFCC !important;
-        background-color: rgba(58, 60, 74, 0.5) !important;
-    }
-    
-    .time-range-button.active {
-        color: #00FFCC !important;
-        font-weight: 500 !important;
-        text-decoration: underline;
-    }
-    
-    div[data-testid="stHorizontalBlock"] {
-        gap: 0.1rem !important;
+        min-height: 24px !important;
     }
     
     /* Fix for button alignment */
@@ -229,31 +200,25 @@ with st.container():
 
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # Add professional time range selector in the top right
-    with st.container():
-        st.markdown('<div class="time-range-selector">', unsafe_allow_html=True)
-        
-        time_ranges = ["1W", "1M", "3M", "6M", "1Y", "All"]
-        
-        # Initialize time_range in session state if not exists
-        if 'time_range' not in st.session_state:
-            st.session_state.time_range = "All"
-        
-        # Create a single row of buttons
-        cols = st.columns(len(time_ranges))
-        
-        for i, tr in enumerate(time_ranges):
-            with cols[i]:
-                # Use markdown to create a styled button that changes on click
-                if st.button(
-                    tr,
-                    key=f"time_range_{tr}",
-                    type="primary" if st.session_state.time_range == tr else "secondary"
-                ):
-                    st.session_state.time_range = tr
-                    st.rerun()
-        
-        st.markdown('</div>', unsafe_allow_html=True)
+    # Add time range selector using segmented_control
+    time_ranges = ["1W", "1M", "3M", "6M", "1Y", "All"]
+    
+    # Initialize time_range in session state if not exists
+    if 'time_range' not in st.session_state:
+        st.session_state.time_range = "All"
+    
+    # Create the segmented control
+    selected_range = st.segmented_control(
+        label="Time Range",
+        options=time_ranges,
+        key="time_range_selector",
+        default_value=st.session_state.time_range
+    )
+    
+    # Update session state when selection changes
+    if selected_range != st.session_state.time_range:
+        st.session_state.time_range = selected_range
+        st.rerun()
 
     # Get the selected time range
     time_range = st.session_state.time_range
