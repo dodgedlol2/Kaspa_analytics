@@ -178,7 +178,7 @@ with st.container():
                     visible=True,
                     thickness=0.1,
                     bgcolor='#0e1117',  # Match the main line color
-                    bordercolor="#00FFCC",
+                    bordercolor="#2b3137",
                     borderwidth=1
                 ),
                 type="log" if x_scale_type == "Log" else None,
