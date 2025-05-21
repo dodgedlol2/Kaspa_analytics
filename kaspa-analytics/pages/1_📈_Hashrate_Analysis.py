@@ -164,15 +164,15 @@ st.markdown("""
     }
     
     .time-range-button {
-        font-size: 12px !important;
-        padding: 6px 12px !important;
+        font-size: 11px !important;
+        padding: 4px 8px !important;
         border-radius: 6px !important;
         transition: all 0.2s ease !important;
         background-color: #262730 !important;
         color: #e0e0e0 !important;
         border: 1px solid #3A3C4A !important;
         margin: 2px !important;
-        min-width: 50px;
+        min-width: 40px;
     }
     
     .time-range-button:hover {
@@ -224,8 +224,8 @@ with st.container():
 
         with cols[2]:
             with st.container():
-                st.markdown('<div class="control-label">Deviation Bands</div>', unsafe_allow_html=True)
-                show_bands = st.toggle("Hide/Show", value=False, key="bands_toggle")
+                st.markdown('<div class="control-label">Power Law Fit</div>', unsafe_allow_html=True)
+                show_power_law = st.toggle("Hide/Show", value=False, key="power_law_toggle")
 
         st.markdown('</div>', unsafe_allow_html=True)
 
@@ -304,8 +304,6 @@ with st.container():
     ))
 
     # Power-law fit extended 300 days into future (only if toggled on)
-    show_power_law = st.session_state.get('show_power_law', False)
-    
     if show_power_law:
         x_fit = np.linspace(filtered_df['days_from_genesis'].min(), max_days, 300)
         y_fit = a * np.power(x_fit, b)
@@ -324,26 +322,25 @@ with st.container():
         ))
 
         # Deviation bands (extended 300 days into future)
-        if show_bands:
-            fig.add_trace(go.Scatter(
-                x=fit_x,
-                y=y_fit * 0.4,
-                mode='lines',
-                name='-60% Deviation',
-                line=dict(color='rgba(255, 255, 255, 0.5)', dash='dot', width=1),
-                hoverinfo='skip',
-                fill=None
-            ))
-            fig.add_trace(go.Scatter(
-                x=fit_x,
-                y=y_fit * 2.2,
-                mode='lines',
-                name='+120% Deviation',
-                line=dict(color='rgba(255, 255, 255, 0.5)', dash='dot', width=1),
-                hoverinfo='skip',
-                fill='tonexty',
-                fillcolor='rgba(100, 100, 100, 0.2)'
-            ))
+        fig.add_trace(go.Scatter(
+            x=fit_x,
+            y=y_fit * 0.4,
+            mode='lines',
+            name='-60% Deviation',
+            line=dict(color='rgba(255, 255, 255, 0.5)', dash='dot', width=1),
+            hoverinfo='skip',
+            fill=None
+        ))
+        fig.add_trace(go.Scatter(
+            x=fit_x,
+            y=y_fit * 2.2,
+            mode='lines',
+            name='+120% Deviation',
+            line=dict(color='rgba(255, 255, 255, 0.5)', dash='dot', width=1),
+            hoverinfo='skip',
+            fill='tonexty',
+            fillcolor='rgba(100, 100, 100, 0.2)'
+        ))
 
     # Enhanced layout with matching background
     fig.update_layout(
@@ -407,13 +404,6 @@ with st.container():
     )
 
     st.plotly_chart(fig, use_container_width=True)
-
-# Add toggle for power law visibility
-with st.container():
-    st.markdown('<div style="text-align: right; margin-right: 30px; margin-top: -20px;">', unsafe_allow_html=True)
-    show_power_law = st.toggle("Show Power Law Fit", value=False, key="show_power_law_toggle")
-    st.session_state.show_power_law = show_power_law
-    st.markdown('</div>', unsafe_allow_html=True)
 
 # Stats in cards with matching styling - now aligned with main panel
 st.markdown('<div class="metrics-container">', unsafe_allow_html=True)
