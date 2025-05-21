@@ -151,35 +151,35 @@ st.markdown("""
         margin-bottom: 0px !important;
     }
     
-    /* Compact time range selector */
-    .time-range-container {
-        display: flex;
-        gap: 0px;
-        justify-content: flex-end;
-        padding-right: 30px;
+    /* Segmented control styling */
+    .st-emotion-cache-1q7spjk {
+        gap: 4px !important;
     }
     
-    .time-range-btn {
-        font-size: 11px !important;
-        padding: 0px 6px !important;
-        margin: 0px !important;
-        min-width: 30px !important;
-        height: 24px !important;
-        border-radius: 0px !important;
-        border: none !important;
-        background-color: transparent !important;
+    .st-emotion-cache-1q7spjk button {
+        font-size: 12px !important;
+        padding: 4px 8px !important;
+        background-color: #262730 !important;
+        border: 1px solid #3A3C4A !important;
         color: #e0e0e0 !important;
     }
     
-    .time-range-btn:hover {
-        color: #00FFCC !important;
-        background-color: rgba(58, 60, 74, 0.5) !important;
+    .st-emotion-cache-1q7spjk button[aria-pressed="true"] {
+        background-color: #00FFCC !important;
+        color: #0E1117 !important;
+        font-weight: 500 !important;
     }
     
-    .time-range-btn.active {
+    .st-emotion-cache-1q7spjk button:hover {
         color: #00FFCC !important;
-        font-weight: 500 !important;
-        text-decoration: underline;
+        border-color: #00FFCC !important;
+    }
+    
+    .segmented-control-container {
+        display: flex;
+        justify-content: flex-end;
+        padding-right: 20px;
+        padding-bottom: 10px;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -215,33 +215,23 @@ with st.container():
 
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # Add compact time range selector
+    # Add segmented time range selector in top right
     time_ranges = ["1W", "1M", "3M", "6M", "1Y", "All"]
     
     # Initialize time_range in session state if not exists
     if 'time_range' not in st.session_state:
         st.session_state.time_range = "All"
     
-    # Create container for time range buttons
-    st.markdown('<div class="time-range-container">', unsafe_allow_html=True)
-    
-    # Create buttons using columns
-    cols = st.columns(len(time_ranges))
-    for i, tr in enumerate(time_ranges):
-        with cols[i]:
-            if st.button(
-                tr,
-                key=f"time_range_{tr}",
-                type="primary" if st.session_state.time_range == tr else "secondary",
-                use_container_width=True
-            ):
-                st.session_state.time_range = tr
-                st.rerun()
-    
+    # Create container for segmented control
+    st.markdown('<div class="segmented-control-container">', unsafe_allow_html=True)
+    time_range = st.selectbox(
+        "Time Range",
+        time_ranges,
+        index=time_ranges.index(st.session_state.time_range),
+        label_visibility="collapsed",
+        key="time_range_select"
+    )
     st.markdown('</div>', unsafe_allow_html=True)
-
-    # Get the selected time range
-    time_range = st.session_state.time_range
 
     # Calculate date range based on selection
     last_date = df['Date'].iloc[-1]
