@@ -26,20 +26,11 @@ except Exception as e:
 # Custom CSS for enhanced spacing
 st.markdown("""
 <style>
-    /* Main container styling */
-    div[data-testid="stVerticalBlockBorderWrapper"] {
-        background-color: #1a1e25 !important;
-        border: 1px solid #2b3137 !important;
-        border-radius: 8px !important;
-        padding: 15px !important;
-    }
-
-    /* Control blocks */
     .control-block {
         padding: 8px 12px;
         border-radius: 8px;
         border: 1px solid #2b3137;
-        background-color: #0e1117;
+        background-color: #1a1e25;
         margin-right: 15px;
         min-width: 160px;
         height: 85px;
@@ -56,6 +47,7 @@ st.markdown("""
         margin-bottom: 6px !important;
         white-space: nowrap;
         font-weight: 500;
+        color: #e0e0e0 !important;
     }
     .stToggle {
         width: 100%;
@@ -73,182 +65,211 @@ st.markdown("""
     .plotly-rangeslider {
         height: 80px !important;
     }
-
-    /* Metric cards */
+    
+    /* Main chart container styling */
+    div[data-testid="stVerticalBlock"] > div[data-testid="stVerticalBlockBorderWrapper"] {
+        background-color: #1a1e25 !important;
+        border-radius: 10px !important;
+        border: 1px solid #2b3137 !important;
+        padding: 15px !important;
+    }
+    
+    /* ===== METRIC CARD ENHANCEMENTS ===== */
+    /* Remove outer container border */
+    div.stContainer > div[data-testid="stVerticalBlockBorderWrapper"] {
+        border: none !important;
+        padding: 0 !important;
+    }
+    
+    /* Style the metric cards */
     div[data-testid="stMetric"] {
         background-color: #1a1e25 !important;
         border: 1px solid #2b3137 !important;
         border-radius: 8px !important;
         padding: 15px 20px !important;
     }
+    
+    /* Metric value styling */
     div[data-testid="stMetricValue"] > div {
         font-size: 24px !important;
         font-weight: 600 !important;
         color: #00FFCC !important;
     }
+    
+    /* Metric label styling */
     div[data-testid="stMetricLabel"] > div {
         font-size: 14px !important;
         opacity: 0.8 !important;
         color: #e0e0e0 !important;
     }
+    
+    /* Container spacing */
     .stMetric {
         margin: 5px !important;
         height: 100% !important;
     }
+    
+    /* Title styling */
+    h2 {
+        color: #e0e0e0 !important;
+    }
+    
+    /* Control container styling */
+    .stContainer {
+        background-color: #1a1e25 !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
-# ====== ENHANCED CHART CONTAINER ======
+# ====== MAIN CHART CONTAINER ======
 with st.container():
-    # Remove border=True and let CSS handle the styling
-    with st.container():
-        # Create columns for title and controls
-        title_col, control_col = st.columns([2, 8])
+    # Create columns for title and controls
+    title_col, control_col = st.columns([2, 8])
 
-        with title_col:
-            st.markdown('<div class="title-spacing"><h2>Kaspa Hashrate</h2></div>', unsafe_allow_html=True)
+    with title_col:
+        st.markdown('<div class="title-spacing"><h2>Kaspa Hashrate</h2></div>', unsafe_allow_html=True)
 
-        with control_col:
-            st.markdown('<div class="controls-wrapper">', unsafe_allow_html=True)
-            cols = st.columns([1.5, 1.5, 1.5, 4])
+    with control_col:
+        st.markdown('<div class="controls-wrapper">', unsafe_allow_html=True)
+        cols = st.columns([1.5, 1.5, 1.5, 4])
 
-            with cols[0]:
-                with st.container(border=True):
-                    st.markdown('<div class="control-label">Hashrate Scale</div>', unsafe_allow_html=True)
-                    y_scale = st.toggle("Linear/Log", value=True, key="y_scale")
-                    y_scale = "Log" if y_scale else "Linear"
+        with cols[0]:
+            with st.container():
+                st.markdown('<div class="control-label">Hashrate Scale</div>', unsafe_allow_html=True)
+                y_scale = st.toggle("Linear/Log", value=True, key="y_scale")
+                y_scale = "Log" if y_scale else "Linear"
 
-            with cols[1]:
-                with st.container(border=True):
-                    st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
-                    x_scale_type = st.toggle("Linear/Log", value=False, key="x_scale")
-                    x_scale_type = "Log" if x_scale_type else "Linear"
+        with cols[1]:
+            with st.container():
+                st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
+                x_scale_type = st.toggle("Linear/Log", value=False, key="x_scale")
+                x_scale_type = "Log" if x_scale_type else "Linear"
 
-            with cols[2]:
-                with st.container(border=True):
-                    st.markdown('<div class="control-label">Deviation Bands</div>', unsafe_allow_html=True)
-                    show_bands = st.toggle("Hide/Show", value=False, key="bands_toggle")
+        with cols[2]:
+            with st.container():
+                st.markdown('<div class="control-label">Deviation Bands</div>', unsafe_allow_html=True)
+                show_bands = st.toggle("Hide/Show", value=False, key="bands_toggle")
 
-            st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
-        # Create figure with enhanced grid
-        fig = go.Figure()
+    # Create figure with enhanced grid
+    fig = go.Figure()
 
-        # Determine x-axis values based on scale type
-        max_days = df['days_from_genesis'].max() + 300
-        if x_scale_type == "Log":
-            x_values = df['days_from_genesis']
-            x_title = "Days Since Genesis (Log Scale)"
-            tickformat = None
-            hoverformat = None
-        else:
-            x_values = df['Date']
-            x_title = "Date"
-            tickformat = "%b %Y"
-            hoverformat = "%b %d, %Y"
+    # Determine x-axis values based on scale type
+    max_days = df['days_from_genesis'].max() + 300  # Extend by 300 days
+    if x_scale_type == "Log":
+        x_values = df['days_from_genesis']
+        x_title = "Days Since Genesis (Log Scale)"
+        tickformat = None
+        hoverformat = None
+    else:
+        x_values = df['Date']
+        x_title = "Date"
+        tickformat = "%b %Y"
+        hoverformat = "%b %d, %Y"
 
-        # Main trace
-        fig.add_trace(go.Scatter(
-            x=x_values,
-            y=df['Hashrate_PH'],
-            mode='lines',
-            name='Hashrate (PH/s)',
-            line=dict(color='#00FFCC', width=2),
-            hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Hashrate</b>: %{y:.2f} PH/s<extra></extra>',
-            text=df['Date']
-        ))
+    # Main trace
+    fig.add_trace(go.Scatter(
+        x=x_values,
+        y=df['Hashrate_PH'],
+        mode='lines',
+        name='Hashrate (PH/s)',
+        line=dict(color='#00FFCC', width=2),
+        hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Hashrate</b>: %{y:.2f} PH/s<extra></extra>',
+        text=df['Date']
+    ))
 
-        # Power-law fit extended 300 days into future
-        x_fit = np.linspace(df['days_from_genesis'].min(), max_days, 300)
-        y_fit = a * np.power(x_fit, b)
+    # Power-law fit extended 300 days into future
+    x_fit = np.linspace(df['days_from_genesis'].min(), max_days, 300)
+    y_fit = a * np.power(x_fit, b)
 
-        if x_scale_type == "Log":
-            fit_x = x_fit
-        else:
-            fit_x = [genesis_date + pd.Timedelta(days=int(d)) for d in x_fit]
+    if x_scale_type == "Log":
+        fit_x = x_fit
+    else:
+        fit_x = [genesis_date + pd.Timedelta(days=int(d)) for d in x_fit]
 
+    fig.add_trace(go.Scatter(
+        x=fit_x,
+        y=y_fit,
+        mode='lines',
+        name=f'Power-Law Fit (R²={r2:.3f})',
+        line=dict(color='orange', dash='dot', width=1.5)
+    ))
+
+    # Deviation bands (extended 300 days into future)
+    if show_bands:
         fig.add_trace(go.Scatter(
             x=fit_x,
-            y=y_fit,
+            y=y_fit * 0.4,
             mode='lines',
-            name=f'Power-Law Fit (R²={r2:.3f})',
-            line=dict(color='orange', dash='dot', width=1.5)
+            name='-60% Deviation',
+            line=dict(color='rgba(150, 150, 150, 0.8)', dash='dot', width=1),
+            hoverinfo='skip',
+            fill=None
+        ))
+        fig.add_trace(go.Scatter(
+            x=fit_x,
+            y=y_fit * 2.2,
+            mode='lines',
+            name='+120% Deviation',
+            line=dict(color='rgba(150, 150, 150, 0.8)', dash='dot', width=1),
+            hoverinfo='skip',
+            fill='tonexty',
+            fillcolor='rgba(100, 100, 100, 0.1)'
         ))
 
-        # Deviation bands (extended 300 days into future)
-        if show_bands:
-            fig.add_trace(go.Scatter(
-                x=fit_x,
-                y=y_fit * 0.4,
-                mode='lines',
-                name='-60% Deviation',
-                line=dict(color='rgba(150, 150, 150, 0.8)', dash='dot', width=1),
-                hoverinfo='skip',
-                fill=None
-            ))
-            fig.add_trace(go.Scatter(
-                x=fit_x,
-                y=y_fit * 2.2,
-                mode='lines',
-                name='+120% Deviation',
-                line=dict(color='rgba(150, 150, 150, 0.8)', dash='dot', width=1),
-                hoverinfo='skip',
-                fill='tonexty',
-                fillcolor='rgba(100, 100, 100, 0.1)'
-            ))
-
-        # Enhanced layout
-        fig.update_layout(
-            template='plotly_dark',
-            hovermode='x unified',
-            height=700,
-            margin=dict(l=20, r=20, t=60, b=100),
-            yaxis_title='Hashrate (PH/s)',
-            xaxis_title=x_title,
-            xaxis=dict(
-                rangeslider=dict(
-                    visible=True,
-                    thickness=0.1,
-                    bgcolor='#0e1117',
-                    bordercolor="#2b3137",
-                    borderwidth=1
-                ),
-                type="log" if x_scale_type == "Log" else None,
-                showgrid=True,
-                gridwidth=1,
-                gridcolor='rgba(100,100,100,0.2)',
-                minor=dict(
-                    ticklen=6,
-                    gridcolor='rgba(100,100,100,0.1)',
-                    gridwidth=0.5
-                ),
-                tickformat=tickformat,
-                range=[None, max_days] if x_scale_type == "Log" else 
-                      [df['Date'].min(), genesis_date + pd.Timedelta(days=max_days)]
+    # Enhanced layout
+    fig.update_layout(
+        template='plotly_dark',
+        hovermode='x unified',
+        height=700,
+        margin=dict(l=20, r=20, t=60, b=100),
+        yaxis_title='Hashrate (PH/s)',
+        xaxis_title=x_title,
+        xaxis=dict(
+            rangeslider=dict(
+                visible=True,
+                thickness=0.1,
+                bgcolor='#0e1117',
+                bordercolor="#2b3137",
+                borderwidth=1
             ),
-            yaxis=dict(
-                type="log" if y_scale == "Log" else "linear",
-                showgrid=True,
-                gridwidth=1,
-                gridcolor='rgba(100,100,100,0.2)',
-                minor=dict(
-                    ticklen=6,
-                    gridcolor='rgba(100,100,100,0.1)',
-                    gridwidth=0.5
-                )
+            type="log" if x_scale_type == "Log" else None,
+            showgrid=True,
+            gridwidth=1,
+            gridcolor='rgba(100,100,100,0.2)',
+            minor=dict(
+                ticklen=6,
+                gridcolor='rgba(100,100,100,0.1)',
+                gridwidth=0.5
             ),
-            legend=dict(
-                orientation="h",
-                yanchor="bottom",
-                y=1.02,
-                xanchor="right",
-                x=1
+            tickformat=tickformat,
+            range=[None, max_days] if x_scale_type == "Log" else 
+                  [df['Date'].min(), genesis_date + pd.Timedelta(days=max_days)]
+        ),
+        yaxis=dict(
+            type="log" if y_scale == "Log" else "linear",
+            showgrid=True,
+            gridwidth=1,
+            gridcolor='rgba(100,100,100,0.2)',
+            minor=dict(
+                ticklen=6,
+                gridcolor='rgba(100,100,100,0.1)',
+                gridwidth=0.5
             )
+        ),
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1
         )
+    )
 
-        st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True)
 
-# Stats in cards
+# Stats in cards with single border
 st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
 cols = st.columns(3)
 with cols[0]:
