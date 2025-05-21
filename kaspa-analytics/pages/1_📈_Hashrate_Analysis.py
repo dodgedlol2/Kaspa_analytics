@@ -7,6 +7,11 @@ from datetime import datetime, timedelta
 
 st.set_page_config(layout="wide")
 
+# Initialize default selections
+if 'first_visit' not in st.session_state:
+    st.session_state.first_visit = True
+    st.session_state.default_time_range = "All"  # Set "All" as default time range
+
 # Data loading and processing
 if 'df' not in st.session_state or 'genesis_date' not in st.session_state:
     try:
@@ -197,6 +202,7 @@ st.markdown("""
 
 # ====== MAIN CHART CONTAINER ======
 with st.container():
+    # Create columns for title and controls
     title_col, control_col = st.columns([2, 8])
 
     with title_col:
