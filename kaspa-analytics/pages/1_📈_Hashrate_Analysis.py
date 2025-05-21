@@ -26,6 +26,15 @@ except Exception as e:
 # Custom CSS for enhanced spacing
 st.markdown("""
 <style>
+    /* Main container styling */
+    div[data-testid="stVerticalBlockBorderWrapper"] {
+        background-color: #1a1e25 !important;
+        border: 1px solid #2b3137 !important;
+        border-radius: 8px !important;
+        padding: 15px !important;
+    }
+
+    /* Control blocks */
     .control-block {
         padding: 8px 12px;
         border-radius: 8px;
@@ -65,36 +74,23 @@ st.markdown("""
         height: 80px !important;
     }
 
-    /* ===== METRIC CARD ENHANCEMENTS ===== */
-    /* Remove outer container border */
-    div.stContainer > div[data-testid="stVerticalBlockBorderWrapper"] {
-        border: none !important;
-        padding: 0 !important;
-    }
-    
-    /* Style the metric cards */
+    /* Metric cards */
     div[data-testid="stMetric"] {
         background-color: #1a1e25 !important;
         border: 1px solid #2b3137 !important;
         border-radius: 8px !important;
         padding: 15px 20px !important;
     }
-    
-    /* Metric value styling */
     div[data-testid="stMetricValue"] > div {
         font-size: 24px !important;
         font-weight: 600 !important;
         color: #00FFCC !important;
     }
-    
-    /* Metric label styling */
     div[data-testid="stMetricLabel"] > div {
         font-size: 14px !important;
         opacity: 0.8 !important;
         color: #e0e0e0 !important;
     }
-    
-    /* Container spacing */
     .stMetric {
         margin: 5px !important;
         height: 100% !important;
@@ -104,7 +100,8 @@ st.markdown("""
 
 # ====== ENHANCED CHART CONTAINER ======
 with st.container():
-    with st.container(border=True):
+    # Remove border=True and let CSS handle the styling
+    with st.container():
         # Create columns for title and controls
         title_col, control_col = st.columns([2, 8])
 
@@ -138,7 +135,7 @@ with st.container():
         fig = go.Figure()
 
         # Determine x-axis values based on scale type
-        max_days = df['days_from_genesis'].max() + 300  # Extend by 300 days
+        max_days = df['days_from_genesis'].max() + 300
         if x_scale_type == "Log":
             x_values = df['days_from_genesis']
             x_title = "Days Since Genesis (Log Scale)"
@@ -251,7 +248,7 @@ with st.container():
 
         st.plotly_chart(fig, use_container_width=True)
 
-# Stats in cards with single border
+# Stats in cards
 st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
 cols = st.columns(3)
 with cols[0]:
