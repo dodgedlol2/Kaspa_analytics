@@ -37,52 +37,9 @@ st.markdown("""
         background-color: #262730 !important;
     }
     
-    /* Control block styling */
-    .control-block {
-        padding: 8px 12px;
-        border-radius: 8px;
-        border: 1px solid #3A3C4A;
-        background-color: #262730;
-        margin-right: 15px;
-        min-width: 160px;
-        height: 85px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }
-    
     .title-spacing {
         padding-left: 40px;
         margin-bottom: 15px;
-    }
-    
-    .control-label {
-        font-size: 13px !important;
-        margin-bottom: 6px !important;
-        white-space: nowrap;
-        font-weight: 500;
-        color: #e0e0e0 !important;
-    }
-    
-    .stToggle {
-        width: 100%;
-    }
-    
-    .stToggle button {
-        width: 100% !important;
-        font-size: 12px !important;
-    }
-    
-    .controls-wrapper {
-        padding-top: 11px;
-    }
-    
-    .main-container {
-        padding: 25px;
-    }
-    
-    .plotly-rangeslider {
-        height: 80px !important;
     }
     
     /* Main chart container styling */
@@ -123,15 +80,6 @@ st.markdown("""
         color: #e0e0e0 !important;
     }
     
-    /* Toggle button styling */
-    .st-bd {
-        background-color: #262730 !important;
-    }
-    
-    .st-cg {
-        background-color: #00FFCC !important;
-    }
-    
     /* Plotly tooltip styling */
     .hovertext text.hovertext {
         fill: #e0e0e0 !important;
@@ -151,22 +99,29 @@ st.markdown("""
         margin-bottom: 0px !important;
     }
     
-    /* Compact time range selector */
-    .time-range-container {
+    /* Compact controls styling */
+    .controls-container {
         position: absolute;
         top: 20px;
         right: 20px;
         display: flex;
         flex-direction: column;
         align-items: flex-end;
-        gap: 4px;
+        gap: 8px;
         z-index: 100;
     }
     
-    .period-label {
+    .control-group {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 2px;
+    }
+    
+    .control-label {
         font-size: 11px !important;
         color: #e0e0e0 !important;
-        margin-bottom: -5px !important;
+        margin-bottom: 0px !important;
     }
     
     .stSelectbox > div {
@@ -190,69 +145,67 @@ st.markdown("""
 
 # ====== MAIN CHART CONTAINER ======
 with st.container():
-    # Create columns for title and controls
-    title_col, control_col = st.columns([2, 8])
+    # Title
+    st.markdown('<div class="title-spacing"><h2>Kaspa Hashrate</h2></div>', unsafe_allow_html=True)
 
-    with title_col:
-        st.markdown('<div class="title-spacing"><h2>Kaspa Hashrate</h2></div>', unsafe_allow_html=True)
-
-    with control_col:
-        st.markdown('<div class="controls-wrapper">', unsafe_allow_html=True)
-        cols = st.columns([1.5, 1.5, 1.5, 4])
-
-        with cols[0]:
-            with st.container():
-                st.markdown('<div class="control-label">Hashrate Scale</div>', unsafe_allow_html=True)
-                y_scale = st.toggle("Linear/Log", value=True, key="y_scale")
-                y_scale = "Log" if y_scale else "Linear"
-
-        with cols[1]:
-            with st.container():
-                st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
-                x_scale_type = st.toggle("Linear/Log", value=False, key="x_scale")
-                x_scale_type = "Log" if x_scale_type else "Linear"
-
-        with cols[2]:
-            with st.container():
-                st.markdown('<div class="control-label">Power Law Fit</div>', unsafe_allow_html=True)
-                show_power_law = st.toggle("Hide/Show", value=False, key="power_law_toggle")
-
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    # Add compact time range selector in top right
-    time_ranges = ["1W", "1M", "3M", "6M", "1Y", "All"]
+    # Controls container - positioned absolutely in top right
+    st.markdown('<div class="controls-container">', unsafe_allow_html=True)
     
-    # Initialize time_range in session state if not exists
+    # Time range selector
+    st.markdown('<div class="control-group">', unsafe_allow_html=True)
+    st.markdown('<div class="control-label">Period</div>', unsafe_allow_html=True)
+    time_ranges = ["1W", "1M", "3M", "6M", "1Y", "All"]
     if 'time_range' not in st.session_state:
         st.session_state.time_range = "All"
+    time_range = st.selectbox(
+        "Time Range",
+        time_ranges,
+        index=time_ranges.index(st.session_state.time_range),
+        label_visibility="collapsed",
+        key="time_range_select"
+    )
+    st.markdown('</div>', unsafe_allow_html=True)
     
-    # Create container for time range selector
-    st.markdown("""
-    <div class="time-range-container">
-        <div class="period-label">Period</div>
-    </div>
-    """, unsafe_allow_html=True)
+    # Hashrate scale selector
+    st.markdown('<div class="control-group">', unsafe_allow_html=True)
+    st.markdown('<div class="control-label">Hashrate Scale</div>', unsafe_allow_html=True)
+    y_scale_options = ["Linear", "Log"]
+    y_scale = st.selectbox(
+        "Hashrate Scale",
+        y_scale_options,
+        index=1 if st.session_state.get("y_scale", True) else 0,
+        label_visibility="collapsed",
+        key="y_scale_select"
+    )
+    st.markdown('</div>', unsafe_allow_html=True)
     
-    # Add the selectbox in the same container
-    with st.container():
-        st.markdown("""
-        <style>
-            div[data-testid="stVerticalBlock"] > div:nth-child(3) > div[data-testid="stVerticalBlock"] {
-                position: absolute;
-                top: 38px;
-                right: 20px;
-                width: 100px !important;
-            }
-        </style>
-        """, unsafe_allow_html=True)
-        
-        time_range = st.selectbox(
-            "Time Range",
-            time_ranges,
-            index=time_ranges.index(st.session_state.time_range),
-            label_visibility="collapsed",
-            key="time_range_select"
-        )
+    # Time scale selector
+    st.markdown('<div class="control-group">', unsafe_allow_html=True)
+    st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
+    x_scale_options = ["Linear", "Log"]
+    x_scale_type = st.selectbox(
+        "Time Scale",
+        x_scale_options,
+        index=0 if st.session_state.get("x_scale", False) else 1,
+        label_visibility="collapsed",
+        key="x_scale_select"
+    )
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Power law fit selector
+    st.markdown('<div class="control-group">', unsafe_allow_html=True)
+    st.markdown('<div class="control-label">Power Law Fit</div>', unsafe_allow_html=True)
+    power_law_options = ["Hide", "Show"]
+    show_power_law = st.selectbox(
+        "Power Law Fit",
+        power_law_options,
+        index=1 if st.session_state.get("power_law_toggle", False) else 0,
+        label_visibility="collapsed",
+        key="power_law_select"
+    )
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
 
     # Calculate date range based on selection
     last_date = df['Date'].iloc[-1]
@@ -300,7 +253,7 @@ with st.container():
     ))
 
     # Power-law fit extended 300 days into future (only if toggled on)
-    if show_power_law:
+    if show_power_law == "Show":
         x_fit = np.linspace(filtered_df['days_from_genesis'].min(), max_days, 300)
         y_fit = a * np.power(x_fit, b)
 
@@ -340,8 +293,8 @@ with st.container():
 
     # Enhanced layout with matching background
     fig.update_layout(
-        plot_bgcolor='#262730',  # Correct sidebar grey
-        paper_bgcolor='#262730',  # Correct sidebar grey
+        plot_bgcolor='#262730',
+        paper_bgcolor='#262730',
         font_color='#e0e0e0',
         hovermode='x unified',
         height=700,
@@ -352,7 +305,7 @@ with st.container():
             rangeslider=dict(
                 visible=True,
                 thickness=0.1,
-                bgcolor='#262730',  # Correct sidebar grey
+                bgcolor='#262730',
                 bordercolor="#3A3C4A",
                 borderwidth=1
             ),
@@ -390,10 +343,10 @@ with st.container():
             y=1.02,
             xanchor="right",
             x=1,
-            bgcolor='rgba(38, 39, 48, 0.8)'  # Semi-transparent sidebar grey
+            bgcolor='rgba(38, 39, 48, 0.8)'
         ),
         hoverlabel=dict(
-            bgcolor='#262730',  # Correct sidebar grey
+            bgcolor='#262730',
             bordercolor='#3A3C4A',
             font_color='#e0e0e0'
         )
@@ -401,7 +354,7 @@ with st.container():
 
     st.plotly_chart(fig, use_container_width=True)
 
-# Stats in cards with matching styling - now aligned with main panel
+# Stats in cards with matching styling
 st.markdown('<div class="metrics-container">', unsafe_allow_html=True)
 cols = st.columns(3)
 with cols[0]:
