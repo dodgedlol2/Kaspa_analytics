@@ -28,15 +28,20 @@ st.markdown("""
 <style>
     /* Main background color */
     .stApp {
-        background-color: #0e1117;
+        background-color: #0E1117;
+    }
+    
+    /* Sidebar color (reference) */
+    .st-emotion-cache-6qob1r {
+        background-color: #1E293B;
     }
     
     /* Control block styling */
     .control-block {
         padding: 8px 12px;
         border-radius: 8px;
-        border: 1px solid #2b3137;
-        background-color: #1a1e25;
+        border: 1px solid #334155;
+        background-color: #1E293B;
         margin-right: 15px;
         min-width: 160px;
         height: 85px;
@@ -81,16 +86,16 @@ st.markdown("""
     
     /* Main chart container styling */
     div[data-testid="stVerticalBlock"] > div[data-testid="stVerticalBlockBorderWrapper"] {
-        background-color: #1a1e25 !important;
+        background-color: #1E293B !important;
         border-radius: 10px !important;
-        border: 1px solid #2b3137 !important;
+        border: 1px solid #334155 !important;
         padding: 15px !important;
     }
     
     /* Metric cards styling */
     div[data-testid="stMetric"] {
-        background-color: #1a1e25 !important;
-        border: 1px solid #2b3137 !important;
+        background-color: #1E293B !important;
+        border: 1px solid #334155 !important;
         border-radius: 8px !important;
         padding: 15px 20px !important;
     }
@@ -119,10 +124,20 @@ st.markdown("""
     
     /* Toggle button styling */
     .st-bd {
-        background-color: #1a1e25 !important;
+        background-color: #1E293B !important;
     }
     
     .st-cg {
+        background-color: #00FFCC !important;
+    }
+    
+    /* Plotly tooltip styling */
+    .hovertext text.hovertext {
+        fill: #e0e0e0 !important;
+    }
+    
+    /* Range slider handle color */
+    .range-slider .handle:after {
         background-color: #00FFCC !important;
     }
 </style>
@@ -227,8 +242,8 @@ with st.container():
 
     # Enhanced layout with matching background
     fig.update_layout(
-        plot_bgcolor='#1a1e25',
-        paper_bgcolor='#1a1e25',
+        plot_bgcolor='#1E293B',  # Sidebar grey
+        paper_bgcolor='#1E293B',  # Sidebar grey
         font_color='#e0e0e0',
         hovermode='x unified',
         height=700,
@@ -239,8 +254,8 @@ with st.container():
             rangeslider=dict(
                 visible=True,
                 thickness=0.1,
-                bgcolor='#1a1e25',
-                bordercolor="#2b3137",
+                bgcolor='#1E293B',  # Sidebar grey
+                bordercolor="#334155",
                 borderwidth=1
             ),
             type="log" if x_scale_type == "Log" else None,
@@ -255,8 +270,8 @@ with st.container():
             tickformat=tickformat,
             range=[None, max_days] if x_scale_type == "Log" else 
                   [df['Date'].min(), genesis_date + pd.Timedelta(days=max_days)],
-            linecolor='#2b3137',
-            zerolinecolor='#2b3137'
+            linecolor='#334155',
+            zerolinecolor='#334155'
         ),
         yaxis=dict(
             type="log" if y_scale == "Log" else "linear",
@@ -268,8 +283,8 @@ with st.container():
                 gridcolor='rgba(255, 255, 255, 0.05)',
                 gridwidth=0.5
             ),
-            linecolor='#2b3137',
-            zerolinecolor='#2b3137'
+            linecolor='#334155',
+            zerolinecolor='#334155'
         ),
         legend=dict(
             orientation="h",
@@ -277,11 +292,11 @@ with st.container():
             y=1.02,
             xanchor="right",
             x=1,
-            bgcolor='rgba(26, 30, 37, 0.8)'
+            bgcolor='rgba(30, 41, 59, 0.8)'  # Semi-transparent sidebar grey
         ),
         hoverlabel=dict(
-            bgcolor='#1a1e25',
-            bordercolor='#2b3137',
+            bgcolor='#1E293B',  # Sidebar grey
+            bordercolor='#334155',
             font_color='#e0e0e0'
         )
     )
