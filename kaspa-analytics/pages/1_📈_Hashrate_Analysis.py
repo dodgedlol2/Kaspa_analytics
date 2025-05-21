@@ -328,3 +328,6 @@ with metrics[2]:
         value=f"{df['Hashrate_PH'].iloc[-1]:.2f} PH/s",
         help="Network hashrate at last data point"
     )
+        value=f"{df['Hashrate_PH'].iloc[-1]:.2f} PH/s",
+        help="Network hashrate at last data point"
+    )
