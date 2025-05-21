@@ -65,6 +65,51 @@ st.markdown("""
     .plotly-rangeslider {
         height: 80px !important;
     }
+
+    /* ===== METRIC CARD ENHANCEMENTS ===== */
+    div[data-testid="stMetric"] {
+        background-color: #1a1e25 !important;
+        border: 1px solid #2b3137 !important;
+        border-radius: 8px !important;
+        padding: 15px 20px !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+    }
+    
+    /* Metric value styling */
+    div[data-testid="stMetricValue"] > div {
+        font-size: 24px !important;
+        font-weight: 600 !important;
+        color: #00FFCC !important;
+    }
+    
+    /* Metric label styling */
+    div[data-testid="stMetricLabel"] > div {
+        font-size: 14px !important;
+        opacity: 0.8 !important;
+        color: #e0e0e0 !important;
+    }
+    
+    /* Hover effect for cards */
+    div[data-testid="stMetric"]:hover {
+        background-color: #1e222a !important;
+        transition: background-color 0.2s ease;
+    }
+    
+    /* Container spacing */
+    .stMetric {
+        margin: 5px !important;
+        height: 100% !important;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        div[data-testid="stMetric"] {
+            padding: 12px 15px !important;
+        }
+        div[data-testid="stMetricValue"] > div {
+            font-size: 20px !important;
+        }
+    }
 </style>
 """, unsafe_allow_html=True)
 
