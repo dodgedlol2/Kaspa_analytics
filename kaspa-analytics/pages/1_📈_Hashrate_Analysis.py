@@ -157,38 +157,38 @@ st.markdown("""
         right: 30px;
         top: 20px;
         z-index: 100;
-        background-color: #262730 !important;
-        border-radius: 8px !important;
-        padding: 4px !important;
-        border: 1px solid #3A3C4A !important;
+        background-color: transparent !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+        border: none !important;
     }
     
     .time-range-button {
         font-size: 11px !important;
-        padding: 4px 8px !important;
-        border-radius: 6px !important;
+        padding: 0px 4px !important;
+        border-radius: 3px !important;
         transition: all 0.2s ease !important;
-        background-color: #262730 !important;
+        background-color: transparent !important;
         color: #e0e0e0 !important;
-        border: 1px solid #3A3C4A !important;
-        margin: 2px !important;
-        min-width: 40px;
+        border: none !important;
+        margin: 0 1px !important;
+        min-width: 24px;
+        height: 20px;
     }
     
     .time-range-button:hover {
-        background-color: #3A3C4A !important;
         color: #00FFCC !important;
+        background-color: rgba(58, 60, 74, 0.5) !important;
     }
     
     .time-range-button.active {
-        background-color: #00FFCC !important;
-        color: #262730 !important;
-        border-color: #00FFCC !important;
+        color: #00FFCC !important;
         font-weight: 500 !important;
+        text-decoration: underline;
     }
     
     div[data-testid="stHorizontalBlock"] {
-        gap: 0.25rem !important;
+        gap: 0.1rem !important;
     }
     
     /* Fix for button alignment */
