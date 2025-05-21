@@ -3,7 +3,6 @@ import plotly.graph_objects as go
 import numpy as np
 import pandas as pd
 import requests
-import time
 from datetime import datetime
 from utils import fit_power_law, load_data
 
@@ -100,49 +99,33 @@ if 'current_hashrate' not in st.session_state:
     st.session_state.last_update = datetime.now()
     st.session_state.updating = False
 
-# Create a placeholder for the hashrate value in the bottom-right card
-hashrate_placeholder = st.empty()
-
 # Function to update the hashrate display with animation
 def update_hashrate_display():
     ph_value = st.session_state.current_hashrate
     if st.session_state.updating:
-        hashrate_placeholder.markdown(
+        st.markdown(
             f"""<div class="updating hashrate-value">
                 {ph_value:.2f} PH/s
             </div>""",
             unsafe_allow_html=True
         )
     else:
-        hashrate_placeholder.markdown(
+        st.markdown(
             f"""<div class="hashrate-value">
                 {ph_value:.2f} PH/s
             </div>""",
             unsafe_allow_html=True
         )
 
-# Real-time hashrate update function
-def hashrate_updater():
-    while True:
-        try:
-            new_hashrate = get_current_hashrate()
-            if new_hashrate is not None:
-                if abs(new_hashrate - st.session_state.current_hashrate) > 0.01:  # Only update if significant change
-                    st.session_state.current_hashrate = new_hashrate
-                    st.session_state.last_update = datetime.now()
-                    st.session_state.updating = True
-                    update_hashrate_display()
-                    time.sleep(1.5)  # Let animation play
-                    st.session_state.updating = False
-                    update_hashrate_display()
-        except Exception as e:
-            print(f"Error updating hashrate: {e}")
-        time.sleep(10)  # Check every 10 seconds
-
-# Start the updater in a separate thread
-if 'updater_thread' not in st.session_state:
-    st.session_state.updater_thread = threading.Thread(target=hashrate_updater, daemon=True)
-    st.session_state.updater_thread.start()
+# Check if we should update the hashrate (every 10 seconds)
+if 'last_api_check' not in st.session_state or (datetime.now() - st.session_state.last_api_check).seconds >= 10:
+    new_hashrate = get_current_hashrate()
+    if new_hashrate is not None:
+        if abs(new_hashrate - st.session_state.current_hashrate) > 0.01:  # Only update if significant change
+            st.session_state.current_hashrate = new_hashrate
+            st.session_state.last_update = datetime.now()
+            st.session_state.updating = True
+    st.session_state.last_api_check = datetime.now()
 
 # ====== MAIN DASHBOARD ======
 with st.container():
@@ -303,4 +286,10 @@ with cols[1].container(border=True):
     st.metric("Model Fit (R²)", f"{r2:.3f}")
 with cols[2].container(border=True):
     st.markdown('<div style="font-size: 0.9rem; margin-bottom: 5px;">Current Hashrate</div>', unsafe_allow_html=True)
-    update_hashrate_display()  # This will display the updating value in the bottom-right card
+    update_hashrate_display()
+    
+    # Reset updating state after showing animation
+    if st.session_state.updating:
+        time.sleep(1.5)
+        st.session_state.updating = False
+        st.rerun()
