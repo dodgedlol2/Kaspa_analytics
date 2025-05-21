@@ -26,6 +26,11 @@ except Exception as e:
 # Custom CSS for enhanced spacing
 st.markdown("""
 <style>
+    /* ====== NEW: FULL-PAGE DARK BACKGROUND ====== */
+    .stApp {
+        background-color: #0a0a0a;  /* Changed from default #0e1117 to pure black */
+    }
+
     .control-block {
         padding: 8px 12px;
         border-radius: 8px;
