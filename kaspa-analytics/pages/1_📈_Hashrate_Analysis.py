@@ -23,7 +23,7 @@ except Exception as e:
     st.error(f"Failed to calculate power law: {str(e)}")
     st.stop()
 
-# Custom CSS for enhanced spacing and color scheme
+# Updated CSS with lighter color scheme
 st.markdown("""
 <style>
     /* Main background */
@@ -33,23 +33,21 @@ st.markdown("""
     
     /* Sidebar background */
     [data-testid="stSidebar"] {
-        background-color: #2d323b !important;
+        background-color: #2a2f3b !important;
     }
     
-    /* Chart and container backgrounds */
-    .stContainer, .stPlotlyChart, .stDataFrame {
-        background-color: #2d323b !important;
-    }
-    
-    /* Borders and control elements */
-    .control-block, .stContainer, .stPlotlyChart, .stDataFrame {
-        border: 1px solid #3d434d !important;
-        border-radius: 8px !important;
+    /* Chart containers and borders */
+    [data-testid="stVerticalBlockBorderWrapper"] {
+        background-color: #2a2f3b;
+        border: 1px solid #3a3f4b;
+        border-radius: 8px;
     }
     
     .control-block {
         padding: 8px 12px;
-        background-color: #2d323b;
+        border-radius: 8px;
+        border: 1px solid #3a3f4b;
+        background-color: #2a2f3b;
         margin-right: 15px;
         min-width: 160px;
         height: 85px;
@@ -86,6 +84,7 @@ st.markdown("""
     
     .main-container {
         padding: 25px;
+        background-color: #2a2f3b;
     }
     
     .plotly-rangeslider {
@@ -93,21 +92,14 @@ st.markdown("""
     }
     
     /* Metric cards */
-    .stMetric {
-        background-color: #2d323b;
-        border: 1px solid #3d434d !important;
-        border-radius: 8px;
-        padding: 15px;
+    [data-testid="metric-container"] {
+        background-color: #2a2f3b !important;
+        border: 1px solid #3a3f4b !important;
     }
     
     /* Text colors */
     h1, h2, h3, h4, h5, h6, p, div, span {
         color: #e0e0e0 !important;
-    }
-    
-    /* Plotly theme adjustments */
-    .js-plotly-plot .plotly, .js-plotly-plot .plotly div {
-        background-color: #2d323b !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -207,13 +199,13 @@ with st.container():
                 line=dict(color='rgba(200, 200, 200, 0.8)', dash='dot', width=1),
                 hoverinfo='skip',
                 fill='tonexty',
-                fillcolor='rgba(150, 150, 150, 0.2)'
+                fillcolor='rgba(150, 150, 150, 0.1)'
             ))
 
         # Enhanced layout with custom slider color
         fig.update_layout(
-            plot_bgcolor='#2d323b',
-            paper_bgcolor='#2d323b',
+            plot_bgcolor='#2a2f3b',
+            paper_bgcolor='#2a2f3b',
             font_color='#e0e0e0',
             hovermode='x unified',
             height=700,
@@ -231,10 +223,10 @@ with st.container():
                 type="log" if x_scale_type == "Log" else None,
                 showgrid=True,
                 gridwidth=1,
-                gridcolor='rgba(150,150,150,0.3)',
+                gridcolor='rgba(150,150,150,0.2)',
                 minor=dict(
                     ticklen=6,
-                    gridcolor='rgba(150,150,150,0.15)',
+                    gridcolor='rgba(150,150,150,0.1)',
                     gridwidth=0.5
                 ),
                 tickformat=tickformat,
@@ -245,10 +237,10 @@ with st.container():
                 type="log" if y_scale == "Log" else "linear",
                 showgrid=True,
                 gridwidth=1,
-                gridcolor='rgba(150,150,150,0.3)',
+                gridcolor='rgba(150,150,150,0.2)',
                 minor=dict(
                     ticklen=6,
-                    gridcolor='rgba(150,150,150,0.15)',
+                    gridcolor='rgba(150,150,150,0.1)',
                     gridwidth=0.5
                 )
             ),
@@ -258,7 +250,7 @@ with st.container():
                 y=1.02,
                 xanchor="right",
                 x=1,
-                bgcolor='rgba(45, 50, 59, 0.7)'
+                bgcolor='rgba(42, 47, 59, 0.7)'
             )
         )
 
