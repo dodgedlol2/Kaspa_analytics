@@ -324,7 +324,7 @@ with st.container():
     # Enhanced layout with matching background
     fig.update_layout(
         plot_bgcolor='#262730',  # Correct sidebar grey
-        paper_bgcolor='262730',  # Correct sidebar grey
+        paper_bgcolor='#262730',  # Now with # prefix
         font_color='#e0e0e0',
         hovermode='x unified',
         height=700,
