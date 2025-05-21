@@ -200,7 +200,7 @@ with st.container():
         y=y_fit,
         mode='lines',
         name=f'Power-Law Fit (R²={r2:.3f})',
-        line=dict(color='#FFA726', dash='dot', width=2)  # Brighter orange
+        line=dict(color='#FFA726', dash='dot', width=2)
     ))
 
     # Deviation bands (extended 300 days into future)
@@ -288,16 +288,16 @@ with st.container():
         )
     )
 
-    # Add configuration for responsive zooming
-    fig.update_layout(
+    # Display the chart with proper configuration
+    st.plotly_chart(
+        fig, 
+        use_container_width=True,
         config={
             'scrollZoom': True,
             'responsive': True,
-            'displayModeBar': True,
+            'displayModeBar': True
         }
     )
-
-    st.plotly_chart(fig, use_container_width=True)
 
 # Stats in cards with matching styling
 st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
