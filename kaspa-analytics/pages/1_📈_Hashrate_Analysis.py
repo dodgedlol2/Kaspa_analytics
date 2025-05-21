@@ -107,11 +107,13 @@ with st.container():
             x_title = "Days Since Genesis (Log Scale)"
             tickformat = None
             hoverformat = None
+            slider_tickformat = None
         else:
             x_values = df['Date']
             x_title = "Date"
             tickformat = "%b %Y"
             hoverformat = "%b %d, %Y"
+            slider_tickformat = "%b %Y"
 
         # Main trace
         fig.add_trace(go.Scatter(
@@ -164,16 +166,15 @@ with st.container():
         fig.update_layout(
             template='plotly_dark',
             hovermode='x unified',
-            height=700,  # Increased height
-            margin=dict(l=20, r=20, t=60, b=100),  # More bottom margin for slider
+            height=750,  # Increased height for more space
+            margin=dict(l=50, r=50, t=80, b=120),  # More margins for better spacing
             yaxis_title='Hashrate (PH/s)',
             xaxis_title=x_title,
             xaxis=dict(
                 rangeslider=dict(
                     visible=True,
-                    thickness=0.1,  # Thicker slider handle
-                    bgcolor='rgba(150,150,150,0.3)',
-                    bordercolor="#444",
+                    thickness=0.08,  # Slightly thicker slider handle
+                    bordercolor="#555",
                     borderwidth=1
                 ),
                 type="log" if x_scale_type == "Log" else None,
@@ -185,7 +186,9 @@ with st.container():
                     gridcolor='rgba(100,100,100,0.1)',
                     gridwidth=0.5
                 ),
-                tickformat=tickformat
+                tickformat=tickformat,
+                tickangle=45,  # Angle dates for better readability
+                tickfont=dict(size=10)
             ),
             yaxis=dict(
                 type="log" if y_scale == "Log" else "linear",
@@ -211,7 +214,7 @@ with st.container():
         st.plotly_chart(fig, use_container_width=True)
 
 # Stats in minimal cards with more spacing
-st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
+st.markdown("<div style='margin-top: 40px;'></div>", unsafe_allow_html=True)
 cols = st.columns(3)
 with cols[0].container(border=True):
     st.metric("Power-Law Slope", f"{b:.3f}")
