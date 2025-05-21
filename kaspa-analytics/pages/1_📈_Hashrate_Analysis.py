@@ -57,6 +57,11 @@ st.markdown("""
     .plotly-rangeslider {
         height: 80px !important;
     }
+    .hashrate-value {
+        font-size: 1.3rem !important;
+        font-weight: bold;
+        margin-top: -10px;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -86,7 +91,7 @@ def get_current_hashrate():
             return th_per_second / 1000  # Convert TH/s to PH/s
         return None
     except Exception as e:
-        st.error(f"Failed to fetch current hashrate: {str(e)}")
+        print(f"Failed to fetch current hashrate: {str(e)}")
         return None
 
 # Initialize session state for real-time hashrate
@@ -95,22 +100,22 @@ if 'current_hashrate' not in st.session_state:
     st.session_state.last_update = datetime.now()
     st.session_state.updating = False
 
-# Create containers for auto-updating elements
-current_hashrate_container = st.empty()
+# Create a placeholder for the hashrate value in the bottom-right card
+hashrate_placeholder = st.empty()
 
-# Function to update the metric with animation
+# Function to update the hashrate display with animation
 def update_hashrate_display():
     ph_value = st.session_state.current_hashrate
     if st.session_state.updating:
-        current_hashrate_container.markdown(
-            f"""<div class="updating" style="font-size: 1rem;">
+        hashrate_placeholder.markdown(
+            f"""<div class="updating hashrate-value">
                 {ph_value:.2f} PH/s
             </div>""",
             unsafe_allow_html=True
         )
     else:
-        current_hashrate_container.markdown(
-            f"""<div style="font-size: 1rem;">
+        hashrate_placeholder.markdown(
+            f"""<div class="hashrate-value">
                 {ph_value:.2f} PH/s
             </div>""",
             unsafe_allow_html=True
@@ -135,12 +140,11 @@ def hashrate_updater():
         time.sleep(10)  # Check every 10 seconds
 
 # Start the updater in a separate thread
-import threading
 if 'updater_thread' not in st.session_state:
     st.session_state.updater_thread = threading.Thread(target=hashrate_updater, daemon=True)
     st.session_state.updater_thread.start()
 
-# ====== ENHANCED CHART CONTAINER ======
+# ====== MAIN DASHBOARD ======
 with st.container():
     with st.container(border=True):
         # Create columns for title and controls
@@ -299,4 +303,4 @@ with cols[1].container(border=True):
     st.metric("Model Fit (R²)", f"{r2:.3f}")
 with cols[2].container(border=True):
     st.markdown('<div style="font-size: 0.9rem; margin-bottom: 5px;">Current Hashrate</div>', unsafe_allow_html=True)
-    update_hashrate_display()
+    update_hashrate_display()  # This will display the updating value in the bottom-right card
