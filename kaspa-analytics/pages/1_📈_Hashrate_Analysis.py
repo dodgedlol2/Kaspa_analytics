@@ -23,116 +23,46 @@ except Exception as e:
     st.error(f"Failed to calculate power law: {str(e)}")
     st.stop()
 
-# Custom CSS for unified styling
-st.markdown("""
-<style>
-    /* Main background color */
-    .stApp {
-        background-color: #0e1117;
-    }
-    
-    /* Control block styling */
+# Custom CSS
+st.markdown("""<style>
+    .stApp { background-color: #0e1117; }
     .control-block {
-        padding: 8px 12px;
-        border-radius: 8px;
-        border: 1px solid #2b3137;
-        background-color: #1a1e25;
-        margin-right: 15px;
-        min-width: 160px;
-        height: 85px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
+        padding: 8px 12px; border-radius: 8px; border: 1px solid #2b3137;
+        background-color: #1a1e25; margin-right: 15px; min-width: 160px;
+        height: 85px; display: flex; flex-direction: column; justify-content: center;
     }
-    
-    .title-spacing {
-        padding-left: 40px;
-        margin-bottom: 15px;
-    }
-    
+    .title-spacing { padding-left: 40px; margin-bottom: 15px; }
     .control-label {
-        font-size: 13px !important;
-        margin-bottom: 6px !important;
-        white-space: nowrap;
-        font-weight: 500;
-        color: #e0e0e0 !important;
+        font-size: 13px !important; margin-bottom: 6px !important;
+        white-space: nowrap; font-weight: 500; color: #e0e0e0 !important;
     }
-    
-    .stToggle {
-        width: 100%;
-    }
-    
-    .stToggle button {
-        width: 100% !important;
-        font-size: 12px !important;
-    }
-    
-    .controls-wrapper {
-        padding-top: 11px;
-    }
-    
-    .main-container {
-        padding: 25px;
-    }
-    
-    .plotly-rangeslider {
-        height: 80px !important;
-    }
-    
-    /* Main chart container styling */
+    .controls-wrapper { padding-top: 11px; }
+    .main-container { padding: 25px; }
+    .plotly-rangeslider { height: 80px !important; }
     div[data-testid="stVerticalBlock"] > div[data-testid="stVerticalBlockBorderWrapper"] {
-        background-color: #1a1e25 !important;
-        border-radius: 10px !important;
-        border: 1px solid #2b3137 !important;
-        padding: 15px !important;
+        background-color: #1a1e25 !important; border-radius: 10px !important;
+        border: 1px solid #2b3137 !important; padding: 15px !important;
     }
-    
-    /* Metric cards styling */
     div[data-testid="stMetric"] {
-        background-color: #1a1e25 !important;
-        border: 1px solid #2b3137 !important;
-        border-radius: 8px !important;
-        padding: 15px 20px !important;
+        background-color: #1a1e25 !important; border: 1px solid #2b3137 !important;
+        border-radius: 8px !important; padding: 15px 20px !important;
     }
-    
     div[data-testid="stMetricValue"] > div {
-        font-size: 24px !important;
-        font-weight: 600 !important;
-        color: #00FFCC !important;
+        font-size: 24px !important; font-weight: 600 !important; color: #00FFCC !important;
     }
-    
     div[data-testid="stMetricLabel"] > div {
-        font-size: 14px !important;
-        opacity: 0.8 !important;
-        color: #e0e0e0 !important;
+        font-size: 14px !important; opacity: 0.8 !important; color: #e0e0e0 !important;
     }
-    
-    .stMetric {
-        margin: 5px !important;
-        height: 100% !important;
-    }
-    
-    /* Title styling */
-    h2 {
-        color: #e0e0e0 !important;
-    }
-    
-    /* Toggle button styling */
-    .st-bd {
-        background-color: #1a1e25 !important;
-    }
-    
-    .st-cg {
-        background-color: #00FFCC !important;
-    }
-</style>
-""", unsafe_allow_html=True)
+    .stMetric { margin: 5px !important; height: 100% !important; }
+    h2 { color: #e0e0e0 !important; }
+    .st-bd { background-color: #1a1e25 !important; }
+    .st-cg { background-color: #00FFCC !important; }
+</style>""", unsafe_allow_html=True)
 
 # ====== MAIN CHART CONTAINER ======
 with st.container():
-    # Create columns for title and controls (unchanged from your original)
     title_col, control_col = st.columns([2, 8])
-    
+
     with title_col:
         st.markdown('<div class="title-spacing"><h2>Kaspa Hashrate</h2></div>', unsafe_allow_html=True)
 
@@ -141,28 +71,23 @@ with st.container():
         cols = st.columns([1.5, 1.5, 1.5, 4])
 
         with cols[0]:
-            with st.container():
-                st.markdown('<div class="control-label">Hashrate Scale</div>', unsafe_allow_html=True)
-                y_scale = st.toggle("Linear/Log", value=True, key="y_scale")
-                y_scale = "Log" if y_scale else "Linear"
+            st.markdown('<div class="control-label">Hashrate Scale</div>', unsafe_allow_html=True)
+            y_scale = st.toggle("Linear/Log", value=True, key="y_scale")
+            y_scale = "Log" if y_scale else "Linear"
 
         with cols[1]:
-            with st.container():
-                st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
-                x_scale_type = st.toggle("Linear/Log", value=False, key="x_scale")
-                x_scale_type = "Log" if x_scale_type else "Linear"
+            st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
+            x_scale_type = st.toggle("Linear/Log", value=False, key="x_scale")
+            x_scale_type = "Log" if x_scale_type else "Linear"
 
         with cols[2]:
-            with st.container():
-                st.markdown('<div class="control-label">Deviation Bands</div>', unsafe_allow_html=True)
-                show_bands = st.toggle("Hide/Show", value=False, key="bands_toggle")
+            st.markdown('<div class="control-label">Deviation Bands</div>', unsafe_allow_html=True)
+            show_bands = st.toggle("Hide/Show", value=False, key="bands_toggle")
 
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # Create figure
     fig = go.Figure()
 
-    # Determine x-axis values based on scale type
     max_days = df['days_from_genesis'].max() + 300
     if x_scale_type == "Log":
         x_values = df['days_from_genesis']
@@ -175,7 +100,6 @@ with st.container():
         tickformat = "%b %Y"
         hoverformat = "%b %d, %Y"
 
-    # Main trace
     fig.add_trace(go.Scatter(
         x=x_values,
         y=df['Hashrate_PH'],
@@ -186,14 +110,10 @@ with st.container():
         text=df['Date']
     ))
 
-    # Power-law fit extended 300 days into future
     x_fit = np.linspace(df['days_from_genesis'].min(), max_days, 300)
     y_fit = a * np.power(x_fit, b)
 
-    if x_scale_type == "Log":
-        fit_x = x_fit
-    else:
-        fit_x = [genesis_date + pd.Timedelta(days=int(d)) for d in x_fit]
+    fit_x = x_fit if x_scale_type == "Log" else [genesis_date + pd.Timedelta(days=int(d)) for d in x_fit]
 
     fig.add_trace(go.Scatter(
         x=fit_x,
@@ -203,7 +123,6 @@ with st.container():
         line=dict(color='#FFA726', dash='dot', width=2)
     ))
 
-    # Deviation bands
     if show_bands:
         fig.add_trace(go.Scatter(
             x=fit_x,
@@ -225,7 +144,6 @@ with st.container():
             fillcolor='rgba(100, 100, 100, 0.2)'
         ))
 
-    # Enhanced layout with auto-range behavior
     fig.update_layout(
         plot_bgcolor='#1a1e25',
         paper_bgcolor='#1a1e25',
@@ -245,33 +163,20 @@ with st.container():
             ),
             type="log" if x_scale_type == "Log" else None,
             showgrid=True,
-            gridwidth=1,
             gridcolor='rgba(255, 255, 255, 0.1)',
-            minor=dict(
-                ticklen=6,
-                gridcolor='rgba(255, 255, 255, 0.05)',
-                gridwidth=0.5
-            ),
             tickformat=tickformat,
+            range=[None, max_days] if x_scale_type == "Log" else 
+                  [df['Date'].min(), genesis_date + pd.Timedelta(days=max_days)],
             linecolor='#2b3137',
-            zerolinecolor='#2b3137',
-            autorange=True,
-            fixedrange=False
+            zerolinecolor='#2b3137'
         ),
         yaxis=dict(
             type="log" if y_scale == "Log" else "linear",
+            autorange=True,  # 🚀 Enables auto-scaling
             showgrid=True,
-            gridwidth=1,
             gridcolor='rgba(255, 255, 255, 0.1)',
-            minor=dict(
-                ticklen=6,
-                gridcolor='rgba(255, 255, 255, 0.05)',
-                gridwidth=0.5
-            ),
             linecolor='#2b3137',
-            zerolinecolor='#2b3137',
-            autorange=True,
-            fixedrange=False
+            zerolinecolor='#2b3137'
         ),
         legend=dict(
             orientation="h",
@@ -288,42 +193,9 @@ with st.container():
         )
     )
 
-    # Add range selector buttons (like Glassnode)
-    fig.update_layout(
-        xaxis=dict(
-            rangeselector=dict(
-                buttons=list([
-                    dict(count=1, label="1m", step="month", stepmode="backward"),
-                    dict(count=6, label="6m", step="month", stepmode="backward"),
-                    dict(count=1, label="YTD", step="year", stepmode="todate"),
-                    dict(count=1, label="1y", step="year", stepmode="backward"),
-                    dict(step="all", label="All")
-                ]),
-                bgcolor='#1a1e25',
-                bordercolor='#2b3137',
-                borderwidth=1,
-                x=0,
-                xanchor='left',
-                y=1.1,
-                yanchor='top'
-            ),
-            rangeslider=dict(visible=True),
-            type="date"
-        )
-    )
+    st.plotly_chart(fig, use_container_width=True)
 
-    # Display the chart with proper configuration
-    st.plotly_chart(
-        fig, 
-        use_container_width=True,
-        config={
-            'scrollZoom': True,
-            'responsive': True,
-            'displayModeBar': True
-        }
-    )
-
-# Stats in cards with matching styling
+# Stats cards
 st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
 cols = st.columns(3)
 with cols[0]:
