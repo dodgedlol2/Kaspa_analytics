@@ -151,34 +151,46 @@ st.markdown("""
         margin-bottom: 0px !important;
     }
     
-    /* Time range selector styling */
+    /* Segmented control styling */
     .time-range-selector {
         position: absolute;
         right: 30px;
         top: 20px;
         z-index: 100;
-    }
-    
-    .st-bq {
-        border-color: #3A3C4A !important;
-    }
-    
-    .st-segmentedControl button {
-        color: #e0e0e0 !important;
         background-color: #262730 !important;
-        border-color: #3A3C4A !important;
+        border-radius: 8px !important;
+        padding: 4px !important;
+        border: 1px solid #3A3C4A !important;
     }
     
-    .st-segmentedControl button:active,
-    .st-segmentedControl button:focus,
-    .st-segmentedControl button:hover {
+    .st-emotion-cache-1q7gvkk {
+        gap: 4px !important;
+    }
+    
+    .st-emotion-cache-1q7gvkk button {
+        background-color: #262730 !important;
+        color: #e0e0e0 !important;
+        border: 1px solid #3A3C4A !important;
+        font-size: 12px !important;
+        padding: 6px 12px !important;
+        border-radius: 6px !important;
+        transition: all 0.2s ease !important;
+    }
+    
+    .st-emotion-cache-1q7gvkk button:hover {
         background-color: #3A3C4A !important;
         color: #00FFCC !important;
     }
     
-    .st-segmentedControl button[aria-pressed="true"] {
+    .st-emotion-cache-1q7gvkk button[aria-pressed="true"] {
         background-color: #00FFCC !important;
         color: #262730 !important;
+        border-color: #00FFCC !important;
+        font-weight: 500 !important;
+    }
+    
+    .st-emotion-cache-1q7gvkk button:focus:not(:active) {
+        box-shadow: 0 0 0 2px rgba(0, 255, 204, 0.3) !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -214,15 +226,13 @@ with st.container():
 
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # Add time range selector in the top right
+    # Add professional time range selector in the top right
     with st.container():
         st.markdown('<div class="time-range-selector">', unsafe_allow_html=True)
-        time_range = st.radio(
+        time_range = st.segmented_control(
             "Time Range",
-            options=["1W", "3M", "6M", "1Y", "All"],
-            index=4,  # Default to "All"
-            horizontal=True,
-            label_visibility="collapsed",
+            options=["1W", "1M", "3M", "6M", "1Y", "All"],
+            default="All",
             key="time_range"
         )
         st.markdown('</div>', unsafe_allow_html=True)
@@ -231,6 +241,8 @@ with st.container():
     last_date = df['Date'].iloc[-1]
     if time_range == "1W":
         start_date = last_date - timedelta(days=7)
+    elif time_range == "1M":
+        start_date = last_date - timedelta(days=30)
     elif time_range == "3M":
         start_date = last_date - timedelta(days=90)
     elif time_range == "6M":
@@ -312,7 +324,7 @@ with st.container():
     # Enhanced layout with matching background
     fig.update_layout(
         plot_bgcolor='#262730',  # Correct sidebar grey
-        paper_bgcolor='#262730',  # Correct sidebar grey
+        paper_bgcolor='262730',  # Correct sidebar grey
         font_color='#e0e0e0',
         hovermode='x unified',
         height=700,
