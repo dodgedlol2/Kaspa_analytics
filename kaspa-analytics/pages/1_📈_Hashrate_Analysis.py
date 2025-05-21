@@ -31,17 +31,17 @@ st.markdown("""
         background-color: #0E1117;
     }
     
-    /* Sidebar color (reference) */
-    .st-emotion-cache-6qob1r {
-        background-color: #1E293B;
+    /* Correct sidebar grey color */
+    .st-emotion-cache-6qob1r, .sidebar-content {
+        background-color: #262730 !important;
     }
     
     /* Control block styling */
     .control-block {
         padding: 8px 12px;
         border-radius: 8px;
-        border: 1px solid #334155;
-        background-color: #1E293B;
+        border: 1px solid #3A3C4A;
+        background-color: #262730;
         margin-right: 15px;
         min-width: 160px;
         height: 85px;
@@ -86,16 +86,16 @@ st.markdown("""
     
     /* Main chart container styling */
     div[data-testid="stVerticalBlock"] > div[data-testid="stVerticalBlockBorderWrapper"] {
-        background-color: #1E293B !important;
+        background-color: #262730 !important;
         border-radius: 10px !important;
-        border: 1px solid #334155 !important;
+        border: 1px solid #3A3C4A !important;
         padding: 15px !important;
     }
     
     /* Metric cards styling */
     div[data-testid="stMetric"] {
-        background-color: #1E293B !important;
-        border: 1px solid #334155 !important;
+        background-color: #262730 !important;
+        border: 1px solid #3A3C4A !important;
         border-radius: 8px !important;
         padding: 15px 20px !important;
     }
@@ -124,7 +124,7 @@ st.markdown("""
     
     /* Toggle button styling */
     .st-bd {
-        background-color: #1E293B !important;
+        background-color: #262730 !important;
     }
     
     .st-cg {
@@ -215,7 +215,7 @@ with st.container():
         y=y_fit,
         mode='lines',
         name=f'Power-Law Fit (R²={r2:.3f})',
-        line=dict(color='#FFA726', dash='dot', width=2)  # Brighter orange
+        line=dict(color='#FFA726', dash='dot', width=2)
     ))
 
     # Deviation bands (extended 300 days into future)
@@ -242,8 +242,8 @@ with st.container():
 
     # Enhanced layout with matching background
     fig.update_layout(
-        plot_bgcolor='#1E293B',  # Sidebar grey
-        paper_bgcolor='#1E293B',  # Sidebar grey
+        plot_bgcolor='#262730',  # Correct sidebar grey
+        paper_bgcolor='#262730',  # Correct sidebar grey
         font_color='#e0e0e0',
         hovermode='x unified',
         height=700,
@@ -254,8 +254,8 @@ with st.container():
             rangeslider=dict(
                 visible=True,
                 thickness=0.1,
-                bgcolor='#1E293B',  # Sidebar grey
-                bordercolor="#334155",
+                bgcolor='#262730',  # Correct sidebar grey
+                bordercolor="#3A3C4A",
                 borderwidth=1
             ),
             type="log" if x_scale_type == "Log" else None,
@@ -270,8 +270,8 @@ with st.container():
             tickformat=tickformat,
             range=[None, max_days] if x_scale_type == "Log" else 
                   [df['Date'].min(), genesis_date + pd.Timedelta(days=max_days)],
-            linecolor='#334155',
-            zerolinecolor='#334155'
+            linecolor='#3A3C4A',
+            zerolinecolor='#3A3C4A'
         ),
         yaxis=dict(
             type="log" if y_scale == "Log" else "linear",
@@ -283,8 +283,8 @@ with st.container():
                 gridcolor='rgba(255, 255, 255, 0.05)',
                 gridwidth=0.5
             ),
-            linecolor='#334155',
-            zerolinecolor='#334155'
+            linecolor='#3A3C4A',
+            zerolinecolor='#3A3C4A'
         ),
         legend=dict(
             orientation="h",
@@ -292,11 +292,11 @@ with st.container():
             y=1.02,
             xanchor="right",
             x=1,
-            bgcolor='rgba(30, 41, 59, 0.8)'  # Semi-transparent sidebar grey
+            bgcolor='rgba(38, 39, 48, 0.8)'  # Semi-transparent sidebar grey
         ),
         hoverlabel=dict(
-            bgcolor='#1E293B',  # Sidebar grey
-            bordercolor='#334155',
+            bgcolor='#262730',  # Correct sidebar grey
+            bordercolor='#3A3C4A',
             font_color='#e0e0e0'
         )
     )
