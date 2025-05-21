@@ -91,43 +91,29 @@ st.markdown("""
         margin-bottom: 0px !important;
     }
 
-    .controls-container {
-        position: relative;
-        width: 100%;
+    /* New controls styling */
+    .controls-row {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
         margin-bottom: 15px;
     }
 
-    .control-group {
-        position: absolute;
-        width: 100px !important;
-        min-width: 100px !important;
-    }
-
-    .control-group:nth-child(1) {
-        left: 0px;
-    }
-
-    .control-group:nth-child(2) {
-        left: 110px;
-    }
-
-    .control-group:nth-child(3) {
-        left: 220px;
-    }
-
-    .control-group:nth-child(4) {
-        left: 330px;
+    .control-item {
+        display: flex;
+        flex-direction: column;
+        width: 100px;
     }
 
     .control-label {
         font-size: 11px !important;
         color: #e0e0e0 !important;
         margin-bottom: 2px !important;
+        white-space: nowrap;
     }
 
     .stSelectbox {
         width: 100px !important;
-        min-width: 100px !important;
     }
 
     .stSelectbox > div {
@@ -141,7 +127,6 @@ st.markdown("""
         border: 1px solid #3A3C4A !important;
         color: #e0e0e0 !important;
         height: 24px !important;
-        width: 100% !important;
     }
 
     .stSelectbox svg {
@@ -155,11 +140,11 @@ with st.container():
     # Title
     st.markdown('<div class="title-spacing"><h2>Kaspa Hashrate</h2></div>', unsafe_allow_html=True)
 
-    # Controls with absolute positioning
-    st.markdown('<div class="controls-container">', unsafe_allow_html=True)
+    # Create a horizontal row for controls
+    st.markdown('<div class="controls-row">', unsafe_allow_html=True)
     
-    # Control group 1 - Period
-    st.markdown('<div class="control-group">', unsafe_allow_html=True)
+    # Control 1 - Period
+    st.markdown('<div class="control-item">', unsafe_allow_html=True)
     st.markdown('<div class="control-label">Period</div>', unsafe_allow_html=True)
     time_ranges = ["1W", "1M", "3M", "6M", "1Y", "All"]
     if 'time_range' not in st.session_state:
@@ -173,8 +158,8 @@ with st.container():
     )
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # Control group 2 - Hashrate Scale
-    st.markdown('<div class="control-group">', unsafe_allow_html=True)
+    # Control 2 - Hashrate Scale
+    st.markdown('<div class="control-item">', unsafe_allow_html=True)
     st.markdown('<div class="control-label">Hashrate Scale</div>', unsafe_allow_html=True)
     y_scale_options = ["Linear", "Log"]
     y_scale = st.selectbox(
@@ -186,8 +171,8 @@ with st.container():
     )
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # Control group 3 - Time Scale
-    st.markdown('<div class="control-group">', unsafe_allow_html=True)
+    # Control 3 - Time Scale
+    st.markdown('<div class="control-item">', unsafe_allow_html=True)
     st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
     x_scale_options = ["Linear", "Log"]
     x_scale_type = st.selectbox(
@@ -199,8 +184,8 @@ with st.container():
     )
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # Control group 4 - Power Law Fit
-    st.markdown('<div class="control-group">', unsafe_allow_html=True)
+    # Control 4 - Power Law Fit
+    st.markdown('<div class="control-item">', unsafe_allow_html=True)
     st.markdown('<div class="control-label">Power Law Fit</div>', unsafe_allow_html=True)
     power_law_options = ["Hide", "Show"]
     show_power_law = st.selectbox(
@@ -212,7 +197,7 @@ with st.container():
     )
     st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)  # Close controls-row
 
     # Date range selection
     last_date = df['Date'].iloc[-1]
