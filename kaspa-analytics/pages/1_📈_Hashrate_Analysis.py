@@ -343,6 +343,14 @@ with st.container():
         text=filtered_df['Date']
     ))
 
+    # Calculate y-axis range based only on hashrate data
+    if y_scale == "Linear":
+        y_min = filtered_df['Hashrate_PH'].min() * 0.9
+        y_max = filtered_df['Hashrate_PH'].max() * 1.1
+    else:  # Log scale
+        y_min = 10**(np.log10(filtered_df['Hashrate_PH'].min()) - 0.1)
+        y_max = 10**(np.log10(filtered_df['Hashrate_PH'].max()) + 0.1)
+
     # Enhanced layout with matching background
     fig.update_layout(
         plot_bgcolor='#262730',
@@ -388,8 +396,8 @@ with st.container():
             ),
             linecolor='#3A3C4A',
             zerolinecolor='#3A3C4A',
-            # This ensures the y-axis is scaled only to the hashrate data
-            autorange=True
+            range=[y_min, y_max] if y_scale == "Linear" else 
+                 [np.log10(y_min), np.log10(y_max)]
         ),
         legend=dict(
             orientation="h",
@@ -405,12 +413,6 @@ with st.container():
             font_color='#e0e0e0'
         )
     )
-
-    # This is the key part - we're telling Plotly to ignore the power law fit for autoscaling
-    fig.update_traces(selector={'name': 'Power-Law Fit'}, exclude_from_scaling=True)
-    if show_bands:
-        fig.update_traces(selector={'name': '-60% Deviation'}, exclude_from_scaling=True)
-        fig.update_traces(selector={'name': '+120% Deviation'}, exclude_from_scaling=True)
 
     st.plotly_chart(fig, use_container_width=True)
 
