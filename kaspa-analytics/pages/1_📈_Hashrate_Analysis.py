@@ -23,20 +23,21 @@ except Exception as e:
     st.error(f"Failed to calculate power law: {str(e)}")
     st.stop()
 
-# Professional Color Scheme
+# Kaspa Brand Color Scheme (extracted from official logo/branding)
 COLORS = {
-    'background': '#0F172A',  # Deep navy base
-    'panel': '#1E293B',       # Dark slate panels
-    'border': '#334155',      # Medium slate borders
-    'primary': '#38BDF8',     # Bright sky blue (main data)
-    'secondary': '#F472B6',   # Vibrant pink (contrast)
-    'accent': '#F59E0B',      # Amber (for highlights)
-    'text': '#E2E8F0',        # Light grey text
-    'success': '#10B981',     # Emerald green
-    'grid': 'rgba(148, 163, 184, 0.1)'
+    'primary': '#17B2A7',     # Kaspa's signature teal
+    'primary_dark': '#0E8C84', # Darker teal for accents
+    'background': '#0D1B2A',   # Deep navy-blue (darker than Kaspa's but complementary)
+    'panel': '#1B263B',        # Dark slate with blue undertone
+    'border': '#2C3A58',       # Medium slate-blue
+    'secondary': '#E9C46A',    # Golden yellow (from Kaspa's gradient)
+    'accent': '#F4A261',       # Orange accent (from Kaspa's gradient)
+    'text': '#E0E1DD',         # Off-white text
+    'success': '#2ECC71',      # Emerald green
+    'grid': 'rgba(200, 213, 219, 0.1)'  # Light blueish grid
 }
 
-# Custom CSS with professional styling
+# Custom CSS with Kaspa branding
 st.markdown(f"""
 <style>
     /* Base styling */
@@ -76,6 +77,7 @@ st.markdown(f"""
     .stToggle button {{
         background-color: {COLORS['panel']} !important;
         border: 1px solid {COLORS['border']} !important;
+        color: {COLORS['text']} !important;
     }}
     
     .stToggle button:hover {{
@@ -114,7 +116,7 @@ st.markdown(f"""
     
     /* Titles */
     h2 {{
-        color: {COLORS['text']} !important;
+        color: {COLORS['primary']} !important;
         font-weight: 600;
         letter-spacing: 0.5px;
         margin-bottom: 5px !important;
@@ -141,7 +143,7 @@ st.markdown(f"""
     }}
     
     ::-webkit-scrollbar-thumb {{
-        background: {COLORS['border']};
+        background: {COLORS['primary_dark']};
         border-radius: 4px;
     }}
 </style>
@@ -196,7 +198,7 @@ with st.container():
         x_title = "Date"
         tickformat = "%b %Y"
 
-    # Main hashrate trace
+    # Main hashrate trace (using Kaspa's primary teal)
     fig.add_trace(go.Scatter(
         x=x_values,
         y=df['Hashrate_PH'],
@@ -207,7 +209,7 @@ with st.container():
         text=df['Date']
     ))
 
-    # Power-law fit
+    # Power-law fit (using Kaspa's golden yellow)
     x_fit = np.linspace(df['days_from_genesis'].min(), max_days, 300)
     y_fit = a * np.power(x_fit, b)
     fit_x = x_fit if x_scale_type == "Log" else [genesis_date + pd.Timedelta(days=int(d)) for d in x_fit]
@@ -217,17 +219,17 @@ with st.container():
         y=y_fit,
         mode='lines',
         name=f'Power-Law Fit (R²={r2:.3f})',
-        line=dict(color=COLORS['accent'], dash='dot', width=2.5)
+        line=dict(color=COLORS['secondary'], dash='dot', width=2.5)
     ))
 
-    # Deviation bands
+    # Deviation bands (using Kaspa's orange accent)
     if show_bands:
         fig.add_trace(go.Scatter(
             x=fit_x,
             y=y_fit * 0.4,
             mode='lines',
             name='-60% Deviation',
-            line=dict(color='rgba(255, 255, 255, 0.3)', width=1),
+            line=dict(color=f"rgba{(*[int(COLORS['accent'].lstrip('#')[i:i+2], 16) for i in (0, 2, 4)}, 0.3)", width=1),
             hoverinfo='skip',
             fill=None
         ))
@@ -236,13 +238,13 @@ with st.container():
             y=y_fit * 2.2,
             mode='lines',
             name='+120% Deviation',
-            line=dict(color='rgba(255, 255, 255, 0.3)', width=1),
+            line=dict(color=f"rgba{(*[int(COLORS['accent'].lstrip('#')[i:i+2], 16) for i in (0, 2, 4)}, 0.3)", width=1),
             hoverinfo='skip',
             fill='tonexty',
-            fillcolor='rgba(148, 163, 184, 0.1)'
+            fillcolor=f"rgba{(*[int(COLORS['primary'].lstrip('#')[i:i+2], 16) for i in (0, 2, 4)}, 0.1)"
         ))
 
-    # Professional chart layout
+    # Professional chart layout with Kaspa colors
     fig.update_layout(
         plot_bgcolor=COLORS['panel'],
         paper_bgcolor=COLORS['panel'],
@@ -277,7 +279,7 @@ with st.container():
             zerolinecolor=COLORS['border'],
             minor=dict(
                 ticklen=6,
-                gridcolor='rgba(148, 163, 184, 0.05)',
+                gridcolor=f"rgba{(*[int(COLORS['primary'].lstrip('#')[i:i+2], 16) for i in (0, 2, 4)}, 0.05)",
                 gridwidth=0.5
             )
         ),
@@ -287,7 +289,7 @@ with st.container():
             y=1.02,
             xanchor="right",
             x=1,
-            bgcolor=f"rgba(30, 41, 59, 0.7)",
+            bgcolor=f"rgba{(*[int(COLORS['panel'].lstrip('#')[i:i+2], 16) for i in (0, 2, 4)}, 0.7)",
             bordercolor=COLORS['border'],
             borderwidth=1,
             font=dict(size=12)
@@ -302,7 +304,7 @@ with st.container():
 
     st.plotly_chart(fig, use_container_width=True)
 
-# Metrics row with improved styling
+# Metrics row with Kaspa styling
 st.markdown("<div style='margin-top: 20px;'></div>", unsafe_allow_html=True)
 metrics = st.columns(3)
 
