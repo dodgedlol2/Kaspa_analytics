@@ -23,14 +23,32 @@ except Exception as e:
     st.error(f"Failed to calculate power law: {str(e)}")
     st.stop()
 
-# Custom CSS for enhanced spacing
+# Updated CSS with deep dark grey theme
 st.markdown("""
 <style>
+    /* Main background - changed to deep dark grey */
+    .stApp {
+        background-color: #1E1E1E;
+    }
+    
+    /* Sidebar background - slightly lighter than main */
+    [data-testid="stSidebar"] {
+        background-color: #252525 !important;
+    }
+    
+    /* Chart containers and borders */
+    [data-testid="stVerticalBlockBorderWrapper"] {
+        background-color: #252525;
+        border: 1px solid #3A3A3A;
+        border-radius: 8px;
+    }
+    
+    /* Control blocks */
     .control-block {
         padding: 8px 12px;
         border-radius: 8px;
-        border: 1px solid #2b3137;
-        background-color: #0e1117;
+        border: 1px solid #3A3A3A;
+        background-color: #252525;
         margin-right: 15px;
         min-width: 160px;
         height: 85px;
@@ -38,31 +56,69 @@ st.markdown("""
         flex-direction: column;
         justify-content: center;
     }
+    
+    /* Text styling */
     .title-spacing {
         padding-left: 40px;
         margin-bottom: 15px;
     }
+    
     .control-label {
         font-size: 13px !important;
         margin-bottom: 6px !important;
         white-space: nowrap;
         font-weight: 500;
+        color: #E0E0E0 !important;
     }
+    
+    /* Toggle buttons */
     .stToggle {
         width: 100%;
     }
+    
     .stToggle button {
         width: 100% !important;
         font-size: 12px !important;
     }
+    
+    /* Controls wrapper */
     .controls-wrapper {
         padding-top: 11px;
     }
+    
+    /* Main container */
     .main-container {
         padding: 25px;
+        background-color: #252525;
     }
+    
+    /* Plotly rangeslider */
     .plotly-rangeslider {
         height: 80px !important;
+    }
+    
+    /* Metric cards */
+    [data-testid="metric-container"] {
+        background-color: #252525 !important;
+        border: 1px solid #3A3A3A !important;
+    }
+    
+    /* Text colors */
+    h1, h2, h3, h4, h5, h6, p, div, span {
+        color: #E0E0E0 !important;
+    }
+    
+    /* Streamlit widget styling */
+    .stSlider, .stSelectbox, .stTextInput {
+        background-color: #252525 !important;
+        border-color: #3A3A3A !important;
+    }
+    
+    /* Plotly tooltip */
+    .hovertext {
+        background-color: #252525 !important;
+        border: 1px solid #3A3A3A !important;
+        color: #E0E0E0 !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -150,7 +206,7 @@ with st.container():
                 y=y_fit * 0.4,
                 mode='lines',
                 name='-60% Deviation',
-                line=dict(color='rgba(150, 150, 150, 0.8)', dash='dot', width=1),
+                line=dict(color='rgba(200, 200, 200, 0.8)', dash='dot', width=1),
                 hoverinfo='skip',
                 fill=None
             ))
@@ -159,15 +215,17 @@ with st.container():
                 y=y_fit * 2.2,
                 mode='lines',
                 name='+120% Deviation',
-                line=dict(color='rgba(150, 150, 150, 0.8)', dash='dot', width=1),
+                line=dict(color='rgba(200, 200, 200, 0.8)', dash='dot', width=1),
                 hoverinfo='skip',
                 fill='tonexty',
-                fillcolor='rgba(100, 100, 100, 0.1)'
+                fillcolor='rgba(150, 150, 150, 0.2)'
             ))
 
-        # Enhanced layout with custom slider color
+        # Enhanced layout with custom colors
         fig.update_layout(
-            template='plotly_dark',
+            plot_bgcolor='#252525',
+            paper_bgcolor='#252525',
+            font_color='#E0E0E0',
             hovermode='x unified',
             height=700,
             margin=dict(l=20, r=20, t=60, b=100),
@@ -177,17 +235,17 @@ with st.container():
                 rangeslider=dict(
                     visible=True,
                     thickness=0.1,
-                    bgcolor='rgba(0,255,204,0.2)',  # Match the main line color
+                    bgcolor='rgba(0,255,204,0.2)',
                     bordercolor="#00FFCC",
                     borderwidth=1
                 ),
                 type="log" if x_scale_type == "Log" else None,
                 showgrid=True,
                 gridwidth=1,
-                gridcolor='rgba(100,100,100,0.2)',
+                gridcolor='rgba(100,100,100,0.3)',
                 minor=dict(
                     ticklen=6,
-                    gridcolor='rgba(100,100,100,0.1)',
+                    gridcolor='rgba(100,100,100,0.15)',
                     gridwidth=0.5
                 ),
                 tickformat=tickformat,
@@ -198,10 +256,10 @@ with st.container():
                 type="log" if y_scale == "Log" else "linear",
                 showgrid=True,
                 gridwidth=1,
-                gridcolor='rgba(100,100,100,0.2)',
+                gridcolor='rgba(100,100,100,0.3)',
                 minor=dict(
                     ticklen=6,
-                    gridcolor='rgba(100,100,100,0.1)',
+                    gridcolor='rgba(100,100,100,0.15)',
                     gridwidth=0.5
                 )
             ),
@@ -210,7 +268,8 @@ with st.container():
                 yanchor="bottom",
                 y=1.02,
                 xanchor="right",
-                x=1
+                x=1,
+                bgcolor='rgba(37, 37, 37, 0.8)'
             )
         )
 
