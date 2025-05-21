@@ -172,7 +172,7 @@ with st.container():
 
         with cols[3]:
             with st.container():
-                st.markdown('<div class="control-label">Auto Scale Y-Axis</div>', unsafe_allow_html=True)
+                st.markdown('<div class="control-label">Auto Scale</div>', unsafe_allow_html=True)
                 auto_scale = st.toggle("Off/On", value=True, key="auto_scale")
 
         st.markdown('</div>', unsafe_allow_html=True)
@@ -181,7 +181,7 @@ with st.container():
     fig = go.Figure()
 
     # Determine x-axis values based on scale type
-    max_days = df['days_from_genesis'].max() + 300  # Extend by 300 days
+    max_days = df['days_from_genesis'].max() + 300
     if x_scale_type == "Log":
         x_values = df['days_from_genesis']
         x_title = "Days Since Genesis (Log Scale)"
@@ -193,7 +193,7 @@ with st.container():
         tickformat = "%b %Y"
         hoverformat = "%b %d, %Y"
 
-    # Main trace with updated colors
+    # Main trace
     fig.add_trace(go.Scatter(
         x=x_values,
         y=df['Hashrate_PH'],
@@ -218,10 +218,10 @@ with st.container():
         y=y_fit,
         mode='lines',
         name=f'Power-Law Fit (R²={r2:.3f})',
-        line=dict(color='#FFA726', dash='dot', width=2)  # Brighter orange
+        line=dict(color='#FFA726', dash='dot', width=2)
     ))
 
-    # Deviation bands (extended 300 days into future)
+    # Deviation bands
     if show_bands:
         fig.add_trace(go.Scatter(
             x=fit_x,
@@ -243,7 +243,7 @@ with st.container():
             fillcolor='rgba(100, 100, 100, 0.2)'
         ))
 
-    # Enhanced layout with matching background
+    # Enhanced layout
     fig.update_layout(
         plot_bgcolor='#1a1e25',
         paper_bgcolor='#1a1e25',
@@ -288,7 +288,6 @@ with st.container():
             ),
             linecolor='#2b3137',
             zerolinecolor='#2b3137',
-            autorange=True if auto_scale else None,
             fixedrange=False
         ),
         legend=dict(
@@ -306,60 +305,106 @@ with st.container():
         )
     )
 
-    # Add reset zoom button
-    st.markdown("""
-    <script>
-    // Function to reset zoom
-    function resetZoom() {
-        const plotElement = document.querySelector('.plotly-graph-div.js-plotly-plot');
-        if (plotElement) {
-            Plotly.relayout(plotElement, {
-                'xaxis.autorange': true,
-                'yaxis.autorange': true
-            });
-        }
-    }
-    </script>
-    """, unsafe_allow_html=True)
-
-    # Display the chart and reset button
-    chart_container = st.container()
-    with chart_container:
-        st.plotly_chart(fig, use_container_width=True, config={'scrollZoom': True})
-        
-        # Add reset button with custom styling
-        reset_col, _ = st.columns([1, 9])
-        with reset_col:
-            if st.button('Reset Zoom', key='reset_zoom'):
-                # This will trigger the JavaScript reset function
-                st.markdown("""
-                <script>
-                resetZoom();
-                </script>
-                """, unsafe_allow_html=True)
-
-    # JavaScript for auto-scaling Y-axis when X-axis is zoomed
+    # JavaScript for professional auto-scaling
     st.markdown("""
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         const plotElement = document.querySelector('.plotly-graph-div.js-plotly-plot');
         if (plotElement) {
-            plotElement.on('plotly_relayout', function(eventdata) {
-                // Check if x-axis range was changed (zoomed)
-                if (eventdata['xaxis.range[0]'] || eventdata['xaxis.range[1]']) {
-                    // Auto-scale y-axis if setting is enabled
-                    const autoScale = %s;
-                    if (autoScale) {
-                        Plotly.relayout(plotElement, {
-                            'yaxis.autorange': true
-                        });
+            // Store original ranges for reset
+            let originalXRange = null;
+            let originalYRange = null;
+            
+            // Get initial ranges
+            Plotly.relayout(plotElement).then(function(gd) {
+                originalXRange = [gd.layout.xaxis.range[0], gd.layout.xaxis.range[1]];
+                originalYRange = [gd.layout.yaxis.range[0], gd.layout.yaxis.range[1]];
+            });
+            
+            // Auto-scaling function
+            function autoScaleYAxis() {
+                if (!%s) return; // Skip if auto-scale is off
+                
+                Plotly.relayout(plotElement).then(function(gd) {
+                    const xRange = gd.layout.xaxis.range;
+                    const fullData = gd.data[0]; // Main hashrate data
+                    
+                    // Convert xRange to indices
+                    let startIdx, endIdx;
+                    if (fullData.x instanceof Array) {
+                        // Date-based x-axis
+                        startIdx = fullData.x.findIndex(x => new Date(x) >= new Date(xRange[0]));
+                        endIdx = fullData.x.findIndex(x => new Date(x) >= new Date(xRange[1]));
+                    } else {
+                        // Numeric x-axis
+                        startIdx = Math.max(0, Math.floor(xRange[0]));
+                        endIdx = Math.min(fullData.x.length-1, Math.ceil(xRange[1]));
                     }
+                    
+                    if (startIdx === -1) startIdx = 0;
+                    if (endIdx === -1) endIdx = fullData.x.length-1;
+                    
+                    // Get y-values in visible range
+                    const visibleY = fullData.y.slice(startIdx, endIdx+1);
+                    if (visibleY.length === 0) return;
+                    
+                    // Calculate new y-range with 10% padding
+                    const yMin = Math.min(...visibleY);
+                    const yMax = Math.max(...visibleY);
+                    const padding = (yMax - yMin) * 0.1;
+                    
+                    const newYRange = [
+                        Math.max(0, yMin - padding),
+                        yMax + padding
+                    ];
+                    
+                    // Apply new range
+                    Plotly.relayout(plotElement, {
+                        'yaxis.range': newYRange,
+                        'yaxis.autorange': false
+                    });
+                });
+            }
+            
+            // Reset function
+            window.resetZoom = function() {
+                Plotly.relayout(plotElement, {
+                    'xaxis.range': originalXRange,
+                    'yaxis.range': originalYRange,
+                    'yaxis.autorange': false
+                });
+            }
+            
+            // Set up event listeners
+            plotElement.on('plotly_relayout', function(eventdata) {
+                // Check if user zoomed or panned
+                if (eventdata['xaxis.range[0]'] !== undefined || 
+                    eventdata['xaxis.range[1]'] !== undefined) {
+                    autoScaleYAxis();
                 }
             });
         }
     });
     </script>
     """ % ('true' if auto_scale else 'false'), unsafe_allow_html=True)
+
+    # Display the chart and controls
+    chart_container = st.container()
+    with chart_container:
+        st.plotly_chart(fig, use_container_width=True, config={'scrollZoom': True})
+        
+        # Add reset button
+        reset_col, _ = st.columns([1, 9])
+        with reset_col:
+            if st.button('Reset View', key='reset_zoom'):
+                st.markdown("""
+                <script>
+                if (typeof resetZoom === 'function') {
+                    resetZoom();
+                }
+                </script>
+                """, unsafe_allow_html=True)
+
 
 # Stats in cards with matching styling
 st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
