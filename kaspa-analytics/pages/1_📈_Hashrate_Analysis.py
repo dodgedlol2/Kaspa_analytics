@@ -26,15 +26,11 @@ except Exception as e:
 # Custom CSS for enhanced spacing
 st.markdown("""
 <style>
-    /* ====== NEW: FULL-PAGE DARK BACKGROUND ====== */
-    .stApp {
-        background-color: #0a0a0a;  /* Changed from default #0e1117 to pure black */
-    }
-
     .control-block {
         padding: 8px 12px;
         border-radius: 8px;
         border: 1px solid #2b3137;
+        background-color: #2b2117;
         background-color: #0e1117;
         margin-right: 15px;
         min-width: 160px;
@@ -69,10 +65,6 @@ st.markdown("""
     .plotly-rangeslider {
         height: 80px !important;
     }
-    /* Plotly chart background (override dark theme) */
-    .js-plotly-plot .plotly {
-        background-color: #000000 !important;
-    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -81,31 +73,31 @@ with st.container():
     with st.container(border=True):
         # Create columns for title and controls
         title_col, control_col = st.columns([2, 8])
-        
+
         with title_col:
             st.markdown('<div class="title-spacing"><h2>Kaspa Hashrate</h2></div>', unsafe_allow_html=True)
-        
+
         with control_col:
             st.markdown('<div class="controls-wrapper">', unsafe_allow_html=True)
             cols = st.columns([1.5, 1.5, 1.5, 4])
-            
+
             with cols[0]:
                 with st.container(border=True):
                     st.markdown('<div class="control-label">Hashrate Scale</div>', unsafe_allow_html=True)
                     y_scale = st.toggle("Linear/Log", value=True, key="y_scale")
                     y_scale = "Log" if y_scale else "Linear"
-            
+
             with cols[1]:
                 with st.container(border=True):
                     st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
                     x_scale_type = st.toggle("Linear/Log", value=False, key="x_scale")
                     x_scale_type = "Log" if x_scale_type else "Linear"
-            
+
             with cols[2]:
                 with st.container(border=True):
                     st.markdown('<div class="control-label">Deviation Bands</div>', unsafe_allow_html=True)
                     show_bands = st.toggle("Hide/Show", value=False, key="bands_toggle")
-            
+
             st.markdown('</div>', unsafe_allow_html=True)
 
         # Create figure with enhanced grid
@@ -138,12 +130,12 @@ with st.container():
         # Power-law fit extended 300 days into future (single continuous line)
         x_fit = np.linspace(df['days_from_genesis'].min(), max_days, 300)
         y_fit = a * np.power(x_fit, b)
-        
+
         if x_scale_type == "Log":
             fit_x = x_fit
         else:
             fit_x = [genesis_date + pd.Timedelta(days=int(d)) for d in x_fit]
-        
+
         fig.add_trace(go.Scatter(
             x=fit_x,
             y=y_fit,
