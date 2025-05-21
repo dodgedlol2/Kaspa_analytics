@@ -269,7 +269,9 @@ with st.container():
                 gridwidth=0.5
             ),
             linecolor='#2b3137',
-            zerolinecolor='#2b3137'
+            zerolinecolor='#2b3137',
+            autorange=True,  # Enable auto-scaling
+            fixedrange=False  # Allow zooming
         ),
         legend=dict(
             orientation="h",
@@ -284,6 +286,15 @@ with st.container():
             bordercolor='#2b3137',
             font_color='#e0e0e0'
         )
+    )
+
+    # Add configuration for responsive zooming
+    fig.update_layout(
+        config={
+            'scrollZoom': True,
+            'responsive': True,
+            'displayModeBar': True,
+        }
     )
 
     st.plotly_chart(fig, use_container_width=True)
