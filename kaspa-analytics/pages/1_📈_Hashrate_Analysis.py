@@ -215,37 +215,51 @@ with st.container():
 
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # Add compact time range selector
+  # ===== TIME RANGE SELECTOR =====
     time_ranges = ["1W", "1M", "3M", "6M", "1Y", "All"]
     
     # Initialize time_range in session state if not exists
     if 'time_range' not in st.session_state:
         st.session_state.time_range = "All"
     
-   # Create container for time range buttons
+ # Create a container for the buttons
+    button_container = st.container()
+    with button_container:
+        cols = st.columns([1,1,1,1,1,1])  # 6 equal columns for 6 buttons
+        for i, tr in enumerate(time_ranges):
+            with cols[i]:
+                if st.button(
+                    tr,
+                    key=f"time_range_{tr}",
+                    type="primary" if st.session_state.time_range == tr else "secondary"
+                ):
+                    st.session_state.time_range = tr
+                    st.rerun()
+    
+    # CSS to make buttons ultra-compact
     st.markdown("""
     <style>
-        .time-range-btn {
-            font-size: 10px !important;
-            padding: 0px 3px !important;
-            margin: 0px 1px !important;
+        /* Make buttons as small as possible */
+        .stButton button {
             min-width: 24px !important;
-            height: 20px !important;
-            border-radius: 2px !important;
-            border: none !important;
-            background-color: transparent !important;
-            color: #e0e0e0 !important;
+            padding: 0px 4px !important;
+            margin: 0px !important;
+            font-size: 10px !important;
+            height: 22px !important;
         }
-        .time-range-btn:hover {
-            color: #00FFCC !important;
+        /* Remove space between buttons */
+        [data-testid="column"] {
+            padding: 0px 1px !important;
         }
-        .time-range-btn.active {
-            color: #00FFCC !important;
-            text-decoration: underline;
-            font-weight: 500 !important;
+        /* Position container at top right */
+        [data-testid="stVerticalBlock"] > [data-testid="stVerticalBlockBorderWrapper"]:first-child {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            background: transparent;
         }
     </style>
-    <div style="display: flex; justify-content: flex-end; gap: 0px;">
     """, unsafe_allow_html=True)
     
   # Create buttons
