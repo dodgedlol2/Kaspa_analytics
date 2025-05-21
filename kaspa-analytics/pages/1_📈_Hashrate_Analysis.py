@@ -177,7 +177,7 @@ with st.container():
                 rangeslider=dict(
                     visible=True,
                     thickness=0.1,
-                    bgcolor='rgba(0,255,204,0.2)',  # Match the main line color
+                    bgcolor='#0e1117',  # Match the main line color
                     bordercolor="#00FFCC",
                     borderwidth=1
                 ),
