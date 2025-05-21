@@ -231,19 +231,49 @@ with st.container():
 
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # Time range selector with "All" selected by default
+# Add professional time range selector in the top right
     with st.container():
-        st.markdown('<div class="time-range-selector">', unsafe_allow_html=True)
-        time_range = st.segmented_control(
-            "Time Range",
-            options=["1W", "1M", "3M", "6M", "1Y", "All"],
-            default_value="All" if st.session_state.first_visit else st.session_state.get('time_range', "All"),
-            key="time_range"
-        )
-        st.session_state.first_visit = False
-        st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown("""
+        <style>
+            div[data-testid="stHorizontalBlock"] {
+                gap: 0.5rem;
+            }
+            div[data-testid="column"] button {
+                width: 100%;
+                font-size: 0.8rem;
+                padding: 0.25rem 0.5rem;
+                border-radius: 0.5rem;
+                border: 1px solid #3A3C4A;
+                background-color: #262730;
+                color: #e0e0e0;
+                transition: all 0.2s ease;
+            }
+            div[data-testid="column"] button:hover {
+                background-color: #3A3C4A !important;
+                color: #00FFCC !important;
+            }
+            div[data-testid="column"] button:active,
+            div[data-testid="column"] button:focus {
+                background-color: #00FFCC !important;
+                color: #262730 !important;
+                border-color: #00FFCC !important;
+                box-shadow: none !important;
+            }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        time_ranges = ["1W", "1M", "3M", "6M", "1Y", "All"]
+        cols = st.columns(len(time_ranges))
+        
+        for i, tr in enumerate(time_ranges):
+            with cols[i]:
+                if st.button(tr, key=f"time_range_{tr}"):
+                    st.session_state.time_range = tr
+        
+        # Default to "All" if not set
+        time_range = st.session_state.get("time_range", "All")
 
-    # Calculate date range based on selection
+  # Calculate date range based on selection
     last_date = df['Date'].iloc[-1]
     if time_range == "1W":
         start_date = last_date - timedelta(days=7)
