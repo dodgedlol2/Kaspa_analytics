@@ -102,7 +102,8 @@ st.markdown("""
     .control-group {
         display: flex;
         flex-direction: column;
-        min-width: 120px;
+        min-width: 60px;
+        max-width: 80px;
     }
 
     .control-label {
@@ -111,17 +112,21 @@ st.markdown("""
         margin-bottom: 2px !important;
     }
 
+    .stSelectbox {
+        width: 60px !important;
+    }
+
     .stSelectbox > div {
         width: 100% !important;
     }
 
     .stSelectbox select {
         font-size: 12px !important;
-        padding: 4px 8px !important;
+        padding: 2px 4px !important;
         background-color: #262730 !important;
         border: 1px solid #3A3C4A !important;
         color: #e0e0e0 !important;
-        height: 28px !important;
+        height: 24px !important;
     }
 
     .stSelectbox svg {
