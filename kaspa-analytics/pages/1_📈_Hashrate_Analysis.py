@@ -291,7 +291,18 @@ with st.container():
         tickformat = "%b %Y"
         hoverformat = "%b %d, %Y"
 
-    # First add the power law fit (this will be in the background)
+    # Main trace with updated colors
+    fig.add_trace(go.Scatter(
+        x=x_values,
+        y=filtered_df['Hashrate_PH'],
+        mode='lines',
+        name='Hashrate (PH/s)',
+        line=dict(color='#00FFCC', width=2.5),
+        hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Hashrate</b>: %{y:.2f} PH/s<extra></extra>',
+        text=filtered_df['Date']
+    ))
+
+    # Power-law fit extended 300 days into future
     x_fit = np.linspace(filtered_df['days_from_genesis'].min(), max_days, 300)
     y_fit = a * np.power(x_fit, b)
 
@@ -300,14 +311,12 @@ with st.container():
     else:
         fit_x = [genesis_date + pd.Timedelta(days=int(d)) for d in x_fit]
 
-    # Add power law fit first (so it's in the background)
     fig.add_trace(go.Scatter(
         x=fit_x,
         y=y_fit,
         mode='lines',
         name=f'Power-Law Fit (R²={r2:.3f})',
-        line=dict(color='#FFA726', dash='dot', width=2),
-        hoverinfo='skip'  # Skip hover for this trace to prevent interference
+        line=dict(color='#FFA726', dash='dot', width=2)
     ))
 
     # Deviation bands (extended 300 days into future)
@@ -332,29 +341,10 @@ with st.container():
             fillcolor='rgba(100, 100, 100, 0.2)'
         ))
 
-    # THEN add the main trace (so it's on top and controls the y-axis)
-    fig.add_trace(go.Scatter(
-        x=x_values,
-        y=filtered_df['Hashrate_PH'],
-        mode='lines',
-        name='Hashrate (PH/s)',
-        line=dict(color='#00FFCC', width=2.5),
-        hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Hashrate</b>: %{y:.2f} PH/s<extra></extra>',
-        text=filtered_df['Date']
-    ))
-
-    # Calculate y-axis range based only on hashrate data
-    if y_scale == "Linear":
-        y_min = filtered_df['Hashrate_PH'].min() * 0.9
-        y_max = filtered_df['Hashrate_PH'].max() * 1.1
-    else:  # Log scale
-        y_min = 10**(np.log10(filtered_df['Hashrate_PH'].min()) - 0.1)
-        y_max = 10**(np.log10(filtered_df['Hashrate_PH'].max()) + 0.1)
-
     # Enhanced layout with matching background
     fig.update_layout(
-        plot_bgcolor='#262730',
-        paper_bgcolor='#262730',
+        plot_bgcolor='#262730',  # Correct sidebar grey
+        paper_bgcolor='#262730',  # Correct sidebar grey
         font_color='#e0e0e0',
         hovermode='x unified',
         height=700,
@@ -365,7 +355,7 @@ with st.container():
             rangeslider=dict(
                 visible=True,
                 thickness=0.1,
-                bgcolor='#262730',
+                bgcolor='#262730',  # Correct sidebar grey
                 bordercolor="#3A3C4A",
                 borderwidth=1
             ),
@@ -395,9 +385,7 @@ with st.container():
                 gridwidth=0.5
             ),
             linecolor='#3A3C4A',
-            zerolinecolor='#3A3C4A',
-            range=[y_min, y_max] if y_scale == "Linear" else 
-                 [np.log10(y_min), np.log10(y_max)]
+            zerolinecolor='#3A3C4A'
         ),
         legend=dict(
             orientation="h",
@@ -405,10 +393,10 @@ with st.container():
             y=1.02,
             xanchor="right",
             x=1,
-            bgcolor='rgba(38, 39, 48, 0.8)'
+            bgcolor='rgba(38, 39, 48, 0.8)'  # Semi-transparent sidebar grey
         ),
         hoverlabel=dict(
-            bgcolor='#262730',
+            bgcolor='#262730',  # Correct sidebar grey
             bordercolor='#3A3C4A',
             font_color='#e0e0e0'
         )
