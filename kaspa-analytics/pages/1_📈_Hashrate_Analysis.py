@@ -2,30 +2,23 @@ import streamlit as st
 import plotly.graph_objects as go
 import numpy as np
 import pandas as pd
+import requests
+import time
+from datetime import datetime
 from utils import fit_power_law, load_data
 
 st.set_page_config(layout="wide")
 
-# Data loading and processing
-if 'df' not in st.session_state or 'genesis_date' not in st.session_state:
-    try:
-        st.session_state.df, st.session_state.genesis_date = load_data()
-    except Exception as e:
-        st.error(f"Failed to load data: {str(e)}")
-        st.stop()
-
-df = st.session_state.df
-genesis_date = st.session_state.genesis_date
-
-try:
-    a, b, r2 = fit_power_law(df)
-except Exception as e:
-    st.error(f"Failed to calculate power law: {str(e)}")
-    st.stop()
-
-# Custom CSS for enhanced spacing
+# Custom CSS for animations and styling
 st.markdown("""
 <style>
+    @keyframes pulse {
+        0% { color: #00FFCC; }
+        100% { color: white; }
+    }
+    .updating {
+        animation: pulse 1.5s ease-out;
+    }
     .control-block {
         padding: 8px 12px;
         border-radius: 8px;
@@ -66,6 +59,86 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
+
+# Data loading and processing
+if 'df' not in st.session_state or 'genesis_date' not in st.session_state:
+    try:
+        st.session_state.df, st.session_state.genesis_date = load_data()
+    except Exception as e:
+        st.error(f"Failed to load data: {str(e)}")
+        st.stop()
+
+df = st.session_state.df
+genesis_date = st.session_state.genesis_date
+
+try:
+    a, b, r2 = fit_power_law(df)
+except Exception as e:
+    st.error(f"Failed to calculate power law: {str(e)}")
+    st.stop()
+
+# Function to fetch current hashrate from Kaspa API
+def get_current_hashrate():
+    try:
+        response = requests.get("https://api.kaspa.org/info/hashrate?stringOnly=true", timeout=5)
+        if response.status_code == 200:
+            th_per_second = float(response.text.strip().replace(',', ''))
+            return th_per_second / 1000  # Convert TH/s to PH/s
+        return None
+    except Exception as e:
+        st.error(f"Failed to fetch current hashrate: {str(e)}")
+        return None
+
+# Initialize session state for real-time hashrate
+if 'current_hashrate' not in st.session_state:
+    st.session_state.current_hashrate = df['Hashrate_PH'].iloc[-1]  # Default to last known value
+    st.session_state.last_update = datetime.now()
+    st.session_state.updating = False
+
+# Create containers for auto-updating elements
+current_hashrate_container = st.empty()
+
+# Function to update the metric with animation
+def update_hashrate_display():
+    ph_value = st.session_state.current_hashrate
+    if st.session_state.updating:
+        current_hashrate_container.markdown(
+            f"""<div class="updating" style="font-size: 1rem;">
+                {ph_value:.2f} PH/s
+            </div>""",
+            unsafe_allow_html=True
+        )
+    else:
+        current_hashrate_container.markdown(
+            f"""<div style="font-size: 1rem;">
+                {ph_value:.2f} PH/s
+            </div>""",
+            unsafe_allow_html=True
+        )
+
+# Real-time hashrate update function
+def hashrate_updater():
+    while True:
+        try:
+            new_hashrate = get_current_hashrate()
+            if new_hashrate is not None:
+                if abs(new_hashrate - st.session_state.current_hashrate) > 0.01:  # Only update if significant change
+                    st.session_state.current_hashrate = new_hashrate
+                    st.session_state.last_update = datetime.now()
+                    st.session_state.updating = True
+                    update_hashrate_display()
+                    time.sleep(1.5)  # Let animation play
+                    st.session_state.updating = False
+                    update_hashrate_display()
+        except Exception as e:
+            print(f"Error updating hashrate: {e}")
+        time.sleep(10)  # Check every 10 seconds
+
+# Start the updater in a separate thread
+import threading
+if 'updater_thread' not in st.session_state:
+    st.session_state.updater_thread = threading.Thread(target=hashrate_updater, daemon=True)
+    st.session_state.updater_thread.start()
 
 # ====== ENHANCED CHART CONTAINER ======
 with st.container():
@@ -177,7 +250,7 @@ with st.container():
                 rangeslider=dict(
                     visible=True,
                     thickness=0.1,
-                    bgcolor='rgba(0,255,204,0.2)',  # Match the main line color
+                    bgcolor='rgba(0,255,204,0.2)',
                     bordercolor="#00FFCC",
                     borderwidth=1
                 ),
@@ -225,4 +298,5 @@ with cols[0].container(border=True):
 with cols[1].container(border=True):
     st.metric("Model Fit (R²)", f"{r2:.3f}")
 with cols[2].container(border=True):
-    st.metric("Current Hashrate", f"{df['Hashrate_PH'].iloc[-1]:.2f} PH/s")
+    st.markdown('<div style="font-size: 0.9rem; margin-bottom: 5px;">Current Hashrate</div>', unsafe_allow_html=True)
+    update_hashrate_display()
