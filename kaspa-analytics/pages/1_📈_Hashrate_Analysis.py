@@ -66,6 +66,23 @@ st.markdown("""
         color: #e0e0e0 !important;
     }
 
+    .stMetric {
+        margin: 5px !important;
+        height: 100% !important;
+    }
+
+    h2 {
+        color: #e0e0e0 !important;
+    }
+
+    .hovertext text.hovertext {
+        fill: #e0e0e0 !important;
+    }
+
+    .range-slider .handle:after {
+        background-color: #00FFCC !important;
+    }
+
     .metrics-container {
         width: calc(100% - 40px) !important;
         margin-left: 20px !important;
@@ -76,27 +93,31 @@ st.markdown("""
 
     .controls-container {
         display: flex;
-        justify-content: flex-start;
-        gap: 12px;
-        margin-left: 40px;
-        margin-bottom: 15px;
+        justify-content: flex-end;
         flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
     }
 
     .control-group {
         display: flex;
         flex-direction: column;
-        width: 110px;
-        padding: 6px;
-        border: 1px solid #3A3C4A;
-        border-radius: 6px;
-        background-color: #1E1F25;
+        width: 120px !important;
+        min-width: 120px !important;
     }
 
     .control-label {
         font-size: 11px !important;
         color: #e0e0e0 !important;
         margin-bottom: 2px !important;
+    }
+
+    .stSelectbox {
+        width: 120px !important;
+    }
+
+    .stSelectbox > div {
+        width: 100% !important;
     }
 
     .stSelectbox select {
@@ -121,26 +142,58 @@ with st.container():
 
     # Controls in horizontal layout
     st.markdown('<div class="controls-container">', unsafe_allow_html=True)
+    
+    # Create columns with minimal spacing
+    col1, col2, col3, col4 = st.columns([1, 1, 1, 1], gap="small")
 
-    for label, key, options, default_index in [
-        ("Period", "time_range_select", ["1W", "1M", "3M", "6M", "1Y", "All"], 5),
-        ("Hashrate Scale", "y_scale_select", ["Linear", "Log"], 1 if st.session_state.get("y_scale", True) else 0),
-        ("Time Scale", "x_scale_select", ["Linear", "Log"], 0 if st.session_state.get("x_scale", False) else 1),
-        ("Power Law Fit", "power_law_select", ["Hide", "Show"], 1 if st.session_state.get("power_law_toggle", False) else 0),
-    ]:
-        st.markdown('<div class="control-group">', unsafe_allow_html=True)
-        st.markdown(f'<div class="control-label">{label}</div>', unsafe_allow_html=True)
-        st.selectbox(label, options, index=default_index, label_visibility="collapsed", key=key)
-        st.markdown('</div>', unsafe_allow_html=True)
+    with col1:
+        st.markdown('<div class="control-label">Period</div>', unsafe_allow_html=True)
+        time_ranges = ["1W", "1M", "3M", "6M", "1Y", "All"]
+        if 'time_range' not in st.session_state:
+            st.session_state.time_range = "All"
+        time_range = st.selectbox(
+            "Time Range",
+            time_ranges,
+            index=time_ranges.index(st.session_state.time_range),
+            label_visibility="collapsed",
+            key="time_range_select"
+        )
 
+    with col2:
+        st.markdown('<div class="control-label">Hashrate Scale</div>', unsafe_allow_html=True)
+        y_scale_options = ["Linear", "Log"]
+        y_scale = st.selectbox(
+            "Hashrate Scale",
+            y_scale_options,
+            index=1 if st.session_state.get("y_scale", True) else 0,
+            label_visibility="collapsed",
+            key="y_scale_select"
+        )
+
+    with col3:
+        st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
+        x_scale_options = ["Linear", "Log"]
+        x_scale_type = st.selectbox(
+            "Time Scale",
+            x_scale_options,
+            index=0 if st.session_state.get("x_scale", False) else 1,
+            label_visibility="collapsed",
+            key="x_scale_select"
+        )
+
+    with col4:
+        st.markdown('<div class="control-label">Power Law Fit</div>', unsafe_allow_html=True)
+        power_law_options = ["Hide", "Show"]
+        show_power_law = st.selectbox(
+            "Power Law Fit",
+            power_law_options,
+            index=1 if st.session_state.get("power_law_toggle", False) else 0,
+            label_visibility="collapsed",
+            key="power_law_select"
+        )
     st.markdown('</div>', unsafe_allow_html=True)
 
     # Date range selection
-    time_range = st.session_state["time_range_select"]
-    y_scale = st.session_state["y_scale_select"]
-    x_scale_type = st.session_state["x_scale_select"]
-    show_power_law = st.session_state["power_law_select"]
-
     last_date = df['Date'].iloc[-1]
     if time_range == "1W":
         start_date = last_date - timedelta(days=7)
