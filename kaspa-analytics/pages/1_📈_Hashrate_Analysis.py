@@ -130,9 +130,9 @@ st.markdown("""
 
 # ====== MAIN CHART CONTAINER ======
 with st.container():
-    # Create columns for title and controls
+    # Create columns for title and controls (unchanged from your original)
     title_col, control_col = st.columns([2, 8])
-
+    
     with title_col:
         st.markdown('<div class="title-spacing"><h2>Kaspa Hashrate</h2></div>', unsafe_allow_html=True)
 
@@ -159,11 +159,11 @@ with st.container():
 
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # Create figure with unified color scheme
+    # Create figure
     fig = go.Figure()
 
     # Determine x-axis values based on scale type
-    max_days = df['days_from_genesis'].max() + 300  # Extend by 300 days
+    max_days = df['days_from_genesis'].max() + 300
     if x_scale_type == "Log":
         x_values = df['days_from_genesis']
         x_title = "Days Since Genesis (Log Scale)"
@@ -175,7 +175,7 @@ with st.container():
         tickformat = "%b %Y"
         hoverformat = "%b %d, %Y"
 
-    # Main trace with updated colors
+    # Main trace
     fig.add_trace(go.Scatter(
         x=x_values,
         y=df['Hashrate_PH'],
@@ -203,7 +203,7 @@ with st.container():
         line=dict(color='#FFA726', dash='dot', width=2)
     ))
 
-    # Deviation bands (extended 300 days into future)
+    # Deviation bands
     if show_bands:
         fig.add_trace(go.Scatter(
             x=fit_x,
@@ -225,7 +225,7 @@ with st.container():
             fillcolor='rgba(100, 100, 100, 0.2)'
         ))
 
-    # Enhanced layout with matching background
+    # Enhanced layout with auto-range behavior
     fig.update_layout(
         plot_bgcolor='#1a1e25',
         paper_bgcolor='#1a1e25',
@@ -253,10 +253,10 @@ with st.container():
                 gridwidth=0.5
             ),
             tickformat=tickformat,
-            range=[None, max_days] if x_scale_type == "Log" else 
-                  [df['Date'].min(), genesis_date + pd.Timedelta(days=max_days)],
             linecolor='#2b3137',
-            zerolinecolor='#2b3137'
+            zerolinecolor='#2b3137',
+            autorange=True,
+            fixedrange=False
         ),
         yaxis=dict(
             type="log" if y_scale == "Log" else "linear",
@@ -270,8 +270,8 @@ with st.container():
             ),
             linecolor='#2b3137',
             zerolinecolor='#2b3137',
-            autorange=True,  # Enable auto-scaling
-            fixedrange=False  # Allow zooming
+            autorange=True,
+            fixedrange=False
         ),
         legend=dict(
             orientation="h",
@@ -285,6 +285,30 @@ with st.container():
             bgcolor='#1a1e25',
             bordercolor='#2b3137',
             font_color='#e0e0e0'
+        )
+    )
+
+    # Add range selector buttons (like Glassnode)
+    fig.update_layout(
+        xaxis=dict(
+            rangeselector=dict(
+                buttons=list([
+                    dict(count=1, label="1m", step="month", stepmode="backward"),
+                    dict(count=6, label="6m", step="month", stepmode="backward"),
+                    dict(count=1, label="YTD", step="year", stepmode="todate"),
+                    dict(count=1, label="1y", step="year", stepmode="backward"),
+                    dict(step="all", label="All")
+                ]),
+                bgcolor='#1a1e25',
+                bordercolor='#2b3137',
+                borderwidth=1,
+                x=0,
+                xanchor='left',
+                y=1.1,
+                yanchor='top'
+            ),
+            rangeslider=dict(visible=True),
+            type="date"
         )
     )
 
