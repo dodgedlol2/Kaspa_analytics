@@ -2,7 +2,6 @@ import streamlit as st
 import plotly.graph_objects as go
 import numpy as np
 import pandas as pd
-from utils import fit_power_law, load_data
 from datetime import datetime, timedelta
 
 st.set_page_config(layout="wide")
@@ -43,11 +42,12 @@ st.markdown("""
     }
     
     /* Main chart container styling */
-    div[data-testid="stVerticalBlock"] > div[data-testid="stVerticalBlockBorderWrapper"] {
+    .chart-container {
         background-color: #262730 !important;
         border-radius: 10px !important;
         border: 1px solid #3A3C4A !important;
         padding: 15px !important;
+        position: relative;
     }
     
     /* Metric cards styling */
@@ -99,7 +99,7 @@ st.markdown("""
         margin-bottom: 0px !important;
     }
     
-    /* Compact controls styling */
+    /* Horizontal controls styling */
     .controls-container {
         position: absolute;
         top: 20px;
@@ -109,24 +109,28 @@ st.markdown("""
         align-items: flex-start;
         gap: 15px;
         z-index: 100;
+        background-color: rgba(38, 39, 48, 0.8);
+        padding: 8px 12px;
+        border-radius: 8px;
+        border: 1px solid #3A3C4A;
     }
     
     .control-group {
         display: flex;
         flex-direction: column;
-        align-items: flex-start;
         gap: 2px;
+        min-width: 100px;
     }
     
     .control-label {
         font-size: 11px !important;
         color: #e0e0e0 !important;
         margin-bottom: 0px !important;
-        white-space: nowrap;
+        text-align: center;
     }
     
     .stSelectbox > div {
-        width: 100px !important;
+        width: 100% !important;
     }
     
     .stSelectbox select {
@@ -146,67 +150,85 @@ st.markdown("""
 
 # ====== MAIN CHART CONTAINER ======
 with st.container():
-    # Title
-    st.markdown('<div class="title-spacing"><h2>Kaspa Hashrate</h2></div>', unsafe_allow_html=True)
-
-    # Controls container - positioned absolutely in top right
-    st.markdown('<div class="controls-container">', unsafe_allow_html=True)
+    # Create a container for the chart with relative positioning
+    chart_container = st.markdown("""
+    <div class="chart-container">
+        <div class="title-spacing"><h2>Kaspa Hashrate</h2></div>
+    </div>
+    """, unsafe_allow_html=True)
     
-    # Time range selector
-    st.markdown('<div class="control-group">', unsafe_allow_html=True)
-    st.markdown('<div class="control-label">Period</div>', unsafe_allow_html=True)
-    time_ranges = ["1W", "1M", "3M", "6M", "1Y", "All"]
-    if 'time_range' not in st.session_state:
-        st.session_state.time_range = "All"
-    time_range = st.selectbox(
-        "Time Range",
-        time_ranges,
-        index=time_ranges.index(st.session_state.time_range),
-        label_visibility="collapsed",
-        key="time_range_select"
-    )
-    st.markdown('</div>', unsafe_allow_html=True)
-    
-    # Hashrate scale selector
-    st.markdown('<div class="control-group">', unsafe_allow_html=True)
-    st.markdown('<div class="control-label">Hashrate Scale</div>', unsafe_allow_html=True)
-    y_scale_options = ["Linear", "Log"]
-    y_scale = st.selectbox(
-        "Hashrate Scale",
-        y_scale_options,
-        index=1 if st.session_state.get("y_scale", True) else 0,
-        label_visibility="collapsed",
-        key="y_scale_select"
-    )
-    st.markdown('</div>', unsafe_allow_html=True)
-    
-    # Time scale selector
-    st.markdown('<div class="control-group">', unsafe_allow_html=True)
-    st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
-    x_scale_options = ["Linear", "Log"]
-    x_scale_type = st.selectbox(
-        "Time Scale",
-        x_scale_options,
-        index=0 if st.session_state.get("x_scale", False) else 1,
-        label_visibility="collapsed",
-        key="x_scale_select"
-    )
-    st.markdown('</div>', unsafe_allow_html=True)
-    
-    # Power law fit selector
-    st.markdown('<div class="control-group">', unsafe_allow_html=True)
-    st.markdown('<div class="control-label">Power Law Fit</div>', unsafe_allow_html=True)
-    power_law_options = ["Hide", "Show"]
-    show_power_law = st.selectbox(
-        "Power Law Fit",
-        power_law_options,
-        index=1 if st.session_state.get("power_law_toggle", False) else 0,
-        label_visibility="collapsed",
-        key="power_law_select"
-    )
-    st.markdown('</div>', unsafe_allow_html=True)
-    
-    st.markdown('</div>', unsafe_allow_html=True)
+    # Add controls container inside the chart container
+    with st.container():
+        st.markdown("""
+        <div class="controls-container">
+            <div class="control-group">
+                <div class="control-label">Period</div>
+        """, unsafe_allow_html=True)
+        
+        # Time range selector
+        time_ranges = ["1W", "1M", "3M", "6M", "1Y", "All"]
+        if 'time_range' not in st.session_state:
+            st.session_state.time_range = "All"
+        time_range = st.selectbox(
+            "Time Range",
+            time_ranges,
+            index=time_ranges.index(st.session_state.time_range),
+            label_visibility="collapsed",
+            key="time_range_select"
+        )
+        
+        st.markdown("""
+            </div>
+            <div class="control-group">
+                <div class="control-label">Hashrate Scale</div>
+        """, unsafe_allow_html=True)
+        
+        # Hashrate scale selector
+        y_scale_options = ["Linear", "Log"]
+        y_scale = st.selectbox(
+            "Hashrate Scale",
+            y_scale_options,
+            index=1 if st.session_state.get("y_scale", True) else 0,
+            label_visibility="collapsed",
+            key="y_scale_select"
+        )
+        
+        st.markdown("""
+            </div>
+            <div class="control-group">
+                <div class="control-label">Time Scale</div>
+        """, unsafe_allow_html=True)
+        
+        # Time scale selector
+        x_scale_options = ["Linear", "Log"]
+        x_scale_type = st.selectbox(
+            "Time Scale",
+            x_scale_options,
+            index=0 if st.session_state.get("x_scale", False) else 1,
+            label_visibility="collapsed",
+            key="x_scale_select"
+        )
+        
+        st.markdown("""
+            </div>
+            <div class="control-group">
+                <div class="control-label">Power Law Fit</div>
+        """, unsafe_allow_html=True)
+        
+        # Power law fit selector
+        power_law_options = ["Hide", "Show"]
+        show_power_law = st.selectbox(
+            "Power Law Fit",
+            power_law_options,
+            index=1 if st.session_state.get("power_law_toggle", False) else 0,
+            label_visibility="collapsed",
+            key="power_law_select"
+        )
+        
+        st.markdown("""
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
     # Calculate date range based on selection
     last_date = df['Date'].iloc[-1]
