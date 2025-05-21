@@ -279,6 +279,7 @@ with st.container():
     fig = go.Figure()
 
     # Determine x-axis values based on scale type
+    max_days = filtered_df['days_from_genesis'].max() + 300  # Extend by 300 days
     if x_scale_type == "Log":
         x_values = filtered_df['days_from_genesis']
         x_title = "Days Since Genesis (Log Scale)"
@@ -300,6 +301,45 @@ with st.container():
         hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Hashrate</b>: %{y:.2f} PH/s<extra></extra>',
         text=filtered_df['Date']
     ))
+
+    # Power-law fit extended 300 days into future
+    x_fit = np.linspace(filtered_df['days_from_genesis'].min(), max_days, 300)
+    y_fit = a * np.power(x_fit, b)
+
+    if x_scale_type == "Log":
+        fit_x = x_fit
+    else:
+        fit_x = [genesis_date + pd.Timedelta(days=int(d)) for d in x_fit]
+
+    fig.add_trace(go.Scatter(
+        x=fit_x,
+        y=y_fit,
+        mode='lines',
+        name=f'Power-Law Fit (R²={r2:.3f})',
+        line=dict(color='#FFA726', dash='dot', width=2)
+    ))
+
+    # Deviation bands (extended 300 days into future)
+    if show_bands:
+        fig.add_trace(go.Scatter(
+            x=fit_x,
+            y=y_fit * 0.4,
+            mode='lines',
+            name='-60% Deviation',
+            line=dict(color='rgba(255, 255, 255, 0.5)', dash='dot', width=1),
+            hoverinfo='skip',
+            fill=None
+        ))
+        fig.add_trace(go.Scatter(
+            x=fit_x,
+            y=y_fit * 2.2,
+            mode='lines',
+            name='+120% Deviation',
+            line=dict(color='rgba(255, 255, 255, 0.5)', dash='dot', width=1),
+            hoverinfo='skip',
+            fill='tonexty',
+            fillcolor='rgba(100, 100, 100, 0.2)'
+        ))
 
     # Enhanced layout with matching background
     fig.update_layout(
@@ -329,7 +369,8 @@ with st.container():
                 gridwidth=0.5
             ),
             tickformat=tickformat,
-            range=None,  # Let Plotly auto-scale based on visible data
+            range=[None, max_days] if x_scale_type == "Log" else 
+                  [filtered_df['Date'].min(), genesis_date + pd.Timedelta(days=max_days)],
             linecolor='#3A3C4A',
             zerolinecolor='#3A3C4A'
         ),
@@ -344,8 +385,7 @@ with st.container():
                 gridwidth=0.5
             ),
             linecolor='#3A3C4A',
-            zerolinecolor='#3A3C4A',
-            range=None  # Let Plotly auto-scale based on visible data
+            zerolinecolor='#3A3C4A'
         ),
         legend=dict(
             orientation="h",
