@@ -151,20 +151,35 @@ st.markdown("""
         margin-bottom: 0px !important;
     }
     
-    /* Custom segmented control styling */
-    .st-emotion-cache-1q7gvpp {
-        gap: 0px !important;
+    /* Compact time range selector */
+    .time-range-container {
+        display: flex;
+        gap: 0px;
+        justify-content: flex-end;
+        padding-right: 30px;
     }
     
-    .st-emotion-cache-1q7gvpp button {
-        padding: 0px 8px !important;
+    .time-range-btn {
         font-size: 11px !important;
-        min-height: 24px !important;
+        padding: 0px 6px !important;
+        margin: 0px !important;
+        min-width: 30px !important;
+        height: 24px !important;
+        border-radius: 0px !important;
+        border: none !important;
+        background-color: transparent !important;
+        color: #e0e0e0 !important;
     }
     
-    /* Fix for button alignment */
-    .stButton button {
-        width: 100% !important;
+    .time-range-btn:hover {
+        color: #00FFCC !important;
+        background-color: rgba(58, 60, 74, 0.5) !important;
+    }
+    
+    .time-range-btn.active {
+        color: #00FFCC !important;
+        font-weight: 500 !important;
+        text-decoration: underline;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -200,25 +215,30 @@ with st.container():
 
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # Add time range selector using segmented_control
+    # Add compact time range selector
     time_ranges = ["1W", "1M", "3M", "6M", "1Y", "All"]
     
     # Initialize time_range in session state if not exists
     if 'time_range' not in st.session_state:
         st.session_state.time_range = "All"
     
-    # Create the segmented control
-    selected_range = st.segmented_control(
-        label="Time Range",
-        options=time_ranges,
-        key="time_range_selector",
-        default_value=st.session_state.time_range
-    )
+    # Create container for time range buttons
+    st.markdown('<div class="time-range-container">', unsafe_allow_html=True)
     
-    # Update session state when selection changes
-    if selected_range != st.session_state.time_range:
-        st.session_state.time_range = selected_range
-        st.rerun()
+    # Create buttons using columns
+    cols = st.columns(len(time_ranges))
+    for i, tr in enumerate(time_ranges):
+        with cols[i]:
+            if st.button(
+                tr,
+                key=f"time_range_{tr}",
+                type="primary" if st.session_state.time_range == tr else "secondary",
+                use_container_width=True
+            ):
+                st.session_state.time_range = tr
+                st.rerun()
+    
+    st.markdown('</div>', unsafe_allow_html=True)
 
     # Get the selected time range
     time_range = st.session_state.time_range
