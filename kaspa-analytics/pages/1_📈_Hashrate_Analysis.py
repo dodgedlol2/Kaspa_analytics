@@ -197,7 +197,6 @@ st.markdown("""
 
 # ====== MAIN CHART CONTAINER ======
 with st.container():
-    # Create columns for title and controls
     title_col, control_col = st.columns([2, 8])
 
     with title_col:
@@ -226,15 +225,16 @@ with st.container():
 
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # Add professional time range selector in the top right
+    # Time range selector with "All" selected by default
     with st.container():
         st.markdown('<div class="time-range-selector">', unsafe_allow_html=True)
         time_range = st.segmented_control(
             "Time Range",
             options=["1W", "1M", "3M", "6M", "1Y", "All"],
-            default="All",
+            default_value="All" if st.session_state.first_visit else st.session_state.get('time_range', "All"),
             key="time_range"
         )
+        st.session_state.first_visit = False
         st.markdown('</div>', unsafe_allow_html=True)
 
     # Calculate date range based on selection
@@ -321,10 +321,15 @@ with st.container():
             fillcolor='rgba(100, 100, 100, 0.2)'
         ))
 
+    # Calculate y-axis range based ONLY on hashrate data
+    hashrate_min = filtered_df['Hashrate_PH'].min()
+    hashrate_max = filtered_df['Hashrate_PH'].max()
+    y_padding = 0.1 * (hashrate_max - hashrate_min)  # 10% padding
+
     # Enhanced layout with matching background
     fig.update_layout(
-        plot_bgcolor='#262730',  # Correct sidebar grey
-        paper_bgcolor='#262730',  # Now with # prefix
+        plot_bgcolor='#262730',
+        paper_bgcolor='#262730',
         font_color='#e0e0e0',
         hovermode='x unified',
         height=700,
@@ -335,7 +340,7 @@ with st.container():
             rangeslider=dict(
                 visible=True,
                 thickness=0.1,
-                bgcolor='#262730',  # Correct sidebar grey
+                bgcolor='#262730',
                 bordercolor="#3A3C4A",
                 borderwidth=1
             ),
@@ -365,7 +370,8 @@ with st.container():
                 gridwidth=0.5
             ),
             linecolor='#3A3C4A',
-            zerolinecolor='#3A3C4A'
+            zerolinecolor='#3A3C4A',
+            range=[hashrate_min - y_padding, hashrate_max + y_padding] if y_scale == "Linear" else None
         ),
         legend=dict(
             orientation="h",
@@ -373,10 +379,10 @@ with st.container():
             y=1.02,
             xanchor="right",
             x=1,
-            bgcolor='rgba(38, 39, 48, 0.8)'  # Semi-transparent sidebar grey
+            bgcolor='rgba(38, 39, 48, 0.8)'
         ),
         hoverlabel=dict(
-            bgcolor='#262730',  # Correct sidebar grey
+            bgcolor='#262730',
             bordercolor='#3A3C4A',
             font_color='#e0e0e0'
         )
@@ -384,7 +390,7 @@ with st.container():
 
     st.plotly_chart(fig, use_container_width=True)
 
-# Stats in cards with matching styling - now aligned with main panel
+# Stats in cards with matching styling
 st.markdown('<div class="metrics-container">', unsafe_allow_html=True)
 cols = st.columns(3)
 with cols[0]:
