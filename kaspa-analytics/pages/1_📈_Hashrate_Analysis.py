@@ -91,7 +91,6 @@ st.markdown("""
         margin-bottom: 0px !important;
     }
 
-    /* Dropdown controls styling */
     .control-label {
         font-size: 11px !important;
         color: #e0e0e0 !important;
@@ -100,7 +99,8 @@ st.markdown("""
     }
 
     .stSelectbox {
-        width: 100px !important;
+        width: 100% !important;
+        max-width: 100px !important;
     }
 
     .stSelectbox > div {
@@ -119,19 +119,15 @@ st.markdown("""
     .stSelectbox svg {
         color: #e0e0e0 !important;
     }
-
-    /* Reduce gap between dropdown columns */
-    section.main > div {gap: 8px !important;}
 </style>
 """, unsafe_allow_html=True)
 
 # ====== MAIN CHART CONTAINER ======
 with st.container():
-    # Title
     st.markdown('<div class="title-spacing"><h2>Kaspa Hashrate</h2></div>', unsafe_allow_html=True)
 
-    # Create columns for controls with tighter spacing
-    col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
+    # Use more columns for tighter spacing
+    spacer, col1, col2, col3, col4, _ = st.columns([1, 2, 2, 2, 2, 1])
 
     with col1:
         st.markdown('<div class="control-label">Period</div>', unsafe_allow_html=True)
