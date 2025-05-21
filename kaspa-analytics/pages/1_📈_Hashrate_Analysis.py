@@ -2,26 +2,10 @@ import streamlit as st
 import plotly.graph_objects as go
 import numpy as np
 import pandas as pd
+from utils import fit_power_law, load_data
 from datetime import datetime, timedelta
 
 st.set_page_config(layout="wide")
-
-# Mock functions since we don't have the actual utils.py
-def fit_power_law(df):
-    return 0.1, 1.5, 0.95  # a, b, r2
-
-def load_data():
-    # Create mock data
-    dates = pd.date_range(start='2022-01-01', end=datetime.now(), freq='D')
-    days_from_genesis = np.arange(len(dates))
-    hashrate = 0.1 * np.power(days_from_genesis, 1.5) * (1 + 0.2 * np.random.randn(len(dates)))
-    df = pd.DataFrame({
-        'Date': dates,
-        'days_from_genesis': days_from_genesis,
-        'Hashrate_PH': hashrate
-    })
-    genesis_date = datetime(2022, 1, 1)
-    return df, genesis_date
 
 # Data loading and processing
 if 'df' not in st.session_state or 'genesis_date' not in st.session_state:
@@ -43,71 +27,62 @@ except Exception as e:
 # Custom CSS for unified styling
 st.markdown("""
 <style>
-    /* Main background color */
     .stApp {
         background-color: #0E1117;
     }
-    
-    /* Correct sidebar grey color */
+
     .st-emotion-cache-6qob1r, .sidebar-content {
         background-color: #262730 !important;
     }
-    
+
     .title-spacing {
         padding-left: 40px;
         margin-bottom: 15px;
     }
-    
-    /* Main chart container styling */
-    .chart-container {
+
+    div[data-testid="stVerticalBlock"] > div[data-testid="stVerticalBlockBorderWrapper"] {
         background-color: #262730 !important;
         border-radius: 10px !important;
         border: 1px solid #3A3C4A !important;
         padding: 15px !important;
-        position: relative;
     }
-    
-    /* Metric cards styling */
+
     div[data-testid="stMetric"] {
         background-color: #262730 !important;
         border: 1px solid #3A3C4A !important;
         border-radius: 8px !important;
         padding: 15px 20px !important;
     }
-    
+
     div[data-testid="stMetricValue"] > div {
         font-size: 24px !important;
         font-weight: 600 !important;
         color: #00FFCC !important;
     }
-    
+
     div[data-testid="stMetricLabel"] > div {
         font-size: 14px !important;
         opacity: 0.8 !important;
         color: #e0e0e0 !important;
     }
-    
+
     .stMetric {
         margin: 5px !important;
         height: 100% !important;
     }
-    
-    /* Title styling */
+
     h2 {
         color: #e0e0e0 !important;
     }
-    
-    /* Plotly tooltip styling */
+
     .hovertext text.hovertext {
         fill: #e0e0e0 !important;
     }
-    
-    /* Range slider handle color */
+
     .range-slider .handle:after {
         background-color: #00FFCC !important;
     }
-    
-    /* Metrics container styling */
+
     .metrics-container {
         width: calc(100% - 40px) !important;
         margin-left: 20px !important;
@@ -115,41 +90,31 @@ st.markdown("""
         margin-top: 10px !important;
         margin-bottom: 0px !important;
     }
-    
-    /* Horizontal controls styling */
+
     .controls-container {
-        position: absolute;
-        top: 20px;
-        right: 20px;
         display: flex;
-        flex-direction: row;
-        align-items: flex-start;
-        gap: 15px;
-        z-index: 100;
-        background-color: rgba(38, 39, 48, 0.8);
-        padding: 8px 12px;
-        border-radius: 8px;
-        border: 1px solid #3A3C4A;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 15px;
     }
-    
+
     .control-group {
         display: flex;
         flex-direction: column;
-        gap: 2px;
-        min-width: 100px;
+        min-width: 120px;
     }
-    
+
     .control-label {
         font-size: 11px !important;
         color: #e0e0e0 !important;
-        margin-bottom: 0px !important;
-        text-align: center;
+        margin-bottom: 2px !important;
     }
-    
+
     .stSelectbox > div {
         width: 100% !important;
     }
-    
+
     .stSelectbox select {
         font-size: 12px !important;
         padding: 4px 8px !important;
@@ -158,7 +123,7 @@ st.markdown("""
         color: #e0e0e0 !important;
         height: 28px !important;
     }
-    
+
     .stSelectbox svg {
         color: #e0e0e0 !important;
     }
@@ -167,72 +132,61 @@ st.markdown("""
 
 # ====== MAIN CHART CONTAINER ======
 with st.container():
-    # Create a container for the chart with relative positioning
-    st.markdown('<div class="chart-container">', unsafe_allow_html=True)
-    
     # Title
     st.markdown('<div class="title-spacing"><h2>Kaspa Hashrate</h2></div>', unsafe_allow_html=True)
 
-    # Controls container - positioned absolutely in top right
+    # Controls in horizontal layout
     st.markdown('<div class="controls-container">', unsafe_allow_html=True)
-    
-    # Time range selector
-    st.markdown('<div class="control-group">', unsafe_allow_html=True)
-    st.markdown('<div class="control-label">Period</div>', unsafe_allow_html=True)
-    time_ranges = ["1W", "1M", "3M", "6M", "1Y", "All"]
-    if 'time_range' not in st.session_state:
-        st.session_state.time_range = "All"
-    time_range = st.selectbox(
-        "Time Range",
-        time_ranges,
-        index=time_ranges.index(st.session_state.time_range),
-        label_visibility="collapsed",
-        key="time_range_select"
-    )
-    st.markdown('</div>', unsafe_allow_html=True)
-    
-    # Hashrate scale selector
-    st.markdown('<div class="control-group">', unsafe_allow_html=True)
-    st.markdown('<div class="control-label">Hashrate Scale</div>', unsafe_allow_html=True)
-    y_scale_options = ["Linear", "Log"]
-    y_scale = st.selectbox(
-        "Hashrate Scale",
-        y_scale_options,
-        index=1 if st.session_state.get("y_scale", True) else 0,
-        label_visibility="collapsed",
-        key="y_scale_select"
-    )
-    st.markdown('</div>', unsafe_allow_html=True)
-    
-    # Time scale selector
-    st.markdown('<div class="control-group">', unsafe_allow_html=True)
-    st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
-    x_scale_options = ["Linear", "Log"]
-    x_scale_type = st.selectbox(
-        "Time Scale",
-        x_scale_options,
-        index=0 if st.session_state.get("x_scale", False) else 1,
-        label_visibility="collapsed",
-        key="x_scale_select"
-    )
-    st.markdown('</div>', unsafe_allow_html=True)
-    
-    # Power law fit selector
-    st.markdown('<div class="control-group">', unsafe_allow_html=True)
-    st.markdown('<div class="control-label">Power Law Fit</div>', unsafe_allow_html=True)
-    power_law_options = ["Hide", "Show"]
-    show_power_law = st.selectbox(
-        "Power Law Fit",
-        power_law_options,
-        index=1 if st.session_state.get("power_law_toggle", False) else 0,
-        label_visibility="collapsed",
-        key="power_law_select"
-    )
-    st.markdown('</div>', unsafe_allow_html=True)
-    
-    st.markdown('</div>', unsafe_allow_html=True)  # Close controls-container
+    col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
 
-    # Calculate date range based on selection
+    with col1:
+        st.markdown('<div class="control-label">Period</div>', unsafe_allow_html=True)
+        time_ranges = ["1W", "1M", "3M", "6M", "1Y", "All"]
+        if 'time_range' not in st.session_state:
+            st.session_state.time_range = "All"
+        time_range = st.selectbox(
+            "Time Range",
+            time_ranges,
+            index=time_ranges.index(st.session_state.time_range),
+            label_visibility="collapsed",
+            key="time_range_select"
+        )
+
+    with col2:
+        st.markdown('<div class="control-label">Hashrate Scale</div>', unsafe_allow_html=True)
+        y_scale_options = ["Linear", "Log"]
+        y_scale = st.selectbox(
+            "Hashrate Scale",
+            y_scale_options,
+            index=1 if st.session_state.get("y_scale", True) else 0,
+            label_visibility="collapsed",
+            key="y_scale_select"
+        )
+
+    with col3:
+        st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
+        x_scale_options = ["Linear", "Log"]
+        x_scale_type = st.selectbox(
+            "Time Scale",
+            x_scale_options,
+            index=0 if st.session_state.get("x_scale", False) else 1,
+            label_visibility="collapsed",
+            key="x_scale_select"
+        )
+
+    with col4:
+        st.markdown('<div class="control-label">Power Law Fit</div>', unsafe_allow_html=True)
+        power_law_options = ["Hide", "Show"]
+        show_power_law = st.selectbox(
+            "Power Law Fit",
+            power_law_options,
+            index=1 if st.session_state.get("power_law_toggle", False) else 0,
+            label_visibility="collapsed",
+            key="power_law_select"
+        )
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # Date range selection
     last_date = df['Date'].iloc[-1]
     if time_range == "1W":
         start_date = last_date - timedelta(days=7)
@@ -244,17 +198,14 @@ with st.container():
         start_date = last_date - timedelta(days=180)
     elif time_range == "1Y":
         start_date = last_date - timedelta(days=365)
-    else:  # All
+    else:
         start_date = df['Date'].iloc[0]
 
-    # Filter data based on selected time range
     filtered_df = df[df['Date'] >= start_date]
 
-    # Create figure with unified color scheme
     fig = go.Figure()
 
-    # Determine x-axis values based on scale type
-    max_days = filtered_df['days_from_genesis'].max() + 300  # Extend by 300 days
+    max_days = filtered_df['days_from_genesis'].max() + 300
     if x_scale_type == "Log":
         x_values = filtered_df['days_from_genesis']
         x_title = "Days Since Genesis (Log Scale)"
@@ -266,7 +217,6 @@ with st.container():
         tickformat = "%b %Y"
         hoverformat = "%b %d, %Y"
 
-    # Main trace with updated colors
     fig.add_trace(go.Scatter(
         x=x_values,
         y=filtered_df['Hashrate_PH'],
@@ -277,15 +227,10 @@ with st.container():
         text=filtered_df['Date']
     ))
 
-    # Power-law fit extended 300 days into future (only if toggled on)
     if show_power_law == "Show":
         x_fit = np.linspace(filtered_df['days_from_genesis'].min(), max_days, 300)
         y_fit = a * np.power(x_fit, b)
-
-        if x_scale_type == "Log":
-            fit_x = x_fit
-        else:
-            fit_x = [genesis_date + pd.Timedelta(days=int(d)) for d in x_fit]
+        fit_x = x_fit if x_scale_type == "Log" else [genesis_date + pd.Timedelta(days=int(d)) for d in x_fit]
 
         fig.add_trace(go.Scatter(
             x=fit_x,
@@ -295,7 +240,6 @@ with st.container():
             line=dict(color='#FFA726', dash='dot', width=2)
         ))
 
-        # Deviation bands (extended 300 days into future)
         fig.add_trace(go.Scatter(
             x=fit_x,
             y=y_fit * 0.4,
@@ -316,7 +260,6 @@ with st.container():
             fillcolor='rgba(100, 100, 100, 0.2)'
         ))
 
-    # Enhanced layout with matching background
     fig.update_layout(
         plot_bgcolor='#262730',
         paper_bgcolor='#262730',
@@ -378,9 +321,8 @@ with st.container():
     )
 
     st.plotly_chart(fig, use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)  # Close chart-container
 
-# Stats in cards with matching styling
+# Stats
 st.markdown('<div class="metrics-container">', unsafe_allow_html=True)
 cols = st.columns(3)
 with cols[0]:
