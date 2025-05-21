@@ -3,6 +3,7 @@ import plotly.graph_objects as go
 import numpy as np
 import pandas as pd
 from utils import fit_power_law, load_data
+from datetime import datetime, timedelta
 
 st.set_page_config(layout="wide")
 
@@ -149,6 +150,36 @@ st.markdown("""
         margin-top: 10px !important;
         margin-bottom: 0px !important;
     }
+    
+    /* Time range selector styling */
+    .time-range-selector {
+        position: absolute;
+        right: 30px;
+        top: 20px;
+        z-index: 100;
+    }
+    
+    .st-bq {
+        border-color: #3A3C4A !important;
+    }
+    
+    .st-segmentedControl button {
+        color: #e0e0e0 !important;
+        background-color: #262730 !important;
+        border-color: #3A3C4A !important;
+    }
+    
+    .st-segmentedControl button:active,
+    .st-segmentedControl button:focus,
+    .st-segmentedControl button:hover {
+        background-color: #3A3C4A !important;
+        color: #00FFCC !important;
+    }
+    
+    .st-segmentedControl button[aria-pressed="true"] {
+        background-color: #00FFCC !important;
+        color: #262730 !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -183,18 +214,47 @@ with st.container():
 
         st.markdown('</div>', unsafe_allow_html=True)
 
+    # Add time range selector in the top right
+    with st.container():
+        st.markdown('<div class="time-range-selector">', unsafe_allow_html=True)
+        time_range = st.radio(
+            "Time Range",
+            options=["1W", "3M", "6M", "1Y", "All"],
+            index=4,  # Default to "All"
+            horizontal=True,
+            label_visibility="collapsed",
+            key="time_range"
+        )
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    # Calculate date range based on selection
+    last_date = df['Date'].iloc[-1]
+    if time_range == "1W":
+        start_date = last_date - timedelta(days=7)
+    elif time_range == "3M":
+        start_date = last_date - timedelta(days=90)
+    elif time_range == "6M":
+        start_date = last_date - timedelta(days=180)
+    elif time_range == "1Y":
+        start_date = last_date - timedelta(days=365)
+    else:  # All
+        start_date = df['Date'].iloc[0]
+
+    # Filter data based on selected time range
+    filtered_df = df[df['Date'] >= start_date]
+
     # Create figure with unified color scheme
     fig = go.Figure()
 
     # Determine x-axis values based on scale type
-    max_days = df['days_from_genesis'].max() + 300  # Extend by 300 days
+    max_days = filtered_df['days_from_genesis'].max() + 300  # Extend by 300 days
     if x_scale_type == "Log":
-        x_values = df['days_from_genesis']
+        x_values = filtered_df['days_from_genesis']
         x_title = "Days Since Genesis (Log Scale)"
         tickformat = None
         hoverformat = None
     else:
-        x_values = df['Date']
+        x_values = filtered_df['Date']
         x_title = "Date"
         tickformat = "%b %Y"
         hoverformat = "%b %d, %Y"
@@ -202,16 +262,16 @@ with st.container():
     # Main trace with updated colors
     fig.add_trace(go.Scatter(
         x=x_values,
-        y=df['Hashrate_PH'],
+        y=filtered_df['Hashrate_PH'],
         mode='lines',
         name='Hashrate (PH/s)',
         line=dict(color='#00FFCC', width=2.5),
         hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Hashrate</b>: %{y:.2f} PH/s<extra></extra>',
-        text=df['Date']
+        text=filtered_df['Date']
     ))
 
     # Power-law fit extended 300 days into future
-    x_fit = np.linspace(df['days_from_genesis'].min(), max_days, 300)
+    x_fit = np.linspace(filtered_df['days_from_genesis'].min(), max_days, 300)
     y_fit = a * np.power(x_fit, b)
 
     if x_scale_type == "Log":
@@ -278,7 +338,7 @@ with st.container():
             ),
             tickformat=tickformat,
             range=[None, max_days] if x_scale_type == "Log" else 
-                  [df['Date'].min(), genesis_date + pd.Timedelta(days=max_days)],
+                  [filtered_df['Date'].min(), genesis_date + pd.Timedelta(days=max_days)],
             linecolor='#3A3C4A',
             zerolinecolor='#3A3C4A'
         ),
