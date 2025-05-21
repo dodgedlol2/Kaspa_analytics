@@ -30,7 +30,6 @@ st.markdown("""
         padding: 8px 12px;
         border-radius: 8px;
         border: 1px solid #2b3137;
-        background-color: #2b2117;
         background-color: #0e1117;
         margin-right: 15px;
         min-width: 160px;
@@ -67,12 +66,18 @@ st.markdown("""
     }
 
     /* ===== METRIC CARD ENHANCEMENTS ===== */
+    /* Remove outer container border */
+    div.stContainer > div[data-testid="stVerticalBlockBorderWrapper"] {
+        border: none !important;
+        padding: 0 !important;
+    }
+    
+    /* Style the metric cards */
     div[data-testid="stMetric"] {
         background-color: #1a1e25 !important;
         border: 1px solid #2b3137 !important;
         border-radius: 8px !important;
         padding: 15px 20px !important;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
     }
     
     /* Metric value styling */
@@ -89,26 +94,10 @@ st.markdown("""
         color: #e0e0e0 !important;
     }
     
-    /* Hover effect for cards */
-    div[data-testid="stMetric"]:hover {
-        background-color: #1e222a !important;
-        transition: background-color 0.2s ease;
-    }
-    
     /* Container spacing */
     .stMetric {
         margin: 5px !important;
         height: 100% !important;
-    }
-    
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-        div[data-testid="stMetric"] {
-            padding: 12px 15px !important;
-        }
-        div[data-testid="stMetricValue"] > div {
-            font-size: 20px !important;
-        }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -172,7 +161,7 @@ with st.container():
             text=df['Date']
         ))
 
-        # Power-law fit extended 300 days into future (single continuous line)
+        # Power-law fit extended 300 days into future
         x_fit = np.linspace(df['days_from_genesis'].min(), max_days, 300)
         y_fit = a * np.power(x_fit, b)
 
@@ -211,7 +200,7 @@ with st.container():
                 fillcolor='rgba(100, 100, 100, 0.1)'
             ))
 
-        # Enhanced layout with custom slider color
+        # Enhanced layout
         fig.update_layout(
             template='plotly_dark',
             hovermode='x unified',
@@ -223,7 +212,7 @@ with st.container():
                 rangeslider=dict(
                     visible=True,
                     thickness=0.1,
-                    bgcolor='#0e1117',  # Match the main line color
+                    bgcolor='#0e1117',
                     bordercolor="#2b3137",
                     borderwidth=1
                 ),
@@ -260,15 +249,14 @@ with st.container():
             )
         )
 
-        # Show the figure with more vertical space
         st.plotly_chart(fig, use_container_width=True)
 
-# Stats in minimal cards with more spacing
+# Stats in cards with single border
 st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
 cols = st.columns(3)
-with cols[0].container(border=True):
+with cols[0]:
     st.metric("Power-Law Slope", f"{b:.3f}")
-with cols[1].container(border=True):
+with cols[1]:
     st.metric("Model Fit (R²)", f"{r2:.3f}")
-with cols[2].container(border=True):
+with cols[2]:
     st.metric("Current Hashrate", f"{df['Hashrate_PH'].iloc[-1]:.2f} PH/s")
