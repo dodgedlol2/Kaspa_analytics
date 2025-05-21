@@ -105,16 +105,16 @@ st.markdown("""
         top: 20px;
         right: 20px;
         display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-        gap: 8px;
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 15px;
         z-index: 100;
     }
     
     .control-group {
         display: flex;
         flex-direction: column;
-        align-items: flex-end;
+        align-items: flex-start;
         gap: 2px;
     }
     
@@ -122,6 +122,7 @@ st.markdown("""
         font-size: 11px !important;
         color: #e0e0e0 !important;
         margin-bottom: 0px !important;
+        white-space: nowrap;
     }
     
     .stSelectbox > div {
