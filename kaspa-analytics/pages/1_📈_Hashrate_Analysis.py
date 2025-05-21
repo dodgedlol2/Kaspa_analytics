@@ -7,11 +7,6 @@ from datetime import datetime, timedelta
 
 st.set_page_config(layout="wide")
 
-# Initialize default selections
-if 'first_visit' not in st.session_state:
-    st.session_state.first_visit = True
-    st.session_state.default_time_range = "All"  # Set "All" as default time range
-
 # Data loading and processing
 if 'df' not in st.session_state or 'genesis_date' not in st.session_state:
     try:
@@ -156,7 +151,7 @@ st.markdown("""
         margin-bottom: 0px !important;
     }
     
-    /* Segmented control styling */
+    /* Time range selector styling */
     .time-range-selector {
         position: absolute;
         right: 30px;
@@ -168,34 +163,39 @@ st.markdown("""
         border: 1px solid #3A3C4A !important;
     }
     
-    .st-emotion-cache-1q7gvkk {
-        gap: 4px !important;
-    }
-    
-    .st-emotion-cache-1q7gvkk button {
-        background-color: #262730 !important;
-        color: #e0e0e0 !important;
-        border: 1px solid #3A3C4A !important;
+    .time-range-button {
+        width: 100% !important;
         font-size: 12px !important;
         padding: 6px 12px !important;
         border-radius: 6px !important;
         transition: all 0.2s ease !important;
+        background-color: #262730 !important;
+        color: #e0e0e0 !important;
+        border: 1px solid #3A3C4A !important;
+        margin: 0 !important;
     }
     
-    .st-emotion-cache-1q7gvkk button:hover {
+    .time-range-button:hover {
         background-color: #3A3C4A !important;
         color: #00FFCC !important;
     }
     
-    .st-emotion-cache-1q7gvkk button[aria-pressed="true"] {
+    .time-range-button:active,
+    .time-range-button:focus {
+        background-color: #00FFCC !important;
+        color: #262730 !important;
+        border-color: #00FFCC !important;
+    }
+    
+    .time-range-button.active {
         background-color: #00FFCC !important;
         color: #262730 !important;
         border-color: #00FFCC !important;
         font-weight: 500 !important;
     }
     
-    .st-emotion-cache-1q7gvkk button:focus:not(:active) {
-        box-shadow: 0 0 0 2px rgba(0, 255, 204, 0.3) !important;
+    div[data-testid="stHorizontalBlock"] {
+        gap: 0.25rem !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -231,49 +231,33 @@ with st.container():
 
         st.markdown('</div>', unsafe_allow_html=True)
 
-# Add professional time range selector in the top right
+    # Add professional time range selector in the top right
     with st.container():
-        st.markdown("""
-        <style>
-            div[data-testid="stHorizontalBlock"] {
-                gap: 0.5rem;
-            }
-            div[data-testid="column"] button {
-                width: 100%;
-                font-size: 0.8rem;
-                padding: 0.25rem 0.5rem;
-                border-radius: 0.5rem;
-                border: 1px solid #3A3C4A;
-                background-color: #262730;
-                color: #e0e0e0;
-                transition: all 0.2s ease;
-            }
-            div[data-testid="column"] button:hover {
-                background-color: #3A3C4A !important;
-                color: #00FFCC !important;
-            }
-            div[data-testid="column"] button:active,
-            div[data-testid="column"] button:focus {
-                background-color: #00FFCC !important;
-                color: #262730 !important;
-                border-color: #00FFCC !important;
-                box-shadow: none !important;
-            }
-        </style>
-        """, unsafe_allow_html=True)
+        st.markdown('<div class="time-range-selector">', unsafe_allow_html=True)
         
         time_ranges = ["1W", "1M", "3M", "6M", "1Y", "All"]
         cols = st.columns(len(time_ranges))
         
+        # Initialize time_range in session state if not exists
+        if 'time_range' not in st.session_state:
+            st.session_state.time_range = "All"
+        
         for i, tr in enumerate(time_ranges):
             with cols[i]:
-                if st.button(tr, key=f"time_range_{tr}"):
+                # Use a button for each time range
+                if st.button(
+                    tr,
+                    key=f"time_range_{tr}",
+                    type="primary" if st.session_state.time_range == tr else "secondary"
+                ):
                     st.session_state.time_range = tr
         
-        # Default to "All" if not set
-        time_range = st.session_state.get("time_range", "All")
+        st.markdown('</div>', unsafe_allow_html=True)
 
-  # Calculate date range based on selection
+    # Get the selected time range
+    time_range = st.session_state.time_range
+
+    # Calculate date range based on selection
     last_date = df['Date'].iloc[-1]
     if time_range == "1W":
         start_date = last_date - timedelta(days=7)
@@ -357,15 +341,10 @@ with st.container():
             fillcolor='rgba(100, 100, 100, 0.2)'
         ))
 
-    # Calculate y-axis range based ONLY on hashrate data
-    hashrate_min = filtered_df['Hashrate_PH'].min()
-    hashrate_max = filtered_df['Hashrate_PH'].max()
-    y_padding = 0.1 * (hashrate_max - hashrate_min)  # 10% padding
-
     # Enhanced layout with matching background
     fig.update_layout(
-        plot_bgcolor='#262730',
-        paper_bgcolor='#262730',
+        plot_bgcolor='#262730',  # Correct sidebar grey
+        paper_bgcolor='#262730',  # Correct sidebar grey
         font_color='#e0e0e0',
         hovermode='x unified',
         height=700,
@@ -376,7 +355,7 @@ with st.container():
             rangeslider=dict(
                 visible=True,
                 thickness=0.1,
-                bgcolor='#262730',
+                bgcolor='#262730',  # Correct sidebar grey
                 bordercolor="#3A3C4A",
                 borderwidth=1
             ),
@@ -406,8 +385,7 @@ with st.container():
                 gridwidth=0.5
             ),
             linecolor='#3A3C4A',
-            zerolinecolor='#3A3C4A',
-            range=[hashrate_min - y_padding, hashrate_max + y_padding] if y_scale == "Linear" else None
+            zerolinecolor='#3A3C4A'
         ),
         legend=dict(
             orientation="h",
@@ -415,10 +393,10 @@ with st.container():
             y=1.02,
             xanchor="right",
             x=1,
-            bgcolor='rgba(38, 39, 48, 0.8)'
+            bgcolor='rgba(38, 39, 48, 0.8)'  # Semi-transparent sidebar grey
         ),
         hoverlabel=dict(
-            bgcolor='#262730',
+            bgcolor='#262730',  # Correct sidebar grey
             bordercolor='#3A3C4A',
             font_color='#e0e0e0'
         )
@@ -426,7 +404,7 @@ with st.container():
 
     st.plotly_chart(fig, use_container_width=True)
 
-# Stats in cards with matching styling
+# Stats in cards with matching styling - now aligned with main panel
 st.markdown('<div class="metrics-container">', unsafe_allow_html=True)
 cols = st.columns(3)
 with cols[0]:
