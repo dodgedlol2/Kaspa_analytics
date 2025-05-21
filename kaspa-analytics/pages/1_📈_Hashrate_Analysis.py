@@ -164,7 +164,6 @@ st.markdown("""
     }
     
     .time-range-button {
-        width: 100% !important;
         font-size: 12px !important;
         padding: 6px 12px !important;
         border-radius: 6px !important;
@@ -172,19 +171,13 @@ st.markdown("""
         background-color: #262730 !important;
         color: #e0e0e0 !important;
         border: 1px solid #3A3C4A !important;
-        margin: 0 !important;
+        margin: 2px !important;
+        min-width: 50px;
     }
     
     .time-range-button:hover {
         background-color: #3A3C4A !important;
         color: #00FFCC !important;
-    }
-    
-    .time-range-button:active,
-    .time-range-button:focus {
-        background-color: #00FFCC !important;
-        color: #262730 !important;
-        border-color: #00FFCC !important;
     }
     
     .time-range-button.active {
@@ -196,6 +189,11 @@ st.markdown("""
     
     div[data-testid="stHorizontalBlock"] {
         gap: 0.25rem !important;
+    }
+    
+    /* Fix for button alignment */
+    .stButton button {
+        width: 100% !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -236,21 +234,24 @@ with st.container():
         st.markdown('<div class="time-range-selector">', unsafe_allow_html=True)
         
         time_ranges = ["1W", "1M", "3M", "6M", "1Y", "All"]
-        cols = st.columns(len(time_ranges))
         
         # Initialize time_range in session state if not exists
         if 'time_range' not in st.session_state:
             st.session_state.time_range = "All"
         
+        # Create a single row of buttons
+        cols = st.columns(len(time_ranges))
+        
         for i, tr in enumerate(time_ranges):
             with cols[i]:
-                # Use a button for each time range
+                # Use markdown to create a styled button that changes on click
                 if st.button(
                     tr,
                     key=f"time_range_{tr}",
                     type="primary" if st.session_state.time_range == tr else "secondary"
                 ):
                     st.session_state.time_range = tr
+                    st.rerun()
         
         st.markdown('</div>', unsafe_allow_html=True)
 
@@ -302,44 +303,47 @@ with st.container():
         text=filtered_df['Date']
     ))
 
-    # Power-law fit extended 300 days into future
-    x_fit = np.linspace(filtered_df['days_from_genesis'].min(), max_days, 300)
-    y_fit = a * np.power(x_fit, b)
+    # Power-law fit extended 300 days into future (only if toggled on)
+    show_power_law = st.session_state.get('show_power_law', False)
+    
+    if show_power_law:
+        x_fit = np.linspace(filtered_df['days_from_genesis'].min(), max_days, 300)
+        y_fit = a * np.power(x_fit, b)
 
-    if x_scale_type == "Log":
-        fit_x = x_fit
-    else:
-        fit_x = [genesis_date + pd.Timedelta(days=int(d)) for d in x_fit]
+        if x_scale_type == "Log":
+            fit_x = x_fit
+        else:
+            fit_x = [genesis_date + pd.Timedelta(days=int(d)) for d in x_fit]
 
-    fig.add_trace(go.Scatter(
-        x=fit_x,
-        y=y_fit,
-        mode='lines',
-        name=f'Power-Law Fit (R²={r2:.3f})',
-        line=dict(color='#FFA726', dash='dot', width=2)
-    ))
-
-    # Deviation bands (extended 300 days into future)
-    if show_bands:
         fig.add_trace(go.Scatter(
             x=fit_x,
-            y=y_fit * 0.4,
+            y=y_fit,
             mode='lines',
-            name='-60% Deviation',
-            line=dict(color='rgba(255, 255, 255, 0.5)', dash='dot', width=1),
-            hoverinfo='skip',
-            fill=None
+            name=f'Power-Law Fit (R²={r2:.3f})',
+            line=dict(color='#FFA726', dash='dot', width=2)
         ))
-        fig.add_trace(go.Scatter(
-            x=fit_x,
-            y=y_fit * 2.2,
-            mode='lines',
-            name='+120% Deviation',
-            line=dict(color='rgba(255, 255, 255, 0.5)', dash='dot', width=1),
-            hoverinfo='skip',
-            fill='tonexty',
-            fillcolor='rgba(100, 100, 100, 0.2)'
-        ))
+
+        # Deviation bands (extended 300 days into future)
+        if show_bands:
+            fig.add_trace(go.Scatter(
+                x=fit_x,
+                y=y_fit * 0.4,
+                mode='lines',
+                name='-60% Deviation',
+                line=dict(color='rgba(255, 255, 255, 0.5)', dash='dot', width=1),
+                hoverinfo='skip',
+                fill=None
+            ))
+            fig.add_trace(go.Scatter(
+                x=fit_x,
+                y=y_fit * 2.2,
+                mode='lines',
+                name='+120% Deviation',
+                line=dict(color='rgba(255, 255, 255, 0.5)', dash='dot', width=1),
+                hoverinfo='skip',
+                fill='tonexty',
+                fillcolor='rgba(100, 100, 100, 0.2)'
+            ))
 
     # Enhanced layout with matching background
     fig.update_layout(
@@ -403,6 +407,13 @@ with st.container():
     )
 
     st.plotly_chart(fig, use_container_width=True)
+
+# Add toggle for power law visibility
+with st.container():
+    st.markdown('<div style="text-align: right; margin-right: 30px; margin-top: -20px;">', unsafe_allow_html=True)
+    show_power_law = st.toggle("Show Power Law Fit", value=False, key="show_power_law_toggle")
+    st.session_state.show_power_law = show_power_law
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # Stats in cards with matching styling - now aligned with main panel
 st.markdown('<div class="metrics-container">', unsafe_allow_html=True)
