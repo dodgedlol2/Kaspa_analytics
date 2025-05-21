@@ -78,7 +78,7 @@ with st.container():
         
         with control_col:
             st.markdown('<div class="controls-wrapper">', unsafe_allow_html=True)
-            cols = st.columns([1.5, 1.5, 1.5, 1.5, 3])
+            cols = st.columns([1.5, 1.5, 1.5, 4])
             
             with cols[0]:
                 with st.container(border=True):
@@ -96,11 +96,6 @@ with st.container():
                 with st.container(border=True):
                     st.markdown('<div class="control-label">Deviation Bands</div>', unsafe_allow_html=True)
                     show_bands = st.toggle("Hide/Show", value=False, key="bands_toggle")
-            
-            with cols[3]:
-                with st.container(border=True):
-                    st.markdown('<div class="control-label">Projections</div>', unsafe_allow_html=True)
-                    show_projections = st.toggle("Hide/Show", value=True, key="proj_toggle")
             
             st.markdown('</div>', unsafe_allow_html=True)
 
@@ -131,48 +126,33 @@ with st.container():
             text=df['Date']
         ))
 
-        # Power-law fit (extended 300 days into future)
-        x_fit = np.linspace(df['days_from_genesis'].min(), max_days, 100)
+        # Power-law fit extended 300 days into future (single continuous line)
+        x_fit = np.linspace(df['days_from_genesis'].min(), max_days, 300)
         y_fit = a * np.power(x_fit, b)
         
         if x_scale_type == "Log":
             fit_x = x_fit
-            future_x = np.linspace(df['days_from_genesis'].max(), max_days, 30)
         else:
             fit_x = [genesis_date + pd.Timedelta(days=int(d)) for d in x_fit]
-            future_x = [genesis_date + pd.Timedelta(days=int(d)) 
-                        for d in np.linspace(df['days_from_genesis'].max(), max_days, 30)]
         
-        # Only show fit line if projections are enabled
-        if show_projections:
-            fig.add_trace(go.Scatter(
-                x=fit_x,
-                y=y_fit,
-                mode='lines',
-                name=f'Power-Law Fit (R²={r2:.3f})',
-                line=dict(color='orange', dash='dot', width=1.5)
-            ))
-            
-            # Add future projection line (dashed)
-            fig.add_trace(go.Scatter(
-                x=future_x,
-                y=a * np.power(np.linspace(df['days_from_genesis'].max(), max_days, 30), b),
-                mode='lines',
-                name='Future Projection',
-                line=dict(color='orange', dash='dot', width=1.5),
-                showlegend=False
-            ))
-        
-        # Deviation bands (only shown when toggled)
-        if show_bands and show_projections:  # Only show bands if projections are also shown
-            # Current bands
+        fig.add_trace(go.Scatter(
+            x=fit_x,
+            y=y_fit,
+            mode='lines',
+            name=f'Power-Law Fit (R²={r2:.3f})',
+            line=dict(color='orange', dash='dot', width=1.5)
+        ))
+
+        # Deviation bands (extended 300 days into future)
+        if show_bands:
             fig.add_trace(go.Scatter(
                 x=fit_x,
                 y=y_fit * 0.4,
                 mode='lines',
                 name='-60% Deviation',
                 line=dict(color='rgba(150, 150, 150, 0.8)', dash='dot', width=1),
-                hoverinfo='skip'
+                hoverinfo='skip',
+                fill=None
             ))
             fig.add_trace(go.Scatter(
                 x=fit_x,
@@ -180,25 +160,9 @@ with st.container():
                 mode='lines',
                 name='+120% Deviation',
                 line=dict(color='rgba(150, 150, 150, 0.8)', dash='dot', width=1),
-                hoverinfo='skip'
-            ))
-            
-            # Future bands
-            fig.add_trace(go.Scatter(
-                x=future_x,
-                y=a * np.power(np.linspace(df['days_from_genesis'].max(), max_days, 30), b) * 0.4,
-                mode='lines',
-                line=dict(color='rgba(150, 150, 150, 0.8)', dash='dot', width=1),
                 hoverinfo='skip',
-                showlegend=False
-            ))
-            fig.add_trace(go.Scatter(
-                x=future_x,
-                y=a * np.power(np.linspace(df['days_from_genesis'].max(), max_days, 30), b) * 2.2,
-                mode='lines',
-                line=dict(color='rgba(150, 150, 150, 0.8)', dash='dot', width=1),
-                hoverinfo='skip',
-                showlegend=False
+                fill='tonexty',
+                fillcolor='rgba(100, 100, 100, 0.1)'
             ))
 
         # Enhanced layout with custom slider color
