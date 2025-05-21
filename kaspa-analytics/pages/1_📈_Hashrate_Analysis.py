@@ -78,7 +78,7 @@ with st.container():
         
         with control_col:
             st.markdown('<div class="controls-wrapper">', unsafe_allow_html=True)
-            cols = st.columns([1.5, 1.5, 1.5, 4])
+            cols = st.columns([1.5, 1.5, 1.5, 1.5, 3])
             
             with cols[0]:
                 with st.container(border=True):
@@ -95,10 +95,16 @@ with st.container():
             with cols[2]:
                 with st.container(border=True):
                     st.markdown('<div class="control-label">Deviation Bands</div>', unsafe_allow_html=True)
-                    show_bands = st.toggle("Hide/Show", value=False)
+                    show_bands = st.toggle("Hide/Show", value=False, key="bands_toggle")
+            
+            with cols[3]:
+                with st.container(border=True):
+                    st.markdown('<div class="control-label">Projections</div>', unsafe_allow_html=True)
+                    show_projections = st.toggle("Hide/Show", value=True, key="proj_toggle")
+            
             st.markdown('</div>', unsafe_allow_html=True)
 
-       # Create figure with enhanced grid
+        # Create figure with enhanced grid
         fig = go.Figure()
 
         # Determine x-axis values based on scale type
@@ -137,26 +143,28 @@ with st.container():
             future_x = [genesis_date + pd.Timedelta(days=int(d)) 
                         for d in np.linspace(df['days_from_genesis'].max(), max_days, 30)]
         
-        fig.add_trace(go.Scatter(
-            x=fit_x,
-            y=y_fit,
-            mode='lines',
-            name=f'Power-Law Fit (R²={r2:.3f})',
-            line=dict(color='orange', dash='dot', width=1.5)
-        ))
-        
-        # Add future projection line (dashed)
-        fig.add_trace(go.Scatter(
-            x=future_x,
-            y=a * np.power(np.linspace(df['days_from_genesis'].max(), max_days, 30), b),
-            mode='lines',
-            name='Future Projection',
-            line=dict(color='orange', dash='dot', width=1.5),
-            showlegend=False
-        ))
+        # Only show fit line if projections are enabled
+        if show_projections:
+            fig.add_trace(go.Scatter(
+                x=fit_x,
+                y=y_fit,
+                mode='lines',
+                name=f'Power-Law Fit (R²={r2:.3f})',
+                line=dict(color='orange', dash='dot', width=1.5)
+            ))
+            
+            # Add future projection line (dashed)
+            fig.add_trace(go.Scatter(
+                x=future_x,
+                y=a * np.power(np.linspace(df['days_from_genesis'].max(), max_days, 30), b),
+                mode='lines',
+                name='Future Projection',
+                line=dict(color='orange', dash='dot', width=1.5),
+                showlegend=False
+            ))
         
         # Deviation bands (only shown when toggled)
-        if show_bands:
+        if show_bands and show_projections:  # Only show bands if projections are also shown
             # Current bands
             fig.add_trace(go.Scatter(
                 x=fit_x,
@@ -193,7 +201,7 @@ with st.container():
                 showlegend=False
             ))
 
-   # Enhanced layout with custom slider color
+        # Enhanced layout with custom slider color
         fig.update_layout(
             template='plotly_dark',
             hovermode='x unified',
@@ -205,8 +213,8 @@ with st.container():
                 rangeslider=dict(
                     visible=True,
                     thickness=0.1,
-                    bgcolor='rgba(0, 0, 0, 0.3)',  # Darker, less distracting background
-                    bordercolor="#2b3137",  # Matching the border color
+                    bgcolor='rgba(0,255,204,0.2)',  # Match the main line color
+                    bordercolor="#00FFCC",
                     borderwidth=1
                 ),
                 type="log" if x_scale_type == "Log" else None,
@@ -240,117 +248,6 @@ with st.container():
                 xanchor="right",
                 x=1
             )
-        )
-
-        # Group the power-law traces together
-        power_law_traces = []
-        
-        # Main power-law fit trace (visible by default)
-        power_law_trace = go.Scatter(
-            x=fit_x,
-            y=y_fit,
-            mode='lines',
-            name=f'Power-Law Fit (R²={r2:.3f})',
-            line=dict(color='orange', dash='dot', width=1.5),
-            visible=True
-        )
-        power_law_traces.append(power_law_trace)
-        
-        # Future projection line (dashed)
-        future_proj_trace = go.Scatter(
-            x=future_x,
-            y=a * np.power(np.linspace(df['days_from_genesis'].max(), max_days, 30), b),
-            mode='lines',
-            name='Future Projection',
-            line=dict(color='orange', dash='dot', width=1.5),
-            visible=True,
-            showlegend=False
-        )
-        power_law_traces.append(future_proj_trace)
-        
-        # Deviation bands (only shown when toggled)
-        lower_band_trace = go.Scatter(
-            x=fit_x,
-            y=y_fit * 0.4,
-            mode='lines',
-            name='-60% Deviation',
-            line=dict(color='rgba(150, 150, 150, 0.8)', dash='dot', width=1),
-            hoverinfo='skip',
-            visible=show_bands
-        )
-        power_law_traces.append(lower_band_trace)
-        
-        upper_band_trace = go.Scatter(
-            x=fit_x,
-            y=y_fit * 2.2,
-            mode='lines',
-            name='+120% Deviation',
-            line=dict(color='rgba(150, 150, 150, 0.8)', dash='dot', width=1),
-            hoverinfo='skip',
-            visible=show_bands
-        )
-        power_law_traces.append(upper_band_trace)
-        
-        # Future bands
-        future_lower_band_trace = go.Scatter(
-            x=future_x,
-            y=a * np.power(np.linspace(df['days_from_genesis'].max(), max_days, 30), b) * 0.4,
-            mode='lines',
-            line=dict(color='rgba(150, 150, 150, 0.8)', dash='dot', width=1),
-            hoverinfo='skip',
-            visible=show_bands,
-            showlegend=False
-        )
-        power_law_traces.append(future_lower_band_trace)
-        
-        future_upper_band_trace = go.Scatter(
-            x=future_x,
-            y=a * np.power(np.linspace(df['days_from_genesis'].max(), max_days, 30), b) * 2.2,
-            mode='lines',
-            line=dict(color='rgba(150, 150, 150, 0.8)', dash='dot', width=1),
-            hoverinfo='skip',
-            visible=show_bands,
-            showlegend=False
-        )
-        power_law_traces.append(future_upper_band_trace)
-        
-        # Add all traces to the figure
-        fig.add_traces(power_law_traces)
-
-        # Main trace (keep this separate)
-        fig.add_trace(go.Scatter(
-            x=x_values,
-            y=df['Hashrate_PH'],
-            mode='lines',
-            name='Hashrate (PH/s)',
-            line=dict(color='#00FFCC', width=2),
-            hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Hashrate</b>: %{y:.2f} PH/s<extra></extra>',
-            text=df['Date']
-        ))
-
-        # Create a button to toggle all power-law related traces
-        fig.update_layout(
-            updatemenus=[
-                dict(
-                    type="buttons",
-                    direction="right",
-                    x=0.5,
-                    y=1.15,
-                    showactive=True,
-                    buttons=list([
-                        dict(
-                            label="Show Power Law",
-                            method="update",
-                            args=[{"visible": [True] + [True]*len(power_law_traces)}]
-                        ),
-                        dict(
-                            label="Hide Power Law",
-                            method="update",
-                            args=[{"visible": [True] + [False]*len(power_law_traces)}]
-                        )
-                    ])
-                )
-            ]
         )
 
         # Show the figure with more vertical space
