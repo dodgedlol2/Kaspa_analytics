@@ -151,35 +151,39 @@ st.markdown("""
         margin-bottom: 0px !important;
     }
     
-    /* Segmented control styling */
-    .st-emotion-cache-1q7spjk {
-        gap: 4px !important;
+    /* Compact time range selector */
+    .time-range-container {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 4px;
+        z-index: 100;
     }
     
-    .st-emotion-cache-1q7spjk button {
+    .period-label {
+        font-size: 11px !important;
+        color: #e0e0e0 !important;
+        margin-bottom: -5px !important;
+    }
+    
+    .stSelectbox > div {
+        width: 100px !important;
+    }
+    
+    .stSelectbox select {
         font-size: 12px !important;
         padding: 4px 8px !important;
         background-color: #262730 !important;
         border: 1px solid #3A3C4A !important;
         color: #e0e0e0 !important;
+        height: 28px !important;
     }
     
-    .st-emotion-cache-1q7spjk button[aria-pressed="true"] {
-        background-color: #00FFCC !important;
-        color: #0E1117 !important;
-        font-weight: 500 !important;
-    }
-    
-    .st-emotion-cache-1q7spjk button:hover {
-        color: #00FFCC !important;
-        border-color: #00FFCC !important;
-    }
-    
-    .segmented-control-container {
-        display: flex;
-        justify-content: flex-end;
-        padding-right: 20px;
-        padding-bottom: 10px;
+    .stSelectbox svg {
+        color: #e0e0e0 !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -215,23 +219,40 @@ with st.container():
 
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # Add segmented time range selector in top right
+    # Add compact time range selector in top right
     time_ranges = ["1W", "1M", "3M", "6M", "1Y", "All"]
     
     # Initialize time_range in session state if not exists
     if 'time_range' not in st.session_state:
         st.session_state.time_range = "All"
     
-    # Create container for segmented control
-    st.markdown('<div class="segmented-control-container">', unsafe_allow_html=True)
-    time_range = st.selectbox(
-        "Time Range",
-        time_ranges,
-        index=time_ranges.index(st.session_state.time_range),
-        label_visibility="collapsed",
-        key="time_range_select"
-    )
-    st.markdown('</div>', unsafe_allow_html=True)
+    # Create container for time range selector
+    st.markdown("""
+    <div class="time-range-container">
+        <div class="period-label">Period</div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Add the selectbox in the same container
+    with st.container():
+        st.markdown("""
+        <style>
+            div[data-testid="stVerticalBlock"] > div:nth-child(3) > div[data-testid="stVerticalBlock"] {
+                position: absolute;
+                top: 38px;
+                right: 20px;
+                width: 100px !important;
+            }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        time_range = st.selectbox(
+            "Time Range",
+            time_ranges,
+            index=time_ranges.index(st.session_state.time_range),
+            label_visibility="collapsed",
+            key="time_range_select"
+        )
 
     # Calculate date range based on selection
     last_date = df['Date'].iloc[-1]
