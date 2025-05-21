@@ -291,18 +291,7 @@ with st.container():
         tickformat = "%b %Y"
         hoverformat = "%b %d, %Y"
 
-    # Main trace with updated colors
-    fig.add_trace(go.Scatter(
-        x=x_values,
-        y=filtered_df['Hashrate_PH'],
-        mode='lines',
-        name='Hashrate (PH/s)',
-        line=dict(color='#00FFCC', width=2.5),
-        hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Hashrate</b>: %{y:.2f} PH/s<extra></extra>',
-        text=filtered_df['Date']
-    ))
-
-    # Power-law fit extended 300 days into future
+    # First add the power law fit (this will be in the background)
     x_fit = np.linspace(filtered_df['days_from_genesis'].min(), max_days, 300)
     y_fit = a * np.power(x_fit, b)
 
@@ -311,12 +300,14 @@ with st.container():
     else:
         fit_x = [genesis_date + pd.Timedelta(days=int(d)) for d in x_fit]
 
+    # Add power law fit first (so it's in the background)
     fig.add_trace(go.Scatter(
         x=fit_x,
         y=y_fit,
         mode='lines',
         name=f'Power-Law Fit (R²={r2:.3f})',
-        line=dict(color='#FFA726', dash='dot', width=2)
+        line=dict(color='#FFA726', dash='dot', width=2),
+        hoverinfo='skip'  # Skip hover for this trace to prevent interference
     ))
 
     # Deviation bands (extended 300 days into future)
@@ -341,10 +332,21 @@ with st.container():
             fillcolor='rgba(100, 100, 100, 0.2)'
         ))
 
+    # THEN add the main trace (so it's on top and controls the y-axis)
+    fig.add_trace(go.Scatter(
+        x=x_values,
+        y=filtered_df['Hashrate_PH'],
+        mode='lines',
+        name='Hashrate (PH/s)',
+        line=dict(color='#00FFCC', width=2.5),
+        hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Hashrate</b>: %{y:.2f} PH/s<extra></extra>',
+        text=filtered_df['Date']
+    ))
+
     # Enhanced layout with matching background
     fig.update_layout(
-        plot_bgcolor='#262730',  # Correct sidebar grey
-        paper_bgcolor='#262730',  # Correct sidebar grey
+        plot_bgcolor='#262730',
+        paper_bgcolor='#262730',
         font_color='#e0e0e0',
         hovermode='x unified',
         height=700,
@@ -355,7 +357,7 @@ with st.container():
             rangeslider=dict(
                 visible=True,
                 thickness=0.1,
-                bgcolor='#262730',  # Correct sidebar grey
+                bgcolor='#262730',
                 bordercolor="#3A3C4A",
                 borderwidth=1
             ),
@@ -385,7 +387,9 @@ with st.container():
                 gridwidth=0.5
             ),
             linecolor='#3A3C4A',
-            zerolinecolor='#3A3C4A'
+            zerolinecolor='#3A3C4A',
+            # This ensures the y-axis is scaled only to the hashrate data
+            autorange=True
         ),
         legend=dict(
             orientation="h",
@@ -393,14 +397,20 @@ with st.container():
             y=1.02,
             xanchor="right",
             x=1,
-            bgcolor='rgba(38, 39, 48, 0.8)'  # Semi-transparent sidebar grey
+            bgcolor='rgba(38, 39, 48, 0.8)'
         ),
         hoverlabel=dict(
-            bgcolor='#262730',  # Correct sidebar grey
+            bgcolor='#262730',
             bordercolor='#3A3C4A',
             font_color='#e0e0e0'
         )
     )
+
+    # This is the key part - we're telling Plotly to ignore the power law fit for autoscaling
+    fig.update_traces(selector={'name': 'Power-Law Fit'}, exclude_from_scaling=True)
+    if show_bands:
+        fig.update_traces(selector={'name': '-60% Deviation'}, exclude_from_scaling=True)
+        fig.update_traces(selector={'name': '+120% Deviation'}, exclude_from_scaling=True)
 
     st.plotly_chart(fig, use_container_width=True)
 
