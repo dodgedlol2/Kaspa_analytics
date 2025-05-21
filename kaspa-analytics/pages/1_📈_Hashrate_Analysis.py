@@ -23,209 +23,211 @@ except Exception as e:
     st.error(f"Failed to calculate power law: {str(e)}")
     st.stop()
 
-# Custom CSS for unified styling
-st.markdown("""
+# Professional Color Scheme
+COLORS = {
+    'background': '#0F172A',  # Deep navy base
+    'panel': '#1E293B',       # Dark slate panels
+    'border': '#334155',      # Medium slate borders
+    'primary': '#38BDF8',     # Bright sky blue (main data)
+    'secondary': '#F472B6',   # Vibrant pink (contrast)
+    'accent': '#F59E0B',      # Amber (for highlights)
+    'text': '#E2E8F0',        # Light grey text
+    'success': '#10B981',     # Emerald green
+    'grid': 'rgba(148, 163, 184, 0.1)'
+}
+
+# Custom CSS with professional styling
+st.markdown(f"""
 <style>
-    /* Main background color */
-    .stApp {
-        background-color: #0E1117;
-    }
+    /* Base styling */
+    .stApp {{
+        background-color: {COLORS['background']};
+        color: {COLORS['text']};
+    }}
     
-    /* Correct sidebar grey color */
-    .st-emotion-cache-6qob1r, .sidebar-content {
-        background-color: #262730 !important;
-    }
+    /* Sidebar matching */
+    .st-emotion-cache-6qob1r, .sidebar-content {{
+        background-color: {COLORS['panel']} !important;
+        border-right: 1px solid {COLORS['border']} !important;
+    }}
     
-    /* Control block styling */
-    .control-block {
-        padding: 8px 12px;
+    /* Control blocks */
+    .control-block {{
+        background-color: {COLORS['panel']};
+        border: 1px solid {COLORS['border']};
         border-radius: 8px;
-        border: 1px solid #3A3C4A;
-        background-color: #262730;
+        padding: 12px;
         margin-right: 15px;
-        min-width: 160px;
         height: 85px;
         display: flex;
         flex-direction: column;
         justify-content: center;
-    }
+    }}
     
-    .title-spacing {
-        padding-left: 40px;
-        margin-bottom: 15px;
-    }
-    
-    .control-label {
+    .control-label {{
         font-size: 13px !important;
-        margin-bottom: 6px !important;
-        white-space: nowrap;
+        margin-bottom: 8px !important;
+        color: {COLORS['text']} !important;
         font-weight: 500;
-        color: #e0e0e0 !important;
-    }
+        letter-spacing: 0.5px;
+    }}
     
-    .stToggle {
-        width: 100%;
-    }
+    /* Toggle buttons */
+    .stToggle button {{
+        background-color: {COLORS['panel']} !important;
+        border: 1px solid {COLORS['border']} !important;
+    }}
     
-    .stToggle button {
-        width: 100% !important;
-        font-size: 12px !important;
-    }
+    .stToggle button:hover {{
+        border-color: {COLORS['primary']} !important;
+    }}
     
-    .controls-wrapper {
-        padding-top: 11px;
-    }
+    /* Main containers */
+    div[data-testid="stVerticalBlock"] > div[data-testid="stVerticalBlockBorderWrapper"] {{
+        background-color: {COLORS['panel']} !important;
+        border: 1px solid {COLORS['border']} !important;
+        border-radius: 10px;
+        padding: 20px !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }}
     
-    .main-container {
-        padding: 25px;
-    }
+    /* Metrics cards */
+    div[data-testid="stMetric"] {{
+        background-color: {COLORS['panel']} !important;
+        border: 1px solid {COLORS['border']} !important;
+        border-radius: 8px;
+        padding: 20px !important;
+    }}
     
-    .plotly-rangeslider {
-        height: 80px !important;
-    }
+    div[data-testid="stMetricValue"] > div {{
+        font-size: 26px !important;
+        font-weight: 700 !important;
+        color: {COLORS['primary']} !important;
+    }}
     
-    /* Main chart container styling */
-    div[data-testid="stVerticalBlock"] > div[data-testid="stVerticalBlockBorderWrapper"] {
-        background-color: #262730 !important;
-        border-radius: 10px !important;
-        border: 1px solid #3A3C4A !important;
-        padding: 15px !important;
-    }
-    
-    /* Metric cards styling */
-    div[data-testid="stMetric"] {
-        background-color: #262730 !important;
-        border: 1px solid #3A3C4A !important;
-        border-radius: 8px !important;
-        padding: 15px 20px !important;
-    }
-    
-    div[data-testid="stMetricValue"] > div {
-        font-size: 24px !important;
-        font-weight: 600 !important;
-        color: #00FFCC !important;
-    }
-    
-    div[data-testid="stMetricLabel"] > div {
+    div[data-testid="stMetricLabel"] > div {{
         font-size: 14px !important;
-        opacity: 0.8 !important;
-        color: #e0e0e0 !important;
-    }
+        color: {COLORS['text']} !important;
+        opacity: 0.9 !important;
+        letter-spacing: 0.3px;
+    }}
     
-    .stMetric {
-        margin: 5px !important;
-        height: 100% !important;
-    }
+    /* Titles */
+    h2 {{
+        color: {COLORS['text']} !important;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        margin-bottom: 5px !important;
+    }}
     
-    /* Title styling */
-    h2 {
-        color: #e0e0e0 !important;
-    }
+    /* Tooltips */
+    .hovertext text.hovertext {{
+        fill: {COLORS['text']} !important;
+    }}
     
-    /* Toggle button styling */
-    .st-bd {
-        background-color: #262730 !important;
-    }
+    /* Range slider */
+    .plotly-rangeslider {{
+        background-color: {COLORS['panel']} !important;
+    }}
     
-    .st-cg {
-        background-color: #00FFCC !important;
-    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {{
+        width: 8px;
+        height: 8px;
+    }}
     
-    /* Plotly tooltip styling */
-    .hovertext text.hovertext {
-        fill: #e0e0e0 !important;
-    }
+    ::-webkit-scrollbar-track {{
+        background: {COLORS['panel']};
+    }}
     
-    /* Range slider handle color */
-    .range-slider .handle:after {
-        background-color: #00FFCC !important;
-    }
+    ::-webkit-scrollbar-thumb {{
+        background: {COLORS['border']};
+        border-radius: 4px;
+    }}
 </style>
 """, unsafe_allow_html=True)
 
 # ====== MAIN CHART CONTAINER ======
 with st.container():
-    # Create columns for title and controls
-    title_col, control_col = st.columns([2, 8])
-
-    with title_col:
-        st.markdown('<div class="title-spacing"><h2>Kaspa Hashrate</h2></div>', unsafe_allow_html=True)
-
-    with control_col:
-        st.markdown('<div class="controls-wrapper">', unsafe_allow_html=True)
-        cols = st.columns([1.5, 1.5, 1.5, 4])
-
-        with cols[0]:
+    # Header with title and controls
+    header_col1, header_col2 = st.columns([2, 8])
+    
+    with header_col1:
+        st.markdown(f"""
+        <div style="padding-left: 15px; margin-bottom: 10px;">
+            <h2>Kaspa Hashrate</h2>
+            <div style="color: {COLORS['text']}; opacity: 0.8; font-size: 14px;">
+                Power-law growth analysis
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with header_col2:
+        controls = st.columns([1.5, 1.5, 1.5, 4])
+        
+        with controls[0]:
             with st.container():
-                st.markdown('<div class="control-label">Hashrate Scale</div>', unsafe_allow_html=True)
-                y_scale = st.toggle("Linear/Log", value=True, key="y_scale")
+                st.markdown('<div class="control-label">HASHRATE SCALE</div>', unsafe_allow_html=True)
+                y_scale = st.toggle("Linear/Log", value=True, key="y_scale", label_visibility="collapsed")
                 y_scale = "Log" if y_scale else "Linear"
-
-        with cols[1]:
+        
+        with controls[1]:
             with st.container():
-                st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
-                x_scale_type = st.toggle("Linear/Log", value=False, key="x_scale")
+                st.markdown('<div class="control-label">TIME SCALE</div>', unsafe_allow_html=True)
+                x_scale_type = st.toggle("Linear/Log", value=False, key="x_scale", label_visibility="collapsed")
                 x_scale_type = "Log" if x_scale_type else "Linear"
-
-        with cols[2]:
+        
+        with controls[2]:
             with st.container():
-                st.markdown('<div class="control-label">Deviation Bands</div>', unsafe_allow_html=True)
-                show_bands = st.toggle("Hide/Show", value=False, key="bands_toggle")
+                st.markdown('<div class="control-label">DEVIATION BANDS</div>', unsafe_allow_html=True)
+                show_bands = st.toggle("Hide/Show", value=False, key="bands_toggle", label_visibility="collapsed")
 
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    # Create figure with unified color scheme
+    # Create the figure
     fig = go.Figure()
 
-    # Determine x-axis values based on scale type
-    max_days = df['days_from_genesis'].max() + 300  # Extend by 300 days
+    # Axis configuration
+    max_days = df['days_from_genesis'].max() + 300
     if x_scale_type == "Log":
         x_values = df['days_from_genesis']
         x_title = "Days Since Genesis (Log Scale)"
         tickformat = None
-        hoverformat = None
     else:
         x_values = df['Date']
         x_title = "Date"
         tickformat = "%b %Y"
-        hoverformat = "%b %d, %Y"
 
-    # Main trace with updated colors
+    # Main hashrate trace
     fig.add_trace(go.Scatter(
         x=x_values,
         y=df['Hashrate_PH'],
         mode='lines',
         name='Hashrate (PH/s)',
-        line=dict(color='#00FFCC', width=2.5),
+        line=dict(color=COLORS['primary'], width=2.8),
         hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Hashrate</b>: %{y:.2f} PH/s<extra></extra>',
         text=df['Date']
     ))
 
-    # Power-law fit extended 300 days into future
+    # Power-law fit
     x_fit = np.linspace(df['days_from_genesis'].min(), max_days, 300)
     y_fit = a * np.power(x_fit, b)
-
-    if x_scale_type == "Log":
-        fit_x = x_fit
-    else:
-        fit_x = [genesis_date + pd.Timedelta(days=int(d)) for d in x_fit]
+    fit_x = x_fit if x_scale_type == "Log" else [genesis_date + pd.Timedelta(days=int(d)) for d in x_fit]
 
     fig.add_trace(go.Scatter(
         x=fit_x,
         y=y_fit,
         mode='lines',
         name=f'Power-Law Fit (R²={r2:.3f})',
-        line=dict(color='#FFA726', dash='dot', width=2)
+        line=dict(color=COLORS['accent'], dash='dot', width=2.5)
     ))
 
-    # Deviation bands (extended 300 days into future)
+    # Deviation bands
     if show_bands:
         fig.add_trace(go.Scatter(
             x=fit_x,
             y=y_fit * 0.4,
             mode='lines',
             name='-60% Deviation',
-            line=dict(color='rgba(255, 255, 255, 0.5)', dash='dot', width=1),
+            line=dict(color='rgba(255, 255, 255, 0.3)', width=1),
             hoverinfo='skip',
             fill=None
         ))
@@ -234,57 +236,50 @@ with st.container():
             y=y_fit * 2.2,
             mode='lines',
             name='+120% Deviation',
-            line=dict(color='rgba(255, 255, 255, 0.5)', dash='dot', width=1),
+            line=dict(color='rgba(255, 255, 255, 0.3)', width=1),
             hoverinfo='skip',
             fill='tonexty',
-            fillcolor='rgba(100, 100, 100, 0.2)'
+            fillcolor='rgba(148, 163, 184, 0.1)'
         ))
 
-    # Enhanced layout with matching background
+    # Professional chart layout
     fig.update_layout(
-        plot_bgcolor='#262730',  # Correct sidebar grey
-        paper_bgcolor='#262730',  # Correct sidebar grey
-        font_color='#e0e0e0',
+        plot_bgcolor=COLORS['panel'],
+        paper_bgcolor=COLORS['panel'],
+        font_color=COLORS['text'],
         hovermode='x unified',
         height=700,
-        margin=dict(l=20, r=20, t=60, b=100),
+        margin=dict(l=50, r=50, t=80, b=80),
         yaxis_title='Hashrate (PH/s)',
         xaxis_title=x_title,
         xaxis=dict(
             rangeslider=dict(
                 visible=True,
-                thickness=0.1,
-                bgcolor='#262730',  # Correct sidebar grey
-                bordercolor="#3A3C4A",
+                thickness=0.08,
+                bgcolor=COLORS['panel'],
+                bordercolor=COLORS['border'],
                 borderwidth=1
             ),
             type="log" if x_scale_type == "Log" else None,
             showgrid=True,
+            gridcolor=COLORS['grid'],
             gridwidth=1,
-            gridcolor='rgba(255, 255, 255, 0.1)',
-            minor=dict(
-                ticklen=6,
-                gridcolor='rgba(255, 255, 255, 0.05)',
-                gridwidth=0.5
-            ),
-            tickformat=tickformat,
-            range=[None, max_days] if x_scale_type == "Log" else 
-                  [df['Date'].min(), genesis_date + pd.Timedelta(days=max_days)],
-            linecolor='#3A3C4A',
-            zerolinecolor='#3A3C4A'
+            linecolor=COLORS['border'],
+            zerolinecolor=COLORS['border'],
+            tickformat=tickformat
         ),
         yaxis=dict(
             type="log" if y_scale == "Log" else "linear",
             showgrid=True,
+            gridcolor=COLORS['grid'],
             gridwidth=1,
-            gridcolor='rgba(255, 255, 255, 0.1)',
+            linecolor=COLORS['border'],
+            zerolinecolor=COLORS['border'],
             minor=dict(
                 ticklen=6,
-                gridcolor='rgba(255, 255, 255, 0.05)',
+                gridcolor='rgba(148, 163, 184, 0.05)',
                 gridwidth=0.5
-            ),
-            linecolor='#3A3C4A',
-            zerolinecolor='#3A3C4A'
+            )
         ),
         legend=dict(
             orientation="h",
@@ -292,23 +287,42 @@ with st.container():
             y=1.02,
             xanchor="right",
             x=1,
-            bgcolor='rgba(38, 39, 48, 0.8)'  # Semi-transparent sidebar grey
+            bgcolor=f"rgba(30, 41, 59, 0.7)",
+            bordercolor=COLORS['border'],
+            borderwidth=1,
+            font=dict(size=12)
         ),
         hoverlabel=dict(
-            bgcolor='#262730',  # Correct sidebar grey
-            bordercolor='#3A3C4A',
-            font_color='#e0e0e0'
+            bgcolor=COLORS['panel'],
+            bordercolor=COLORS['border'],
+            font_size=12,
+            font_color=COLORS['text']
         )
     )
 
     st.plotly_chart(fig, use_container_width=True)
 
-# Stats in cards with matching styling
-st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
-cols = st.columns(3)
-with cols[0]:
-    st.metric("Power-Law Slope", f"{b:.3f}")
-with cols[1]:
-    st.metric("Model Fit (R²)", f"{r2:.3f}")
-with cols[2]:
-    st.metric("Current Hashrate", f"{df['Hashrate_PH'].iloc[-1]:.2f} PH/s")
+# Metrics row with improved styling
+st.markdown("<div style='margin-top: 20px;'></div>", unsafe_allow_html=True)
+metrics = st.columns(3)
+
+with metrics[0]:
+    st.metric(
+        label="POWER-LAW SLOPE",
+        value=f"{b:.3f}",
+        help="Exponent in the power-law equation y = a*x^b"
+    )
+
+with metrics[1]:
+    st.metric(
+        label="MODEL FIT (R²)",
+        value=f"{r2:.3f}",
+        help="Coefficient of determination (0-1 scale)"
+    )
+
+with metrics[2]:
+    st.metric(
+        label="CURRENT HASHRATE",
+        value=f"{df['Hashrate_PH'].iloc[-1]:.2f} PH/s",
+        help="Network hashrate at last data point"
+    )
