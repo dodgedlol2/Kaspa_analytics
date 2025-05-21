@@ -126,23 +126,10 @@ st.markdown("""
 with st.container():
     st.markdown('<div class="title-spacing"><h2>Kaspa Hashrate</h2></div>', unsafe_allow_html=True)
 
-    # Use more columns for tighter spacing
-    spacer, col1, col2, col3, col4, _ = st.columns([1, 2, 2, 2, 2, 1])
+    # Use tighter column spacing and shift controls left
+    col_spacer, col1, col2, col3, col4, col5, col_filler = st.columns([0.2, 1.5, 1.5, 1.5, 1.5, 1.5, 4])
 
     with col1:
-        st.markdown('<div class="control-label">Period</div>', unsafe_allow_html=True)
-        time_ranges = ["1W", "1M", "3M", "6M", "1Y", "All"]
-        if 'time_range' not in st.session_state:
-            st.session_state.time_range = "All"
-        time_range = st.selectbox(
-            "Time Range",
-            time_ranges,
-            index=time_ranges.index(st.session_state.time_range),
-            label_visibility="collapsed",
-            key="time_range_select"
-        )
-
-    with col2:
         st.markdown('<div class="control-label">Hashrate Scale</div>', unsafe_allow_html=True)
         y_scale_options = ["Linear", "Log"]
         y_scale = st.selectbox(
@@ -153,7 +140,7 @@ with st.container():
             key="y_scale_select"
         )
 
-    with col3:
+    with col2:
         st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
         x_scale_options = ["Linear", "Log"]
         x_scale_type = st.selectbox(
@@ -162,6 +149,19 @@ with st.container():
             index=0 if st.session_state.get("x_scale", False) else 1,
             label_visibility="collapsed",
             key="x_scale_select"
+        )
+
+    with col3:
+        st.markdown('<div class="control-label">Period</div>', unsafe_allow_html=True)
+        time_ranges = ["1W", "1M", "3M", "6M", "1Y", "All"]
+        if 'time_range' not in st.session_state:
+            st.session_state.time_range = "All"
+        time_range = st.selectbox(
+            "Time Range",
+            time_ranges,
+            index=time_ranges.index(st.session_state.time_range),
+            label_visibility="collapsed",
+            key="time_range_select"
         )
 
     with col4:
