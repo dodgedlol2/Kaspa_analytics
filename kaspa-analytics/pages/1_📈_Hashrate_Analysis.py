@@ -98,10 +98,11 @@ with st.container():
                     show_bands = st.toggle("Hide/Show", value=False)
             st.markdown('</div>', unsafe_allow_html=True)
 
-        # Create figure with enhanced grid
+       # Create figure with enhanced grid
         fig = go.Figure()
 
         # Determine x-axis values based on scale type
+        max_days = df['days_from_genesis'].max() + 300  # Extend by 300 days
         if x_scale_type == "Log":
             x_values = df['days_from_genesis']
             x_title = "Days Since Genesis (Log Scale)"
@@ -124,14 +125,17 @@ with st.container():
             text=df['Date']
         ))
 
-        # Power-law fit (always shown)
-        x_fit = np.linspace(df['days_from_genesis'].min(), df['days_from_genesis'].max(), 100)
+        # Power-law fit (extended 300 days into future)
+        x_fit = np.linspace(df['days_from_genesis'].min(), max_days, 100)
         y_fit = a * np.power(x_fit, b)
         
         if x_scale_type == "Log":
             fit_x = x_fit
+            future_x = np.linspace(df['days_from_genesis'].max(), max_days, 30)
         else:
             fit_x = [genesis_date + pd.Timedelta(days=int(d)) for d in x_fit]
+            future_x = [genesis_date + pd.Timedelta(days=int(d)) 
+                        for d in np.linspace(df['days_from_genesis'].max(), max_days, 30)]
         
         fig.add_trace(go.Scatter(
             x=fit_x,
@@ -141,8 +145,19 @@ with st.container():
             line=dict(color='orange', dash='dot', width=1.5)
         ))
         
+        # Add future projection line (dashed)
+        fig.add_trace(go.Scatter(
+            x=future_x,
+            y=a * np.power(np.linspace(df['days_from_genesis'].max(), max_days, 30), b),
+            mode='lines',
+            name='Future Projection',
+            line=dict(color='orange', dash='dot', width=1.5),
+            showlegend=False
+        ))
+        
         # Deviation bands (only shown when toggled)
         if show_bands:
+            # Current bands
             fig.add_trace(go.Scatter(
                 x=fit_x,
                 y=y_fit * 0.4,
@@ -159,21 +174,39 @@ with st.container():
                 line=dict(color='rgba(150, 150, 150, 0.8)', dash='dot', width=1),
                 hoverinfo='skip'
             ))
+            
+            # Future bands
+            fig.add_trace(go.Scatter(
+                x=future_x,
+                y=a * np.power(np.linspace(df['days_from_genesis'].max(), max_days, 30), b) * 0.4,
+                mode='lines',
+                line=dict(color='rgba(150, 150, 150, 0.8)', dash='dot', width=1),
+                hoverinfo='skip',
+                showlegend=False
+            ))
+            fig.add_trace(go.Scatter(
+                x=future_x,
+                y=a * np.power(np.linspace(df['days_from_genesis'].max(), max_days, 30), b) * 2.2,
+                mode='lines',
+                line=dict(color='rgba(150, 150, 150, 0.8)', dash='dot', width=1),
+                hoverinfo='skip',
+                showlegend=False
+            ))
 
-        # Enhanced layout with taller range slider
+        # Enhanced layout with custom slider color
         fig.update_layout(
             template='plotly_dark',
             hovermode='x unified',
-            height=700,  # Increased height
-            margin=dict(l=20, r=20, t=60, b=100),  # More bottom margin for slider
+            height=700,
+            margin=dict(l=20, r=20, t=60, b=100),
             yaxis_title='Hashrate (PH/s)',
             xaxis_title=x_title,
             xaxis=dict(
                 rangeslider=dict(
                     visible=True,
-                    thickness=0.1,  # Thicker slider handle
-                    bgcolor='rgba(150,150,150,0.3)',
-                    bordercolor="#444",
+                    thickness=0.1,
+                    bgcolor='rgba(0,255,204,0.2)',  # Match the main line color
+                    bordercolor="#00FFCC",
                     borderwidth=1
                 ),
                 type="log" if x_scale_type == "Log" else None,
@@ -185,7 +218,9 @@ with st.container():
                     gridcolor='rgba(100,100,100,0.1)',
                     gridwidth=0.5
                 ),
-                tickformat=tickformat
+                tickformat=tickformat,
+                range=[None, max_days] if x_scale_type == "Log" else 
+                      [df['Date'].min(), genesis_date + pd.Timedelta(days=max_days)]
             ),
             yaxis=dict(
                 type="log" if y_scale == "Log" else "linear",
