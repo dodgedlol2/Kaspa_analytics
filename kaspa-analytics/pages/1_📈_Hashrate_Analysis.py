@@ -1,197 +1,4 @@
-import streamlit as st
-import plotly.graph_objects as go
-import numpy as np
-import pandas as pd
-from utils import fit_power_law, load_data
-
-st.set_page_config(layout="wide")
-
-# Data loading and processing
-if 'df' not in st.session_state or 'genesis_date' not in st.session_state:
-    try:
-        st.session_state.df, st.session_state.genesis_date = load_data()
-    except Exception as e:
-        st.error(f"Failed to load data: {str(e)}")
-        st.stop()
-
-df = st.session_state.df
-genesis_date = st.session_state.genesis_date
-
-try:
-    a, b, r2 = fit_power_law(df)
-except Exception as e:
-    st.error(f"Failed to calculate power law: {str(e)}")
-    st.stop()
-
-# Custom CSS for enhanced spacing
-st.markdown("""
-<style>
-    .control-block {
-        padding: 8px 12px;
-        border-radius: 8px;
-        border: 1px solid #2b3137;
-        background-color: #0e1117;
-        margin-right: 15px;
-        min-width: 160px;
-        height: 85px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }
-    .title-spacing {
-        padding-left: 40px;
-        margin-bottom: 15px;
-    }
-    .control-label {
-        font-size: 13px !important;
-        margin-bottom: 6px !important;
-        white-space: nowrap;
-        font-weight: 500;
-    }
-    .stToggle {
-        width: 100%;
-    }
-    .stToggle button {
-        width: 100% !important;
-        font-size: 12px !important;
-    }
-    .controls-wrapper {
-        padding-top: 11px;
-    }
-    .main-container {
-        padding: 25px;
-    }
-    .plotly-rangeslider {
-        height: 80px !important;
-    }
-</style>
-""", unsafe_allow_html=True)
-
-# ====== ENHANCED CHART CONTAINER ======
-with st.container():
-    with st.container(border=True):
-        # Create columns for title and controls
-        title_col, control_col = st.columns([2, 8])
-        
-        with title_col:
-            st.markdown('<div class="title-spacing"><h2>Kaspa Hashrate</h2></div>', unsafe_allow_html=True)
-        
-        with control_col:
-            st.markdown('<div class="controls-wrapper">', unsafe_allow_html=True)
-            cols = st.columns([1.5, 1.5, 1.5, 4])
-            
-            with cols[0]:
-                with st.container(border=True):
-                    st.markdown('<div class="control-label">Hashrate Scale</div>', unsafe_allow_html=True)
-                    y_scale = st.toggle("Linear/Log", value=True, key="y_scale")
-                    y_scale = "Log" if y_scale else "Linear"
-            
-            with cols[1]:
-                with st.container(border=True):
-                    st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
-                    x_scale_type = st.toggle("Linear/Log", value=False, key="x_scale")
-                    x_scale_type = "Log" if x_scale_type else "Linear"
-            
-            with cols[2]:
-                with st.container(border=True):
-                    st.markdown('<div class="control-label">Deviation Bands</div>', unsafe_allow_html=True)
-                    show_bands = st.toggle("Hide/Show", value=False)
-            st.markdown('</div>', unsafe_allow_html=True)
-
-       # Create figure with enhanced grid
-        fig = go.Figure()
-
-        # Determine x-axis values based on scale type
-        max_days = df['days_from_genesis'].max() + 300  # Extend by 300 days
-        if x_scale_type == "Log":
-            x_values = df['days_from_genesis']
-            x_title = "Days Since Genesis (Log Scale)"
-            tickformat = None
-            hoverformat = None
-        else:
-            x_values = df['Date']
-            x_title = "Date"
-            tickformat = "%b %Y"
-            hoverformat = "%b %d, %Y"
-
-        # Main trace
-        fig.add_trace(go.Scatter(
-            x=x_values,
-            y=df['Hashrate_PH'],
-            mode='lines',
-            name='Hashrate (PH/s)',
-            line=dict(color='#00FFCC', width=2),
-            hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Hashrate</b>: %{y:.2f} PH/s<extra></extra>',
-            text=df['Date']
-        ))
-
-        # Power-law fit (extended 300 days into future)
-        x_fit = np.linspace(df['days_from_genesis'].min(), max_days, 100)
-        y_fit = a * np.power(x_fit, b)
-        
-        if x_scale_type == "Log":
-            fit_x = x_fit
-            future_x = np.linspace(df['days_from_genesis'].max(), max_days, 30)
-        else:
-            fit_x = [genesis_date + pd.Timedelta(days=int(d)) for d in x_fit]
-            future_x = [genesis_date + pd.Timedelta(days=int(d)) 
-                        for d in np.linspace(df['days_from_genesis'].max(), max_days, 30)]
-        
-        fig.add_trace(go.Scatter(
-            x=fit_x,
-            y=y_fit,
-            mode='lines',
-            name=f'Power-Law Fit (R²={r2:.3f})',
-            line=dict(color='orange', dash='dot', width=1.5)
-        ))
-        
-        # Add future projection line (dashed)
-        fig.add_trace(go.Scatter(
-            x=future_x,
-            y=a * np.power(np.linspace(df['days_from_genesis'].max(), max_days, 30), b),
-            mode='lines',
-            name='Future Projection',
-            line=dict(color='orange', dash='dot', width=1.5),
-            showlegend=False
-        ))
-        
-        # Deviation bands (only shown when toggled)
-        if show_bands:
-            # Current bands
-            fig.add_trace(go.Scatter(
-                x=fit_x,
-                y=y_fit * 0.4,
-                mode='lines',
-                name='-60% Deviation',
-                line=dict(color='rgba(150, 150, 150, 0.8)', dash='dot', width=1),
-                hoverinfo='skip'
-            ))
-            fig.add_trace(go.Scatter(
-                x=fit_x,
-                y=y_fit * 2.2,
-                mode='lines',
-                name='+120% Deviation',
-                line=dict(color='rgba(150, 150, 150, 0.8)', dash='dot', width=1),
-                hoverinfo='skip'
-            ))
-            
-            # Future bands
-            fig.add_trace(go.Scatter(
-                x=future_x,
-                y=a * np.power(np.linspace(df['days_from_genesis'].max(), max_days, 30), b) * 0.4,
-                mode='lines',
-                line=dict(color='rgba(150, 150, 150, 0.8)', dash='dot', width=1),
-                hoverinfo='skip',
-                showlegend=False
-            ))
-            fig.add_trace(go.Scatter(
-                x=future_x,
-                y=a * np.power(np.linspace(df['days_from_genesis'].max(), max_days, 30), b) * 2.2,
-                mode='lines',
-                line=dict(color='rgba(150, 150, 150, 0.8)', dash='dot', width=1),
-                hoverinfo='skip',
-                showlegend=False
-            ))
+# Update the figure creation section with these changes:
 
         # Enhanced layout with custom slider color
         fig.update_layout(
@@ -205,8 +12,8 @@ with st.container():
                 rangeslider=dict(
                     visible=True,
                     thickness=0.1,
-                    bgcolor='rgba(0,255,204,0.2)',  # Match the main line color
-                    bordercolor="#00FFCC",
+                    bgcolor='rgba(0, 0, 0, 0.3)',  # Darker, less distracting background
+                    bordercolor="#2b3137",  # Matching the border color
                     borderwidth=1
                 ),
                 type="log" if x_scale_type == "Log" else None,
@@ -242,15 +49,116 @@ with st.container():
             )
         )
 
+        # Group the power-law traces together
+        power_law_traces = []
+        
+        # Main power-law fit trace (visible by default)
+        power_law_trace = go.Scatter(
+            x=fit_x,
+            y=y_fit,
+            mode='lines',
+            name=f'Power-Law Fit (R²={r2:.3f})',
+            line=dict(color='orange', dash='dot', width=1.5),
+            visible=True
+        )
+        power_law_traces.append(power_law_trace)
+        
+        # Future projection line (dashed)
+        future_proj_trace = go.Scatter(
+            x=future_x,
+            y=a * np.power(np.linspace(df['days_from_genesis'].max(), max_days, 30), b),
+            mode='lines',
+            name='Future Projection',
+            line=dict(color='orange', dash='dot', width=1.5),
+            visible=True,
+            showlegend=False
+        )
+        power_law_traces.append(future_proj_trace)
+        
+        # Deviation bands (only shown when toggled)
+        lower_band_trace = go.Scatter(
+            x=fit_x,
+            y=y_fit * 0.4,
+            mode='lines',
+            name='-60% Deviation',
+            line=dict(color='rgba(150, 150, 150, 0.8)', dash='dot', width=1),
+            hoverinfo='skip',
+            visible=show_bands
+        )
+        power_law_traces.append(lower_band_trace)
+        
+        upper_band_trace = go.Scatter(
+            x=fit_x,
+            y=y_fit * 2.2,
+            mode='lines',
+            name='+120% Deviation',
+            line=dict(color='rgba(150, 150, 150, 0.8)', dash='dot', width=1),
+            hoverinfo='skip',
+            visible=show_bands
+        )
+        power_law_traces.append(upper_band_trace)
+        
+        # Future bands
+        future_lower_band_trace = go.Scatter(
+            x=future_x,
+            y=a * np.power(np.linspace(df['days_from_genesis'].max(), max_days, 30), b) * 0.4,
+            mode='lines',
+            line=dict(color='rgba(150, 150, 150, 0.8)', dash='dot', width=1),
+            hoverinfo='skip',
+            visible=show_bands,
+            showlegend=False
+        )
+        power_law_traces.append(future_lower_band_trace)
+        
+        future_upper_band_trace = go.Scatter(
+            x=future_x,
+            y=a * np.power(np.linspace(df['days_from_genesis'].max(), max_days, 30), b) * 2.2,
+            mode='lines',
+            line=dict(color='rgba(150, 150, 150, 0.8)', dash='dot', width=1),
+            hoverinfo='skip',
+            visible=show_bands,
+            showlegend=False
+        )
+        power_law_traces.append(future_upper_band_trace)
+        
+        # Add all traces to the figure
+        fig.add_traces(power_law_traces)
+
+        # Main trace (keep this separate)
+        fig.add_trace(go.Scatter(
+            x=x_values,
+            y=df['Hashrate_PH'],
+            mode='lines',
+            name='Hashrate (PH/s)',
+            line=dict(color='#00FFCC', width=2),
+            hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Hashrate</b>: %{y:.2f} PH/s<extra></extra>',
+            text=df['Date']
+        ))
+
+        # Create a button to toggle all power-law related traces
+        fig.update_layout(
+            updatemenus=[
+                dict(
+                    type="buttons",
+                    direction="right",
+                    x=0.5,
+                    y=1.15,
+                    showactive=True,
+                    buttons=list([
+                        dict(
+                            label="Show Power Law",
+                            method="update",
+                            args=[{"visible": [True] + [True]*len(power_law_traces)}]
+                        ),
+                        dict(
+                            label="Hide Power Law",
+                            method="update",
+                            args=[{"visible": [True] + [False]*len(power_law_traces)}]
+                        )
+                    ])
+                )
+            ]
+        )
+
         # Show the figure with more vertical space
         st.plotly_chart(fig, use_container_width=True)
-
-# Stats in minimal cards with more spacing
-st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True)
-cols = st.columns(3)
-with cols[0].container(border=True):
-    st.metric("Power-Law Slope", f"{b:.3f}")
-with cols[1].container(border=True):
-    st.metric("Model Fit (R²)", f"{r2:.3f}")
-with cols[2].container(border=True):
-    st.metric("Current Hashrate", f"{df['Hashrate_PH'].iloc[-1]:.2f} PH/s")
