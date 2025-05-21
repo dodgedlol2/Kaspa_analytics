@@ -13,7 +13,7 @@ if 'dark_mode' not in st.session_state:
     st.markdown("""
     <style>
         .stApp {
-            background-color: #0E1117;
+            background-color: #3b1117;
         }
     </style>
     """, unsafe_allow_html=True)
