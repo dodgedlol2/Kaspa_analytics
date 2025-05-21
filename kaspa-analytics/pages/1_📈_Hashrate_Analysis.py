@@ -92,18 +92,31 @@ st.markdown("""
     }
 
     .controls-container {
-        display: flex;
-        justify-content: flex-end;
-        flex-wrap: wrap;
-        gap: 10px;
+        position: relative;
+        width: 100%;
         margin-bottom: 15px;
     }
 
     .control-group {
-        display: flex;
-        flex-direction: column;
-        width: 120px !important;
-        min-width: 120px !important;
+        position: absolute;
+        width: 100px !important;
+        min-width: 100px !important;
+    }
+
+    .control-group:nth-child(1) {
+        left: 0px;
+    }
+
+    .control-group:nth-child(2) {
+        left: 110px;
+    }
+
+    .control-group:nth-child(3) {
+        left: 220px;
+    }
+
+    .control-group:nth-child(4) {
+        left: 330px;
     }
 
     .control-label {
@@ -113,7 +126,8 @@ st.markdown("""
     }
 
     .stSelectbox {
-        width: 120px !important;
+        width: 100px !important;
+        min-width: 100px !important;
     }
 
     .stSelectbox > div {
@@ -127,6 +141,7 @@ st.markdown("""
         border: 1px solid #3A3C4A !important;
         color: #e0e0e0 !important;
         height: 24px !important;
+        width: 100% !important;
     }
 
     .stSelectbox svg {
@@ -140,57 +155,63 @@ with st.container():
     # Title
     st.markdown('<div class="title-spacing"><h2>Kaspa Hashrate</h2></div>', unsafe_allow_html=True)
 
-    # Controls in horizontal layout
+    # Controls with absolute positioning
     st.markdown('<div class="controls-container">', unsafe_allow_html=True)
     
-    # Create columns with minimal spacing
-    col1, col2, col3, col4 = st.columns([1, 1, 1, 1], gap="small")
+    # Control group 1 - Period
+    st.markdown('<div class="control-group">', unsafe_allow_html=True)
+    st.markdown('<div class="control-label">Period</div>', unsafe_allow_html=True)
+    time_ranges = ["1W", "1M", "3M", "6M", "1Y", "All"]
+    if 'time_range' not in st.session_state:
+        st.session_state.time_range = "All"
+    time_range = st.selectbox(
+        "Time Range",
+        time_ranges,
+        index=time_ranges.index(st.session_state.time_range),
+        label_visibility="collapsed",
+        key="time_range_select"
+    )
+    st.markdown('</div>', unsafe_allow_html=True)
 
-    with col1:
-        st.markdown('<div class="control-label">Period</div>', unsafe_allow_html=True)
-        time_ranges = ["1W", "1M", "3M", "6M", "1Y", "All"]
-        if 'time_range' not in st.session_state:
-            st.session_state.time_range = "All"
-        time_range = st.selectbox(
-            "Time Range",
-            time_ranges,
-            index=time_ranges.index(st.session_state.time_range),
-            label_visibility="collapsed",
-            key="time_range_select"
-        )
+    # Control group 2 - Hashrate Scale
+    st.markdown('<div class="control-group">', unsafe_allow_html=True)
+    st.markdown('<div class="control-label">Hashrate Scale</div>', unsafe_allow_html=True)
+    y_scale_options = ["Linear", "Log"]
+    y_scale = st.selectbox(
+        "Hashrate Scale",
+        y_scale_options,
+        index=1 if st.session_state.get("y_scale", True) else 0,
+        label_visibility="collapsed",
+        key="y_scale_select"
+    )
+    st.markdown('</div>', unsafe_allow_html=True)
 
-    with col2:
-        st.markdown('<div class="control-label">Hashrate Scale</div>', unsafe_allow_html=True)
-        y_scale_options = ["Linear", "Log"]
-        y_scale = st.selectbox(
-            "Hashrate Scale",
-            y_scale_options,
-            index=1 if st.session_state.get("y_scale", True) else 0,
-            label_visibility="collapsed",
-            key="y_scale_select"
-        )
+    # Control group 3 - Time Scale
+    st.markdown('<div class="control-group">', unsafe_allow_html=True)
+    st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
+    x_scale_options = ["Linear", "Log"]
+    x_scale_type = st.selectbox(
+        "Time Scale",
+        x_scale_options,
+        index=0 if st.session_state.get("x_scale", False) else 1,
+        label_visibility="collapsed",
+        key="x_scale_select"
+    )
+    st.markdown('</div>', unsafe_allow_html=True)
 
-    with col3:
-        st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
-        x_scale_options = ["Linear", "Log"]
-        x_scale_type = st.selectbox(
-            "Time Scale",
-            x_scale_options,
-            index=0 if st.session_state.get("x_scale", False) else 1,
-            label_visibility="collapsed",
-            key="x_scale_select"
-        )
+    # Control group 4 - Power Law Fit
+    st.markdown('<div class="control-group">', unsafe_allow_html=True)
+    st.markdown('<div class="control-label">Power Law Fit</div>', unsafe_allow_html=True)
+    power_law_options = ["Hide", "Show"]
+    show_power_law = st.selectbox(
+        "Power Law Fit",
+        power_law_options,
+        index=1 if st.session_state.get("power_law_toggle", False) else 0,
+        label_visibility="collapsed",
+        key="power_law_select"
+    )
+    st.markdown('</div>', unsafe_allow_html=True)
 
-    with col4:
-        st.markdown('<div class="control-label">Power Law Fit</div>', unsafe_allow_html=True)
-        power_law_options = ["Hide", "Show"]
-        show_power_law = st.selectbox(
-            "Power Law Fit",
-            power_law_options,
-            index=1 if st.session_state.get("power_law_toggle", False) else 0,
-            label_visibility="collapsed",
-            key="power_law_select"
-        )
     st.markdown('</div>', unsafe_allow_html=True)
 
     # Date range selection
