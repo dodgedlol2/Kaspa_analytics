@@ -92,7 +92,7 @@ with st.container():
 
     # 1 spacer before + 4 dropdowns + 1 visible wide + 6 invisible after
     col_spacer_left, col1, col2, col3, col4, spacer1, spacer2, spacer3, spacer4, spacer5, spacer6, spacer7, spacer8, spacer9 = st.columns(
-        [0.5, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 4]
+        [0.5, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 3]
     )
 
     with col1:
