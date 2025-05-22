@@ -72,7 +72,7 @@ st.markdown("""
     .stSelectbox { width: 100% !important; max-width: 100px !important; }
     .stSelectbox > div { width: 100% !important; }
     .stSelectbox select {
-        font-size: 12px !important;
+        font-size: 11px !important;
         padding: 2px 4px !important;
         background-color: #262730 !important;
         border: 1px solid #3A3C4A !important;
@@ -266,3 +266,4 @@ with cols[1]:
 with cols[2]:
     st.metric("Current Hashrate", f"{df['Hashrate_PH'].iloc[-1]:.2f} PH/s")
 st.markdown('</div>', unsafe_allow_html=True)
+
