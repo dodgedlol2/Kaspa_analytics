@@ -134,8 +134,8 @@ with st.container():
         st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
         x_scale_options = ["Linear", "Log"]
         x_scale_type = st.selectbox("Time Scale", x_scale_options,
-                                    index=0 if st.session_state.get("x_scale", False) else 1,
-                                    label_visibility="collapsed", key="x_scale_select")
+                                index=0,  # Default to Linear
+                                label_visibility="collapsed", key="x_scale_select")
 
     with col3:
         st.markdown('<div class="control-label">Period</div>', unsafe_allow_html=True)
