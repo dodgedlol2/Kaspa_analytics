@@ -88,7 +88,7 @@ with st.container():
     st.markdown('<div class="title-spacing"><h2>Kaspa Hashrate</h2></div>', unsafe_allow_html=True)
 
     # 1 spacer before + 4 dropdowns + 8 spacers after (7 invisible + 1 wide)
-    col_spacer_left, col1, col2, col3, col4, spacer1, spacer2, spacer3, spacer4, spacer5, spacer6, spacer7, spacer8 = st.columns([0.5, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 8])
+    col_spacer_left, col1, col2, col3, col4, spacer1, spacer2, spacer3, spacer4, spacer5, spacer6, spacer7, spacer8 = st.columns([0.5, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 5])
 
     with col1:
         st.markdown('<div class="control-label">Hashrate Scale</div>', unsafe_allow_html=True)
