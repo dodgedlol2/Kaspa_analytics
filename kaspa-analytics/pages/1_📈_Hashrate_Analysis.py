@@ -87,8 +87,8 @@ st.markdown("""
 with st.container():
     st.markdown('<div class="title-spacing"><h2>Kaspa Hashrate</h2></div>', unsafe_allow_html=True)
 
-    # Adjust column spacing to push dropdowns left by adding invisible columns at the end
-    col1, col2, col3, col4, col_spacer1, col_spacer2, col_spacer3 = st.columns([1, 1, 1, 1, 0.5, 0.5, 5])
+    # 1 invisible column before, 4 dropdowns, then 3 invisible columns after
+    col_spacer_left, col1, col2, col3, col4, col_spacer1, col_spacer2, col_spacer3, col_spacer4 = st.columns([0.5, 1, 1, 1, 1, 0.5, 0.5, 0.5, 2])
 
     with col1:
         st.markdown('<div class="control-label">Hashrate Scale</div>', unsafe_allow_html=True)
@@ -119,6 +119,7 @@ with st.container():
         show_power_law = st.selectbox("Power Law Fit", power_law_options,
                                       index=1 if st.session_state.get("power_law_toggle", False) else 0,
                                       label_visibility="collapsed", key="power_law_select")
+
 
     last_date = df['Date'].iloc[-1]
     if time_range == "1W":
