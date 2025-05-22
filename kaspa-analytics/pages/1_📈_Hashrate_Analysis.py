@@ -193,7 +193,7 @@ with st.container():
         text=filtered_df['Date']
     ))
 
-    # Keeping the power law code but commented out for future use
+    # Power law fit and bands (commented out but kept in code)
     '''
     if show_power_law == "Show":
         x_fit = np.linspace(filtered_df['days_from_genesis'].min(), max_days, 300)
