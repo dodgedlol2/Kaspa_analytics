@@ -63,11 +63,33 @@ st.markdown("""
         margin-top: 10px !important;
         margin-bottom: 0px !important;
     }
-    .control-label {
+
+    /* DROPDOWN CONTAINER STYLES */
+    .dropdown-container {
+        position: relative;
+        margin-bottom: 8px;
+    }
+    .dropdown-label {
+        position: absolute;
+        top: -18px;
+        left: 8px;
         font-size: 11px !important;
         color: #e0e0e0 !important;
-        margin-bottom: 2px !important;
-        white-space: nowrap;
+        background-color: #262730;
+        padding: 0 4px;
+        z-index: 1;
+        border-radius: 3px;
+        border: 1px solid #3A3C4A;
+    }
+    .dropdown-label:after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: -5px;
+        width: 100%;
+        height: 5px;
+        background-color: #262730;
+        z-index: -1;
     }
 
     /* DROPDOWN STYLES */
@@ -75,11 +97,12 @@ st.markdown("""
         font-size: 12px !important;
     }
     [data-baseweb="select"] > div {
-        padding: 2px 6px !important;
-        border-radius: 4px !important;
+        padding: 8px 12px !important;
+        border-radius: 6px !important;
         border: 1px solid #3A3C4A !important;
         background-color: #262730 !important;
         transition: all 0.2s ease;
+        min-height: 40px;
     }
     [data-baseweb="select"] > div:hover {
         border-color: #00FFCC !important;
@@ -124,34 +147,50 @@ with st.container():
     )
 
     with col1:
-        st.markdown('<div class="control-label">Hashrate Scale</div>', unsafe_allow_html=True)
+        st.markdown("""
+        <div class="dropdown-container">
+            <div class="dropdown-label">Hashrate Scale</div>
+        """, unsafe_allow_html=True)
         y_scale_options = ["Linear", "Log"]
         y_scale = st.selectbox("Hashrate Scale", y_scale_options,
                                index=1 if st.session_state.get("y_scale", True) else 0,
                                label_visibility="collapsed", key="y_scale_select")
+        st.markdown("</div>", unsafe_allow_html=True)
 
     with col2:
-        st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
+        st.markdown("""
+        <div class="dropdown-container">
+            <div class="dropdown-label">Time Scale</div>
+        """, unsafe_allow_html=True)
         x_scale_options = ["Linear", "Log"]
         x_scale_type = st.selectbox("Time Scale", x_scale_options,
                                     index=0 if st.session_state.get("x_scale", False) else 1,
                                     label_visibility="collapsed", key="x_scale_select")
+        st.markdown("</div>", unsafe_allow_html=True)
 
     with col3:
-        st.markdown('<div class="control-label">Period</div>', unsafe_allow_html=True)
+        st.markdown("""
+        <div class="dropdown-container">
+            <div class="dropdown-label">Period</div>
+        """, unsafe_allow_html=True)
         time_ranges = ["1W", "1M", "3M", "6M", "1Y", "All"]
         if 'time_range' not in st.session_state:
             st.session_state.time_range = "All"
         time_range = st.selectbox("Time Range", time_ranges,
                                   index=time_ranges.index(st.session_state.time_range),
                                   label_visibility="collapsed", key="time_range_select")
+        st.markdown("</div>", unsafe_allow_html=True)
 
     with col4:
-        st.markdown('<div class="control-label">Power Law Fit</div>', unsafe_allow_html=True)
+        st.markdown("""
+        <div class="dropdown-container">
+            <div class="dropdown-label">Power Law Fit</div>
+        """, unsafe_allow_html=True)
         power_law_options = ["Hide", "Show"]
         show_power_law = st.selectbox("Power Law Fit", power_law_options,
                                       index=1 if st.session_state.get("power_law_toggle", False) else 0,
                                       label_visibility="collapsed", key="power_law_select")
+        st.markdown("</div>", unsafe_allow_html=True)
 
     last_date = df['Date'].iloc[-1]
     if time_range == "1W":
