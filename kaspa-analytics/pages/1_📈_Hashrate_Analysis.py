@@ -171,7 +171,6 @@ with st.container():
 
     fig = go.Figure()
 
-    max_days = filtered_df['days_from_genesis'].max() + 300
     if x_scale_type == "Log":
         x_values = filtered_df['days_from_genesis']
         x_title = "Days Since Genesis (Log Scale)"
@@ -193,12 +192,11 @@ with st.container():
         text=filtered_df['Date']
     ))
 
-    # Power law fit and bands (commented out but kept in code)
-    '''
     if show_power_law == "Show":
-        x_fit = np.linspace(filtered_df['days_from_genesis'].min(), max_days, 300)
+        # Only show power law fit for existing data points (no projection)
+        x_fit = filtered_df['days_from_genesis']
         y_fit = a * np.power(x_fit, b)
-        fit_x = x_fit if x_scale_type == "Log" else [genesis_date + pd.Timedelta(days=int(d)) for d in x_fit]
+        fit_x = x_fit if x_scale_type == "Log" else filtered_df['Date']
 
         fig.add_trace(go.Scatter(
             x=fit_x,
@@ -227,7 +225,6 @@ with st.container():
             fill='tonexty',
             fillcolor='rgba(100, 100, 100, 0.2)'
         ))
-    '''
 
     fig.update_layout(
         plot_bgcolor='#262730',
@@ -256,8 +253,6 @@ with st.container():
                 gridwidth=0.5
             ),
             tickformat=tickformat,
-            range=[None, max_days] if x_scale_type == "Log" else 
-                  [filtered_df['Date'].min(), genesis_date + pd.Timedelta(days=max_days)],
             linecolor='#3A3C4A',
             zerolinecolor='#3A3C4A'
         ),
