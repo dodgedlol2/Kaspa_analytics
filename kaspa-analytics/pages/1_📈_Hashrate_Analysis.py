@@ -69,17 +69,20 @@ st.markdown("""
         margin-bottom: 2px !important;
         white-space: nowrap;
     }
-    .stSelectbox { width: 100% !important; max-width: 100px !important; }
-    .stSelectbox > div { width: 100% !important; }
-    .stSelectbox select {
-        font-size: 11px !important;
-        padding: 2px 4px !important;
-        background-color: #262730 !important;
-        border: 1px solid #3A3C4A !important;
-        color: #e0e0e0 !important;
-        height: 24px !important;
+
+    /* DROPDOWN FONT SIZE TWEAKS */
+    [data-baseweb="select"] {
+        font-size: 12px !important;
     }
-    .stSelectbox svg { color: #e0e0e0 !important; }
+    [data-baseweb="select"] > div {
+        padding: 2px 6px !important;
+    }
+    [role="option"] {
+        font-size: 12px !important;
+    }
+    div[role="combobox"] > div {
+        font-size: 12px !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -87,8 +90,10 @@ st.markdown("""
 with st.container():
     st.markdown('<div class="title-spacing"><h2>Kaspa Hashrate</h2></div>', unsafe_allow_html=True)
 
-    # 1 spacer before + 4 dropdowns + 8 spacers after (7 invisible + 1 wide)
-    col_spacer_left, col1, col2, col3, col4, spacer1, spacer2, spacer3, spacer4, spacer5, spacer6, spacer7, spacer8 = st.columns([0.5, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 5])
+    # 1 spacer before + 4 dropdowns + 1 visible wide + 6 invisible after
+    col_spacer_left, col1, col2, col3, col4, spacer1, spacer2, spacer3, spacer4, spacer5, spacer6, spacer7, spacer8, spacer9 = st.columns(
+        [0.5, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 5]
+    )
 
     with col1:
         st.markdown('<div class="control-label">Hashrate Scale</div>', unsafe_allow_html=True)
@@ -119,7 +124,6 @@ with st.container():
         show_power_law = st.selectbox("Power Law Fit", power_law_options,
                                       index=1 if st.session_state.get("power_law_toggle", False) else 0,
                                       label_visibility="collapsed", key="power_law_select")
-
 
     last_date = df['Date'].iloc[-1]
     if time_range == "1W":
