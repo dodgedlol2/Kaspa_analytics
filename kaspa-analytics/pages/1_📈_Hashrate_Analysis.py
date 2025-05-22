@@ -70,18 +70,46 @@ st.markdown("""
         white-space: nowrap;
     }
 
-    /* DROPDOWN FONT SIZE TWEAKS */
+    /* DROPDOWN STYLES */
     [data-baseweb="select"] {
         font-size: 12px !important;
     }
     [data-baseweb="select"] > div {
         padding: 2px 6px !important;
+        border-radius: 4px !important;
+        border: 1px solid #3A3C4A !important;
+        background-color: #262730 !important;
+        transition: all 0.2s ease;
+    }
+    [data-baseweb="select"] > div:hover {
+        border-color: #00FFCC !important;
+    }
+    [data-baseweb="select"] > div[aria-expanded="true"],
+    [data-baseweb="select"] > div:focus-within {
+        border-color: #00FFCC !important;
+        box-shadow: 0 0 0 1px #00FFCC !important;
     }
     [role="option"] {
         font-size: 12px !important;
+        padding: 8px 12px !important;
+    }
+    [role="option"]:hover {
+        background-color: #3A3C4A !important;
+    }
+    [aria-selected="true"] {
+        background-color: #00FFCC20 !important;
+        color: #00FFCC !important;
     }
     div[role="combobox"] > div {
         font-size: 12px !important;
+        color: #e0e0e0 !important;
+    }
+    .stSelectbox [data-baseweb="select"] > div:has(> div[aria-selected="true"]) {
+        border-color: #00FFCC !important;
+        background-color: #00FFCC10 !important;
+    }
+    .stSelectbox [data-baseweb="select"] > div:has(> div[aria-selected="true"]) > div {
+        color: #00FFCC !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -270,4 +298,3 @@ with cols[1]:
 with cols[2]:
     st.metric("Current Hashrate", f"{df['Hashrate_PH'].iloc[-1]:.2f} PH/s")
 st.markdown('</div>', unsafe_allow_html=True)
-
