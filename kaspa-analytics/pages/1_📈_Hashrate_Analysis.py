@@ -63,62 +63,35 @@ st.markdown("""
         margin-top: 10px !important;
         margin-bottom: 0px !important;
     }
-
-    /* CONTROL PANEL STYLES */
-    .control-panel {
-        background-color: #262730;
-        border: 1px solid #3A3C4A;
-        border-radius: 10px;
-        padding: 15px;
-        margin-bottom: 20px;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 15px;
-        align-items: flex-end;
-    }
-    .control-item {
-        flex: 1;
-        min-width: 150px;
-    }
     .control-label {
-        font-size: 11px;
-        color: #e0e0e0;
-        margin-bottom: 4px;
-        display: block;
-        font-weight: 500;
-        letter-spacing: 0.5px;
+        font-size: 11px !important;
+        color: #e0e0e0 !important;
+        margin-bottom: 2px !important;
+        white-space: nowrap;
     }
 
-    /* ENHANCED DROPDOWN STYLES */
+    /* DROPDOWN STYLES */
     [data-baseweb="select"] {
         font-size: 12px !important;
     }
     [data-baseweb="select"] > div {
-        padding: 8px 12px !important;
-        border-radius: 6px !important;
+        padding: 2px 6px !important;
+        border-radius: 4px !important;
         border: 1px solid #3A3C4A !important;
-        background-color: #1E2029 !important;
+        background-color: #262730 !important;
         transition: all 0.2s ease;
-        min-height: 40px;
     }
     [data-baseweb="select"] > div:hover {
         border-color: #00FFCC !important;
-        background-color: #1E2029 !important;
     }
     [data-baseweb="select"] > div[aria-expanded="true"],
     [data-baseweb="select"] > div:focus-within {
         border-color: #00FFCC !important;
         box-shadow: 0 0 0 1px #00FFCC !important;
-        background-color: #1E2029 !important;
-    }
-    [role="listbox"] {
-        background-color: #262730 !important;
-        border: 1px solid #3A3C4A !important;
     }
     [role="option"] {
         font-size: 12px !important;
         padding: 8px 12px !important;
-        color: #e0e0e0 !important;
     }
     [role="option"]:hover {
         background-color: #3A3C4A !important;
@@ -144,50 +117,41 @@ st.markdown("""
 # ====== MAIN CHART CONTAINER ======
 with st.container():
     st.markdown('<div class="title-spacing"><h2>Kaspa Hashrate</h2></div>', unsafe_allow_html=True)
-    
-    # Control Panel Container
-    with st.container():
-        st.markdown('<div class="control-panel">', unsafe_allow_html=True)
-        
-        # Dropdown 1: Hashrate Scale
-        st.markdown('<div class="control-item">', unsafe_allow_html=True)
-        st.markdown('<span class="control-label">HASHRATE SCALE</span>', unsafe_allow_html=True)
+
+    # 1 spacer before + 4 dropdowns + 1 visible wide + 6 invisible after
+    col_spacer_left, col1, col2, col3, col4, spacer1, spacer2, spacer3, spacer4, spacer5, spacer6, spacer7, spacer8, spacer9 = st.columns(
+        [0.5, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 3]
+    )
+
+    with col1:
+        st.markdown('<div class="control-label">Hashrate Scale</div>', unsafe_allow_html=True)
         y_scale_options = ["Linear", "Log"]
         y_scale = st.selectbox("Hashrate Scale", y_scale_options,
-                             index=1 if st.session_state.get("y_scale", True) else 0,
-                             label_visibility="collapsed", key="y_scale_select")
-        st.markdown('</div>', unsafe_allow_html=True)
-        
-        # Dropdown 2: Time Scale
-        st.markdown('<div class="control-item">', unsafe_allow_html=True)
-        st.markdown('<span class="control-label">TIME SCALE</span>', unsafe_allow_html=True)
+                               index=1 if st.session_state.get("y_scale", True) else 0,
+                               label_visibility="collapsed", key="y_scale_select")
+
+    with col2:
+        st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
         x_scale_options = ["Linear", "Log"]
         x_scale_type = st.selectbox("Time Scale", x_scale_options,
-                                  index=0 if st.session_state.get("x_scale", False) else 1,
-                                  label_visibility="collapsed", key="x_scale_select")
-        st.markdown('</div>', unsafe_allow_html=True)
-        
-        # Dropdown 3: Period
-        st.markdown('<div class="control-item">', unsafe_allow_html=True)
-        st.markdown('<span class="control-label">TIME PERIOD</span>', unsafe_allow_html=True)
+                                    index=0 if st.session_state.get("x_scale", False) else 1,
+                                    label_visibility="collapsed", key="x_scale_select")
+
+    with col3:
+        st.markdown('<div class="control-label">Period</div>', unsafe_allow_html=True)
         time_ranges = ["1W", "1M", "3M", "6M", "1Y", "All"]
         if 'time_range' not in st.session_state:
             st.session_state.time_range = "All"
         time_range = st.selectbox("Time Range", time_ranges,
-                                index=time_ranges.index(st.session_state.time_range),
-                                label_visibility="collapsed", key="time_range_select")
-        st.markdown('</div>', unsafe_allow_html=True)
-        
-        # Dropdown 4: Power Law Fit
-        st.markdown('<div class="control-item">', unsafe_allow_html=True)
-        st.markdown('<span class="control-label">POWER LAW FIT</span>', unsafe_allow_html=True)
+                                  index=time_ranges.index(st.session_state.time_range),
+                                  label_visibility="collapsed", key="time_range_select")
+
+    with col4:
+        st.markdown('<div class="control-label">Power Law Fit</div>', unsafe_allow_html=True)
         power_law_options = ["Hide", "Show"]
         show_power_law = st.selectbox("Power Law Fit", power_law_options,
-                                    index=1 if st.session_state.get("power_law_toggle", False) else 0,
-                                    label_visibility="collapsed", key="power_law_select")
-        st.markdown('</div>', unsafe_allow_html=True)
-        
-        st.markdown('</div>', unsafe_allow_html=True)
+                                      index=1 if st.session_state.get("power_law_toggle", False) else 0,
+                                      label_visibility="collapsed", key="power_law_select")
 
     last_date = df['Date'].iloc[-1]
     if time_range == "1W":
