@@ -120,7 +120,7 @@ with st.container():
 
     # 1 spacer before + 4 dropdowns + 1 visible wide + 6 invisible after
     col_spacer_left, col1, col2, col3, col4, spacer1, spacer2, spacer3, spacer4, spacer5, spacer6, spacer7, spacer8, spacer9 = st.columns(
-        [0.35, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 3]
+        [0.5, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 3]
     )
 
     with col1:
@@ -150,7 +150,7 @@ with st.container():
         st.markdown('<div class="control-label">Power Law Fit</div>', unsafe_allow_html=True)
         power_law_options = ["Hide", "Show"]
         show_power_law = st.selectbox("Power Law Fit", power_law_options,
-                                      index=1 if st.session_state.get("power_law_toggle", False) else 0,
+                                      index=0,  # Default to Hide
                                       label_visibility="collapsed", key="power_law_select")
 
     last_date = df['Date'].iloc[-1]
@@ -193,6 +193,8 @@ with st.container():
         text=filtered_df['Date']
     ))
 
+    # Keeping the power law code but commented out for future use
+    '''
     if show_power_law == "Show":
         x_fit = np.linspace(filtered_df['days_from_genesis'].min(), max_days, 300)
         y_fit = a * np.power(x_fit, b)
@@ -225,6 +227,7 @@ with st.container():
             fill='tonexty',
             fillcolor='rgba(100, 100, 100, 0.2)'
         ))
+    '''
 
     fig.update_layout(
         plot_bgcolor='#262730',
