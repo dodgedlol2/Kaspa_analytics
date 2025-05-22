@@ -126,8 +126,8 @@ st.markdown("""
 with st.container():
     st.markdown('<div class="title-spacing"><h2>Kaspa Hashrate</h2></div>', unsafe_allow_html=True)
 
-    # Use tighter column spacing and shift controls left
-    col_spacer, col1, col2, col3, col4, col5, col_filler = st.columns([0.2, 1.5, 1.5, 1.5, 1.5, 1.5, 4])
+    # Use tighter column spacing and add invisible spacers between dropdowns
+    col_spacer, col1, col_spacer2, col2, col_spacer3, col3, col4, col5, col_filler = st.columns([0.2, 1.5, 0.05, 1.5, 0.05, 1.5, 1.5, 1.5, 4])
 
     with col1:
         st.markdown('<div class="control-label">Hashrate Scale</div>', unsafe_allow_html=True)
