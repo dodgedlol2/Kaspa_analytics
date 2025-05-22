@@ -24,65 +24,38 @@ except Exception as e:
     st.error(f"Failed to calculate power law: {str(e)}")
     st.stop()
 
-# Custom CSS for unified styling
+# Custom CSS
 st.markdown("""
 <style>
-    .stApp {
-        background-color: #0E1117;
-    }
-
-    .st-emotion-cache-6qob1r, .sidebar-content {
-        background-color: #262730 !important;
-    }
-
-    .title-spacing {
-        padding-left: 40px;
-        margin-bottom: 15px;
-    }
-
+    .stApp { background-color: #0E1117; }
+    .st-emotion-cache-6qob1r, .sidebar-content { background-color: #262730 !important; }
+    .title-spacing { padding-left: 40px; margin-bottom: 15px; }
     div[data-testid="stVerticalBlock"] > div[data-testid="stVerticalBlockBorderWrapper"] {
         background-color: #262730 !important;
         border-radius: 10px !important;
         border: 1px solid #3A3C4A !important;
         padding: 15px !important;
     }
-
     div[data-testid="stMetric"] {
         background-color: #262730 !important;
         border: 1px solid #3A3C4A !important;
         border-radius: 8px !important;
         padding: 15px 20px !important;
     }
-
     div[data-testid="stMetricValue"] > div {
         font-size: 24px !important;
         font-weight: 600 !important;
         color: #00FFCC !important;
     }
-
     div[data-testid="stMetricLabel"] > div {
         font-size: 14px !important;
         opacity: 0.8 !important;
         color: #e0e0e0 !important;
     }
-
-    .stMetric {
-        margin: 5px !important;
-        height: 100% !important;
-    }
-
-    h2 {
-        color: #e0e0e0 !important;
-    }
-
-    .hovertext text.hovertext {
-        fill: #e0e0e0 !important;
-    }
-
-    .range-slider .handle:after {
-        background-color: #00FFCC !important;
-    }
-
+    .stMetric { margin: 5px !important; height: 100% !important; }
+    h2 { color: #e0e0e0 !important; }
+    .hovertext text.hovertext { fill: #e0e0e0 !important; }
+    .range-slider .handle:after { background-color: #00FFCC !important; }
     .metrics-container {
         width: calc(100% - 40px) !important;
         margin-left: 20px !important;
@@ -90,23 +63,14 @@ st.markdown("""
         margin-top: 10px !important;
         margin-bottom: 0px !important;
     }
-
     .control-label {
         font-size: 11px !important;
         color: #e0e0e0 !important;
         margin-bottom: 2px !important;
         white-space: nowrap;
     }
-
-    .stSelectbox {
-        width: 100% !important;
-        max-width: 100px !important;
-    }
-
-    .stSelectbox > div {
-        width: 100% !important;
-    }
-
+    .stSelectbox { width: 100% !important; max-width: 100px !important; }
+    .stSelectbox > div { width: 100% !important; }
     .stSelectbox select {
         font-size: 12px !important;
         padding: 2px 4px !important;
@@ -115,10 +79,7 @@ st.markdown("""
         color: #e0e0e0 !important;
         height: 24px !important;
     }
-
-    .stSelectbox svg {
-        color: #e0e0e0 !important;
-    }
+    .stSelectbox svg { color: #e0e0e0 !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -126,56 +87,39 @@ st.markdown("""
 with st.container():
     st.markdown('<div class="title-spacing"><h2>Kaspa Hashrate</h2></div>', unsafe_allow_html=True)
 
-    # Use tighter column spacing and add invisible spacers between dropdowns
-    col_spacer, col1, col_spacer2, col2, col_spacer3, col3, col4, col5, col_filler = st.columns([0.2, 1.5, 0.05, 1.5, 0.05, 1.5, 1.5, 1.5, 4])
+    # Adjust column spacing to push dropdowns left by adding invisible columns at the end
+    col1, col2, col3, col4, col_spacer1, col_spacer2, col_spacer3 = st.columns([1, 1, 1, 1, 0.5, 0.5, 5])
 
     with col1:
         st.markdown('<div class="control-label">Hashrate Scale</div>', unsafe_allow_html=True)
         y_scale_options = ["Linear", "Log"]
-        y_scale = st.selectbox(
-            "Hashrate Scale",
-            y_scale_options,
-            index=1 if st.session_state.get("y_scale", True) else 0,
-            label_visibility="collapsed",
-            key="y_scale_select"
-        )
+        y_scale = st.selectbox("Hashrate Scale", y_scale_options,
+                               index=1 if st.session_state.get("y_scale", True) else 0,
+                               label_visibility="collapsed", key="y_scale_select")
 
     with col2:
         st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
         x_scale_options = ["Linear", "Log"]
-        x_scale_type = st.selectbox(
-            "Time Scale",
-            x_scale_options,
-            index=0 if st.session_state.get("x_scale", False) else 1,
-            label_visibility="collapsed",
-            key="x_scale_select"
-        )
+        x_scale_type = st.selectbox("Time Scale", x_scale_options,
+                                    index=0 if st.session_state.get("x_scale", False) else 1,
+                                    label_visibility="collapsed", key="x_scale_select")
 
     with col3:
         st.markdown('<div class="control-label">Period</div>', unsafe_allow_html=True)
         time_ranges = ["1W", "1M", "3M", "6M", "1Y", "All"]
         if 'time_range' not in st.session_state:
             st.session_state.time_range = "All"
-        time_range = st.selectbox(
-            "Time Range",
-            time_ranges,
-            index=time_ranges.index(st.session_state.time_range),
-            label_visibility="collapsed",
-            key="time_range_select"
-        )
+        time_range = st.selectbox("Time Range", time_ranges,
+                                  index=time_ranges.index(st.session_state.time_range),
+                                  label_visibility="collapsed", key="time_range_select")
 
     with col4:
         st.markdown('<div class="control-label">Power Law Fit</div>', unsafe_allow_html=True)
         power_law_options = ["Hide", "Show"]
-        show_power_law = st.selectbox(
-            "Power Law Fit",
-            power_law_options,
-            index=1 if st.session_state.get("power_law_toggle", False) else 0,
-            label_visibility="collapsed",
-            key="power_law_select"
-        )
+        show_power_law = st.selectbox("Power Law Fit", power_law_options,
+                                      index=1 if st.session_state.get("power_law_toggle", False) else 0,
+                                      label_visibility="collapsed", key="power_law_select")
 
-    # Date range selection
     last_date = df['Date'].iloc[-1]
     if time_range == "1W":
         start_date = last_date - timedelta(days=7)
