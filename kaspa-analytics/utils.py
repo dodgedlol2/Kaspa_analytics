@@ -45,8 +45,8 @@ def load_price_data():
     gc = get_gspread_client()
     
     # Load price data - you'll need to provide these details
-    price_sheet_id = "YOUR_PRICE_SHEET_ID"  # Replace with your actual sheet ID
-    price_worksheet_name = "YOUR_WORKSHEET_NAME"  # Replace with your worksheet name
+    price_sheet_id = "1rMBuWn0CscUZkcKy2gleH85rXSO6U4YOSk3Sz2KuR_s"  # Replace with your actual sheet ID
+    price_worksheet_name = "kaspa_daily_price"  # Replace with your worksheet name
     worksheet = gc.open_by_key(price_sheet_id).worksheet(price_worksheet_name)
     data = worksheet.get_all_values()
     
