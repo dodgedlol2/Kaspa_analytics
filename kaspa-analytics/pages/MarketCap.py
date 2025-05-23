@@ -7,10 +7,14 @@ from datetime import datetime, timedelta
 
 st.set_page_config(layout="wide")
 
-# Data loading and processing
+# Data loading and processing with 0 values excluded
 if 'mcap_df' not in st.session_state or 'mcap_genesis_date' not in st.session_state:
     try:
-        st.session_state.mcap_df, st.session_state.mcap_genesis_date = load_marketcap_data()
+        # Load data and filter out 0 values
+        mcap_df, genesis_date = load_marketcap_data()
+        mcap_df = mcap_df[mcap_df['MarketCap_B'] > 0]  # Exclude 0 values
+        st.session_state.mcap_df = mcap_df
+        st.session_state.mcap_genesis_date = genesis_date
     except Exception as e:
         st.error(f"Failed to load market cap data: {str(e)}")
         st.stop()
