@@ -5,16 +5,20 @@ from google.oauth2 import service_account
 from sklearn.metrics import r2_score
 import streamlit as st
 
-@st.cache_data(ttl=3600)
-def load_data():
-    # Authentication
+# Shared authentication function
+def get_gspread_client():
     credentials = service_account.Credentials.from_service_account_info(
         st.secrets["gcp_service_account"],
         scopes=["https://www.googleapis.com/auth/spreadsheets"],
     )
-    gc = gspread.authorize(credentials)
+    return gspread.authorize(credentials)
+
+# ===== HASH RATE FUNCTIONS =====
+@st.cache_data(ttl=3600)
+def load_data():
+    gc = get_gspread_client()
     
-    # Load data
+    # Load hashrate data
     sheet_id = "1NPwQh2FQKVES7OYUzKQLKwuOrRuIivGhOtQWZZ-Sp80"
     worksheet = gc.open_by_key(sheet_id).worksheet("kaspa_daily_hashrate (3)")
     data = worksheet.get_all_values()
@@ -35,9 +39,37 @@ def load_data():
     
     return df, genesis_date
 
-def fit_power_law(df):
+# ===== PRICE FUNCTIONS =====
+@st.cache_data(ttl=3600)
+def load_price_data():
+    gc = get_gspread_client()
+    
+    # Load price data - you'll need to provide these details
+    price_sheet_id = "YOUR_PRICE_SHEET_ID"  # Replace with your actual sheet ID
+    price_worksheet_name = "YOUR_WORKSHEET_NAME"  # Replace with your worksheet name
+    worksheet = gc.open_by_key(price_sheet_id).worksheet(price_worksheet_name)
+    data = worksheet.get_all_values()
+    
+    # Create DataFrame - adjust columns based on your actual data structure
+    df = pd.DataFrame(data[1:], columns=data[0])
+    df = df[['Date', 'Price']]  # Adjust these column names to match your data
+    
+    # Clean data
+    df['Date'] = pd.to_datetime(df['Date'], utc=True)  # Adjust format if needed
+    df['Price'] = df['Price'].astype(float)
+    
+    # Calculate metrics
+    genesis_date = pd.to_datetime('2021-11-07', utc=True)  # Same genesis as hashrate
+    df['days_from_genesis'] = (df['Date'] - genesis_date).dt.days
+    df = df[df['days_from_genesis'] >= 0]
+    
+    return df, genesis_date
+
+# ===== SHARED ANALYSIS FUNCTIONS =====
+def fit_power_law(df, y_col='Hashrate_PH'):
+    """General power law fitting function that works for both hashrate and price"""
     x_data = df['days_from_genesis'].values
-    y_data = df['Hashrate_PH'].values
+    y_data = df[y_col].values
     
     valid_indices = (x_data > 0) & (y_data > 0)
     x_data, y_data = x_data[valid_indices], y_data[valid_indices]
