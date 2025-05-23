@@ -24,7 +24,7 @@ except Exception as e:
     st.error(f"Failed to calculate power law: {str(e)}")
     st.stop()
 
-# Custom CSS
+# Custom CSS - updated divider styling
 st.markdown("""
 <style>
     .stApp { background-color: #0E1117; }
@@ -69,14 +69,14 @@ st.markdown("""
         margin-bottom: 2px !important;
         white-space: nowrap;
     }
-    .divider {
-        border-top: 1px solid #3A3C4A;
-        margin: 10px 0;
+    
+    /* NEW DIVIDER STYLES THAT WILL WORK */
+    .st-emotion-cache-1dp5vir {
+        border-top: 1px solid #3A3C4A !important;
+        margin-top: 10px !important;
+        margin-bottom: 10px !important;
     }
-    .dropdown-container {
-        margin-top: 10px;
-    }
-
+    
     /* DROPDOWN STYLES */
     [data-baseweb="select"] {
         font-size: 12px !important;
@@ -125,13 +125,10 @@ st.markdown("""
 with st.container():
     st.markdown('<div class="title-spacing"><h2>Kaspa Hashrate</h2></div>', unsafe_allow_html=True)
     
-    # First divider - under the title
-    st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
+    # First divider - under the title (using Streamlit's native divider with our styling)
+    st.divider()
     
     # Dropdown container
-    st.markdown('<div class="dropdown-container">', unsafe_allow_html=True)
-    
-    # 1 spacer before + 4 dropdowns + 1 visible wide + 6 invisible after
     col_spacer_left, col1, col2, col3, col4, spacer1, spacer2, spacer3, spacer4, spacer5, spacer6, spacer7, spacer8, spacer9 = st.columns(
         [0.35, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 3]
     )
@@ -166,10 +163,8 @@ with st.container():
                                       index=0,  # Default to Hide
                                       label_visibility="collapsed", key="power_law_select")
     
-    st.markdown('</div>', unsafe_allow_html=True)  # Close dropdown container
-    
     # Second divider - under the dropdown menus
-    st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
+    st.divider()
 
     last_date = df['Date'].iloc[-1]
     if time_range == "1W":
@@ -211,7 +206,6 @@ with st.container():
     ))
 
     if show_power_law == "Show":
-        # Only show power law fit for existing data points (no projection)
         x_fit = filtered_df['days_from_genesis']
         y_fit = a * np.power(x_fit, b)
         fit_x = x_fit if x_scale_type == "Log" else filtered_df['Date']
