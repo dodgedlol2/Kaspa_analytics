@@ -24,20 +24,57 @@ except Exception as e:
     st.error(f"Failed to calculate power law: {str(e)}")
     st.stop()
 
-# Custom CSS - updated with tighter spacing
+# Custom CSS - optimized for tight top spacing
 st.markdown("""
 <style>
     .stApp { background-color: #0E1117; }
     .st-emotion-cache-6qob1r, .sidebar-content { background-color: #262730 !important; }
-    .title-spacing { 
-        padding-left: 40px; 
-        margin-bottom: 5px !important;  /* Reduced from 15px */
+    
+    /* Tighter title section */
+    .title-container {
+        padding-left: 20px !important;
+        padding-top: 5px !important;
+        padding-bottom: 0px !important;
+        margin-bottom: 0px !important;
     }
+    
+    h2 {
+        color: #e0e0e0 !important;
+        margin-bottom: 5px !important;
+        padding-bottom: 0px !important;
+    }
+    
+    /* Ultra-compact dividers */
+    .st-emotion-cache-1dp5vir {
+        border-top: 1px solid #3A3C4A !important;
+        margin-top: 0px !important;
+        margin-bottom: 0px !important;
+        padding-top: 0px !important;
+        padding-bottom: 0px !important;
+    }
+    
+    /* Tight dropdown container */
+    .dropdown-row {
+        padding-top: 2px !important;
+        padding-bottom: 2px !important;
+        margin-top: 0px !important;
+        margin-bottom: 0px !important;
+    }
+    
+    /* Control label adjustments */
+    .control-label {
+        font-size: 11px !important;
+        color: #e0e0e0 !important;
+        margin-bottom: 1px !important;
+        padding-bottom: 0px !important;
+    }
+    
+    /* Rest of your existing styles */
     div[data-testid="stVerticalBlock"] > div[data-testid="stVerticalBlockBorderWrapper"] {
         background-color: #262730 !important;
         border-radius: 10px !important;
         border: 1px solid #3A3C4A !important;
-        padding: 10px !important;  /* Reduced from 15px */
+        padding: 10px !important;
     }
     div[data-testid="stMetric"] {
         background-color: #262730 !important;
@@ -56,37 +93,14 @@ st.markdown("""
         color: #e0e0e0 !important;
     }
     .stMetric { margin: 5px !important; height: 100% !important; }
-    h2 { 
-        color: #e0e0e0 !important;
-        margin-bottom: 8px !important;  /* Added to reduce space below title */
-    }
     .hovertext text.hovertext { fill: #e0e0e0 !important; }
     .range-slider .handle:after { background-color: #00FFCC !important; }
     .metrics-container {
         width: calc(100% - 40px) !important;
         margin-left: 20px !important;
         margin-right: 20px !important;
-        margin-top: 5px !important;  /* Reduced from 10px */
+        margin-top: 5px !important;
         margin-bottom: 0px !important;
-    }
-    .control-label {
-        font-size: 11px !important;
-        color: #e0e0e0 !important;
-        margin-bottom: 2px !important;
-        white-space: nowrap;
-    }
-    
-    /* Tighter divider styles */
-    .st-emotion-cache-1dp5vir {
-        border-top: 2px solid #3A3C4A !important;
-        margin-top: 0px !important;  /* Reduced from 1px */
-        margin-bottom: 0px !important;  /* Reduced from 2px */
-    }
-    
-    /* Compact dropdown container */
-    .dropdown-container {
-        padding-top: 0px !important;
-        padding-bottom: 0px !important;
     }
     
     /* DROPDOWN STYLES */
@@ -135,49 +149,57 @@ st.markdown("""
 
 # ====== MAIN CHART CONTAINER ======
 with st.container():
-    st.markdown('<div class="title-spacing"><h2>Kaspa Hashrate</h2></div>', unsafe_allow_html=True)
+    # Title with minimal spacing
+    st.markdown("""
+    <div class="title-container">
+        <h2>Kaspa Hashrate</h2>
+    </div>
+    """, unsafe_allow_html=True)
     
-    # First divider - under the title
+    # First divider - right under title
     st.divider()
     
-    # Dropdown container with tighter spacing
-    col_spacer_left, col1, col2, col3, col4, spacer1, spacer2, spacer3, spacer4, spacer5, spacer6, spacer7, spacer8, spacer9 = st.columns(
-        [0.35, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 3]
-    )
+    # Dropdown container with minimal padding
+    with st.container():
+        st.markdown('<div class="dropdown-row">', unsafe_allow_html=True)
+        col1, col2, col3, col4, spacer = st.columns([1, 1, 1, 1, 6])
+        
+        with col1:
+            st.markdown('<div class="control-label">Hashrate Scale</div>', unsafe_allow_html=True)
+            y_scale_options = ["Linear", "Log"]
+            y_scale = st.selectbox("Hashrate Scale", y_scale_options,
+                                 index=1 if st.session_state.get("y_scale", True) else 0,
+                                 label_visibility="collapsed", key="y_scale_select")
 
-    with col1:
-        st.markdown('<div class="control-label">Hashrate Scale</div>', unsafe_allow_html=True)
-        y_scale_options = ["Linear", "Log"]
-        y_scale = st.selectbox("Hashrate Scale", y_scale_options,
-                             index=1 if st.session_state.get("y_scale", True) else 0,
-                             label_visibility="collapsed", key="y_scale_select")
+        with col2:
+            st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
+            x_scale_options = ["Linear", "Log"]
+            x_scale_type = st.selectbox("Time Scale", x_scale_options,
+                                      index=0,
+                                      label_visibility="collapsed", key="x_scale_select")
 
-    with col2:
-        st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
-        x_scale_options = ["Linear", "Log"]
-        x_scale_type = st.selectbox("Time Scale", x_scale_options,
-                                  index=0,
-                                  label_visibility="collapsed", key="x_scale_select")
+        with col3:
+            st.markdown('<div class="control-label">Period</div>', unsafe_allow_html=True)
+            time_ranges = ["1W", "1M", "3M", "6M", "1Y", "All"]
+            if 'time_range' not in st.session_state:
+                st.session_state.time_range = "All"
+            time_range = st.selectbox("Time Range", time_ranges,
+                                    index=time_ranges.index(st.session_state.time_range),
+                                    label_visibility="collapsed", key="time_range_select")
 
-    with col3:
-        st.markdown('<div class="control-label">Period</div>', unsafe_allow_html=True)
-        time_ranges = ["1W", "1M", "3M", "6M", "1Y", "All"]
-        if 'time_range' not in st.session_state:
-            st.session_state.time_range = "All"
-        time_range = st.selectbox("Time Range", time_ranges,
-                                index=time_ranges.index(st.session_state.time_range),
-                                label_visibility="collapsed", key="time_range_select")
-
-    with col4:
-        st.markdown('<div class="control-label">Power Law Fit</div>', unsafe_allow_html=True)
-        power_law_options = ["Hide", "Show"]
-        show_power_law = st.selectbox("Power Law Fit", power_law_options,
-                                    index=0,
-                                    label_visibility="collapsed", key="power_law_select")
+        with col4:
+            st.markdown('<div class="control-label">Power Law Fit</div>', unsafe_allow_html=True)
+            power_law_options = ["Hide", "Show"]
+            show_power_law = st.selectbox("Power Law Fit", power_law_options,
+                                        index=0,
+                                        label_visibility="collapsed", key="power_law_select")
+        
+        st.markdown('</div>', unsafe_allow_html=True)
     
-    # Second divider - under the dropdown menus
+    # Second divider - right under dropdowns
     st.divider()
 
+    # Rest of your existing code...
     last_date = df['Date'].iloc[-1]
     if time_range == "1W":
         start_date = last_date - timedelta(days=7)
@@ -256,7 +278,7 @@ with st.container():
         font_color='#e0e0e0',
         hovermode='x unified',
         height=700,
-        margin=dict(l=20, r=20, t=30, b=100),  # Reduced top margin from 60 to 30
+        margin=dict(l=20, r=20, t=20, b=100),  # Reduced top margin to 20px
         yaxis_title='Hashrate (PH/s)',
         xaxis_title=x_title,
         xaxis=dict(
