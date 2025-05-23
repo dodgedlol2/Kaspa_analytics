@@ -72,9 +72,9 @@ st.markdown("""
     
     /* NEW DIVIDER STYLES THAT WILL WORK */
     .st-emotion-cache-1dp5vir {
-        border-top: 1px solid #3A3C4A !important;
+        border-top: 2px solid #3A3C4A !important;
         margin-top: 1px !important;
-        margin-bottom: 10px !important;
+        margin-bottom: 2px !important;
     }
     
     /* DROPDOWN STYLES */
