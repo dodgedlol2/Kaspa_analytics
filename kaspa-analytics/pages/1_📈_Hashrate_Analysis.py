@@ -69,6 +69,13 @@ st.markdown("""
         margin-bottom: 2px !important;
         white-space: nowrap;
     }
+    .divider {
+        border-top: 1px solid #3A3C4A;
+        margin: 10px 0;
+    }
+    .dropdown-container {
+        margin-top: 10px;
+    }
 
     /* DROPDOWN STYLES */
     [data-baseweb="select"] {
@@ -117,7 +124,13 @@ st.markdown("""
 # ====== MAIN CHART CONTAINER ======
 with st.container():
     st.markdown('<div class="title-spacing"><h2>Kaspa Hashrate</h2></div>', unsafe_allow_html=True)
-
+    
+    # First divider - under the title
+    st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
+    
+    # Dropdown container
+    st.markdown('<div class="dropdown-container">', unsafe_allow_html=True)
+    
     # 1 spacer before + 4 dropdowns + 1 visible wide + 6 invisible after
     col_spacer_left, col1, col2, col3, col4, spacer1, spacer2, spacer3, spacer4, spacer5, spacer6, spacer7, spacer8, spacer9 = st.columns(
         [0.35, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 3]
@@ -152,6 +165,11 @@ with st.container():
         show_power_law = st.selectbox("Power Law Fit", power_law_options,
                                       index=0,  # Default to Hide
                                       label_visibility="collapsed", key="power_law_select")
+    
+    st.markdown('</div>', unsafe_allow_html=True)  # Close dropdown container
+    
+    # Second divider - under the dropdown menus
+    st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
 
     last_date = df['Date'].iloc[-1]
     if time_range == "1W":
