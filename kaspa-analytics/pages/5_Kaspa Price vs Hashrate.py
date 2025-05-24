@@ -36,6 +36,15 @@ except Exception as e:
     st.error(f"Failed to calculate price-hashrate power law: {str(e)}")
     st.stop()
 
+# Create color gradient for last 30 points
+last_30 = analysis_df.tail(30).copy()
+colors = ['#FF0000', '#FF4500', '#FF8C00', '#FFA500', '#FFD700', 
+          '#FFFF00', '#ADFF2F', '#7CFC00', '#00FF00', '#00FA9A', 
+          '#00FFFF', '#1E90FF', '#0000FF', '#8A2BE2', '#9400D3']
+n_colors = len(colors)
+last_30['color_index'] = range(len(last_30))
+last_30['color'] = last_30['color_index'].apply(lambda x: colors[min(x, n_colors-1)])
+
 # Custom CSS - consistent styling
 st.markdown("""
 <style>
@@ -137,8 +146,8 @@ with st.container():
     st.divider()
     
     # Dropdown container
-    col_spacer_left, col1, col2, col3, spacer1, spacer2, spacer3, spacer4, spacer5, spacer6, spacer7, spacer8, spacer9 = st.columns(
-        [0.35, 1, 1, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 3]
+    col_spacer_left, col1, col2, col3, col4, spacer1, spacer2, spacer3, spacer4, spacer5, spacer6, spacer7, spacer8, spacer9 = st.columns(
+        [0.35, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 3]
     )
 
     with col1:
@@ -162,26 +171,61 @@ with st.container():
                                       index=1,
                                       label_visibility="collapsed", key="power_law_select")
     
+    with col4:
+        st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
+        time_scale_options = ["Linear", "Log"]
+        time_scale = st.selectbox("Time Scale", time_scale_options,
+                                index=0,
+                                label_visibility="collapsed", key="time_scale_select")
+    
     # Second divider - under the dropdown menus
     st.divider()
 
-    # Create the scatter plot
+    # Create the main figure
     fig = go.Figure()
 
-    # Add scatter trace for price vs hashrate
+    # Add scatter trace for all price vs hashrate points (light gray)
     fig.add_trace(go.Scatter(
         x=analysis_df['Hashrate_PH'],
         y=analysis_df['Price'],
         mode='markers',
-        name='Price vs Hashrate',
+        name='Historical Data',
         marker=dict(
-            color='#00FFCC',
-            size=8,
-            opacity=0.7,
-            line=dict(width=1, color='DarkSlateGrey')
+            color='rgba(150, 150, 150, 0.3)',
+            size=6,
+            line=dict(width=0.5, color='DarkSlateGrey')
         ),
         hovertemplate='<b>Hashrate</b>: %{x:.2f} PH/s<br><b>Price</b>: $%{y:.4f}<br><b>Date</b>: %{text}<extra></extra>',
         text=analysis_df['Date'].dt.strftime('%Y-%m-%d')
+    ))
+
+    # Add colored scatter trace for last 30 points
+    for i, row in last_30.iterrows():
+        fig.add_trace(go.Scatter(
+            x=[row['Hashrate_PH']],
+            y=[row['Price']],
+            mode='markers',
+            name=f"Recent ({row['Date'].strftime('%Y-%m-%d')})" if i == last_30.index[-1] else None,
+            marker=dict(
+                color=row['color'],
+                size=10,
+                line=dict(width=1, color='DarkSlateGrey')
+            ),
+            hovertemplate='<b>Hashrate</b>: %{x:.2f} PH/s<br><b>Price</b>: $%{y:.4f}<br><b>Date</b>: %{text}<extra></extra>',
+            text=[row['Date'].strftime('%Y-%m-%d')],
+            showlegend=False
+        ))
+
+    # Add price over time on secondary y-axis
+    fig.add_trace(go.Scatter(
+        x=analysis_df['Hashrate_PH'],
+        y=analysis_df['Price'],
+        mode='lines',
+        name='Price Trend',
+        line=dict(color='rgba(150, 150, 150, 0.7)', width=1.5),
+        hovertemplate='<b>Hashrate</b>: %{x:.2f} PH/s<br><b>Price</b>: $%{y:.4f}<br><b>Date</b>: %{text}<extra></extra>',
+        text=analysis_df['Date'].dt.strftime('%Y-%m-%d'),
+        yaxis='y2'
     ))
 
     if show_power_law == "Show":
@@ -225,7 +269,7 @@ with st.container():
         hovermode='closest',
         height=700,
         margin=dict(l=20, r=20, t=60, b=100),
-        yaxis_title='Price (USD)',
+        yaxis_title='Price vs Hashrate (USD/PH/s)',
         xaxis_title='Hashrate (PH/s)',
         xaxis=dict(
             type="log" if x_scale_type == "Log" else "linear",
@@ -252,6 +296,15 @@ with st.container():
             ),
             linecolor='#3A3C4A',
             zerolinecolor='#3A3C4A'
+        ),
+        yaxis2=dict(
+            title='Price Over Time (USD)',
+            overlaying='y',
+            side='right',
+            type="log" if y_scale == "Log" else "linear",
+            showgrid=False,
+            linecolor='rgba(150, 150, 150, 0.5)',
+            zeroline=False
         ),
         legend=dict(
             orientation="h",
