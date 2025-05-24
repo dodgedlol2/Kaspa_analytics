@@ -65,6 +65,46 @@ def load_price_data():
     
     return df, genesis_date
 
+# ===== VOLUME FUNCTIONS =====
+@st.cache_data(ttl=3600)
+def load_volume_data():
+    gc = get_gspread_client()
+    
+    # Load volume data
+    volume_sheet_id = "1IdAmETrtZ8_lCuSQwEyDLtMIGiQbJFOyGGpMa9_hxZc"
+    volume_worksheet_name = "KAS_VOLUME_ETC"
+    worksheet = gc.open_by_key(volume_sheet_id).worksheet(volume_worksheet_name)
+    data = worksheet.get_all_values()
+    
+    # Create DataFrame
+    df = pd.DataFrame(data[1:], columns=data[0])
+    
+    # Clean data - select relevant columns and rename if needed
+    df = df[['date', 'price', 'total_volume']]
+    df = df.rename(columns={
+        'date': 'Date',
+        'price': 'Price',
+        'total_volume': 'Volume_USD'
+    })
+    
+    # Convert data types
+    df['Date'] = pd.to_datetime(df['Date'], utc=True)
+    df['Price'] = pd.to_numeric(df['Price'], errors='coerce')
+    df['Volume_USD'] = pd.to_numeric(df['Volume_USD'], errors='coerce')
+    
+    # Remove rows with missing data
+    df = df.dropna()
+    
+    # Calculate metrics
+    genesis_date = pd.to_datetime('2021-11-07', utc=True)
+    df['days_from_genesis'] = (df['Date'] - genesis_date).dt.days
+    df = df[df['days_from_genesis'] >= 0]
+    
+    # Sort by date and reset index
+    df = df.sort_values('Date').reset_index(drop=True)
+    
+    return df
+
 # ===== MARKET CAP FUNCTIONS =====
 @st.cache_data(ttl=3600)
 def load_marketcap_data():
