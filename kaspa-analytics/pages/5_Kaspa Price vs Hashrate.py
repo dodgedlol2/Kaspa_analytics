@@ -147,8 +147,8 @@ with st.container():
     st.divider()
     
     # Dropdown container
-    col_spacer_left, col1, col2, col3, spacer1, spacer2, spacer3, spacer4, spacer5, spacer6, spacer7, spacer8, spacer9 = st.columns(
-        [0.35, 1, 1, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 3]
+    col_spacer_left, col1, col2, col3, col4, spacer1, spacer2, spacer3, spacer4, spacer5, spacer6, spacer7, spacer8 = st.columns(
+        [0.35, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 3]
     )
 
     with col1:
@@ -171,6 +171,13 @@ with st.container():
         show_power_law = st.selectbox("Power Law Fit", power_law_options,
                                       index=1,
                                       label_visibility="collapsed", key="power_law_select")
+    
+    with col4:
+        st.markdown('<div class="control-label">Ratio Scale</div>', unsafe_allow_html=True)
+        ratio_scale_options = ["Linear", "Log"]
+        ratio_scale = st.selectbox("Ratio Scale", ratio_scale_options,
+                                   index=1,
+                                   label_visibility="collapsed", key="ratio_scale_select")
     
     # Second divider - under the dropdown menus
     st.divider()
@@ -344,6 +351,7 @@ with st.container():
             zerolinecolor='#3A3C4A'
         ),
         yaxis=dict(
+            type="log" if ratio_scale == "Log" else "linear",
             showgrid=True,
             gridwidth=1,
             gridcolor='rgba(255, 255, 255, 0.1)',
