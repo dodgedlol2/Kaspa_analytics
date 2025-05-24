@@ -125,7 +125,7 @@ st.markdown("""
 
 # ====== MAIN CHART CONTAINER ======
 with st.container():
-    st.markdown('<div class="title-spacing"><h2>Kaspa Hashrate with Price</h2></div>', unsafe_allow_html=True)
+    st.markdown('<div class="title-spacing"><h2>Kaspa Hashrate with Price Reference</h2></div>', unsafe_allow_html=True)
     
     # First divider - under the title
     st.divider()
@@ -208,13 +208,13 @@ with st.container():
         text=filtered_df['Date']
     ))
 
-    # Add price trace (secondary y-axis)
+    # Add price trace (secondary y-axis) - more subtle styling
     fig.add_trace(go.Scatter(
         x=x_values,
         y=filtered_df['Price'],
         mode='lines',
         name='Price (USD)',
-        line=dict(color='#FF6699', width=1.5),
+        line=dict(color='rgba(150, 150, 150, 0.7)', width=1.2, dash='dot'),
         hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Price</b>: $%{y:.4f}<extra></extra>',
         text=filtered_df['Date'],
         yaxis='y2'
@@ -303,9 +303,9 @@ with st.container():
             side='right',
             type="log" if y_scale == "Log" else "linear",
             showgrid=False,
-            linecolor='#FF6699',
-            zerolinecolor='#FF6699',
-            color='#FF6699'
+            linecolor='rgba(150, 150, 150, 0.5)',  # More subtle axis line
+            zeroline=False,
+            color='rgba(150, 150, 150, 0.7)'
         ),
         legend=dict(
             orientation="h",
