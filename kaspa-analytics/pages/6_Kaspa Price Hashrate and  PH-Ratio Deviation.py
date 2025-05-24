@@ -11,7 +11,6 @@ st.set_page_config(layout="wide")
 if 'df' not in st.session_state or 'genesis_date' not in st.session_state:
     try:
         st.session_state.df, st.session_state.genesis_date = load_data()
-        # Load price data as well
         st.session_state.price_df, _ = load_price_data()
     except Exception as e:
         st.error(f"Failed to load data: {str(e)}")
@@ -28,8 +27,29 @@ price_df['Date'] = pd.to_datetime(price_df['Date']).dt.normalize()
 # Remove duplicate dates (keep last)
 price_df = price_df.drop_duplicates('Date', keep='last')
 
-# Then proceed with your existing merge
+# Merge data
 merged_df = pd.merge(df, price_df[['Date', 'Price']], on='Date', how='left')
+
+# Calculate price/hashrate ratio and days since genesis
+analysis_df = merged_df.dropna(subset=['Hashrate_PH', 'Price']).copy()
+analysis_df['Price_Hashrate_Ratio'] = analysis_df['Price'] / analysis_df['Hashrate_PH']
+analysis_df['Days_Since_Genesis'] = (analysis_df['Date'] - genesis_date).dt.days + 1  # +1 to avoid log(0)
+
+# Calculate power law fit for the ratio
+try:
+    a_ratio_time, b_ratio_time, r2_ratio_time = fit_power_law(analysis_df, x_col='Days_Since_Genesis', y_col='Price_Hashrate_Ratio')
+    # Calculate expected ratio values
+    analysis_df['Expected_Ratio'] = a_ratio_time * np.power(analysis_df['Days_Since_Genesis'], b_ratio_time)
+    # Calculate deviation from expected ratio
+    analysis_df['Ratio_Deviation_Pct'] = ((analysis_df['Price_Hashrate_Ratio'] - analysis_df['Expected_Ratio']) / analysis_df['Expected_Ratio']) * 100
+except Exception as e:
+    st.error(f"Failed to calculate ratio power law: {str(e)}")
+    st.stop()
+
+# Create color gradient for last 7 points (teal to purple)
+last_7 = analysis_df.tail(7).copy()
+purple_gradient = ['#00FFCC', '#40E0D0', '#80C0FF', '#A080FF', '#C040FF', '#E000FF', '#FF00FF']
+last_7['color'] = purple_gradient
 
 # Custom CSS - updated divider styling
 st.markdown("""
@@ -121,6 +141,10 @@ st.markdown("""
     .stSelectbox [data-baseweb="select"] > div:has(> div[aria-selected="true"]) > div {
         color: #00FFCC !important;
     }
+    .oscillator-chart {
+        margin-top: -30px !important;
+        height: 200px !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -177,6 +201,7 @@ with st.container():
         start_date = merged_df['Date'].iloc[0]
 
     filtered_df = merged_df[merged_df['Date'] >= start_date]
+    filtered_analysis_df = analysis_df[analysis_df['Date'] >= start_date]
 
     fig = go.Figure()
 
@@ -202,7 +227,7 @@ with st.container():
         text=filtered_df['Date']
     ))
 
-    # Add price trace (secondary y-axis) - solid line version
+    # Add price trace (secondary y-axis)
     fig.add_trace(go.Scatter(
         x=x_values,
         y=filtered_df['Price'],
@@ -219,7 +244,7 @@ with st.container():
         paper_bgcolor='#262730',
         font_color='#e0e0e0',
         hovermode='x unified',
-        height=700,
+        height=500,
         margin=dict(l=20, r=20, t=60, b=100),
         yaxis_title='Hashrate (PH/s)',
         xaxis_title=x_title,
@@ -285,13 +310,110 @@ with st.container():
 
     st.plotly_chart(fig, use_container_width=True)
 
+    # ====== OSCILLATOR CHART ======
+    st.markdown('<div class="title-spacing"><h4>Price/Hashrate Ratio Deviation (%)</h4></div>', unsafe_allow_html=True)
+    
+    osc_fig = go.Figure()
+    
+    # Determine x-axis values based on time scale selection
+    if x_scale_type == "Log":
+        x_osc = filtered_analysis_df['Days_Since_Genesis']
+        x_osc_title = 'Days Since Genesis (Log Scale)'
+    else:
+        x_osc = filtered_analysis_df['Date']
+        x_osc_title = 'Date'
+    
+    # Add zero line
+    osc_fig.add_shape(
+        type="line",
+        x0=x_osc.iloc[0], x1=x_osc.iloc[-1],
+        y0=0, y1=0,
+        line=dict(color="rgba(255,255,255,0.5)", width=1, dash="dot")
+    )
+    
+    # Add deviation area
+    osc_fig.add_trace(go.Scatter(
+        x=x_osc,
+        y=filtered_analysis_df['Ratio_Deviation_Pct'],
+        fill='tozeroy',
+        mode='lines',
+        name='Deviation %',
+        line=dict(color='#00FFCC', width=2),
+        hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Deviation</b>: %{y:.1f}%<extra></extra>',
+        text=filtered_analysis_df['Date']
+    ))
+    
+    # Add colored markers for last 7 points
+    last_7_filtered = filtered_analysis_df.tail(7)
+    for i, row in last_7_filtered.iterrows():
+        x_val = row['Days_Since_Genesis'] if x_scale_type == "Log" else row['Date']
+        osc_fig.add_trace(go.Scatter(
+            x=[x_val],
+            y=[row['Ratio_Deviation_Pct']],
+            mode='markers',
+            marker=dict(
+                color=purple_gradient[i % len(purple_gradient)],
+                size=8,
+                line=dict(width=1.5, color='DarkSlateGrey')
+            ),
+            showlegend=False,
+            hoverinfo='skip'
+        ))
+    
+    # Add bands for significant levels
+    for level in [-60, 120]:
+        osc_fig.add_shape(
+            type="line",
+            x0=x_osc.iloc[0], x1=x_osc.iloc[-1],
+            y0=level, y1=level,
+            line=dict(color="rgba(255,165,0,0.5)", width=1, dash="dot"),
+            name=f"{level}% level"
+        )
+    
+    osc_fig.update_layout(
+        plot_bgcolor='#262730',
+        paper_bgcolor='#262730',
+        font_color='#e0e0e0',
+        hovermode='x unified',
+        height=200,
+        margin=dict(l=20, r=20, t=30, b=50),
+        yaxis_title='Deviation from Trend (%)',
+        xaxis_title=x_osc_title,
+        xaxis=dict(
+            type="log" if x_scale_type == "Log" else None,
+            showgrid=True,
+            gridwidth=1,
+            gridcolor='rgba(255, 255, 255, 0.1)',
+            linecolor='#3A3C4A',
+            zerolinecolor='#3A3C4A'
+        ),
+        yaxis=dict(
+            showgrid=True,
+            gridwidth=1,
+            gridcolor='rgba(255, 255, 255, 0.1)',
+            linecolor='#3A3C4A',
+            zeroline=False
+        ),
+        showlegend=False,
+        hoverlabel=dict(
+            bgcolor='#262730',
+            bordercolor='#3A3C4A',
+            font_color='#e0e0e0'
+        )
+    )
+    
+    st.plotly_chart(osc_fig, use_container_width=True, className="oscillator-chart")
+
 # Stats
 st.markdown('<div class="metrics-container">', unsafe_allow_html=True)
-cols = st.columns(3)
+cols = st.columns(4)
 with cols[0]:
-    st.metric("Current Hashrate", f"{filtered_df['Hashrate_PH'].iloc[-1]:.2f} PH/s")
+    st.metric("Current Hashrate", f"{df['Hashrate_PH'].iloc[-1]:.2f} PH/s")
 with cols[1]:
-    st.metric("Current Price", f"${filtered_df['Price'].iloc[-1]:.4f}")
+    st.metric("Current Price", f"${price_df['Price'].iloc[-1]:.4f}")
 with cols[2]:
-    st.metric("Days Since Genesis", f"{filtered_df['days_from_genesis'].iloc[-1]}")
+    current_deviation = analysis_df['Ratio_Deviation_Pct'].iloc[-1]
+    st.metric("Current Deviation", f"{current_deviation:.1f}%")
+with cols[3]:
+    st.metric("Ratio Trend (R²)", f"{r2_ratio_time:.3f}")
 st.markdown('</div>', unsafe_allow_html=True)
