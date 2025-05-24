@@ -2,7 +2,7 @@ import streamlit as st
 import plotly.graph_objects as go
 import numpy as np
 import pandas as pd
-from utils import fit_power_law, load_data
+from utils import fit_power_law, load_data, load_price_data
 from datetime import datetime, timedelta
 
 st.set_page_config(layout="wide")
@@ -11,11 +11,14 @@ st.set_page_config(layout="wide")
 if 'df' not in st.session_state or 'genesis_date' not in st.session_state:
     try:
         st.session_state.df, st.session_state.genesis_date = load_data()
+        # Load price data as well
+        st.session_state.price_df, _ = load_price_data()
     except Exception as e:
         st.error(f"Failed to load data: {str(e)}")
         st.stop()
 
 df = st.session_state.df
+price_df = st.session_state.price_df
 genesis_date = st.session_state.genesis_date
 
 try:
@@ -23,6 +26,9 @@ try:
 except Exception as e:
     st.error(f"Failed to calculate power law: {str(e)}")
     st.stop()
+
+# Merge hashrate and price data on Date
+merged_df = pd.merge(df, price_df[['Date', 'Price']], on='Date', how='left')
 
 # Custom CSS - updated divider styling
 st.markdown("""
@@ -69,15 +75,11 @@ st.markdown("""
         margin-bottom: 2px !important;
         white-space: nowrap;
     }
-    
-    /* NEW DIVIDER STYLES THAT WILL WORK */
     .st-emotion-cache-1dp5vir {
         border-top: 2px solid #3A3C4A !important;
         margin-top: 1px !important;
         margin-bottom: 2px !important;
     }
-    
-    /* DROPDOWN STYLES */
     [data-baseweb="select"] {
         font-size: 12px !important;
     }
@@ -123,9 +125,9 @@ st.markdown("""
 
 # ====== MAIN CHART CONTAINER ======
 with st.container():
-    st.markdown('<div class="title-spacing"><h2>Kaspa Hashrate</h2></div>', unsafe_allow_html=True)
+    st.markdown('<div class="title-spacing"><h2>Kaspa Hashrate with Price</h2></div>', unsafe_allow_html=True)
     
-    # First divider - under the title (using Streamlit's native divider with our styling)
+    # First divider - under the title
     st.divider()
     
     # Dropdown container
@@ -144,7 +146,7 @@ with st.container():
         st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
         x_scale_options = ["Linear", "Log"]
         x_scale_type = st.selectbox("Time Scale", x_scale_options,
-                                index=0,  # Default to Linear
+                                index=0,
                                 label_visibility="collapsed", key="x_scale_select")
 
     with col3:
@@ -160,13 +162,13 @@ with st.container():
         st.markdown('<div class="control-label">Power Law Fit</div>', unsafe_allow_html=True)
         power_law_options = ["Hide", "Show"]
         show_power_law = st.selectbox("Power Law Fit", power_law_options,
-                                      index=0,  # Default to Hide
+                                      index=0,
                                       label_visibility="collapsed", key="power_law_select")
     
     # Second divider - under the dropdown menus
     st.divider()
 
-    last_date = df['Date'].iloc[-1]
+    last_date = merged_df['Date'].iloc[-1]
     if time_range == "1W":
         start_date = last_date - timedelta(days=7)
     elif time_range == "1M":
@@ -178,9 +180,9 @@ with st.container():
     elif time_range == "1Y":
         start_date = last_date - timedelta(days=365)
     else:
-        start_date = df['Date'].iloc[0]
+        start_date = merged_df['Date'].iloc[0]
 
-    filtered_df = df[df['Date'] >= start_date]
+    filtered_df = merged_df[merged_df['Date'] >= start_date]
 
     fig = go.Figure()
 
@@ -195,6 +197,7 @@ with st.container():
         tickformat = "%b %Y"
         hoverformat = "%b %d, %Y"
 
+    # Add hashrate trace (primary y-axis)
     fig.add_trace(go.Scatter(
         x=x_values,
         y=filtered_df['Hashrate_PH'],
@@ -203,6 +206,18 @@ with st.container():
         line=dict(color='#00FFCC', width=2.5),
         hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Hashrate</b>: %{y:.2f} PH/s<extra></extra>',
         text=filtered_df['Date']
+    ))
+
+    # Add price trace (secondary y-axis)
+    fig.add_trace(go.Scatter(
+        x=x_values,
+        y=filtered_df['Price'],
+        mode='lines',
+        name='Price (USD)',
+        line=dict(color='#FF6699', width=1.5),
+        hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Price</b>: $%{y:.4f}<extra></extra>',
+        text=filtered_df['Date'],
+        yaxis='y2'
     ))
 
     if show_power_law == "Show":
@@ -279,7 +294,18 @@ with st.container():
                 gridwidth=0.5
             ),
             linecolor='#3A3C4A',
-            zerolinecolor='#3A3C4A'
+            zerolinecolor='#3A3C4A',
+            color='#00FFCC'
+        ),
+        yaxis2=dict(
+            title='Price (USD)',
+            overlaying='y',
+            side='right',
+            type="log" if y_scale == "Log" else "linear",
+            showgrid=False,
+            linecolor='#FF6699',
+            zerolinecolor='#FF6699',
+            color='#FF6699'
         ),
         legend=dict(
             orientation="h",
