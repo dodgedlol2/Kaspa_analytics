@@ -208,17 +208,17 @@ with st.container():
         text=filtered_df['Date']
     ))
 
-    # Add price trace (secondary y-axis) - more subtle styling
-    fig.add_trace(go.Scatter(
-        x=x_values,
-        y=filtered_df['Price'],
-        mode='lines',
-        name='Price (USD)',
-        line=dict(color='rgba(150, 150, 150, 0.7)', width=1.2, dash='dot'),
-        hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Price</b>: $%{y:.4f}<extra></extra>',
-        text=filtered_df['Date'],
-        yaxis='y2'
-    ))
+# Add price trace (secondary y-axis) - solid line version
+fig.add_trace(go.Scatter(
+    x=x_values,
+    y=filtered_df['Price'],
+    mode='lines',
+    name='Price (USD)',
+    line=dict(color='rgba(150, 150, 150, 0.7)', width=1.2),  # Removed dash='dot'
+    hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Price</b>: $%{y:.4f}<extra></extra>',
+    text=filtered_df['Date'],
+    yaxis='y2'
+))
 
     if show_power_law == "Show":
         x_fit = filtered_df['days_from_genesis']
