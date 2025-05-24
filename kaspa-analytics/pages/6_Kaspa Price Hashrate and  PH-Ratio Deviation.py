@@ -92,10 +92,167 @@ last_7 = analysis_df.tail(7).copy()
 purple_gradient = ['#00FFCC', '#40E0D0', '#80C0FF', '#A080FF', '#C040FF', '#E000FF', '#FF00FF']
 last_7['color'] = purple_gradient
 
-# Custom CSS remains the same as before...
-
 # ====== MAIN CHART CONTAINER ======
-# (Same as before until the oscillator section)
+with st.container():
+    st.markdown('<div class="title-spacing"><h2>Kaspa Hashrate with Price Reference</h2></div>', unsafe_allow_html=True)
+    
+    # First divider - under the title
+    st.divider()
+    
+    # Dropdown container
+    col_spacer_left, col1, col2, col3, spacer1, spacer2, spacer3, spacer4, spacer5, spacer6, spacer7, spacer8, spacer9 = st.columns(
+        [0.35, 1, 1, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 3]
+    )
+
+    with col1:
+        st.markdown('<div class="control-label">Hashrate Scale</div>', unsafe_allow_html=True)
+        y_scale_options = ["Linear", "Log"]
+        y_scale = st.selectbox("Hashrate Scale", y_scale_options,
+                             index=1 if st.session_state.get("y_scale", True) else 0,
+                             label_visibility="collapsed", key="y_scale_select")
+
+    with col2:
+        st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
+        x_scale_options = ["Linear", "Log"]
+        x_scale_type = st.selectbox("Time Scale", x_scale_options,
+                                  index=0,
+                                  label_visibility="collapsed", key="x_scale_select")
+
+    with col3:
+        st.markdown('<div class="control-label">Period</div>', unsafe_allow_html=True)
+        time_ranges = ["1W", "1M", "3M", "6M", "1Y", "All"]
+        if 'time_range' not in st.session_state:
+            st.session_state.time_range = "All"
+        time_range = st.selectbox("Time Range", time_ranges,
+                                index=time_ranges.index(st.session_state.time_range),
+                                label_visibility="collapsed", key="time_range_select")
+    
+    # Second divider - under the dropdown menus
+    st.divider()
+
+    last_date = merged_df['Date'].iloc[-1]
+    if time_range == "1W":
+        start_date = last_date - timedelta(days=7)
+    elif time_range == "1M":
+        start_date = last_date - timedelta(days=30)
+    elif time_range == "3M":
+        start_date = last_date - timedelta(days=90)
+    elif time_range == "6M":
+        start_date = last_date - timedelta(days=180)
+    elif time_range == "1Y":
+        start_date = last_date - timedelta(days=365)
+    else:
+        start_date = merged_df['Date'].iloc[0]
+
+    filtered_df = merged_df[merged_df['Date'] >= start_date]
+    filtered_analysis_df = analysis_df[analysis_df['Date'] >= start_date]
+
+    fig = go.Figure()
+
+    if x_scale_type == "Log":
+        x_values = filtered_df['days_from_genesis']
+        x_title = "Days Since Genesis (Log Scale)"
+        tickformat = None
+        hoverformat = None
+    else:
+        x_values = filtered_df['Date']
+        x_title = "Date"
+        tickformat = "%b %Y"
+        hoverformat = "%b %d, %Y"
+
+    # Add hashrate trace (primary y-axis)
+    fig.add_trace(go.Scatter(
+        x=x_values,
+        y=filtered_df['Hashrate_PH'],
+        mode='lines',
+        name='Hashrate (PH/s)',
+        line=dict(color='#00FFCC', width=2.5),
+        hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Hashrate</b>: %{y:.2f} PH/s<extra></extra>',
+        text=filtered_df['Date']
+    ))
+
+    # Add price trace (secondary y-axis)
+    fig.add_trace(go.Scatter(
+        x=x_values,
+        y=filtered_df['Price'],
+        mode='lines',
+        name='Price (USD)',
+        line=dict(color='rgba(150, 150, 150, 0.7)', width=1.2),
+        hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Price</b>: $%{y:.4f}<extra></extra>',
+        text=filtered_df['Date'],
+        yaxis='y2'
+    ))
+
+    fig.update_layout(
+        plot_bgcolor='#262730',
+        paper_bgcolor='#262730',
+        font_color='#e0e0e0',
+        hovermode='x unified',
+        height=500,
+        margin=dict(l=20, r=20, t=60, b=100),
+        yaxis_title='Hashrate (PH/s)',
+        xaxis_title=x_title,
+        xaxis=dict(
+            rangeslider=dict(
+                visible=True,
+                thickness=0.1,
+                bgcolor='#262730',
+                bordercolor="#3A3C4A",
+                borderwidth=1
+            ),
+            type="log" if x_scale_type == "Log" else None,
+            showgrid=True,
+            gridwidth=1,
+            gridcolor='rgba(255, 255, 255, 0.1)',
+            minor=dict(
+                ticklen=6,
+                gridcolor='rgba(255, 255, 255, 0.05)',
+                gridwidth=0.5
+            ),
+            tickformat=tickformat,
+            linecolor='#3A3C4A',
+            zerolinecolor='#3A3C4A'
+        ),
+        yaxis=dict(
+            type="log" if y_scale == "Log" else "linear",
+            showgrid=True,
+            gridwidth=1,
+            gridcolor='rgba(255, 255, 255, 0.1)',
+            minor=dict(
+                ticklen=6,
+                gridcolor='rgba(255, 255, 255, 0.05)',
+                gridwidth=0.5
+            ),
+            linecolor='#3A3C4A',
+            zerolinecolor='#3A3C4A',
+            color='#00FFCC'
+        ),
+        yaxis2=dict(
+            title='Price (USD)',
+            overlaying='y',
+            side='right',
+            type="log" if y_scale == "Log" else "linear",
+            showgrid=False,
+            linecolor='rgba(150, 150, 150, 0.5)',
+            zeroline=False,
+            color='rgba(150, 150, 150, 0.7)'
+        ),
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1,
+            bgcolor='rgba(38, 39, 48, 0.8)'
+        ),
+        hoverlabel=dict(
+            bgcolor='#262730',
+            bordercolor='#3A3C4A',
+            font_color='#e0e0e0'
+        )
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
 
     # ====== OSCILLATOR CHART ======
     st.markdown('<div class="title-spacing"><h4>Price/Hashrate Ratio Deviation from Trend (%)</h4></div>', unsafe_allow_html=True)
