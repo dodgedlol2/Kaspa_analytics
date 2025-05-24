@@ -111,6 +111,10 @@ if 'volume_df' not in st.session_state:
 volume_df = st.session_state.volume_df
 volume_df['Date'] = pd.to_datetime(volume_df['Date']).dt.normalize()
 
+# Calculate moving averages
+volume_df['MA_30'] = volume_df['Volume_USD'].rolling(30).mean()
+volume_df['MA_60'] = volume_df['Volume_USD'].rolling(60).mean()
+
 # Calculate power law fit
 try:
     a, b, r2 = fit_power_law(volume_df, y_col='Volume_USD')
@@ -126,8 +130,8 @@ with st.container():
     st.divider()
     
     # Dropdown container
-    col_spacer_left, col1, col2, col3, col4, spacer1, spacer2, spacer3, spacer4, spacer5, spacer6, spacer7, spacer8, spacer9 = st.columns(
-        [0.35, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 3]
+    col_spacer_left, col1, col2, col3, col4, col5, col6, spacer1, spacer2, spacer3, spacer4, spacer5, spacer6, spacer7 = st.columns(
+        [0.35, 1, 1, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 1]
     )
 
     with col1:
@@ -155,8 +159,22 @@ with st.container():
         st.markdown('<div class="control-label">Power Law Fit</div>', unsafe_allow_html=True)
         power_law_options = ["Hide", "Show"]
         show_power_law = st.selectbox("Power Law Fit", power_law_options,
-                                      index=1,
+                                      index=0,  # Default to hidden
                                       label_visibility="collapsed", key="power_law_select")
+    
+    with col5:
+        st.markdown('<div class="control-label">30D MA</div>', unsafe_allow_html=True)
+        ma30_options = ["Hide", "Show"]
+        show_ma30 = st.selectbox("30D MA", ma30_options,
+                                 index=0,  # Default to hidden
+                                 label_visibility="collapsed", key="ma30_select")
+    
+    with col6:
+        st.markdown('<div class="control-label">60D MA</div>', unsafe_allow_html=True)
+        ma60_options = ["Hide", "Show"]
+        show_ma60 = st.selectbox("60D MA", ma60_options,
+                                 index=0,  # Default to hidden
+                                 label_visibility="collapsed", key="ma60_select")
     
     # Second divider - under the dropdown menus
     st.divider()
@@ -213,6 +231,29 @@ with st.container():
         text=filtered_df['Date'],
         yaxis='y2'
     ))
+
+    # Add moving averages if enabled
+    if show_ma30 == "Show":
+        fig.add_trace(go.Scatter(
+            x=x_values,
+            y=filtered_df['MA_30'],
+            mode='lines',
+            name='30D MA Volume',
+            line=dict(color='#FFA726', width=2),
+            hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>30D MA Volume</b>: $%{y:,.0f}<extra></extra>',
+            text=filtered_df['Date']
+        ))
+
+    if show_ma60 == "Show":
+        fig.add_trace(go.Scatter(
+            x=x_values,
+            y=filtered_df['MA_60'],
+            mode='lines',
+            name='60D MA Volume',
+            line=dict(color='#FF5252', width=2),
+            hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>60D MA Volume</b>: $%{y:,.0f}<extra></extra>',
+            text=filtered_df['Date']
+        ))
 
     if show_power_law == "Show":
         x_fit = filtered_df['days_from_genesis']
