@@ -3,6 +3,7 @@ import numpy as np
 import gspread
 from google.oauth2 import service_account
 from sklearn.metrics import r2_score
+from scipy.stats import linregress
 import streamlit as st
 
 # Shared authentication function
@@ -13,9 +14,10 @@ def get_gspread_client():
     )
     return gspread.authorize(credentials)
 
-# ===== HASH RATE FUNCTIONS =====
+# ===== DATA LOADING FUNCTIONS =====
 @st.cache_data(ttl=3600)
 def load_data():
+    """Load hashrate data with caching"""
     gc = get_gspread_client()
     
     # Load hashrate data
@@ -39,9 +41,9 @@ def load_data():
     
     return df, genesis_date
 
-# ===== PRICE FUNCTIONS =====
 @st.cache_data(ttl=3600)
 def load_price_data():
+    """Load price data with caching"""
     gc = get_gspread_client()
     
     # Load price data
@@ -65,9 +67,9 @@ def load_price_data():
     
     return df, genesis_date
 
-# ===== VOLUME FUNCTIONS =====
 @st.cache_data(ttl=3600)
 def load_volume_data():
+    """Load volume data with caching"""
     gc = get_gspread_client()
     
     # Load volume data
@@ -79,7 +81,7 @@ def load_volume_data():
     # Create DataFrame
     df = pd.DataFrame(data[1:], columns=data[0])
     
-    # Clean data - select relevant columns and rename if needed
+    # Clean data
     df = df[['date', 'price', 'total_volume']]
     df = df.rename(columns={
         'date': 'Date',
@@ -100,25 +102,22 @@ def load_volume_data():
     df['days_from_genesis'] = (df['Date'] - genesis_date).dt.days
     df = df[df['days_from_genesis'] >= 0]
     
-    # Sort by date and reset index
-    df = df.sort_values('Date').reset_index(drop=True)
-    
-    return df
+    return df.sort_values('Date').reset_index(drop=True)
 
-# ===== MARKET CAP FUNCTIONS =====
 @st.cache_data(ttl=3600)
 def load_marketcap_data():
+    """Load market cap data with caching"""
     gc = get_gspread_client()
     
-    # Load market cap data - adjust these to match your sheet
-    marketcap_sheet_id = "15BZcsswJPZZF2MQ6S_m9CtbHPtVJVcET_VjZ9_aJ8nY"  # Replace with your actual sheet ID
-    marketcap_worksheet_name = "kaspa_market_cap"  # e.g. "kaspa_marketcap"
+    # Load market cap data
+    marketcap_sheet_id = "15BZcsswJPZZF2MQ6S_m9CtbHPtVJVcET_VjZ9_aJ8nY"
+    marketcap_worksheet_name = "kaspa_market_cap"
     worksheet = gc.open_by_key(marketcap_sheet_id).worksheet(marketcap_worksheet_name)
     data = worksheet.get_all_values()
     
-    # Create DataFrame - adjust columns based on your data structure
+    # Create DataFrame
     df = pd.DataFrame(data[1:], columns=data[0])
-    df = df[['Date', 'MarketCap']]  # Ensure these column names match your sheet
+    df = df[['Date', 'MarketCap']]
     
     # Clean data
     df['Date'] = pd.to_datetime(df['Date'], utc=True)
@@ -128,44 +127,109 @@ def load_marketcap_data():
     genesis_date = pd.to_datetime('2021-11-07', utc=True)
     df['days_from_genesis'] = (df['Date'] - genesis_date).dt.days
     df = df[df['days_from_genesis'] >= 0]
-    
-    # Convert market cap to billions for better readability
     df['MarketCap_B'] = df['MarketCap'] / 1e9
     
     return df, genesis_date
 
-# ===== SHARED ANALYSIS FUNCTIONS =====
-def fit_power_law(df, y_col='Hashrate_PH'):
-    """General power law fitting function that works for hashrate, price, and market cap"""
-    x_data = df['days_from_genesis'].values
-    y_data = df[y_col].values
+# ===== ANALYSIS FUNCTIONS =====
+def fit_power_law(df, x_col='days_from_genesis', y_col='Hashrate_PH'):
+    """
+    Fits a power law y = a*x^b to the data
+    Args:
+        df: DataFrame containing the data
+        x_col: Column name for independent variable (default: 'days_from_genesis')
+        y_col: Column name for dependent variable (default: 'Hashrate_PH')
+    Returns:
+        a, b, r2: Power law coefficients and R-squared value
+    """
+    # Filter out invalid values
+    valid_data = df[(df[x_col] > 0) & (df[y_col] > 0)].copy()
     
-    valid_indices = (x_data > 0) & (y_data > 0)
-    x_data, y_data = x_data[valid_indices], y_data[valid_indices]
+    if len(valid_data) < 2:
+        raise ValueError("Not enough valid data points for power law fitting")
     
-    log_x = np.log10(x_data)
-    log_y = np.log10(y_data)
+    # Perform linear regression on log-transformed data
+    slope, intercept, r_value, _, _ = linregress(
+        np.log(valid_data[x_col]),
+        np.log(valid_data[y_col])
     
-    coeffs = np.polyfit(log_x, log_y, 1)
-    b = coeffs[0]
-    a = 10 ** coeffs[1]
-    
-    y_pred = a * np.power(x_data, b)
-    r2 = r2_score(np.log10(y_data), np.log10(y_pred))
+    # Convert back to power law coefficients
+    a = np.exp(intercept)
+    b = slope
+    r2 = r_value**2
     
     return a, b, r2
 
-def calculate_growth_metrics(df, y_col):
-    """Calculate periodic growth rates and volatility"""
-    df = df.copy()
-    df['daily_change'] = df[y_col].pct_change()
-    df['weekly_change'] = df[y_col].pct_change(7)
-    df['monthly_change'] = df[y_col].pct_change(30)
+def calculate_growth_metrics(df, value_col='Price', date_col='Date'):
+    """
+    Calculate periodic growth rates and volatility
+    Args:
+        df: DataFrame containing the data
+        value_col: Column name containing the values to analyze
+        date_col: Column name containing dates (must be datetime)
+    Returns:
+        Dictionary of growth metrics
+    """
+    df = df.sort_values(date_col).copy()
     
     metrics = {
-        'last_value': df[y_col].iloc[-1],
-        'daily_volatility': df['daily_change'].std(),
-        'weekly_growth': df['weekly_change'].mean(),
-        'monthly_growth': df['monthly_change'].mean()
+        'current_value': df[value_col].iloc[-1],
+        'daily_return': df[value_col].pct_change().iloc[-1],
+        'weekly_return': df[value_col].pct_change(7).iloc[-1],
+        'monthly_return': df[value_col].pct_change(30).iloc[-1],
+        'annualized_volatility': df[value_col].pct_change().std() * np.sqrt(365),
+        'max_drawdown': (df[value_col] / df[value_col].cummax() - 1).min(),
+        'sharpe_ratio': (df[value_col].pct_change().mean() / 
+                         df[value_col].pct_change().std()) * np.sqrt(365)
     }
+    
     return metrics
+
+def merge_datasets(include_price=True, include_hashrate=True, include_marketcap=True, include_volume=True):
+    """
+    Merge multiple datasets into one comprehensive DataFrame
+    Returns:
+        Merged DataFrame with selected metrics
+    """
+    dfs = []
+    
+    if include_hashrate:
+        hashrate_df, _ = load_data()
+        hashrate_df = hashrate_df[['Date', 'Hashrate_PH']]
+        dfs.append(hashrate_df)
+    
+    if include_price:
+        price_df, _ = load_price_data()
+        price_df = price_df[['Date', 'Price']]
+        dfs.append(price_df)
+    
+    if include_marketcap:
+        marketcap_df, _ = load_marketcap_data()
+        marketcap_df = marketcap_df[['Date', 'MarketCap_B']]
+        dfs.append(marketcap_df)
+    
+    if include_volume:
+        volume_df = load_volume_data()
+        volume_df = volume_df[['Date', 'Volume_USD']]
+        dfs.append(volume_df)
+    
+    # Merge all datasets
+    merged_df = dfs[0]
+    for df in dfs[1:]:
+        merged_df = pd.merge(merged_df, df, on='Date', how='outer')
+    
+    # Forward fill missing values for continuity
+    merged_df = merged_df.sort_values('Date').ffill().dropna()
+    
+    return merged_df
+
+def calculate_correlations(df):
+    """
+    Calculate correlation matrix between numeric columns
+    Args:
+        df: DataFrame containing the data
+    Returns:
+        Correlation matrix DataFrame
+    """
+    numeric_cols = df.select_dtypes(include=[np.number]).columns
+    return df[numeric_cols].corr()
