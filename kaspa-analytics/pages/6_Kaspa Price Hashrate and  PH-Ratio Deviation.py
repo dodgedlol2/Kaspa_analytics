@@ -96,9 +96,102 @@ last_7 = analysis_df.tail(7).copy()
 purple_gradient = ['#00FFCC', '#40E0D0', '#80C0FF', '#A080FF', '#C040FF', '#E000FF', '#FF00FF']
 last_7['color'] = purple_gradient
 
+# Custom CSS to match other pages
+st.markdown("""
+<style>
+    .stApp { background-color: #0E1117; }
+    .st-emotion-cache-6qob1r, .sidebar-content { background-color: #262730 !important; }
+    .title-spacing { padding-left: 40px; margin-bottom: 15px; }
+    div[data-testid="stVerticalBlock"] > div[data-testid="stVerticalBlockBorderWrapper"] {
+        background-color: #262730 !important;
+        border-radius: 10px !important;
+        border: 1px solid #3A3C4A !important;
+        padding: 15px !important;
+    }
+    div[data-testid="stMetric"] {
+        background-color: #262730 !important;
+        border: 1px solid #3A3C4A !important;
+        border-radius: 8px !important;
+        padding: 15px 20px !important;
+    }
+    div[data-testid="stMetricValue"] > div {
+        font-size: 24px !important;
+        font-weight: 600 !important;
+        color: #00FFCC !important;
+    }
+    div[data-testid="stMetricLabel"] > div {
+        font-size: 14px !important;
+        opacity: 0.8 !important;
+        color: #e0e0e0 !important;
+    }
+    .stMetric { margin: 5px !important; height: 100% !important; }
+    h2 { color: #e0e0e0 !important; }
+    .hovertext text.hovertext { fill: #e0e0e0 !important; }
+    .range-slider .handle:after { background-color: #00FFCC !important; }
+    .metrics-container {
+        width: calc(100% - 40px) !important;
+        margin-left: 20px !important;
+        margin-right: 20px !important;
+        margin-top: 10px !important;
+        margin-bottom: 0px !important;
+    }
+    .control-label {
+        font-size: 11px !important;
+        color: #e0e0e0 !important;
+        margin-bottom: 2px !important;
+        white-space: nowrap;
+    }
+    .st-emotion-cache-1dp5vir {
+        border-top: 2px solid #3A3C4A !important;
+        margin-top: 1px !important;
+        margin-bottom: 2px !important;
+    }
+    [data-baseweb="select"] {
+        font-size: 12px !important;
+    }
+    [data-baseweb="select"] > div {
+        padding: 2px 6px !important;
+        border-radius: 4px !important;
+        border: 1px solid #3A3C4A !important;
+        background-color: #262730 !important;
+        transition: all 0.2s ease;
+    }
+    [data-baseweb="select"] > div:hover {
+        border-color: #00FFCC !important;
+    }
+    [data-baseweb="select"] > div[aria-expanded="true"],
+    [data-baseweb="select"] > div:focus-within {
+        border-color: #00FFCC !important;
+        box-shadow: 0 0 0 1px #00FFCC !important;
+    }
+    [role="option"] {
+        font-size: 12px !important;
+        padding: 8px 12px !important;
+    }
+    [role="option"]:hover {
+        background-color: #3A3C4A !important;
+    }
+    [aria-selected="true"] {
+        background-color: #00FFCC20 !important;
+        color: #00FFCC !important;
+    }
+    div[role="combobox"] > div {
+        font-size: 12px !important;
+        color: #e0e0e0 !important;
+    }
+    .stSelectbox [data-baseweb="select"] > div:has(> div[aria-selected="true"]) {
+        border-color: #00FFCC !important;
+        background-color: #00FFCC10 !important;
+    }
+    .stSelectbox [data-baseweb="select"] > div:has(> div[aria-selected="true"]) > div {
+        color: #00FFCC !important;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # ====== MAIN CHART CONTAINER ======
 with st.container():
-    st.markdown('<div class="title-spacing"><h2>Kaspa Hashrate with Price Reference</h2></div>', unsafe_allow_html=True)
+    st.markdown('<div class="title-spacing"><h2>Kaspa Hashrate with Price and Ratio Oscillator</h2></div>', unsafe_allow_html=True)
     
     # First divider - under the title
     st.divider()
@@ -151,6 +244,7 @@ with st.container():
     filtered_df = merged_df[merged_df['Date'] >= start_date]
     filtered_analysis_df = analysis_df[analysis_df['Date'] >= start_date]
 
+    # Create figure with secondary y-axis for oscillator
     fig = go.Figure()
 
     if x_scale_type == "Log":
@@ -172,7 +266,8 @@ with st.container():
         name='Hashrate (PH/s)',
         line=dict(color='#00FFCC', width=2.5),
         hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Hashrate</b>: %{y:.2f} PH/s<extra></extra>',
-        text=filtered_df['Date']
+        text=filtered_df['Date'],
+        yaxis='y1'
     ))
 
     # Add price trace (secondary y-axis)
@@ -187,14 +282,75 @@ with st.container():
         yaxis='y2'
     ))
 
+    # Add oscillator trace (tertiary y-axis)
+    fig.add_trace(go.Scatter(
+        x=x_values,
+        y=filtered_analysis_df['Ratio_Deviation_Pct'],
+        mode='lines',
+        name='Ratio Deviation %',
+        line=dict(color='#FF00FF', width=2),
+        hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Deviation</b>: %{y:.1f}%<extra></extra>',
+        text=filtered_analysis_df['Date'],
+        yaxis='y3'
+    ))
+
+    # Add zero line for oscillator
+    fig.add_shape(
+        type="line",
+        x0=x_values.iloc[0], x1=x_values.iloc[-1],
+        y0=0, y1=0,
+        line=dict(color="rgba(255,255,255,0.5)", width=1, dash="dot"),
+        yref='y3'
+    )
+
+    # Add Bollinger-style bands for oscillator
+    fig.add_trace(go.Scatter(
+        x=x_values,
+        y=filtered_analysis_df['Upper_Band'],
+        mode='lines',
+        line=dict(width=0),
+        showlegend=False,
+        hoverinfo='skip',
+        yaxis='y3'
+    ))
+    
+    fig.add_trace(go.Scatter(
+        x=x_values,
+        y=filtered_analysis_df['Lower_Band'],
+        mode='lines',
+        line=dict(width=0),
+        fill='tonexty',
+        fillcolor='rgba(100, 100, 100, 0.2)',
+        name='±2σ Range',
+        hoverinfo='skip',
+        yaxis='y3'
+    ))
+
+    # Add colored markers for last 7 points on oscillator
+    last_7_filtered = filtered_analysis_df.tail(7)
+    for i, row in last_7_filtered.iterrows():
+        x_val = row['Days_Since_Genesis'] if x_scale_type == "Log" else row['Date']
+        fig.add_trace(go.Scatter(
+            x=[x_val],
+            y=[row['Ratio_Deviation_Pct']],
+            mode='markers',
+            marker=dict(
+                color=purple_gradient[i % len(purple_gradient)],
+                size=8,
+                line=dict(width=1.5, color='DarkSlateGrey')
+            ),
+            showlegend=False,
+            hoverinfo='skip',
+            yaxis='y3'
+        ))
+
     fig.update_layout(
         plot_bgcolor='#262730',
         paper_bgcolor='#262730',
         font_color='#e0e0e0',
         hovermode='x unified',
-        height=500,
+        height=700,
         margin=dict(l=20, r=20, t=60, b=100),
-        yaxis_title='Hashrate (PH/s)',
         xaxis_title=x_title,
         xaxis=dict(
             rangeslider=dict(
@@ -218,6 +374,7 @@ with st.container():
             zerolinecolor='#3A3C4A'
         ),
         yaxis=dict(
+            title='Hashrate (PH/s)',
             type="log" if y_scale == "Log" else "linear",
             showgrid=True,
             gridwidth=1,
@@ -241,6 +398,16 @@ with st.container():
             zeroline=False,
             color='rgba(150, 150, 150, 0.7)'
         ),
+        yaxis3=dict(
+            title='Deviation (%)',
+            overlaying='y',
+            side='right',
+            position=0.85,
+            showgrid=False,
+            linecolor='#FF00FF',
+            zeroline=False,
+            color='#FF00FF'
+        ),
         legend=dict(
             orientation="h",
             yanchor="bottom",
@@ -257,127 +424,6 @@ with st.container():
     )
 
     st.plotly_chart(fig, use_container_width=True)
-
-    # ====== OSCILLATOR CHART ======
-    st.markdown('<div class="title-spacing"><h4>Price/Hashrate Ratio Deviation from Power Law Trend (%)</h4></div>', unsafe_allow_html=True)
-    
-    osc_fig = go.Figure()
-    
-    # Determine x-axis values based on time scale selection
-    if x_scale_type == "Log":
-        x_osc = filtered_analysis_df['Days_Since_Genesis']
-        x_osc_title = 'Days Since Genesis (Log Scale)'
-    else:
-        x_osc = filtered_analysis_df['Date']
-        x_osc_title = 'Date'
-    
-    # Add zero line
-    osc_fig.add_shape(
-        type="line",
-        x0=x_osc.iloc[0], x1=x_osc.iloc[-1],
-        y0=0, y1=0,
-        line=dict(color="rgba(255,255,255,0.5)", width=1, dash="dot")
-    )
-    
-    # Add Bollinger-style bands
-    osc_fig.add_trace(go.Scatter(
-        x=x_osc,
-        y=filtered_analysis_df['Upper_Band'],
-        mode='lines',
-        line=dict(width=0),
-        showlegend=False,
-        hoverinfo='skip'
-    ))
-    
-    osc_fig.add_trace(go.Scatter(
-        x=x_osc,
-        y=filtered_analysis_df['Lower_Band'],
-        mode='lines',
-        line=dict(width=0),
-        fill='tonexty',
-        fillcolor='rgba(100, 100, 100, 0.2)',
-        name='±2σ Range',
-        hoverinfo='skip'
-    ))
-    
-    # Add deviation line
-    osc_fig.add_trace(go.Scatter(
-        x=x_osc,
-        y=filtered_analysis_df['Ratio_Deviation_Pct'],
-        mode='lines',
-        name='Deviation %',
-        line=dict(color='#00FFCC', width=2),
-        hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Deviation</b>: %{y:.1f}%<extra></extra>',
-        text=filtered_analysis_df['Date']
-    ))
-    
-    # Add moving average line
-    osc_fig.add_trace(go.Scatter(
-        x=x_osc,
-        y=filtered_analysis_df['Deviation_MA'],
-        mode='lines',
-        name='30D Avg',
-        line=dict(color='rgba(255,165,0,0.7)', width=1, dash='dot'),
-        hovertemplate='<b>30D Avg</b>: %{y:.1f}%<extra></extra>'
-    ))
-    
-    # Add colored markers for last 7 points
-    last_7_filtered = filtered_analysis_df.tail(7)
-    for i, row in last_7_filtered.iterrows():
-        x_val = row['Days_Since_Genesis'] if x_scale_type == "Log" else row['Date']
-        osc_fig.add_trace(go.Scatter(
-            x=[x_val],
-            y=[row['Ratio_Deviation_Pct']],
-            mode='markers',
-            marker=dict(
-                color=purple_gradient[i % len(purple_gradient)],
-                size=8,
-                line=dict(width=1.5, color='DarkSlateGrey')
-            ),
-            showlegend=False,
-            hoverinfo='skip'
-        ))
-    
-    osc_fig.update_layout(
-        plot_bgcolor='#262730',
-        paper_bgcolor='#262730',
-        font_color='#e0e0e0',
-        hovermode='x unified',
-        height=200,
-        margin=dict(l=20, r=20, t=30, b=50),
-        yaxis_title='Deviation from Trend (%)',
-        xaxis_title=x_osc_title,
-        xaxis=dict(
-            type="log" if x_scale_type == "Log" else None,
-            showgrid=True,
-            gridwidth=1,
-            gridcolor='rgba(255, 255, 255, 0.1)',
-            linecolor='#3A3C4A',
-            zerolinecolor='#3A3C4A'
-        ),
-        yaxis=dict(
-            showgrid=True,
-            gridwidth=1,
-            gridcolor='rgba(255, 255, 255, 0.1)',
-            linecolor='#3A3C4A',
-            zeroline=False
-        ),
-        legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=1.02,
-            xanchor="right",
-            x=1,
-            bgcolor='rgba(38, 39, 48, 0.8)'
-        ),
-        hoverlabel=dict(
-            bgcolor='#262730',
-            bordercolor='#3A3C4A',
-            font_color='#e0e0e0'
-        )
-    )
-    
-    st.plotly_chart(osc_fig, use_container_width=True, className="oscillator-chart")
 
 # Stats
 st.markdown('<div class="metrics-container">', unsafe_allow_html=True)
