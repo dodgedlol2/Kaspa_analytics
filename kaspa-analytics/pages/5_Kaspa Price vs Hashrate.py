@@ -36,8 +36,10 @@ analysis_df['Days_Since_Genesis'] = (analysis_df['Date'] - genesis_date).dt.days
 # Calculate power law for price vs hashrate relationship
 try:
     a_relation, b_relation, r2_relation = fit_power_law(analysis_df, x_col='Hashrate_PH', y_col='Price')
+    # Calculate power law for ratio vs time relationship
+    a_ratio_time, b_ratio_time, r2_ratio_time = fit_power_law(analysis_df, x_col='Days_Since_Genesis', y_col='Price_Hashrate_Ratio')
 except Exception as e:
-    st.error(f"Failed to calculate price-hashrate power law: {str(e)}")
+    st.error(f"Failed to calculate power laws: {str(e)}")
     st.stop()
 
 # Create color gradient for last 7 points (teal to purple)
@@ -150,8 +152,8 @@ with st.container():
     st.divider()
     
     # Dropdown container
-    col_spacer_left, col1, col2, col3, col4, col5, spacer1, spacer2, spacer3, spacer4, spacer5, spacer6 = st.columns(
-        [0.35, 1, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 3]
+    col_spacer_left, col1, col2, col3, col4, col5, col6, spacer1, spacer2, spacer3, spacer4 = st.columns(
+        [0.35, 1, 1, 1, 1, 1, 1, 0.5, 0.5, 0.5, 3]
     )
 
     with col1:
@@ -188,6 +190,13 @@ with st.container():
         time_scale = st.selectbox("Time Scale", time_scale_options,
                                   index=0,
                                   label_visibility="collapsed", key="time_scale_select")
+    
+    with col6:
+        st.markdown('<div class="control-label">Ratio Fit</div>', unsafe_allow_html=True)
+        ratio_fit_options = ["Hide", "Show"]
+        show_ratio_fit = st.selectbox("Ratio Fit", ratio_fit_options,
+                                      index=1,
+                                      label_visibility="collapsed", key="ratio_fit_select")
     
     # Second divider - under the dropdown menus
     st.divider()
@@ -357,6 +366,31 @@ with st.container():
             hoverinfo='skip'
         ))
     
+    if show_ratio_fit == "Show":
+        # Generate fitted values for ratio chart
+        if time_scale == "Log":
+            x_fit_ratio = np.logspace(np.log10(analysis_df['Days_Since_Genesis'].min()), 
+                                     np.log10(analysis_df['Days_Since_Genesis'].max()), 
+                                     100)
+        else:
+            # Convert dates to numeric values for fitting
+            date_numeric = pd.to_numeric(analysis_df['Date']) / 10**18  # Scale down large numbers
+            x_fit_ratio = np.linspace(date_numeric.min(), date_numeric.max(), 100)
+        
+        y_fit_ratio = a_ratio_time * np.power(x_fit_ratio if time_scale == "Log" else date_numeric.min() + 
+                                             (x_fit_ratio - date_numeric.min()) * 
+                                             (date_numeric.max() - date_numeric.min()) / 
+                                             (x_fit_ratio.max() - x_fit_ratio.min()), 
+                                             b_ratio_time)
+        
+        ratio_fig.add_trace(go.Scatter(
+            x=x_fit_ratio if time_scale == "Log" else pd.to_datetime(x_fit_ratio * 10**18),
+            y=y_fit_ratio,
+            mode='lines',
+            name=f'Ratio Power-Law Fit (R²={r2_ratio_time:.3f})',
+            line=dict(color='#FFA726', dash='dot', width=2)
+        ))
+    
     ratio_fig.update_layout(
         plot_bgcolor='#262730',
         paper_bgcolor='#262730',
@@ -382,6 +416,14 @@ with st.container():
             linecolor='#3A3C4A',
             zerolinecolor='#3A3C4A'
         ),
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1,
+            bgcolor='rgba(38, 39, 48, 0.8)'
+        ),
         hoverlabel=dict(
             bgcolor='#262730',
             bordercolor='#3A3C4A',
@@ -393,16 +435,17 @@ with st.container():
 
 # Stats
 st.markdown('<div class="metrics-container">', unsafe_allow_html=True)
-cols = st.columns(5)
+cols = st.columns(6)
 with cols[0]:
     st.metric("Power-Law Slope", f"{b_relation:.3f}")
 with cols[1]:
-    st.metric("Model Fit (R²)", f"{r2_relation:.3f}")
+    st.metric("Price-HR Fit (R²)", f"{r2_relation:.3f}")
 with cols[2]:
-    current_ratio = analysis_df['Price_Hashrate_Ratio'].iloc[-1]
-    st.metric("Current Ratio", f"{current_ratio:.6f}")
+    st.metric("Ratio-Time Slope", f"{b_ratio_time:.3f}")
 with cols[3]:
-    st.metric("Current Hashrate", f"{df['Hashrate_PH'].iloc[-1]:.2f} PH/s")
+    st.metric("Ratio-Time Fit (R²)", f"{r2_ratio_time:.3f}")
 with cols[4]:
+    st.metric("Current Hashrate", f"{df['Hashrate_PH'].iloc[-1]:.2f} PH/s")
+with cols[5]:
     st.metric("Current Price", f"${price_df['Price'].iloc[-1]:.4f}")
 st.markdown('</div>', unsafe_allow_html=True)
