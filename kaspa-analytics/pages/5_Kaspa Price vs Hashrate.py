@@ -30,6 +30,9 @@ merged_df = pd.merge(df, price_df[['Date', 'Price']], on='Date', how='left')
 analysis_df = merged_df.dropna(subset=['Hashrate_PH', 'Price']).copy()
 analysis_df['Price_Hashrate_Ratio'] = analysis_df['Price'] / analysis_df['Hashrate_PH']
 
+# Calculate days since genesis for log time scale
+analysis_df['Days_Since_Genesis'] = (analysis_df['Date'] - genesis_date).dt.days + 1  # +1 to avoid log(0)
+
 # Calculate power law for price vs hashrate relationship
 try:
     a_relation, b_relation, r2_relation = fit_power_law(analysis_df, x_col='Hashrate_PH', y_col='Price')
@@ -147,8 +150,8 @@ with st.container():
     st.divider()
     
     # Dropdown container
-    col_spacer_left, col1, col2, col3, col4, spacer1, spacer2, spacer3, spacer4, spacer5, spacer6, spacer7, spacer8 = st.columns(
-        [0.35, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 3]
+    col_spacer_left, col1, col2, col3, col4, col5, spacer1, spacer2, spacer3, spacer4, spacer5, spacer6 = st.columns(
+        [0.35, 1, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 3]
     )
 
     with col1:
@@ -178,6 +181,13 @@ with st.container():
         ratio_scale = st.selectbox("Ratio Scale", ratio_scale_options,
                                    index=1,
                                    label_visibility="collapsed", key="ratio_scale_select")
+    
+    with col5:
+        st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
+        time_scale_options = ["Linear", "Log"]
+        time_scale = st.selectbox("Time Scale", time_scale_options,
+                                  index=0,
+                                  label_visibility="collapsed", key="time_scale_select")
     
     # Second divider - under the dropdown menus
     st.divider()
@@ -310,20 +320,32 @@ with st.container():
     
     ratio_fig = go.Figure()
     
+    # Determine x-axis values based on time scale selection
+    if time_scale == "Log":
+        x_values = analysis_df['Days_Since_Genesis']
+        x_title = 'Days Since Genesis (Log Scale)'
+        hover_template = '<b>Days</b>: %{x:.1f}<br><b>Date</b>: %{customdata}<br><b>Ratio</b>: %{y:.6f}<extra></extra>'
+    else:
+        x_values = analysis_df['Date']
+        x_title = 'Date'
+        hover_template = '<b>Date</b>: %{x|%Y-%m-%d}<br><b>Ratio</b>: %{y:.6f}<extra></extra>'
+    
     ratio_fig.add_trace(go.Scatter(
-        x=analysis_df['Date'],
+        x=x_values,
         y=analysis_df['Price_Hashrate_Ratio'],
         mode='lines+markers',
         name='Price/Hashrate Ratio',
         line=dict(color='#00FFCC', width=2),
         marker=dict(size=5, color='#00FFCC'),
-        hovertemplate='<b>Date</b>: %{x|%Y-%m-%d}<br><b>Ratio</b>: %{y:.6f}<extra></extra>'
+        hovertemplate=hover_template,
+        customdata=analysis_df['Date'].dt.strftime('%Y-%m-%d')
     ))
     
     # Add colored markers for last 7 points
     for i, row in last_7.iterrows():
+        x_val = row['Days_Since_Genesis'] if time_scale == "Log" else row['Date']
         ratio_fig.add_trace(go.Scatter(
-            x=[row['Date']],
+            x=[x_val],
             y=[row['Price_Hashrate_Ratio']],
             mode='markers',
             marker=dict(
@@ -343,7 +365,9 @@ with st.container():
         height=250,
         margin=dict(l=20, r=20, t=30, b=50),
         yaxis_title='Price/Hashrate Ratio (USD/PH/s)',
+        xaxis_title=x_title,
         xaxis=dict(
+            type="log" if time_scale == "Log" else "linear",
             showgrid=True,
             gridwidth=1,
             gridcolor='rgba(255, 255, 255, 0.1)',
