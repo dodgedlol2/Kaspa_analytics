@@ -27,7 +27,14 @@ except Exception as e:
     st.error(f"Failed to calculate power law: {str(e)}")
     st.stop()
 
-# Merge hashrate and price data on Date
+# Normalize timestamps to daily resolution
+df['Date'] = pd.to_datetime(df['Date']).dt.normalize()
+price_df['Date'] = pd.to_datetime(price_df['Date']).dt.normalize()
+
+# Remove duplicate dates (keep last)
+price_df = price_df.drop_duplicates('Date', keep='last')
+
+# Then proceed with your existing merge
 merged_df = pd.merge(df, price_df[['Date', 'Price']], on='Date', how='left')
 
 # Custom CSS - updated divider styling
