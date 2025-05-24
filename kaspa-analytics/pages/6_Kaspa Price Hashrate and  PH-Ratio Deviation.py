@@ -2,10 +2,37 @@ import streamlit as st
 import plotly.graph_objects as go
 import numpy as np
 import pandas as pd
+from scipy.optimize import curve_fit
 from utils import load_data, load_price_data
 from datetime import datetime, timedelta
 
 st.set_page_config(layout="wide")
+
+# Define power law fitting function
+def fit_power_law(df, x_col='days_from_genesis', y_col='Hashrate_PH'):
+    """Fit power law y = a*x^b to data"""
+    x_data = df[x_col].values
+    y_data = df[y_col].values
+    
+    # Power law function
+    def power_law(x, a, b):
+        return a * np.power(x, b)
+    
+    # Fit the data
+    try:
+        params, _ = curve_fit(power_law, x_data, y_data, maxfev=5000)
+        a, b = params
+        
+        # Calculate R-squared
+        residuals = y_data - power_law(x_data, a, b)
+        ss_res = np.sum(residuals**2)
+        ss_tot = np.sum((y_data - np.mean(y_data))**2)
+        r_squared = 1 - (ss_res / ss_tot)
+        
+        return a, b, r_squared
+    except Exception as e:
+        st.error(f"Power law fitting failed: {str(e)}")
+        return None, None, None
 
 # Data loading and processing
 if 'df' not in st.session_state or 'genesis_date' not in st.session_state:
@@ -38,6 +65,10 @@ analysis_df['Days_Since_Genesis'] = (analysis_df['Date'] - genesis_date).dt.days
 # Calculate power law fit for the ratio
 try:
     a_ratio_time, b_ratio_time, r2_ratio_time = fit_power_law(analysis_df, x_col='Days_Since_Genesis', y_col='Price_Hashrate_Ratio')
+    if None in [a_ratio_time, b_ratio_time, r2_ratio_time]:
+        st.error("Failed to calculate ratio power law fit")
+        st.stop()
+        
     # Calculate expected ratio values
     analysis_df['Expected_Ratio'] = a_ratio_time * np.power(analysis_df['Days_Since_Genesis'], b_ratio_time)
     # Calculate deviation from expected ratio
