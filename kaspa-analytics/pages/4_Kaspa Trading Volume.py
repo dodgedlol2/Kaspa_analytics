@@ -1,7 +1,8 @@
 import streamlit as st
 import plotly.graph_objects as go
 import pandas as pd
-from utils import load_volume_data
+import numpy as np
+from utils import load_volume_data, fit_power_law
 from datetime import datetime, timedelta
 
 st.set_page_config(layout="wide")
@@ -110,16 +111,23 @@ if 'volume_df' not in st.session_state:
 volume_df = st.session_state.volume_df
 volume_df['Date'] = pd.to_datetime(volume_df['Date']).dt.normalize()
 
+# Calculate power law fit
+try:
+    a, b, r2 = fit_power_law(volume_df, y_col='Volume_USD')
+except Exception as e:
+    st.error(f"Failed to calculate power law: {str(e)}")
+    st.stop()
+
 # ====== MAIN CHART CONTAINER ======
 with st.container():
-    st.markdown('<div class="title-spacing"><h2>Kaspa Trading Volume Analysis</h2></div>', unsafe_allow_html=True)
+    st.markdown('<div class="title-spacing"><h2>Kaspa Trading Volume Power Law Analysis</h2></div>', unsafe_allow_html=True)
     
     # First divider - under the title
     st.divider()
     
     # Dropdown container
-    col_spacer_left, col1, col2, col3, spacer1, spacer2, spacer3, spacer4, spacer5, spacer6, spacer7, spacer8, spacer9 = st.columns(
-        [0.35, 1, 1, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 3]
+    col_spacer_left, col1, col2, col3, col4, spacer1, spacer2, spacer3, spacer4, spacer5, spacer6, spacer7, spacer8, spacer9 = st.columns(
+        [0.35, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 3]
     )
 
     with col1:
@@ -130,11 +138,11 @@ with st.container():
                                label_visibility="collapsed", key="y_scale_select")
 
     with col2:
-        st.markdown('<div class="control-label">Price Scale</div>', unsafe_allow_html=True)
-        price_scale_options = ["Linear", "Log"]
-        price_scale = st.selectbox("Price Scale", price_scale_options,
-                                index=1,
-                                label_visibility="collapsed", key="price_scale_select")
+        st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
+        x_scale_options = ["Linear", "Log"]
+        x_scale_type = st.selectbox("Time Scale", x_scale_options,
+                                index=0,
+                                label_visibility="collapsed", key="x_scale_select")
 
     with col3:
         st.markdown('<div class="control-label">Period</div>', unsafe_allow_html=True)
@@ -142,6 +150,13 @@ with st.container():
         time_range = st.selectbox("Time Range", time_ranges,
                                   index=time_ranges.index("All"),
                                   label_visibility="collapsed", key="time_range_select")
+
+    with col4:
+        st.markdown('<div class="control-label">Power Law Fit</div>', unsafe_allow_html=True)
+        power_law_options = ["Hide", "Show"]
+        show_power_law = st.selectbox("Power Law Fit", power_law_options,
+                                      index=1,
+                                      label_visibility="collapsed", key="power_law_select")
     
     # Second divider - under the dropdown menus
     st.divider()
@@ -163,40 +178,73 @@ with st.container():
 
     filtered_df = volume_df[volume_df['Date'] >= start_date]
 
-    # Create figure with secondary y-axis
     fig = go.Figure()
 
-    # Add Volume trace (primary y-axis)
-    fig.add_trace(go.Bar(
-        x=filtered_df['Date'],
+    if x_scale_type == "Log":
+        x_values = filtered_df['days_from_genesis']
+        x_title = "Days Since Genesis (Log Scale)"
+        tickformat = None
+        hoverformat = None
+    else:
+        x_values = filtered_df['Date']
+        x_title = "Date"
+        tickformat = "%b %Y"
+        hoverformat = "%b %d, %Y"
+
+    # Add Volume trace
+    fig.add_trace(go.Scatter(
+        x=x_values,
         y=filtered_df['Volume_USD'],
+        mode='lines',
         name='Volume (USD)',
-        marker_color='#00FFCC',
-        opacity=0.7,
-        hovertemplate='<b>Date</b>: %{x|%Y-%m-%d}<br><b>Volume</b>: $%{y:,.0f}<extra></extra>'
+        line=dict(color='#00FFCC', width=2.5),
+        hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Volume</b>: $%{y:,.0f}<extra></extra>',
+        text=filtered_df['Date']
     ))
 
     # Add Price trace (secondary y-axis)
     fig.add_trace(go.Scatter(
-        x=filtered_df['Date'],
+        x=x_values,
         y=filtered_df['Price'],
         mode='lines',
         name='Price (USD)',
-        line=dict(color='rgba(150, 150, 150, 0.7)', width=1.5),
-        hovertemplate='<b>Date</b>: %{x|%Y-%m-%d}<br><b>Price</b>: $%{y:.4f}<extra></extra>',
+        line=dict(color='rgba(150, 150, 150, 0.7)', width=1.2),
+        hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Price</b>: $%{y:.4f}<extra></extra>',
+        text=filtered_df['Date'],
         yaxis='y2'
     ))
 
-    # Add 30-day moving average for volume
-    if len(filtered_df) > 30:
-        filtered_df['Volume_MA_30'] = filtered_df['Volume_USD'].rolling(30).mean()
+    if show_power_law == "Show":
+        x_fit = filtered_df['days_from_genesis']
+        y_fit = a * np.power(x_fit, b)
+        fit_x = x_fit if x_scale_type == "Log" else filtered_df['Date']
+
         fig.add_trace(go.Scatter(
-            x=filtered_df['Date'],
-            y=filtered_df['Volume_MA_30'],
+            x=fit_x,
+            y=y_fit,
             mode='lines',
-            name='30D Avg Volume',
-            line=dict(color='#FFA726', width=2),
-            hovertemplate='<b>Date</b>: %{x|%Y-%m-%d}<br><b>30D Avg Volume</b>: $%{y:,.0f}<extra></extra>'
+            name=f'Power-Law Fit (R²={r2:.3f})',
+            line=dict(color='#FFA726', dash='dot', width=2)
+        ))
+
+        fig.add_trace(go.Scatter(
+            x=fit_x,
+            y=y_fit * 0.4,
+            mode='lines',
+            name='-60% Deviation',
+            line=dict(color='rgba(255, 255, 255, 0.5)', dash='dot', width=1),
+            hoverinfo='skip',
+            fill=None
+        ))
+        fig.add_trace(go.Scatter(
+            x=fit_x,
+            y=y_fit * 2.2,
+            mode='lines',
+            name='+120% Deviation',
+            line=dict(color='rgba(255, 255, 255, 0.5)', dash='dot', width=1),
+            hoverinfo='skip',
+            fill='tonexty',
+            fillcolor='rgba(100, 100, 100, 0.2)'
         ))
 
     fig.update_layout(
@@ -207,7 +255,7 @@ with st.container():
         height=700,
         margin=dict(l=20, r=20, t=60, b=100),
         yaxis_title='Volume (USD)',
-        xaxis_title='Date',
+        xaxis_title=x_title,
         xaxis=dict(
             rangeslider=dict(
                 visible=True,
@@ -216,6 +264,7 @@ with st.container():
                 bordercolor="#3A3C4A",
                 borderwidth=1
             ),
+            type="log" if x_scale_type == "Log" else None,
             showgrid=True,
             gridwidth=1,
             gridcolor='rgba(255, 255, 255, 0.1)',
@@ -224,7 +273,7 @@ with st.container():
                 gridcolor='rgba(255, 255, 255, 0.05)',
                 gridwidth=0.5
             ),
-            tickformat="%b %Y",
+            tickformat=tickformat,
             linecolor='#3A3C4A',
             zerolinecolor='#3A3C4A'
         ),
@@ -246,7 +295,7 @@ with st.container():
             title='Price (USD)',
             overlaying='y',
             side='right',
-            type="log" if price_scale == "Log" else "linear",
+            type="log" if y_scale == "Log" else "linear",
             showgrid=False,
             linecolor='rgba(150, 150, 150, 0.5)',
             zeroline=False,
@@ -264,9 +313,7 @@ with st.container():
             bgcolor='#262730',
             bordercolor='#3A3C4A',
             font_color='#e0e0e0'
-        ),
-        barmode='group',
-        bargap=0.15
+        )
     )
 
     st.plotly_chart(fig, use_container_width=True)
@@ -275,15 +322,11 @@ with st.container():
 st.markdown('<div class="metrics-container">', unsafe_allow_html=True)
 cols = st.columns(4)
 with cols[0]:
-    current_volume = filtered_df['Volume_USD'].iloc[-1]
-    st.metric("Current Volume", f"${current_volume:,.0f}")
+    st.metric("Power-Law Slope", f"{b:.3f}")
 with cols[1]:
-    avg_volume = filtered_df['Volume_USD'].mean()
-    st.metric("Average Volume", f"${avg_volume:,.0f}")
+    st.metric("Model Fit (R²)", f"{r2:.3f}")
 with cols[2]:
-    max_volume = filtered_df['Volume_USD'].max()
-    st.metric("Max Volume", f"${max_volume:,.0f}")
+    st.metric("Current Volume", f"${volume_df['Volume_USD'].iloc[-1]:,.0f}")
 with cols[3]:
-    current_price = filtered_df['Price'].iloc[-1]
-    st.metric("Current Price", f"${current_price:.4f}")
+    st.metric("Current Price", f"${volume_df['Price'].iloc[-1]:.4f}")
 st.markdown('</div>', unsafe_allow_html=True)
