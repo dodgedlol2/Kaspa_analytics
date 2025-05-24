@@ -27,7 +27,8 @@ price_df = price_df.drop_duplicates('Date', keep='last')
 merged_df = pd.merge(df, price_df[['Date', 'Price']], on='Date', how='left')
 
 # Remove rows where either hashrate or price is missing
-analysis_df = merged_df.dropna(subset=['Hashrate_PH', 'Price'])
+analysis_df = merged_df.dropna(subset=['Hashrate_PH', 'Price']).copy()
+analysis_df['Price_Hashrate_Ratio'] = analysis_df['Price'] / analysis_df['Hashrate_PH']
 
 # Calculate power law for price vs hashrate relationship
 try:
@@ -131,6 +132,10 @@ st.markdown("""
     .stSelectbox [data-baseweb="select"] > div:has(> div[aria-selected="true"]) > div {
         color: #00FFCC !important;
     }
+    .ratio-chart {
+        margin-top: -30px !important;
+        height: 250px !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -142,8 +147,8 @@ with st.container():
     st.divider()
     
     # Dropdown container
-    col_spacer_left, col1, col2, col3, col4, spacer1, spacer2, spacer3, spacer4, spacer5, spacer6, spacer7, spacer8, spacer9 = st.columns(
-        [0.35, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 3]
+    col_spacer_left, col1, col2, col3, spacer1, spacer2, spacer3, spacer4, spacer5, spacer6, spacer7, spacer8, spacer9 = st.columns(
+        [0.35, 1, 1, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 3]
     )
 
     with col1:
@@ -167,13 +172,6 @@ with st.container():
                                       index=1,
                                       label_visibility="collapsed", key="power_law_select")
     
-    with col4:
-        st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
-        time_scale_options = ["Linear", "Log"]
-        time_scale = st.selectbox("Time Scale", time_scale_options,
-                                index=0,
-                                label_visibility="collapsed", key="time_scale_select")
-    
     # Second divider - under the dropdown menus
     st.divider()
 
@@ -193,9 +191,7 @@ with st.container():
             line=dict(width=1, color='DarkSlateGrey')
         ),
         hovertemplate='<b>Hashrate</b>: %{x:.2f} PH/s<br><b>Price</b>: $%{y:.4f}<br><b>Date</b>: %{text}<extra></extra>',
-        text=analysis_df['Date'].dt.strftime('%Y-%m-%d'),
-        xaxis='x',
-        yaxis='y'
+        text=analysis_df['Date'].dt.strftime('%Y-%m-%d')
     ))
 
     # Add colored scatter trace for last 7 points (teal to purple gradient)
@@ -213,22 +209,8 @@ with st.container():
             ),
             hovertemplate='<b>Hashrate</b>: %{x:.2f} PH/s<br><b>Price</b>: $%{y:.4f}<br><b>Date</b>: %{text}<extra></extra>',
             text=[row['Date'].strftime('%Y-%m-%d')],
-            showlegend=False,
-            xaxis='x',
-            yaxis='y'
+            showlegend=False
         ))
-
-    # Add price over time on secondary axes
-    fig.add_trace(go.Scatter(
-        x=analysis_df['Date'],
-        y=analysis_df['Price'],
-        mode='lines',
-        name='Price Timeline',
-        line=dict(color='rgba(150, 150, 150, 0.7)', width=1.5),
-        hovertemplate='<b>Date</b>: %{x|%Y-%m-%d}<br><b>Price</b>: $%{y:.4f}<extra></extra>',
-        xaxis='x2',
-        yaxis='y2'
-    ))
 
     if show_power_law == "Show":
         # Generate fitted values
@@ -240,9 +222,7 @@ with st.container():
             y=y_fit,
             mode='lines',
             name=f'Power-Law Fit (R²={r2_relation:.3f})',
-            line=dict(color='#FFA726', dash='dot', width=2),
-            xaxis='x',
-            yaxis='y'
+            line=dict(color='#FFA726', dash='dot', width=2)
         ))
 
         # Add deviation bands
@@ -253,9 +233,7 @@ with st.container():
             name='-60% Deviation',
             line=dict(color='rgba(255, 255, 255, 0.5)', dash='dot', width=1),
             hoverinfo='skip',
-            fill=None,
-            xaxis='x',
-            yaxis='y'
+            fill=None
         ))
         fig.add_trace(go.Scatter(
             x=x_fit,
@@ -265,9 +243,7 @@ with st.container():
             line=dict(color='rgba(255, 255, 255, 0.5)', dash='dot', width=1),
             hoverinfo='skip',
             fill='tonexty',
-            fillcolor='rgba(100, 100, 100, 0.2)',
-            xaxis='x',
-            yaxis='y'
+            fillcolor='rgba(100, 100, 100, 0.2)'
         ))
 
     fig.update_layout(
@@ -275,25 +251,11 @@ with st.container():
         paper_bgcolor='#262730',
         font_color='#e0e0e0',
         hovermode='closest',
-        height=700,
+        height=500,
         margin=dict(l=20, r=20, t=60, b=100),
-        yaxis=dict(
-            title='Price vs Hashrate (USD)',
-            type="log" if y_scale == "Log" else "linear",
-            showgrid=True,
-            gridwidth=1,
-            gridcolor='rgba(255, 255, 255, 0.1)',
-            minor=dict(
-                ticklen=6,
-                gridcolor='rgba(255, 255, 255, 0.05)',
-                gridwidth=0.5
-            ),
-            linecolor='#3A3C4A',
-            zerolinecolor='#3A3C4A',
-            domain=[0.0, 1.0]
-        ),
+        yaxis_title='Price (USD)',
+        xaxis_title='Hashrate (PH/s)',
         xaxis=dict(
-            title='Hashrate (PH/s)',
             type="log" if x_scale_type == "Log" else "linear",
             showgrid=True,
             gridwidth=1,
@@ -304,32 +266,20 @@ with st.container():
                 gridwidth=0.5
             ),
             linecolor='#3A3C4A',
-            zerolinecolor='#3A3C4A',
-            domain=[0.0, 0.45]
+            zerolinecolor='#3A3C4A'
         ),
-        yaxis2=dict(
-            title='Price Timeline (USD)',
+        yaxis=dict(
             type="log" if y_scale == "Log" else "linear",
-            showgrid=False,
-            linecolor='rgba(150, 150, 150, 0.5)',
-            zeroline=False,
-            anchor='x2',
-            overlaying='y',
-            side='right',
-            position=1.0
-        ),
-        xaxis2=dict(
-            title='Date',
-            type="log" if time_scale == "Log" else "linear",
             showgrid=True,
             gridwidth=1,
             gridcolor='rgba(255, 255, 255, 0.1)',
+            minor=dict(
+                ticklen=6,
+                gridcolor='rgba(255, 255, 255, 0.05)',
+                gridwidth=0.5
+            ),
             linecolor='#3A3C4A',
-            zerolinecolor='#3A3C4A',
-            anchor='y2',
-            overlaying='x',
-            side='top',
-            domain=[0.55, 1.0]
+            zerolinecolor='#3A3C4A'
         ),
         legend=dict(
             orientation="h",
@@ -348,15 +298,79 @@ with st.container():
 
     st.plotly_chart(fig, use_container_width=True)
 
+    # ====== RATIO CHART ======
+    st.markdown('<div class="title-spacing"><h4>Price/Hashrate Ratio</h4></div>', unsafe_allow_html=True)
+    
+    ratio_fig = go.Figure()
+    
+    ratio_fig.add_trace(go.Scatter(
+        x=analysis_df['Date'],
+        y=analysis_df['Price_Hashrate_Ratio'],
+        mode='lines+markers',
+        name='Price/Hashrate Ratio',
+        line=dict(color='#00FFCC', width=2),
+        marker=dict(size=5, color='#00FFCC'),
+        hovertemplate='<b>Date</b>: %{x|%Y-%m-%d}<br><b>Ratio</b>: %{y:.6f}<extra></extra>'
+    ))
+    
+    # Add colored markers for last 7 points
+    for i, row in last_7.iterrows():
+        ratio_fig.add_trace(go.Scatter(
+            x=[row['Date']],
+            y=[row['Price_Hashrate_Ratio']],
+            mode='markers',
+            marker=dict(
+                color=row['color'],
+                size=8,
+                line=dict(width=1.5, color='DarkSlateGrey')
+            ),
+            showlegend=False,
+            hoverinfo='skip'
+        ))
+    
+    ratio_fig.update_layout(
+        plot_bgcolor='#262730',
+        paper_bgcolor='#262730',
+        font_color='#e0e0e0',
+        hovermode='x unified',
+        height=250,
+        margin=dict(l=20, r=20, t=30, b=50),
+        yaxis_title='Price/Hashrate Ratio (USD/PH/s)',
+        xaxis=dict(
+            showgrid=True,
+            gridwidth=1,
+            gridcolor='rgba(255, 255, 255, 0.1)',
+            linecolor='#3A3C4A',
+            zerolinecolor='#3A3C4A'
+        ),
+        yaxis=dict(
+            showgrid=True,
+            gridwidth=1,
+            gridcolor='rgba(255, 255, 255, 0.1)',
+            linecolor='#3A3C4A',
+            zerolinecolor='#3A3C4A'
+        ),
+        hoverlabel=dict(
+            bgcolor='#262730',
+            bordercolor='#3A3C4A',
+            font_color='#e0e0e0'
+        )
+    )
+    
+    st.plotly_chart(ratio_fig, use_container_width=True, className="ratio-chart")
+
 # Stats
 st.markdown('<div class="metrics-container">', unsafe_allow_html=True)
-cols = st.columns(4)
+cols = st.columns(5)
 with cols[0]:
     st.metric("Power-Law Slope", f"{b_relation:.3f}")
 with cols[1]:
     st.metric("Model Fit (R²)", f"{r2_relation:.3f}")
 with cols[2]:
-    st.metric("Current Hashrate", f"{df['Hashrate_PH'].iloc[-1]:.2f} PH/s")
+    current_ratio = analysis_df['Price_Hashrate_Ratio'].iloc[-1]
+    st.metric("Current Ratio", f"{current_ratio:.6f}")
 with cols[3]:
+    st.metric("Current Hashrate", f"{df['Hashrate_PH'].iloc[-1]:.2f} PH/s")
+with cols[4]:
     st.metric("Current Price", f"${price_df['Price'].iloc[-1]:.4f}")
 st.markdown('</div>', unsafe_allow_html=True)
