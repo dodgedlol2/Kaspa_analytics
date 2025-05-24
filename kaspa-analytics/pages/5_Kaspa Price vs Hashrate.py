@@ -36,14 +36,10 @@ except Exception as e:
     st.error(f"Failed to calculate price-hashrate power law: {str(e)}")
     st.stop()
 
-# Create color gradient for last 30 points
-last_30 = analysis_df.tail(30).copy()
-colors = ['#FF0000', '#FF4500', '#FF8C00', '#FFA500', '#FFD700', 
-          '#FFFF00', '#ADFF2F', '#7CFC00', '#00FF00', '#00FA9A', 
-          '#00FFFF', '#1E90FF', '#0000FF', '#8A2BE2', '#9400D3']
-n_colors = len(colors)
-last_30['color_index'] = range(len(last_30))
-last_30['color'] = last_30['color_index'].apply(lambda x: colors[min(x, n_colors-1)])
+# Create color gradient for last 7 points (teal to purple)
+last_7 = analysis_df.tail(7).copy()
+purple_gradient = ['#00FFCC', '#40E0D0', '#80C0FF', '#A080FF', '#C040FF', '#E000FF', '#FF00FF']
+last_7['color'] = purple_gradient
 
 # Custom CSS - consistent styling
 st.markdown("""
@@ -184,47 +180,53 @@ with st.container():
     # Create the main figure
     fig = go.Figure()
 
-    # Add scatter trace for all price vs hashrate points (light gray)
+    # Add scatter trace for all price vs hashrate points (original teal color)
     fig.add_trace(go.Scatter(
         x=analysis_df['Hashrate_PH'],
         y=analysis_df['Price'],
         mode='markers',
-        name='Historical Data',
+        name='Price vs Hashrate',
         marker=dict(
-            color='rgba(150, 150, 150, 0.3)',
-            size=6,
-            line=dict(width=0.5, color='DarkSlateGrey')
+            color='#00FFCC',
+            size=8,
+            opacity=0.7,
+            line=dict(width=1, color='DarkSlateGrey')
         ),
         hovertemplate='<b>Hashrate</b>: %{x:.2f} PH/s<br><b>Price</b>: $%{y:.4f}<br><b>Date</b>: %{text}<extra></extra>',
-        text=analysis_df['Date'].dt.strftime('%Y-%m-%d')
+        text=analysis_df['Date'].dt.strftime('%Y-%m-%d'),
+        xaxis='x',
+        yaxis='y'
     ))
 
-    # Add colored scatter trace for last 30 points
-    for i, row in last_30.iterrows():
+    # Add colored scatter trace for last 7 points (teal to purple gradient)
+    for i, row in last_7.iterrows():
         fig.add_trace(go.Scatter(
             x=[row['Hashrate_PH']],
             y=[row['Price']],
             mode='markers',
-            name=f"Recent ({row['Date'].strftime('%Y-%m-%d')})" if i == last_30.index[-1] else None,
+            name=f"Recent ({row['Date'].strftime('%Y-%m-%d')})" if i == last_7.index[-1] else None,
             marker=dict(
                 color=row['color'],
-                size=10,
-                line=dict(width=1, color='DarkSlateGrey')
+                size=12,
+                opacity=0.9,
+                line=dict(width=1.5, color='DarkSlateGrey')
             ),
             hovertemplate='<b>Hashrate</b>: %{x:.2f} PH/s<br><b>Price</b>: $%{y:.4f}<br><b>Date</b>: %{text}<extra></extra>',
             text=[row['Date'].strftime('%Y-%m-%d')],
-            showlegend=False
+            showlegend=False,
+            xaxis='x',
+            yaxis='y'
         ))
 
-    # Add price over time on secondary y-axis
+    # Add price over time on secondary axes
     fig.add_trace(go.Scatter(
-        x=analysis_df['Hashrate_PH'],
+        x=analysis_df['Date'],
         y=analysis_df['Price'],
         mode='lines',
-        name='Price Trend',
+        name='Price Timeline',
         line=dict(color='rgba(150, 150, 150, 0.7)', width=1.5),
-        hovertemplate='<b>Hashrate</b>: %{x:.2f} PH/s<br><b>Price</b>: $%{y:.4f}<br><b>Date</b>: %{text}<extra></extra>',
-        text=analysis_df['Date'].dt.strftime('%Y-%m-%d'),
+        hovertemplate='<b>Date</b>: %{x|%Y-%m-%d}<br><b>Price</b>: $%{y:.4f}<extra></extra>',
+        xaxis='x2',
         yaxis='y2'
     ))
 
@@ -238,7 +240,9 @@ with st.container():
             y=y_fit,
             mode='lines',
             name=f'Power-Law Fit (R²={r2_relation:.3f})',
-            line=dict(color='#FFA726', dash='dot', width=2)
+            line=dict(color='#FFA726', dash='dot', width=2),
+            xaxis='x',
+            yaxis='y'
         ))
 
         # Add deviation bands
@@ -249,7 +253,9 @@ with st.container():
             name='-60% Deviation',
             line=dict(color='rgba(255, 255, 255, 0.5)', dash='dot', width=1),
             hoverinfo='skip',
-            fill=None
+            fill=None,
+            xaxis='x',
+            yaxis='y'
         ))
         fig.add_trace(go.Scatter(
             x=x_fit,
@@ -259,7 +265,9 @@ with st.container():
             line=dict(color='rgba(255, 255, 255, 0.5)', dash='dot', width=1),
             hoverinfo='skip',
             fill='tonexty',
-            fillcolor='rgba(100, 100, 100, 0.2)'
+            fillcolor='rgba(100, 100, 100, 0.2)',
+            xaxis='x',
+            yaxis='y'
         ))
 
     fig.update_layout(
@@ -269,9 +277,23 @@ with st.container():
         hovermode='closest',
         height=700,
         margin=dict(l=20, r=20, t=60, b=100),
-        yaxis_title='Price vs Hashrate (USD/PH/s)',
-        xaxis_title='Hashrate (PH/s)',
+        yaxis=dict(
+            title='Price vs Hashrate (USD)',
+            type="log" if y_scale == "Log" else "linear",
+            showgrid=True,
+            gridwidth=1,
+            gridcolor='rgba(255, 255, 255, 0.1)',
+            minor=dict(
+                ticklen=6,
+                gridcolor='rgba(255, 255, 255, 0.05)',
+                gridwidth=0.5
+            ),
+            linecolor='#3A3C4A',
+            zerolinecolor='#3A3C4A',
+            domain=[0.0, 1.0]
+        ),
         xaxis=dict(
+            title='Hashrate (PH/s)',
             type="log" if x_scale_type == "Log" else "linear",
             showgrid=True,
             gridwidth=1,
@@ -282,29 +304,32 @@ with st.container():
                 gridwidth=0.5
             ),
             linecolor='#3A3C4A',
-            zerolinecolor='#3A3C4A'
-        ),
-        yaxis=dict(
-            type="log" if y_scale == "Log" else "linear",
-            showgrid=True,
-            gridwidth=1,
-            gridcolor='rgba(255, 255, 255, 0.1)',
-            minor=dict(
-                ticklen=6,
-                gridcolor='rgba(255, 255, 255, 0.05)',
-                gridwidth=0.5
-            ),
-            linecolor='#3A3C4A',
-            zerolinecolor='#3A3C4A'
+            zerolinecolor='#3A3C4A',
+            domain=[0.0, 0.45]
         ),
         yaxis2=dict(
-            title='Price Over Time (USD)',
-            overlaying='y',
-            side='right',
+            title='Price Timeline (USD)',
             type="log" if y_scale == "Log" else "linear",
             showgrid=False,
             linecolor='rgba(150, 150, 150, 0.5)',
-            zeroline=False
+            zeroline=False,
+            anchor='x2',
+            overlaying='y',
+            side='right',
+            position=1.0
+        ),
+        xaxis2=dict(
+            title='Date',
+            type="log" if time_scale == "Log" else "linear",
+            showgrid=True,
+            gridwidth=1,
+            gridcolor='rgba(255, 255, 255, 0.1)',
+            linecolor='#3A3C4A',
+            zerolinecolor='#3A3C4A',
+            anchor='y2',
+            overlaying='x',
+            side='top',
+            domain=[0.55, 1.0]
         ),
         legend=dict(
             orientation="h",
