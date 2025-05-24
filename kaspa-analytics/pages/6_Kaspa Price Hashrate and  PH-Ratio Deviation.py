@@ -132,8 +132,8 @@ with st.container():
     st.divider()
     
     # Dropdown container
-    col_spacer_left, col1, col2, col3, col4, spacer1, spacer2, spacer3, spacer4, spacer5, spacer6, spacer7, spacer8, spacer9 = st.columns(
-        [0.35, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 3]
+    col_spacer_left, col1, col2, col3, spacer1, spacer2, spacer3, spacer4, spacer5, spacer6, spacer7, spacer8, spacer9 = st.columns(
+        [0.35, 1, 1, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 3]
     )
 
     with col1:
@@ -158,13 +158,6 @@ with st.container():
         time_range = st.selectbox("Time Range", time_ranges,
                                   index=time_ranges.index(st.session_state.time_range),
                                   label_visibility="collapsed", key="time_range_select")
-
-    with col4:
-        st.markdown('<div class="control-label">Power Law Fit</div>', unsafe_allow_html=True)
-        power_law_options = ["Hide", "Show"]
-        show_power_law = st.selectbox("Power Law Fit", power_law_options,
-                                      index=0,
-                                      label_visibility="collapsed", key="power_law_select")
     
     # Second divider - under the dropdown menus
     st.divider()
@@ -209,13 +202,13 @@ with st.container():
         text=filtered_df['Date']
     ))
 
-     # Add price trace (secondary y-axis) - solid line version
+    # Add price trace (secondary y-axis) - solid line version
     fig.add_trace(go.Scatter(
-            x=x_values,
+        x=x_values,
         y=filtered_df['Price'],
         mode='lines',
         name='Price (USD)',
-        line=dict(color='rgba(150, 150, 150, 0.7)', width=1.2),  # Removed dash='dot'
+        line=dict(color='rgba(150, 150, 150, 0.7)', width=1.2),
         hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Price</b>: $%{y:.4f}<extra></extra>',
         text=filtered_df['Date'],
         yaxis='y2'
@@ -271,7 +264,7 @@ with st.container():
             side='right',
             type="log" if y_scale == "Log" else "linear",
             showgrid=False,
-            linecolor='rgba(150, 150, 150, 0.5)',  # More subtle axis line
+            linecolor='rgba(150, 150, 150, 0.5)',
             zeroline=False,
             color='rgba(150, 150, 150, 0.7)'
         ),
@@ -296,9 +289,9 @@ with st.container():
 st.markdown('<div class="metrics-container">', unsafe_allow_html=True)
 cols = st.columns(3)
 with cols[0]:
-    st.metric("Current Hashrate", f"{df['Hashrate_PH'].iloc[-1]:.2f} PH/s")
+    st.metric("Current Hashrate", f"{filtered_df['Hashrate_PH'].iloc[-1]:.2f} PH/s")
 with cols[1]:
-    st.metric("Current Price", f"${df['Price'].iloc[-1]:.4f}")
+    st.metric("Current Price", f"${filtered_df['Price'].iloc[-1]:.4f}")
 with cols[2]:
-    st.metric("Days Since Genesis", f"{df['days_from_genesis'].iloc[-1]}")
+    st.metric("Days Since Genesis", f"{filtered_df['days_from_genesis'].iloc[-1]}")
 st.markdown('</div>', unsafe_allow_html=True)
