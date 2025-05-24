@@ -8,23 +8,27 @@ from datetime import datetime, timedelta
 
 st.set_page_config(layout="wide")
 
-# Define power law fitting function
-def fit_power_law(df, x_col='days_from_genesis', y_col='Hashrate_PH'):
-    """Fit power law y = a*x^b to data"""
-    x_data = df[x_col].values
-    y_data = df[y_col].values
+# Define power law fitting function (using log-log space for better fit)
+def fit_power_law_loglog(df, x_col='days_from_genesis', y_col='Price_Hashrate_Ratio'):
+    """Fit power law y = a*x^b to data in log-log space"""
+    x_data = np.log(df[x_col].values)
+    y_data = np.log(df[y_col].values)
     
-    # Power law function
-    def power_law(x, a, b):
-        return a * np.power(x, b)
+    # Linear function for log-log space
+    def linear_func(x, a, b):
+        return a * x + b
     
-    # Fit the data
     try:
-        params, _ = curve_fit(power_law, x_data, y_data, maxfev=5000)
-        a, b = params
+        params, _ = curve_fit(linear_func, x_data, y_data)
+        a_log, b_log = params
         
-        # Calculate R-squared
-        residuals = y_data - power_law(x_data, a, b)
+        # Convert back to power law parameters
+        a = np.exp(b_log)
+        b = a_log
+        
+        # Calculate R-squared in log space
+        y_pred = linear_func(x_data, a_log, b_log)
+        residuals = y_data - y_pred
         ss_res = np.sum(residuals**2)
         ss_tot = np.sum((y_data - np.mean(y_data))**2)
         r_squared = 1 - (ss_res / ss_tot)
@@ -62,10 +66,10 @@ analysis_df = merged_df.dropna(subset=['Hashrate_PH', 'Price']).copy()
 analysis_df['Price_Hashrate_Ratio'] = analysis_df['Price'] / analysis_df['Hashrate_PH']
 analysis_df['Days_Since_Genesis'] = (analysis_df['Date'] - genesis_date).dt.days + 1  # +1 to avoid log(0)
 
-# Calculate power law fit for the ratio
+# Calculate power law fit for the ratio in log-log space
 try:
-    # Fit power law to the ratio vs time
-    a_ratio, b_ratio, r2_ratio = fit_power_law(analysis_df, x_col='Days_Since_Genesis', y_col='Price_Hashrate_Ratio')
+    # Fit power law to the ratio vs time in log-log space
+    a_ratio, b_ratio, r2_ratio = fit_power_law_loglog(analysis_df, x_col='Days_Since_Genesis', y_col='Price_Hashrate_Ratio')
     if None in [a_ratio, b_ratio, r2_ratio]:
         st.error("Failed to calculate ratio power law fit")
         st.stop()
@@ -76,7 +80,7 @@ try:
     # Calculate percentage deviation from expected ratio
     analysis_df['Ratio_Deviation_Pct'] = ((analysis_df['Price_Hashrate_Ratio'] - analysis_df['Expected_Ratio']) / analysis_df['Expected_Ratio']) * 100
     
-    # Calculate Bollinger Band-like standard deviation bands
+    # Calculate standard deviation bands
     rolling_window = min(30, len(analysis_df))  # Use 30-day window or all data if less
     analysis_df['Deviation_MA'] = analysis_df['Ratio_Deviation_Pct'].rolling(rolling_window).mean()
     analysis_df['Deviation_Std'] = analysis_df['Ratio_Deviation_Pct'].rolling(rolling_window).std()
@@ -255,7 +259,7 @@ with st.container():
     st.plotly_chart(fig, use_container_width=True)
 
     # ====== OSCILLATOR CHART ======
-    st.markdown('<div class="title-spacing"><h4>Price/Hashrate Ratio Deviation from Trend (%)</h4></div>', unsafe_allow_html=True)
+    st.markdown('<div class="title-spacing"><h4>Price/Hashrate Ratio Deviation from Power Law Trend (%)</h4></div>', unsafe_allow_html=True)
     
     osc_fig = go.Figure()
     
