@@ -8,47 +8,61 @@ from datetime import datetime, timedelta
 st.set_page_config(layout="wide")
 
 # Data loading and processing
-if 'df' not in st.session_state or 'genesis_date' not in st.session_state:
+@st.cache_data
+def load_all_data():
     try:
-        st.session_state.df, st.session_state.genesis_date = load_data()
-        # Load price data as well
-        st.session_state.price_df, _ = load_price_data()
+        df, genesis_date = load_data()
+        price_df, _ = load_price_data()
+        return df, price_df, genesis_date
     except Exception as e:
         st.error(f"Failed to load data: {str(e)}")
         st.stop()
+
+if 'df' not in st.session_state or 'genesis_date' not in st.session_state:
+    st.session_state.df, st.session_state.price_df, st.session_state.genesis_date = load_all_data()
 
 df = st.session_state.df
 price_df = st.session_state.price_df
 genesis_date = st.session_state.genesis_date
 
-# Normalize timestamps to daily resolution
-df['Date'] = pd.to_datetime(df['Date']).dt.normalize()
-price_df['Date'] = pd.to_datetime(price_df['Date']).dt.normalize()
+# Data processing
+@st.cache_data
+def process_data(_df, _price_df, genesis_date):
+    # Normalize timestamps to daily resolution
+    _df['Date'] = pd.to_datetime(_df['Date']).dt.normalize()
+    _price_df['Date'] = pd.to_datetime(_price_df['Date']).dt.normalize()
 
-# Remove duplicate dates (keep last)
-price_df = price_df.drop_duplicates('Date', keep='last')
+    # Remove duplicate dates (keep last)
+    _price_df = _price_df.drop_duplicates('Date', keep='last')
 
-# Merge data
-merged_df = pd.merge(df, price_df[['Date', 'Price']], on='Date', how='left')
-
-# Calculate Price/Hashrate ratio and days since genesis
-analysis_df = merged_df.dropna(subset=['Hashrate_PH', 'Price']).copy()
-analysis_df['Price_Hashrate_Ratio'] = analysis_df['Price'] / analysis_df['Hashrate_PH']
-analysis_df['Days_Since_Genesis'] = (analysis_df['Date'] - genesis_date).dt.days + 1  # +1 to avoid log(0)
-
-# Calculate power law for price vs hashrate relationship
-try:
-    a_relation, b_relation, r2_relation = fit_power_law(analysis_df, x_col='Hashrate_PH', y_col='Price')
+    # Merge data
+    merged_df = pd.merge(_df, _price_df[['Date', 'Price']], on='Date', how='left')
     
-    # Calculate expected price based on power law
-    analysis_df['Expected_Price'] = a_relation * np.power(analysis_df['Hashrate_PH'], b_relation)
+    # Calculate days from genesis
+    merged_df['days_from_genesis'] = (merged_df['Date'] - genesis_date).dt.days + 1
     
-    # Calculate percentage deviation from power law
-    analysis_df['Price_Deviation_Pct'] = ((analysis_df['Price'] - analysis_df['Expected_Price']) / analysis_df['Expected_Price']) * 100
+    # Calculate Price/Hashrate ratio and days since genesis
+    analysis_df = merged_df.dropna(subset=['Hashrate_PH', 'Price']).copy()
+    analysis_df['Price_Hashrate_Ratio'] = analysis_df['Price'] / analysis_df['Hashrate_PH']
+    analysis_df['Days_Since_Genesis'] = (analysis_df['Date'] - genesis_date).dt.days + 1  # +1 to avoid log(0)
+
+    # Calculate power law for price vs hashrate relationship
+    try:
+        a_relation, b_relation, r2_relation = fit_power_law(analysis_df, x_col='Hashrate_PH', y_col='Price')
+        
+        # Calculate expected price based on power law
+        analysis_df['Expected_Price'] = a_relation * np.power(analysis_df['Hashrate_PH'], b_relation)
+        
+        # Calculate percentage deviation from power law
+        analysis_df['Price_Deviation_Pct'] = ((analysis_df['Price'] - analysis_df['Expected_Price']) / analysis_df['Expected_Price']) * 100
+        
+    except Exception as e:
+        st.error(f"Failed to calculate power laws: {str(e)}")
+        st.stop()
     
-except Exception as e:
-    st.error(f"Failed to calculate power laws: {str(e)}")
-    st.stop()
+    return merged_df, analysis_df, a_relation, b_relation
+
+merged_df, analysis_df, a_relation, b_relation = process_data(df, price_df, genesis_date)
 
 # Custom CSS - updated divider styling
 st.markdown("""
@@ -181,6 +195,7 @@ with st.container():
     # Second divider - under the dropdown menus
     st.divider()
 
+    # Filter data based on time range
     last_date = merged_df['Date'].iloc[-1]
     if time_range == "1W":
         start_date = last_date - timedelta(days=7)
@@ -205,13 +220,9 @@ with st.container():
     if x_scale_type == "Log":
         x_values = filtered_df['days_from_genesis']
         x_title = "Days Since Genesis (Log Scale)"
-        tickformat = None
-        hoverformat = None
     else:
         x_values = filtered_df['Date']
         x_title = "Date"
-        tickformat = "%b %Y"
-        hoverformat = "%b %d, %Y"
 
     # Add hashrate trace (primary y-axis)
     fig.add_trace(go.Scatter(
@@ -268,16 +279,6 @@ with st.container():
         yref='y3'
     )
     
-    # Add average line to oscillator
-    avg_deviation = filtered_analysis_df['Price_Deviation_Pct'].mean()
-    fig.add_hline(
-        y=avg_deviation,
-        line=dict(color='rgba(255, 255, 255, 0.3)', dash='dot', width=1),
-        annotation_text=f'Avg: {avg_deviation:.1f}%',
-        annotation_position="bottom right",
-        yref='y3'
-    )
-
     # Update layout with subplots
     fig.update_layout(
         plot_bgcolor='#262730',
@@ -348,7 +349,6 @@ with st.container():
                 gridcolor='rgba(255, 255, 255, 0.05)',
                 gridwidth=0.5
             ),
-            tickformat=tickformat,
             linecolor='#3A3C4A',
             zerolinecolor='#3A3C4A',
             domain=[0, 1],
@@ -385,7 +385,5 @@ with cols[2]:
 with cols[3]:
     if 'Price_Deviation_Pct' in analysis_df.columns:
         current_deviation = analysis_df['Price_Deviation_Pct'].iloc[-1]
-        st.metric("Current Deviation", 
-                 f"{current_deviation:.1f}%",
-                 delta=f"{abs(current_deviation):.1f}% {'above' if current_deviation >= 0 else 'below'} expected")
+        st.metric("Current Deviation", f"{current_deviation:.1f}%")
 st.markdown('</div>', unsafe_allow_html=True)
