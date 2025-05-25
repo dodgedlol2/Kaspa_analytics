@@ -101,4 +101,54 @@ with tab3:
     block_id = st.text_input("Enter a Block Hash:", 
                            value="18c7afdf8f447ca06adb8b4946dc45f5feb1188c7d177da6094dfbc760eca699")
     
-    if st.button("Get Block
+    if st.button("Get Block Info"):
+        block_data = make_api_request(f"/blocks/{block_id}", params={"includeTransactions": True})
+        if block_data:
+            col6, col7 = st.columns(2)
+            
+            with col6:
+                st.metric("Block Height", block_data['verboseData']['blueScore'])
+                st.metric("Timestamp", pd.to_datetime(int(block_data['header']['timestamp']), unit='ms')
+                st.metric("Difficulty", f"{block_data['verboseData']['difficulty'][0]:,.2f}")
+            
+            with col7:
+                st.metric("Transaction Count", len(block_data['transactions']))
+                st.metric("Hash", block_data['verboseData']['hash'])
+            
+            st.subheader("Transactions in Block")
+            txs = block_data['transactions']
+            tx_df = pd.DataFrame([{
+                'id': tx['verboseData']['transactionId'],
+                'mass': tx['mass'],
+                'inputs': len(tx['inputs']),
+                'outputs': len(tx['outputs'])
+            } for tx in txs])
+            st.dataframe(tx_df)
+
+with tab4:
+    st.header("Transaction Information")
+    
+    tx_id = st.text_input("Enter a Transaction ID:", 
+                         value="b9382bdee4aa364acf73eda93914eaae61d0e78334d1b8a637ab89ef5e224e41")
+    
+    if st.button("Get Transaction Info"):
+        tx_data = make_api_request(f"/transactions/{tx_id}")
+        if tx_data:
+            col8, col9 = st.columns(2)
+            
+            with col8:
+                st.metric("Transaction ID", tx_data['transaction_id'])
+                st.metric("Mass", tx_data['mass'])
+                st.metric("Block Time", pd.to_datetime(tx_data['block_time'], unit='ms'))
+            
+            with col9:
+                st.metric("Inputs", len(tx_data['inputs']))
+                st.metric("Outputs", len(tx_data['outputs']))
+            
+            st.subheader("Inputs")
+            inputs_df = pd.DataFrame(tx_data['inputs'])
+            st.dataframe(inputs_df[['previous_outpoint_hash', 'previous_outpoint_index', 'previous_outpoint_amount']])
+            
+            st.subheader("Outputs")
+            outputs_df = pd.DataFrame(tx_data['outputs'])
+            st.dataframe(outputs_df[['script_public_key_address', 'amount']])
