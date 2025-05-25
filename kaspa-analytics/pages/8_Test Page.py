@@ -8,11 +8,11 @@ API_BASE_URL = "https://api.kaspa.org"
 st.set_page_config(page_title="Kaspa Explorer", page_icon="⛓️", layout="wide")
 
 # Helper functions
-def make_api_request(endpoint, params=None):
+def make_api_request(endpoint, params=None, as_text=False):
     try:
         response = requests.get(f"{API_BASE_URL}{endpoint}", params=params)
         response.raise_for_status()
-        return response.json()
+        return response.text if as_text else response.json()
     except requests.exceptions.RequestException as e:
         st.error(f"API request failed: {str(e)}")
         return None
@@ -87,23 +87,31 @@ with tab1:
     
     with col4:
         with st.spinner("Loading hashrate data..."):
-            hashrate_data = make_api_request("/info/hashrate")
-            if hashrate_data and isinstance(hashrate_data, dict):
-                hashrate = safe_get(hashrate_data, 'hashrate', default=0)
-                if isinstance(hashrate, (int, float)):
-                    st.metric("Current Hashrate", f"{hashrate / 1e12:,.2f} TH/s")
-                else:
+            hashrate = make_api_request("/info/hashrate", params={"stringOnly": True}, as_text=True)
+            if hashrate:
+                try:
+                    # Clean the response (remove quotes if present)
+                    hashrate_clean = hashrate.strip('"\'')
+                    hashrate_value = float(hashrate_clean)
+                    st.metric("Current Hashrate", f"{hashrate_value:,.2f} PH/s")
+                except ValueError:
                     st.warning("Invalid hashrate data")
+            else:
+                st.warning("Could not load hashrate data")
     
     with col5:
         with st.spinner("Loading block reward data..."):
-            blockreward_data = make_api_request("/info/blockreward")
-            if blockreward_data and isinstance(blockreward_data, dict):
-                blockreward = safe_get(blockreward_data, 'blockreward', default=0)
-                if isinstance(blockreward, (int, float)):
-                    st.metric("Block Reward", f"{blockreward / 1e8:,.2f} KAS")
-                else:
+            blockreward = make_api_request("/info/blockreward", params={"stringOnly": True}, as_text=True)
+            if blockreward:
+                try:
+                    # Clean the response (remove quotes if present)
+                    blockreward_clean = blockreward.strip('"\'')
+                    blockreward_value = float(blockreward_clean)
+                    st.metric("Block Reward", f"{blockreward_value:,.2f} KAS")
+                except ValueError:
                     st.warning("Invalid block reward data")
+            else:
+                st.warning("Could not load block reward data")
 
 with tab2:
     st.header("Address Information")
