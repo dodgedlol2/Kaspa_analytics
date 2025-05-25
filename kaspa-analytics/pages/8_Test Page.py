@@ -19,9 +19,22 @@ def make_api_request(endpoint, params=None):
 
 def format_timestamp(timestamp_ms):
     try:
-        return datetime.fromtimestamp(int(timestamp_ms)/1000).strftime('%Y-%m-%d %H:%M:%S')
+        if isinstance(timestamp_ms, (int, float, str)):
+            if isinstance(timestamp_ms, str) and timestamp_ms.isdigit():
+                timestamp_ms = int(timestamp_ms)
+            return datetime.fromtimestamp(int(timestamp_ms)/1000).strftime('%Y-%m-%d %H:%M:%S')
+        return "N/A"
     except:
         return "N/A"
+
+def safe_get(data, *keys, default=None):
+    """Safely get nested dictionary values"""
+    for key in keys:
+        try:
+            data = data[key]
+        except (KeyError, TypeError, IndexError):
+            return default
+    return data
 
 # App layout
 st.title("Kaspa Blockchain Explorer")
@@ -40,8 +53,8 @@ with tab1:
         with st.spinner("Loading supply data..."):
             supply_data = make_api_request("/info/coinsupply")
             if supply_data:
-                circulating = float(supply_data.get('circulatingSupply', 0)) / 1e8
-                max_supply = float(supply_data.get('maxSupply', 0)) / 1e8
+                circulating = float(safe_get(supply_data, 'circulatingSupply', default=0)) / 1e8
+                max_supply = float(safe_get(supply_data, 'maxSupply', default=0)) / 1e8
                 st.metric("Circulating Supply", f"{circulating:,.2f} KAS")
                 st.metric("Max Supply", f"{max_supply:,.2f} KAS")
     
@@ -50,21 +63,24 @@ with tab1:
         with st.spinner("Loading network data..."):
             network_data = make_api_request("/info/network")
             if network_data:
-                st.metric("Block Count", network_data.get('blockCount', 'N/A'))
-                st.metric("Difficulty", f"{float(network_data.get('difficulty', 0)):,.2f}")
+                st.metric("Block Count", safe_get(network_data, 'blockCount', default='N/A'))
+                difficulty = safe_get(network_data, 'difficulty', default=0)
+                st.metric("Difficulty", f"{float(difficulty):,.2f}" if difficulty != 'N/A' else 'N/A')
     
     with col3:
         st.subheader("Price & Market Data")
         with st.spinner("Loading price data..."):
             price_data = make_api_request("/info/price")
             if price_data and isinstance(price_data, dict):
-                st.metric("Price (USD)", f"${float(price_data.get('price', 0)):,.4f}")
+                price = safe_get(price_data, 'price', default=0)
+                st.metric("Price (USD)", f"${float(price):,.4f}")
             else:
                 st.warning("Could not load price data")
             
             marketcap_data = make_api_request("/info/marketcap")
             if marketcap_data and isinstance(marketcap_data, dict):
-                st.metric("Market Cap", f"${float(marketcap_data.get('marketcap', 0)):,.0f}")
+                marketcap = safe_get(marketcap_data, 'marketcap', default=0)
+                st.metric("Market Cap", f"${float(marketcap):,.0f}")
 
     st.subheader("Hashrate & Mining")
     col4, col5 = st.columns(2)
@@ -73,13 +89,21 @@ with tab1:
         with st.spinner("Loading hashrate data..."):
             hashrate_data = make_api_request("/info/hashrate")
             if hashrate_data and isinstance(hashrate_data, dict):
-                st.metric("Current Hashrate", f"{float(hashrate_data.get('hashrate', 0)) / 1e12:,.2f} TH/s")
+                hashrate = safe_get(hashrate_data, 'hashrate', default=0)
+                if isinstance(hashrate, (int, float)):
+                    st.metric("Current Hashrate", f"{hashrate / 1e12:,.2f} TH/s")
+                else:
+                    st.warning("Invalid hashrate data")
     
     with col5:
         with st.spinner("Loading block reward data..."):
             blockreward_data = make_api_request("/info/blockreward")
             if blockreward_data and isinstance(blockreward_data, dict):
-                st.metric("Block Reward", f"{float(blockreward_data.get('blockreward', 0)) / 1e8:,.2f} KAS")
+                blockreward = safe_get(blockreward_data, 'blockreward', default=0)
+                if isinstance(blockreward, (int, float)):
+                    st.metric("Block Reward", f"{blockreward / 1e8:,.2f} KAS")
+                else:
+                    st.warning("Invalid block reward data")
 
 with tab2:
     st.header("Address Information")
@@ -93,7 +117,7 @@ with tab2:
                 # Get balance
                 balance_data = make_api_request(f"/addresses/{address}/balance")
                 if balance_data and isinstance(balance_data, dict):
-                    balance = float(balance_data.get('balance', 0)) / 1e8
+                    balance = float(safe_get(balance_data, 'balance', default=0)) / 1e8
                     st.metric("Balance", f"{balance:,.8f} KAS")
                 else:
                     st.warning("Could not load balance data")
@@ -106,9 +130,10 @@ with tab2:
                         utxos_list = []
                         for utxo in utxos_data:
                             if isinstance(utxo, dict) and 'utxoEntry' in utxo:
-                                amount = float(utxo['utxoEntry'].get('amount', ['0'])[0]) / 1e8
+                                amount_str = safe_get(utxo, 'utxoEntry', 'amount', default=['0'])[0]
+                                amount = float(amount_str) / 1e8
                                 utxos_list.append({
-                                    'address': utxo.get('address', ''),
+                                    'address': safe_get(utxo, 'address', default=''),
                                     'amount': amount
                                 })
                         if utxos_list:
@@ -122,7 +147,7 @@ with tab2:
                 # Get transaction count
                 tx_count = make_api_request(f"/addresses/{address}/transactions-count")
                 if tx_count and isinstance(tx_count, dict):
-                    st.metric("Transaction Count", tx_count.get('total', 0))
+                    st.metric("Transaction Count", safe_get(tx_count, 'total', default=0))
         else:
             st.error("Please enter a valid Kaspa address starting with 'kaspa:'")
 
@@ -140,30 +165,34 @@ with tab3:
                     col6, col7 = st.columns(2)
                     
                     with col6:
-                        blue_score = block_data.get('verboseData', {}).get('blueScore', 'N/A')
-                        timestamp = block_data.get('header', {}).get('timestamp', 'N/A')
-                        difficulty = block_data.get('verboseData', {}).get('difficulty', [0])[0]
+                        blue_score = safe_get(block_data, 'verboseData', 'blueScore', default='N/A')
+                        timestamp = safe_get(block_data, 'header', 'timestamp', default='N/A')
+                        difficulty = safe_get(block_data, 'verboseData', 'difficulty', default=[0])
+                        if isinstance(difficulty, list) and len(difficulty) > 0:
+                            difficulty = difficulty[0]
+                        else:
+                            difficulty = 0
                         
                         st.metric("Block Height", blue_score)
                         st.metric("Timestamp", format_timestamp(timestamp))
                         st.metric("Difficulty", f"{float(difficulty):,.2f}")
                     
                     with col7:
-                        transactions = block_data.get('transactions', [])
+                        transactions = safe_get(block_data, 'transactions', default=[])
                         st.metric("Transaction Count", len(transactions))
-                        st.metric("Hash", block_data.get('verboseData', {}).get('hash', 'N/A'))
+                        st.metric("Hash", safe_get(block_data, 'verboseData', 'hash', default='N/A'))
                     
                     st.subheader("Transactions in Block")
-                    if transactions:
+                    if transactions and isinstance(transactions, list):
                         try:
                             tx_list = []
                             for tx in transactions:
                                 if isinstance(tx, dict):
                                     tx_list.append({
-                                        'id': tx.get('verboseData', {}).get('transactionId', ''),
-                                        'mass': tx.get('mass', ''),
-                                        'inputs': len(tx.get('inputs', [])),
-                                        'outputs': len(tx.get('outputs', []))
+                                        'id': safe_get(tx, 'verboseData', 'transactionId', default=''),
+                                        'mass': safe_get(tx, 'mass', default=''),
+                                        'inputs': len(safe_get(tx, 'inputs', default=[])),
+                                        'outputs': len(safe_get(tx, 'outputs', default=[]))
                                     })
                             if tx_list:
                                 tx_df = pd.DataFrame(tx_list)
@@ -189,25 +218,25 @@ with tab4:
                     col8, col9 = st.columns(2)
                     
                     with col8:
-                        st.metric("Transaction ID", tx_data.get('transaction_id', 'N/A'))
-                        st.metric("Mass", tx_data.get('mass', 'N/A'))
-                        st.metric("Block Time", format_timestamp(tx_data.get('block_time', 0)))
+                        st.metric("Transaction ID", safe_get(tx_data, 'transaction_id', default='N/A'))
+                        st.metric("Mass", safe_get(tx_data, 'mass', default='N/A'))
+                        st.metric("Block Time", format_timestamp(safe_get(tx_data, 'block_time', default=0)))
                     
                     with col9:
-                        st.metric("Inputs", len(tx_data.get('inputs', [])))
-                        st.metric("Outputs", len(tx_data.get('outputs', [])))
+                        st.metric("Inputs", len(safe_get(tx_data, 'inputs', default=[])))
+                        st.metric("Outputs", len(safe_get(tx_data, 'outputs', default=[])))
                     
                     st.subheader("Inputs")
-                    inputs = tx_data.get('inputs', [])
-                    if inputs:
+                    inputs = safe_get(tx_data, 'inputs', default=[])
+                    if inputs and isinstance(inputs, list):
                         try:
                             input_list = []
                             for inp in inputs:
                                 if isinstance(inp, dict):
                                     input_list.append({
-                                        'previous_outpoint_hash': inp.get('previous_outpoint_hash', ''),
-                                        'previous_outpoint_index': inp.get('previous_outpoint_index', ''),
-                                        'previous_outpoint_amount': float(inp.get('previous_outpoint_amount', 0)) / 1e8
+                                        'previous_outpoint_hash': safe_get(inp, 'previous_outpoint_hash', default=''),
+                                        'previous_outpoint_index': safe_get(inp, 'previous_outpoint_index', default=''),
+                                        'previous_outpoint_amount': float(safe_get(inp, 'previous_outpoint_amount', default=0)) / 1e8
                                     })
                             if input_list:
                                 inputs_df = pd.DataFrame(input_list)
@@ -218,15 +247,15 @@ with tab4:
                         st.info("No inputs found")
                     
                     st.subheader("Outputs")
-                    outputs = tx_data.get('outputs', [])
-                    if outputs:
+                    outputs = safe_get(tx_data, 'outputs', default=[])
+                    if outputs and isinstance(outputs, list):
                         try:
                             output_list = []
                             for out in outputs:
                                 if isinstance(out, dict):
                                     output_list.append({
-                                        'address': out.get('script_public_key_address', ''),
-                                        'amount': float(out.get('amount', 0)) / 1e8
+                                        'address': safe_get(out, 'script_public_key_address', default=''),
+                                        'amount': float(safe_get(out, 'amount', default=0)) / 1e8
                                     })
                             if output_list:
                                 outputs_df = pd.DataFrame(output_list)
