@@ -149,7 +149,7 @@ st.markdown("""
 
 # ====== MAIN CHART CONTAINER ======
 with st.container():
-    st.markdown('<div class="title-spacing"><h2>Kaspa Hashrate with Price Reference</h2></div>', unsafe_allow_html=True)
+    st.markdown('<div class="title-spacing"><h2>Power Law Residual of Kaspa Price Relative to Network Hashrate</h2></div>', unsafe_allow_html=True)
     
     # First divider - under the title
     st.divider()
