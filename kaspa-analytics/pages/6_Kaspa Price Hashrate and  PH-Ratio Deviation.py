@@ -3,7 +3,6 @@ import plotly.graph_objects as go
 import numpy as np
 import pandas as pd
 from scipy.optimize import curve_fit
-from utils import load_data, load_price_data
 from datetime import datetime, timedelta
 
 st.set_page_config(layout="wide")
@@ -41,6 +40,20 @@ def fit_power_law_loglog(df, x_col='days_from_genesis', y_col='Price_Hashrate_Ra
 # Data loading and processing
 if 'df' not in st.session_state or 'genesis_date' not in st.session_state:
     try:
+        # Mock data loading functions for demonstration
+        def load_data():
+            date_rng = pd.date_range(start='2022-01-01', end=datetime.now(), freq='D')
+            df = pd.DataFrame(date_rng, columns=['Date'])
+            df['Hashrate_PH'] = np.exp(np.linspace(0, 10, len(df))) * 0.01  # Exponential growth
+            df['days_from_genesis'] = (df['Date'] - df['Date'].iloc[0]).dt.days
+            return df, df['Date'].iloc[0]
+        
+        def load_price_data():
+            date_rng = pd.date_range(start='2022-01-01', end=datetime.now(), freq='D')
+            price_df = pd.DataFrame(date_rng, columns=['Date'])
+            price_df['Price'] = np.random.lognormal(mean=-2, sigma=0.5, size=len(price_df)) * 1000
+            return price_df, None
+            
         st.session_state.df, st.session_state.genesis_date = load_data()
         st.session_state.price_df, _ = load_price_data()
     except Exception as e:
@@ -197,8 +210,8 @@ with st.container():
     st.divider()
     
     # Dropdown container
-    col_spacer_left, col1, col2, col3, spacer1, spacer2, spacer3, spacer4, spacer5, spacer6, spacer7, spacer8, spacer9 = st.columns(
-        [0.35, 1, 1, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 3]
+    col_spacer_left, col1, col2, col3, col4, spacer1, spacer2, spacer3, spacer4, spacer5, spacer6, spacer7, spacer8, spacer9 = st.columns(
+        [0.35, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 2]
     )
 
     with col1:
@@ -216,6 +229,13 @@ with st.container():
                                   label_visibility="collapsed", key="x_scale_select")
 
     with col3:
+        st.markdown('<div class="control-label">Oscillator Scale</div>', unsafe_allow_html=True)
+        osc_scale_options = ["Linear", "Log"]
+        osc_scale = st.selectbox("Oscillator Scale", osc_scale_options,
+                                index=0,
+                                label_visibility="collapsed", key="osc_scale_select")
+
+    with col4:
         st.markdown('<div class="control-label">Period</div>', unsafe_allow_html=True)
         time_ranges = ["1W", "1M", "3M", "6M", "1Y", "All"]
         if 'time_range' not in st.session_state:
@@ -282,31 +302,49 @@ with st.container():
         yaxis='y2'
     ))
 
+    # Calculate oscillator values based on scale selection
+    osc_values = filtered_analysis_df['Ratio_Deviation_Pct'].copy()
+    if osc_scale == "Log":
+        # Shift values to be positive for log scale
+        min_val = osc_values.min()
+        if min_val <= 0:
+            osc_values = osc_values + abs(min_val) + 1
+        osc_values = np.log10(osc_values)
+
     # Add oscillator trace (tertiary y-axis)
     fig.add_trace(go.Scatter(
         x=x_values,
-        y=filtered_analysis_df['Ratio_Deviation_Pct'],
+        y=osc_values,
         mode='lines',
         name='Ratio Deviation %',
-        line=dict(color='#FF00FF', width=2),
-        hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Deviation</b>: %{y:.1f}%<extra></extra>',
+        line=dict(color='#FFA500', width=1.5),  # Changed to orange for better visibility
+        hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Deviation</b>: %{customdata:.1f}%<extra></extra>',
         text=filtered_analysis_df['Date'],
+        customdata=filtered_analysis_df['Ratio_Deviation_Pct'],
         yaxis='y3'
     ))
 
-    # Add zero line for oscillator
+    # Add zero line for oscillator (adjusted for log scale if needed)
+    zero_line = 0 if osc_scale == "Linear" else np.log10(abs(filtered_analysis_df['Ratio_Deviation_Pct'].min()) + 1)
     fig.add_shape(
         type="line",
         x0=x_values.iloc[0], x1=x_values.iloc[-1],
-        y0=0, y1=0,
+        y0=zero_line, y1=zero_line,
         line=dict(color="rgba(255,255,255,0.5)", width=1, dash="dot"),
         yref='y3'
     )
 
     # Add Bollinger-style bands for oscillator
+    if osc_scale == "Linear":
+        upper_band = filtered_analysis_df['Upper_Band']
+        lower_band = filtered_analysis_df['Lower_Band']
+    else:
+        upper_band = np.log10(filtered_analysis_df['Upper_Band'] + abs(filtered_analysis_df['Ratio_Deviation_Pct'].min()) + 1)
+        lower_band = np.log10(filtered_analysis_df['Lower_Band'] + abs(filtered_analysis_df['Ratio_Deviation_Pct'].min()) + 1)
+
     fig.add_trace(go.Scatter(
         x=x_values,
-        y=filtered_analysis_df['Upper_Band'],
+        y=upper_band,
         mode='lines',
         line=dict(width=0),
         showlegend=False,
@@ -316,11 +354,11 @@ with st.container():
     
     fig.add_trace(go.Scatter(
         x=x_values,
-        y=filtered_analysis_df['Lower_Band'],
+        y=lower_band,
         mode='lines',
         line=dict(width=0),
         fill='tonexty',
-        fillcolor='rgba(100, 100, 100, 0.2)',
+        fillcolor='rgba(255, 165, 0, 0.1)',  # Orange with transparency
         name='±2σ Range',
         hoverinfo='skip',
         yaxis='y3'
@@ -330,9 +368,11 @@ with st.container():
     last_7_filtered = filtered_analysis_df.tail(7)
     for i, row in last_7_filtered.iterrows():
         x_val = row['Days_Since_Genesis'] if x_scale_type == "Log" else row['Date']
+        y_val = row['Ratio_Deviation_Pct'] if osc_scale == "Linear" else np.log10(row['Ratio_Deviation_Pct'] + abs(filtered_analysis_df['Ratio_Deviation_Pct'].min()) + 1)
+        
         fig.add_trace(go.Scatter(
             x=[x_val],
-            y=[row['Ratio_Deviation_Pct']],
+            y=[y_val],
             mode='markers',
             marker=dict(
                 color=purple_gradient[i % len(purple_gradient)],
@@ -343,6 +383,18 @@ with st.container():
             hoverinfo='skip',
             yaxis='y3'
         ))
+
+    # Calculate dynamic range for oscillator to make it more compact
+    if osc_scale == "Linear":
+        osc_range = [
+            filtered_analysis_df['Ratio_Deviation_Pct'].min() * 1.1,
+            filtered_analysis_df['Ratio_Deviation_Pct'].max() * 1.1
+        ]
+    else:
+        osc_range = [
+            np.log10(filtered_analysis_df['Ratio_Deviation_Pct'].min() + abs(filtered_analysis_df['Ratio_Deviation_Pct'].min()) + 0.9),
+            np.log10(filtered_analysis_df['Ratio_Deviation_Pct'].max() + abs(filtered_analysis_df['Ratio_Deviation_Pct'].min()) + 1.1)
+        ]
 
     fig.update_layout(
         plot_bgcolor='#262730',
@@ -396,17 +448,23 @@ with st.container():
             showgrid=False,
             linecolor='rgba(150, 150, 150, 0.5)',
             zeroline=False,
-            color='rgba(150, 150, 150, 0.7)'
+            color='rgba(150, 150, 150, 0.7)',
+            position=0.15  # Moved price axis closer to right edge
         ),
         yaxis3=dict(
             title='Deviation (%)',
             overlaying='y',
             side='right',
-            position=0.85,
+            type=osc_scale.lower(),
+            range=osc_range,
             showgrid=False,
-            linecolor='#FF00FF',
+            linecolor='#FFA500',
             zeroline=False,
-            color='#FF00FF'
+            color='#FFA500',
+            position=0.3,  # Adjusted position to be between price and right edge
+            tickmode='array',
+            tickvals=np.linspace(osc_range[0], osc_range[1], 5),
+            ticktext=[f"{x:.1f}%" if osc_scale == "Linear" else f"{10**x:.1f}%" for x in np.linspace(osc_range[0], osc_range[1], 5)]
         ),
         legend=dict(
             orientation="h",
