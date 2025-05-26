@@ -5,6 +5,8 @@ from datetime import datetime
 import plotly.graph_objects as go
 import numpy as np
 from utils import load_price_data
+import concurrent.futures
+from tqdm import tqdm
 
 # Configuration
 API_BASE_URL = "https://api.kaspa.org"
@@ -166,7 +168,8 @@ def format_timestamp(timestamp_ms):
     except:
         return "N/A"
 
-def fetch_transactions_page(address, limit=500, before=None):
+def fetch_transactions_page_improved(address, limit=500, before=None, after=None):
+    """Improved version with both before and after parameters"""
     endpoint = f"/addresses/{address}/full-transactions-page"
     params = {
         "limit": limit,
@@ -175,7 +178,100 @@ def fetch_transactions_page(address, limit=500, before=None):
     }
     if before is not None:
         params["before"] = before
+    if after is not None:
+        params["after"] = after
     return make_api_request(endpoint, params=params)
+
+def fetch_all_transactions_improved(address):
+    """Improved transaction fetching with parallel requests and better pagination"""
+    all_transactions = []
+    seen_ids = set()
+    
+    # First get the most recent transactions to establish time range
+    initial_batch = fetch_transactions_page_improved(address, limit=50)
+    if not initial_batch:
+        return []
+    
+    if len(initial_batch) < 50:
+        # If we got less than requested, this might be all transactions
+        return initial_batch
+    
+    # Determine time range to fetch
+    newest_timestamp = max(tx['block_time'] for tx in initial_batch if 'block_time' in tx)
+    oldest_timestamp = min(tx['block_time'] for tx in initial_batch if 'block_time' in tx)
+    
+    # Split the time range into chunks for parallel fetching
+    time_chunks = []
+    current_end = newest_timestamp
+    chunk_size = 30 * 24 * 60 * 60 * 1000  # 30 days in milliseconds
+    
+    while current_end > oldest_timestamp:
+        time_chunks.append((current_end - chunk_size, current_end))
+        current_end -= chunk_size
+    
+    # Function to fetch transactions for a time range
+    def fetch_time_chunk(start, end):
+        chunk_txs = []
+        before = end
+        while True:
+            batch = fetch_transactions_page_improved(
+                address, 
+                limit=500, 
+                before=before,
+                after=start
+            )
+            if not batch:
+                break
+                
+            # Filter out duplicates and transactions outside our time range
+            new_txs = [
+                tx for tx in batch 
+                if tx['transaction_id'] not in seen_ids and 
+                start <= tx.get('block_time', 0) <= end
+            ]
+            
+            if not new_txs:
+                break
+                
+            chunk_txs.extend(new_txs)
+            seen_ids.update(tx['transaction_id'] for tx in new_txs)
+            before = min(tx['block_time'] for tx in new_txs)
+            
+            # Early exit if we've hit the start of our time range
+            if before <= start:
+                break
+                
+        return chunk_txs
+    
+    # Use ThreadPoolExecutor to fetch time chunks in parallel
+    with st.spinner("Fetching transactions in parallel..."):
+        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+            futures = []
+            for start, end in time_chunks:
+                futures.append(executor.submit(fetch_time_chunk, start, end))
+            
+            # Initialize progress bar
+            progress_bar = st.progress(0)
+            completed = 0
+            total_chunks = len(time_chunks)
+            
+            for future in concurrent.futures.as_completed(futures):
+                chunk_result = future.result()
+                all_transactions.extend(chunk_result)
+                completed += 1
+                progress_bar.progress(completed / total_chunks)
+    
+    # Add the initial batch (removing any duplicates)
+    initial_batch_filtered = [
+        tx for tx in initial_batch 
+        if tx['transaction_id'] not in seen_ids
+    ]
+    all_transactions.extend(initial_batch_filtered)
+    
+    # Sort all transactions by timestamp
+    all_transactions.sort(key=lambda x: x.get('block_time', 0))
+    
+    return all_transactions
 
 def extract_net_changes(transactions, address):
     history = []
@@ -218,40 +314,6 @@ def compute_balance_from_current(current_balance, history):
         tx['balance'] = balance
         balance -= tx['net_change']
     return history[::-1]
-
-def fetch_all_transactions(address):
-    all_transactions = []
-    seen_ids = set()
-    before = None
-    limit = 500  # Increased batch size for better performance
-
-    with st.spinner(f"Fetching transactions (batch size: {limit})..."):
-        progress_bar = st.progress(0)
-        batch_count = 0
-        
-        while True:
-            tx_batch = fetch_transactions_page(address, limit=limit, before=before)
-            if not tx_batch:
-                break
-
-            new_tx = [tx for tx in tx_batch if safe_get(tx, 'transaction_id') not in seen_ids]
-            if not new_tx:
-                break
-
-            all_transactions.extend(new_tx)
-            seen_ids.update(safe_get(tx, 'transaction_id') for tx in new_tx)
-            before = min([safe_get(tx, 'block_time') for tx in new_tx if safe_get(tx, 'block_time')])
-            
-            batch_count += 1
-            progress_bar.progress(min(batch_count * 10, 100))  # Simple progress indicator
-            
-            # Early exit if we've fetched enough transactions to show meaningful data
-            if len(all_transactions) >= 1000:  # Limit to 1000 transactions for demo purposes
-                break
-
-        progress_bar.empty()
-
-    return all_transactions
 
 def fetch_kaspa_price_history():
     """Fetch historical KAS price data from Google Sheets"""
@@ -325,34 +387,6 @@ def calculate_average_purchase_price_over_time(transactions, price_history):
                 })
     
     return avg_price_history
-
-# UI Starts
-st.markdown('<div class="title-spacing"><h2>Kaspa Address History Explorer</h2></div>', unsafe_allow_html=True)
-st.divider()
-
-st.markdown("""
-**How to use:**
-1. Enter a valid Kaspa address (starts with `kaspa:`)
-2. Click "Fetch Full History" to load all transactions
-""")
-
-address = st.text_input("Kaspa Address:", value="kaspa:qyp4pmj4u48e2rq3976kjqx4mywlgera8rxufmary5xhwgj6a8c4lkgyxctpu92")
-
-# Session State
-if 'history' not in st.session_state:
-    st.session_state.history = []
-if 'current_address' not in st.session_state:
-    st.session_state.current_address = None
-if 'price_history' not in st.session_state:
-    st.session_state.price_history = None
-if 'avg_price_history' not in st.session_state:
-    st.session_state.avg_price_history = None
-
-# Reset history on new address
-if address != st.session_state.current_address:
-    st.session_state.current_address = address
-    st.session_state.history = []
-    st.session_state.avg_price_history = None
 
 def display_results(address, transactions):
     # Fetch current balance
@@ -634,11 +668,40 @@ def display_results(address, transactions):
         use_container_width=True
     )
 
+# UI Starts
+st.markdown('<div class="title-spacing"><h2>Kaspa Address History Explorer</h2></div>', unsafe_allow_html=True)
+st.divider()
+
+st.markdown("""
+**How to use:**
+1. Enter a valid Kaspa address (starts with `kaspa:`)
+2. Click "Fetch Full History" to load all transactions
+""")
+
+address = st.text_input("Kaspa Address:", value="kaspa:qyp4pmj4u48e2rq3976kjqx4mywlgera8rxufmary5xhwgj6a8c4lkgyxctpu92")
+
+# Session State
+if 'history' not in st.session_state:
+    st.session_state.history = []
+if 'current_address' not in st.session_state:
+    st.session_state.current_address = None
+if 'price_history' not in st.session_state:
+    st.session_state.price_history = None
+if 'avg_price_history' not in st.session_state:
+    st.session_state.avg_price_history = None
+
+# Reset history on new address
+if address != st.session_state.current_address:
+    st.session_state.current_address = address
+    st.session_state.history = []
+    st.session_state.avg_price_history = None
+
 # Main button
 if st.button("Fetch Full History"):
-    with st.spinner("Fetching all transactions (this may take a while)..."):
-        all_txs = fetch_all_transactions(address)
+    with st.spinner("Fetching all transactions (this may take a while for large histories)..."):
+        all_txs = fetch_all_transactions_improved(address)
         if all_txs:
             st.session_state.history = all_txs
             st.session_state.avg_price_history = None  # Reset to force recalculation
             display_results(address, all_txs)
+            st.success(f"Successfully fetched {len(all_txs)} transactions")
