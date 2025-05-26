@@ -339,6 +339,7 @@ with st.container():
         x_title = 'Date'
         hover_template = '<b>Date</b>: %{x|%Y-%m-%d}<br><b>Ratio</b>: %{y:.6f}<extra></extra>'
     
+    # Main ratio line
     ratio_fig.add_trace(go.Scatter(
         x=x_values,
         y=analysis_df['Price_Hashrate_Ratio'],
@@ -372,24 +373,31 @@ with st.container():
             x_fit_ratio = np.logspace(np.log10(analysis_df['Days_Since_Genesis'].min()), 
                                      np.log10(analysis_df['Days_Since_Genesis'].max()), 
                                      100)
+            y_fit_ratio = a_ratio_time * np.power(x_fit_ratio, b_ratio_time)
+            
+            ratio_fig.add_trace(go.Scatter(
+                x=x_fit_ratio,
+                y=y_fit_ratio,
+                mode='lines',
+                name=f'Ratio Power-Law Fit (R²={r2_ratio_time:.3f})',
+                line=dict(color='#FFA726', dash='dot', width=2)
+            ))
         else:
-            # Convert dates to numeric values for fitting
-            date_numeric = pd.to_numeric(analysis_df['Date']) / 10**18  # Scale down large numbers
-            x_fit_ratio = np.linspace(date_numeric.min(), date_numeric.max(), 100)
-        
-        y_fit_ratio = a_ratio_time * np.power(x_fit_ratio if time_scale == "Log" else date_numeric.min() + 
-                                             (x_fit_ratio - date_numeric.min()) * 
-                                             (date_numeric.max() - date_numeric.min()) / 
-                                             (x_fit_ratio.max() - x_fit_ratio.min()), 
-                                             b_ratio_time)
-        
-        ratio_fig.add_trace(go.Scatter(
-            x=x_fit_ratio if time_scale == "Log" else pd.to_datetime(x_fit_ratio * 10**18),
-            y=y_fit_ratio,
-            mode='lines',
-            name=f'Ratio Power-Law Fit (R²={r2_ratio_time:.3f})',
-            line=dict(color='#FFA726', dash='dot', width=2)
-        ))
+            # For linear time scale, we'll use date numeric values but display as dates
+            date_numeric = (analysis_df['Date'] - analysis_df['Date'].min()).dt.days + 1
+            x_fit_ratio = np.linspace(1, date_numeric.max(), 100)
+            y_fit_ratio = a_ratio_time * np.power(x_fit_ratio, b_ratio_time)
+            
+            # Convert numeric days back to dates
+            fit_dates = analysis_df['Date'].min() + pd.to_timedelta(x_fit_ratio - 1, unit='D')
+            
+            ratio_fig.add_trace(go.Scatter(
+                x=fit_dates,
+                y=y_fit_ratio,
+                mode='lines',
+                name=f'Ratio Power-Law Fit (R²={r2_ratio_time:.3f})',
+                line=dict(color='#FFA726', dash='dot', width=2)
+            ))
     
     ratio_fig.update_layout(
         plot_bgcolor='#262730',
