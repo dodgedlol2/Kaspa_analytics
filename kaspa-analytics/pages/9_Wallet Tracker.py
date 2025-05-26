@@ -6,7 +6,6 @@ import plotly.graph_objects as go
 import numpy as np
 from utils import load_price_data
 import concurrent.futures
-from tqdm import tqdm
 
 # Configuration
 API_BASE_URL = "https://api.kaspa.org"
