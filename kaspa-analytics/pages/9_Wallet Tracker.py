@@ -35,7 +35,7 @@ def format_timestamp(timestamp_ms):
     except:
         return "N/A"
 
-def fetch_transactions_page(address, limit=50, before=None, after=None):
+def fetch_transactions_page(address, limit=50, before=None):
     endpoint = f"/addresses/{address}/full-transactions-page"
     params = {
         "limit": limit,
@@ -44,14 +44,10 @@ def fetch_transactions_page(address, limit=50, before=None, after=None):
     }
     if before is not None:
         params["before"] = before
-    if after is not None:
-        params["after"] = after
     return make_api_request(endpoint, params=params)
 
 def extract_net_changes(transactions, address):
-    """Extract net changes (without calculating balance)"""
     history = []
-
     for tx in transactions:
         inputs = safe_get(tx, 'inputs', default=[])
         outputs = safe_get(tx, 'outputs', default=[])
@@ -85,137 +81,117 @@ def extract_net_changes(transactions, address):
     return history
 
 def compute_balance_from_current(current_balance, history):
-    """Given current balance and net_changes in reverse order, compute full balance history"""
-    # Reverse the list so we subtract net_changes backward in time
     history = sorted(history, key=lambda x: x['timestamp'], reverse=True)
-
     balance = current_balance
     for tx in history:
         tx['balance'] = balance
         balance -= tx['net_change']
-    return history[::-1]  # Return in chronological order
+    return history[::-1]
 
-# Main App
+def fetch_all_transactions_recursively(address, limit=500):
+    all_transactions = []
+    seen_ids = set()
+    before = None
+
+    while True:
+        tx_batch = fetch_transactions_page(address, limit=limit, before=before)
+        if not tx_batch:
+            break
+
+        new_tx = [tx for tx in tx_batch if safe_get(tx, 'transaction_id') not in seen_ids]
+        if not new_tx:
+            break
+
+        all_transactions.extend(new_tx)
+        seen_ids.update(safe_get(tx, 'transaction_id') for tx in new_tx)
+        before = min([safe_get(tx, 'block_time') for tx in new_tx if safe_get(tx, 'block_time')])
+
+    return all_transactions
+
+# UI Starts
 st.title("Kaspa Address History Explorer")
 
 st.markdown("""
 **How to use:**
 1. Enter a valid Kaspa address (starts with `kaspa:`)
 2. Set how many transactions to fetch per batch (1–500)
-3. Click "Load Transaction History"
+3. Click "Load Transaction History" for single page or "Fetch All History" for full recursive history
 """)
 
 address = st.text_input("Kaspa Address:", value="kaspa:qyp4pmj4u48e2rq3976kjqx4mywlgera8rxufmary5xhwgj6a8c4lkgyxctpu92")
 limit = st.number_input("Transactions per batch", min_value=1, max_value=500, value=50)
 
-# Session State Init
+# Session State
+if 'history' not in st.session_state:
+    st.session_state.history = []
 if 'current_address' not in st.session_state:
     st.session_state.current_address = None
-    st.session_state.pagination_state = {
-        'before': None,
-        'after': None,
-        'history': []
-    }
 
-# Reset if new address
+# Reset history on new address
 if address != st.session_state.current_address:
     st.session_state.current_address = address
-    st.session_state.pagination_state = {
-        'before': None,
-        'after': None,
-        'history': []
-    }
+    st.session_state.history = []
 
-if st.button("Load Transaction History"):
-    if address and address.startswith("kaspa:"):
-        with st.spinner("Fetching data..."):
-            # Get current balance
-            balance_data = make_api_request(f"/addresses/{address}/balance")
-            if not balance_data:
-                st.error("Could not fetch balance")
-                st.stop()
-            current_balance = float(safe_get(balance_data, 'balance', default=0)) / 1e8
-            st.metric("Current Balance", f"{current_balance:,.8f} KAS")
+def display_results(address, transactions):
+    balance_data = make_api_request(f"/addresses/{address}/balance")
+    if not balance_data:
+        st.error("Could not fetch balance")
+        return
+    current_balance = float(safe_get(balance_data, 'balance', default=0)) / 1e8
+    st.metric("Current Balance", f"{current_balance:,.8f} KAS")
 
-            transactions = fetch_transactions_page(
-                address,
-                limit=limit,
-                before=st.session_state.pagination_state['before'],
-                after=st.session_state.pagination_state['after']
-            )
+    changes = extract_net_changes(transactions, address)
+    txs_by_id = {tx['transaction_id']: tx for tx in changes}
+    history = list(txs_by_id.values())
 
-            if not transactions:
-                st.warning("No transactions returned")
-                st.stop()
+    history_with_balance = compute_balance_from_current(current_balance, history)
+    df = pd.DataFrame(history_with_balance)
+    df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+    df = df.sort_values('timestamp')
 
-            # Get timestamps for pagination
-            timestamps = [safe_get(tx, 'block_time') for tx in transactions]
-            if timestamps:
-                st.session_state.pagination_state['before'] = min(timestamps)
-                st.session_state.pagination_state['after'] = max(timestamps)
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=df['timestamp'],
+        y=df['balance'],
+        name='Balance',
+        fill='tozeroy',
+        line=dict(color='blue')
+    ))
+    fig.update_layout(
+        title="Balance Over Time",
+        xaxis_title="Time",
+        yaxis_title="KAS",
+        hovermode='x unified'
+    )
+    st.plotly_chart(fig, use_container_width=True)
 
-            # Process transactions
-            new_changes = extract_net_changes(transactions, address)
-            st.session_state.pagination_state['history'].extend(new_changes)
+    st.subheader("Transaction Details")
+    st.dataframe(
+        df.sort_values('timestamp', ascending=False),
+        column_config={
+            "datetime": "Date",
+            "net_change": st.column_config.NumberColumn("Amount", format="%+.8f KAS"),
+            "balance": st.column_config.NumberColumn("Balance", format="%.8f KAS"),
+            "transaction_id": "Transaction ID",
+            "direction": "Direction"
+        },
+        hide_index=True,
+        use_container_width=True
+    )
 
-            # De-duplicate by transaction ID
-            unique_history = {tx['transaction_id']: tx for tx in st.session_state.pagination_state['history']}
-            all_history = list(unique_history.values())
-
-            # Recompute balances from current balance
-            history_with_balance = compute_balance_from_current(current_balance, all_history)
-
-            df = pd.DataFrame(history_with_balance)
-            df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
-            df = df.sort_values('timestamp')
-
-            # Plot
-            fig = go.Figure()
-            fig.add_trace(go.Scatter(
-                x=df['timestamp'],
-                y=df['balance'],
-                name='Balance',
-                fill='tozeroy',
-                line=dict(color='blue')
-            ))
-            fig.update_layout(
-                title="Balance Over Time",
-                xaxis_title="Time",
-                yaxis_title="KAS",
-                hovermode='x unified'
-            )
-            st.plotly_chart(fig, use_container_width=True)
-
-            # Table
-            st.subheader("Transaction Details")
-            st.dataframe(
-                df.sort_values('timestamp', ascending=False),
-                column_config={
-                    "datetime": "Date",
-                    "net_change": st.column_config.NumberColumn(
-                        "Amount", format="%+.8f KAS"
-                    ),
-                    "balance": st.column_config.NumberColumn(
-                        "Balance", format="%.8f KAS"
-                    ),
-                    "transaction_id": "Transaction ID",
-                    "direction": "Direction"
-                },
-                hide_index=True,
-                use_container_width=True
-            )
-
-            # Pagination
-            st.write("Pagination Controls")
-            prev_col, next_col = st.columns(2)
-            with prev_col:
-                if st.button("◀ Load Older Transactions"):
-                    st.session_state.pagination_state['after'] = None
-                    st.experimental_rerun()
-            with next_col:
-                if st.button("Load Newer Transactions ▶"):
-                    st.session_state.pagination_state['before'] = None
-                    st.experimental_rerun()
-    else:
-        st.error("Please enter a valid Kaspa address starting with 'kaspa:'")
-
+# Buttons
+col1, col2 = st.columns(2)
+with col1:
+    if st.button("Load Transaction History"):
+        with st.spinner("Fetching one page..."):
+            tx_page = fetch_transactions_page(address, limit=limit)
+            if tx_page:
+                st.session_state.history = tx_page
+                display_results(address, tx_page)
+with col2:
+    if st.button("Fetch All History"):
+        with st.spinner("Recursively fetching all transactions..."):
+            all_txs = fetch_all_transactions_recursively(address)
+            if all_txs:
+                st.session_state.history = all_txs
+                display_results(address, all_txs)
