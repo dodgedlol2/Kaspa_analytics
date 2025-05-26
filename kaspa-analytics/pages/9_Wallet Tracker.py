@@ -138,8 +138,8 @@ def fetch_all_transactions_complete(address, max_transactions=10000, start_date=
     total_fetched = 0
     
     # Convert dates to timestamps if provided
-    start_ts = int(start_date.timestamp() * 1000) if start_date else None
-    end_ts = int(end_date.timestamp() * 1000) if end_date else None
+    start_ts = int(datetime.combine(start_date, datetime.min.time()).timestamp() * 1000) if start_date else None
+    end_ts = int(datetime.combine(end_date, datetime.max.time()).timestamp() * 1000) if end_date else None
     
     # Create progress container
     progress_container = st.empty()
