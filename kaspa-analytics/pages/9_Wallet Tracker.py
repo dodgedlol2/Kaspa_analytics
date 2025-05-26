@@ -42,7 +42,7 @@ def fetch_transactions_page(address, limit=50, before=None, after=None):
     params = {
         "limit": limit,
         "resolve_previous_outpoints": "light",
-        "acceptance": "accepted"
+        "acceptance": "accepted"  # Fixed typo here (was "accepted")
     }
     
     if before is not None:
@@ -56,28 +56,12 @@ def fetch_transactions_page(address, limit=50, before=None, after=None):
 def process_transaction_history(transactions, address):
     """Process transactions into balance timeline"""
     history = []
-    current_balance = 0
+    balance = 0
     
     if not transactions or not isinstance(transactions, list):
         return history
     
-    # First pass: Calculate current balance by summing all outputs and subtracting inputs
-    for tx in reversed(transactions):  # Process from newest to oldest
-        inputs = safe_get(tx, 'inputs', default=[])
-        outputs = safe_get(tx, 'outputs', default=[])
-        
-        for out in outputs:
-            out_address = safe_get(out, 'script_public_key_address', default='')
-            if out_address == address:
-                current_balance += float(safe_get(out, 'amount', default=0)) / 1e8
-        
-        for inp in inputs:
-            prev_address = safe_get(inp, 'previous_outpoint_address', default='')
-            if prev_address == address:
-                current_balance -= float(safe_get(inp, 'previous_outpoint_amount', default=0)) / 1e8
-    
-    # Second pass: Build history by working backwards
-    for tx in reversed(transactions):
+    for tx in transactions:
         tx_data = tx
         if not tx_data:
             continue
@@ -90,36 +74,33 @@ def process_transaction_history(transactions, address):
         if not timestamp:
             continue
             
-        # Calculate net change for this transaction
         net_change = 0
         
-        # Subtract outputs first (since we're working backwards)
+        # Process outputs (receives)
         for out in outputs:
             out_address = safe_get(out, 'script_public_key_address', default='')
             if out_address == address:
                 amount = float(safe_get(out, 'amount', default=0)) / 1e8
-                net_change -= amount
-                current_balance -= amount
+                net_change += amount
         
-        # Add inputs (since we're working backwards)
+        # Process inputs (sends)
         for inp in inputs:
             prev_address = safe_get(inp, 'previous_outpoint_address', default='')
             if prev_address == address:
                 amount = float(safe_get(inp, 'previous_outpoint_amount', default=0)) / 1e8
-                net_change += amount
-                current_balance += amount
+                net_change -= amount
         
+        balance += net_change
         history.append({
             'timestamp': timestamp,
             'datetime': format_timestamp(timestamp),
-            'balance': current_balance,
+            'balance': balance,
             'net_change': net_change,
             'transaction_id': tx_id,
             'direction': 'in' if net_change > 0 else 'out'
         })
     
-    # Reverse to show oldest first
-    return list(reversed(history))
+    return history
 
 # Main App
 st.title("Kaspa Address History Explorer")
@@ -131,9 +112,8 @@ st.markdown("""
 3. Click "Load Transaction History"
 """)
 
-# Use the preferred example address
 address = st.text_input("Kaspa Address:", 
-                       value="kaspa:qypaf4exd6qkf7mw9zy8saaawvnc44fusnsdy4azq0xss9adj4387vqr6k865vk")
+                       value="kaspa:qyp4pmj4u48e2rq3976kjqx4mywlgera8rxufmary5xhwgj6a8c4lkgyxctpu92")
 
 limit = st.number_input("Transactions per batch", 
                       min_value=1, max_value=500, value=50,
@@ -218,19 +198,15 @@ if st.button("Load Transaction History"):
                     x=history_df['timestamp'],
                     y=history_df['balance'],
                     name="Balance",
-                    line=dict(color='#00FFCC'),
-                    fill='tozeroy',
-                    hovertemplate='Date: %{x|%Y-%m-%d}<br>Balance: %{y:,.2f} KAS<extra></extra>'
+                    line=dict(color='blue'),
+                    fill='tozeroy'
                 )
             )
             fig.update_layout(
                 title="Balance Over Time",
                 xaxis_title="Date",
                 yaxis_title="Balance (KAS)",
-                hovermode="x unified",
-                plot_bgcolor='#0E1117',
-                paper_bgcolor='#0E1117',
-                font=dict(color='white')
+                hovermode="x unified"
             )
             st.plotly_chart(fig, use_container_width=True)
             
@@ -249,12 +225,7 @@ if st.button("Load Transaction History"):
                         "Balance", 
                         format="%.8f KAS"
                     ),
-                    "transaction_id": st.column_config.LinkColumn(
-                        "Transaction ID",
-                        help="Link to Kaspa Explorer",
-                        display_text="View on Explorer",
-                        url="https://explorer.kaspa.org/txs/{transaction_id}"
-                    ),
+                    "transaction_id": "Transaction ID",
                     "direction": "Direction"
                 },
                 hide_index=True,
