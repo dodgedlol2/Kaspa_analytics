@@ -42,7 +42,7 @@ def fetch_full_transactions(address, limit=50, offset=0):
     params = {
         "limit": limit,
         "offset": offset,
-        "resolve_previous_outpoints": "light"  # Changed to 'light' for better compatibility
+        "resolve_previous_outpoints": "full"
     }
     return make_api_request(endpoint, params=params)
 
@@ -55,39 +55,37 @@ def process_transaction_history(transactions, address):
         return history
     
     for tx in transactions:
-        tx_data = safe_get(tx, 'transaction', default={})
-        if not tx_data:
+        if not isinstance(tx, dict):
             continue
             
-        inputs = safe_get(tx_data, 'inputs', default=[])
-        outputs = safe_get(tx_data, 'outputs', default=[])
-        timestamp = safe_get(tx_data, 'block_time', default=None)
-        tx_id = safe_get(tx_data, 'verboseData', 'transactionId', default='')
+        tx_id = safe_get(tx, 'transaction_id')
+        block_time = safe_get(tx, 'block_time')
+        inputs = safe_get(tx, 'inputs', [])
+        outputs = safe_get(tx, 'outputs', [])
         
-        if not timestamp:
+        if not block_time:
             continue
             
         net_change = 0
         
         # Process outputs (receives)
         for out in outputs:
-            out_address = safe_get(out, 'script_public_key_address', default='')
+            out_address = safe_get(out, 'script_public_key_address', '')
             if out_address == address:
-                amount = float(safe_get(out, 'amount', default=0)) / 1e8
+                amount = float(safe_get(out, 'amount', 0)) / 1e8
                 net_change += amount
         
         # Process inputs (sends)
         for inp in inputs:
-            prev_out = safe_get(inp, 'previous_outpoint', default={})
-            prev_address = safe_get(prev_out, 'scriptPublicKeyAddress', default='')
+            prev_address = safe_get(inp, 'previous_outpoint_address', '')
             if prev_address == address:
-                amount = float(safe_get(prev_out, 'amount', default=0)) / 1e8
+                amount = float(safe_get(inp, 'previous_outpoint_amount', 0)) / 1e8
                 net_change -= amount
         
         balance += net_change
         history.append({
-            'timestamp': timestamp,
-            'datetime': format_timestamp(timestamp),
+            'timestamp': block_time,
+            'datetime': format_timestamp(block_time),
             'balance': balance,
             'net_change': net_change,
             'transaction_id': tx_id,
@@ -99,26 +97,11 @@ def process_transaction_history(transactions, address):
 # Main App
 st.title("Kaspa Address History Explorer")
 
-st.markdown("""
-**How to use:**
-1. Enter a valid Kaspa address (starts with `kaspa:`)
-2. Set how many transactions to fetch per batch (1-500)
-3. Set the starting offset (0 for newest transactions)
-4. Click "Load Transaction History"
-""")
-
 address = st.text_input("Kaspa Address:", 
                        value="kaspa:qyp4pmj4u48e2rq3976kjqx4mywlgera8rxufmary5xhwgj6a8c4lkgyxctpu92")
 
-col1, col2 = st.columns(2)
-with col1:
-    limit = st.number_input("Transactions per batch", 
-                          min_value=1, max_value=500, value=50,
-                          help="Number of transactions to fetch at once (1-500)")
-with col2:
-    offset = st.number_input("Starting offset", 
-                           min_value=0, value=0,
-                           help="Skip this many transactions from the start")
+limit = st.number_input("Transactions per batch", min_value=1, max_value=500, value=50)
+offset = st.number_input("Starting offset", min_value=0, value=0)
 
 if st.button("Load Transaction History"):
     if address and address.startswith("kaspa:"):
@@ -129,7 +112,7 @@ if st.button("Load Transaction History"):
                 st.error("Failed to fetch balance data")
                 st.stop()
                 
-            current_balance = float(safe_get(balance_data, 'balance', default=0)) / 1e8
+            current_balance = float(safe_get(balance_data, 'balance', 0)) / 1e8
             st.metric("Current Balance", f"{current_balance:,.8f} KAS")
             
             # Get transactions
@@ -143,13 +126,7 @@ if st.button("Load Transaction History"):
             history = process_transaction_history(transactions, address)
             
             if not history:
-                st.warning("""
-                No valid transactions processed. This could mean:
-                - The address has no transaction history
-                - The transactions don't match our processing logic
-                - The API response format changed
-                """)
-                st.json(transactions[0] if transactions else {})  # Show raw data for debugging
+                st.warning("No balance-changing transactions found for this address")
                 st.stop()
                 
             # Create DataFrame
@@ -184,8 +161,7 @@ if st.button("Load Transaction History"):
                     "datetime": "Date",
                     "net_change": st.column_config.NumberColumn(
                         "Amount", 
-                        format="%+.8f KAS",
-                        help="Positive = received, Negative = sent"
+                        format="%+.8f KAS"
                     ),
                     "balance": st.column_config.NumberColumn(
                         "Balance", 
