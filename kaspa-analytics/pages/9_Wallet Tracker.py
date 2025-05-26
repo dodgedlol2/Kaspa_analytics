@@ -166,7 +166,7 @@ def format_timestamp(timestamp_ms):
     except:
         return "N/A"
 
-def fetch_transactions_page(address, limit=50, before=None):
+def fetch_transactions_page(address, limit=500, before=None):
     endpoint = f"/addresses/{address}/full-transactions-page"
     params = {
         "limit": limit,
@@ -223,20 +223,33 @@ def fetch_all_transactions(address):
     all_transactions = []
     seen_ids = set()
     before = None
-    limit = 50  # Fixed batch size
+    limit = 500  # Increased batch size for better performance
 
-    while True:
-        tx_batch = fetch_transactions_page(address, limit=limit, before=before)
-        if not tx_batch:
-            break
+    with st.spinner(f"Fetching transactions (batch size: {limit})..."):
+        progress_bar = st.progress(0)
+        batch_count = 0
+        
+        while True:
+            tx_batch = fetch_transactions_page(address, limit=limit, before=before)
+            if not tx_batch:
+                break
 
-        new_tx = [tx for tx in tx_batch if safe_get(tx, 'transaction_id') not in seen_ids]
-        if not new_tx:
-            break
+            new_tx = [tx for tx in tx_batch if safe_get(tx, 'transaction_id') not in seen_ids]
+            if not new_tx:
+                break
 
-        all_transactions.extend(new_tx)
-        seen_ids.update(safe_get(tx, 'transaction_id') for tx in new_tx)
-        before = min([safe_get(tx, 'block_time') for tx in new_tx if safe_get(tx, 'block_time')])
+            all_transactions.extend(new_tx)
+            seen_ids.update(safe_get(tx, 'transaction_id') for tx in new_tx)
+            before = min([safe_get(tx, 'block_time') for tx in new_tx if safe_get(tx, 'block_time')])
+            
+            batch_count += 1
+            progress_bar.progress(min(batch_count * 10, 100))  # Simple progress indicator
+            
+            # Early exit if we've fetched enough transactions to show meaningful data
+            if len(all_transactions) >= 1000:  # Limit to 1000 transactions for demo purposes
+                break
+
+        progress_bar.empty()
 
     return all_transactions
 
@@ -268,19 +281,23 @@ def fetch_kaspa_price_history():
         st.error(f"Failed to fetch price history: {str(e)}")
         return None
 
-def calculate_average_purchase_price(transactions, price_history):
-    """Calculate average purchase price based on incoming transactions"""
-    if not price_history:
+def calculate_average_purchase_price_over_time(transactions, price_history):
+    """Calculate average purchase price over time with each transaction"""
+    if not price_history or not transactions:
         return None
         
     # Create a DataFrame with price history for easy lookup
     price_df = pd.DataFrame(price_history)
     price_df['date'] = pd.to_datetime(price_df['timestamp'], unit='ms')
     
+    # Process transactions in chronological order
+    transactions_sorted = sorted(transactions, key=lambda x: x['timestamp'])
+    
     total_kas = 0
     total_cost = 0
+    avg_price_history = []
     
-    for tx in transactions:
+    for tx in transactions_sorted:
         if tx['direction'] == 'in' and tx['net_change'] > 0:
             tx_date = datetime.fromtimestamp(tx['timestamp']/1000)
             
@@ -292,10 +309,22 @@ def calculate_average_purchase_price(transactions, price_history):
                 kas_amount = tx['net_change']
                 total_kas += kas_amount
                 total_cost += kas_amount * price
+                
+                if total_kas > 0:
+                    current_avg = total_cost / total_kas
+                else:
+                    current_avg = 0
+                
+                avg_price_history.append({
+                    'timestamp': tx['timestamp'],
+                    'datetime': tx['datetime'],
+                    'avg_purchase_price': current_avg,
+                    'transaction_id': tx['transaction_id'],
+                    'kas_amount': kas_amount,
+                    'price_at_purchase': price
+                })
     
-    if total_kas > 0:
-        return total_cost / total_kas
-    return None
+    return avg_price_history
 
 # UI Starts
 st.markdown('<div class="title-spacing"><h2>Kaspa Address History Explorer</h2></div>', unsafe_allow_html=True)
@@ -316,11 +345,14 @@ if 'current_address' not in st.session_state:
     st.session_state.current_address = None
 if 'price_history' not in st.session_state:
     st.session_state.price_history = None
+if 'avg_price_history' not in st.session_state:
+    st.session_state.avg_price_history = None
 
 # Reset history on new address
 if address != st.session_state.current_address:
     st.session_state.current_address = address
     st.session_state.history = []
+    st.session_state.avg_price_history = None
 
 def display_results(address, transactions):
     # Fetch current balance
@@ -346,8 +378,20 @@ def display_results(address, transactions):
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     df = df.sort_values('timestamp')
     
-    # Calculate average purchase price
-    avg_purchase_price = calculate_average_purchase_price(history_with_balance, st.session_state.price_history)
+    # Calculate average purchase price over time
+    if st.session_state.avg_price_history is None:
+        with st.spinner("Calculating average purchase price history..."):
+            st.session_state.avg_price_history = calculate_average_purchase_price_over_time(
+                history_with_balance, 
+                st.session_state.price_history
+            )
+    
+    avg_price_df = pd.DataFrame(st.session_state.avg_price_history) if st.session_state.avg_price_history else pd.DataFrame()
+    if not avg_price_df.empty:
+        avg_price_df['timestamp'] = pd.to_datetime(avg_price_df['timestamp'], unit='ms')
+    
+    # Current average purchase price
+    current_avg_price = avg_price_df['avg_purchase_price'].iloc[-1] if not avg_price_df.empty else None
     
     # Create daily balance history
     if not df.empty:
@@ -386,6 +430,14 @@ def display_results(address, transactions):
             
             merged_df = pd.merge(balance_df, price_df, on='date', how='left')
             merged_df['price'] = merged_df['price'].ffill().bfill()
+            
+            # Merge with average purchase price if available
+            if not avg_price_df.empty:
+                avg_price_daily = avg_price_df.resample('D', on='timestamp').last().reset_index()
+                avg_price_daily = avg_price_daily[['timestamp', 'avg_purchase_price']]
+                avg_price_daily = avg_price_daily.rename(columns={'timestamp': 'date'})
+                merged_df = pd.merge(merged_df, avg_price_daily, on='date', how='left')
+                merged_df['avg_purchase_price'] = merged_df['avg_purchase_price'].ffill()
         else:
             merged_df = balance_df
             merged_df['price'] = np.nan
@@ -402,10 +454,10 @@ def display_results(address, transactions):
         total_out = abs(df[df['direction'] == 'out']['net_change'].sum())
         st.metric("Total Sent", f"{total_out:,.8f} KAS")
     with cols[3]:
-        if avg_purchase_price is not None:
-            st.metric("Avg Purchase Price", f"${avg_purchase_price:.4f}")
+        if current_avg_price is not None:
+            st.metric("Current Avg Price", f"${current_avg_price:.4f}")
         else:
-            st.metric("Avg Purchase Price", "N/A")
+            st.metric("Current Avg Price", "N/A")
     st.markdown('</div>', unsafe_allow_html=True)
     
     # Main chart
@@ -434,15 +486,16 @@ def display_results(address, transactions):
         ))
     
     # Add average purchase price line if available
-    if avg_purchase_price is not None:
-        fig.add_hline(
-            y=avg_purchase_price,
+    if 'avg_purchase_price' in merged_df and not merged_df['avg_purchase_price'].isna().all():
+        fig.add_trace(go.Scatter(
+            x=merged_df['date'],
+            y=merged_df['avg_purchase_price'],
+            mode='lines',
+            name='Avg Purchase Price (USD)',
             line=dict(color="#FFA500", width=1.5, dash="dash"),
-            annotation_text=f"Avg Purchase: ${avg_purchase_price:.4f}",
-            annotation_position="bottom right",
-            annotation_font_color="#FFA500",
-            yref="y2"
-        )
+            hovertemplate='<b>Date</b>: %{x|%Y-%m-%d}<br><b>Avg Price</b>: $%{y:.4f}<extra></extra>',
+            yaxis='y2'
+        ))
     
     fig.update_layout(
         plot_bgcolor='#262730',
@@ -512,8 +565,60 @@ def display_results(address, transactions):
     
     st.plotly_chart(fig, use_container_width=True)
     
+    # Average purchase price chart
+    if not avg_price_df.empty:
+        st.subheader("Average Purchase Price History")
+        
+        avg_fig = go.Figure()
+        
+        avg_fig.add_trace(go.Scatter(
+            x=avg_price_df['timestamp'],
+            y=avg_price_df['avg_purchase_price'],
+            mode='lines+markers',
+            name='Average Purchase Price',
+            line=dict(color="#FFA500", width=2),
+            marker=dict(size=6, color="#FFA500"),
+            hovertemplate='<b>Date</b>: %{x|%Y-%m-%d %H:%M:%S}<br><b>Avg Price</b>: $%{y:.4f}<extra></extra>'
+        ))
+        
+        avg_fig.add_trace(go.Scatter(
+            x=avg_price_df['timestamp'],
+            y=avg_price_df['price_at_purchase'],
+            mode='markers',
+            name='Purchase Price at Time',
+            marker=dict(size=6, color="#00FFCC"),
+            hovertemplate='<b>Date</b>: %{x|%Y-%m-%d %H:%M:%S}<br><b>Price</b>: $%{y:.4f}<extra></extra>'
+        ))
+        
+        avg_fig.update_layout(
+            plot_bgcolor='#262730',
+            paper_bgcolor='#262730',
+            font_color='#e0e0e0',
+            hovermode='x unified',
+            height=400,
+            margin=dict(l=20, r=20, t=40, b=40),
+            yaxis_title='Price (USD)',
+            xaxis_title='Date',
+            showlegend=True,
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+                xanchor="right",
+                x=1
+            )
+        )
+        
+        st.plotly_chart(avg_fig, use_container_width=True)
+    
     # Transaction details
     st.subheader("Transaction Details")
+    
+    # Merge with average price data if available
+    if not avg_price_df.empty:
+        avg_price_tx = avg_price_df[['transaction_id', 'avg_purchase_price', 'price_at_purchase']]
+        df = pd.merge(df, avg_price_tx, on='transaction_id', how='left')
+    
     st.dataframe(
         df.sort_values('timestamp', ascending=False),
         column_config={
@@ -521,7 +626,9 @@ def display_results(address, transactions):
             "net_change": st.column_config.NumberColumn("Amount", format="%+.8f KAS"),
             "balance": st.column_config.NumberColumn("Balance", format="%.8f KAS"),
             "transaction_id": "Transaction ID",
-            "direction": "Direction"
+            "direction": "Direction",
+            "avg_purchase_price": st.column_config.NumberColumn("Avg Price", format="$%.4f"),
+            "price_at_purchase": st.column_config.NumberColumn("Price at Tx", format="$%.4f")
         },
         hide_index=True,
         use_container_width=True
@@ -533,4 +640,5 @@ if st.button("Fetch Full History"):
         all_txs = fetch_all_transactions(address)
         if all_txs:
             st.session_state.history = all_txs
+            st.session_state.avg_price_history = None  # Reset to force recalculation
             display_results(address, all_txs)
