@@ -219,10 +219,11 @@ def compute_balance_from_current(current_balance, history):
         balance -= tx['net_change']
     return history[::-1]
 
-def fetch_all_transactions(address, limit=500):
+def fetch_all_transactions(address):
     all_transactions = []
     seen_ids = set()
     before = None
+    limit = 50  # Fixed batch size
 
     while True:
         tx_batch = fetch_transactions_page(address, limit=limit, before=before)
@@ -267,6 +268,35 @@ def fetch_kaspa_price_history():
         st.error(f"Failed to fetch price history: {str(e)}")
         return None
 
+def calculate_average_purchase_price(transactions, price_history):
+    """Calculate average purchase price based on incoming transactions"""
+    if not price_history:
+        return None
+        
+    # Create a DataFrame with price history for easy lookup
+    price_df = pd.DataFrame(price_history)
+    price_df['date'] = pd.to_datetime(price_df['timestamp'], unit='ms')
+    
+    total_kas = 0
+    total_cost = 0
+    
+    for tx in transactions:
+        if tx['direction'] == 'in' and tx['net_change'] > 0:
+            tx_date = datetime.fromtimestamp(tx['timestamp']/1000)
+            
+            # Find the closest price date before the transaction
+            price_row = price_df[price_df['date'] <= tx_date].sort_values('date', ascending=False).head(1)
+            
+            if not price_row.empty:
+                price = price_row.iloc[0]['price']
+                kas_amount = tx['net_change']
+                total_kas += kas_amount
+                total_cost += kas_amount * price
+    
+    if total_kas > 0:
+        return total_cost / total_kas
+    return None
+
 # UI Starts
 st.markdown('<div class="title-spacing"><h2>Kaspa Address History Explorer</h2></div>', unsafe_allow_html=True)
 st.divider()
@@ -274,12 +304,10 @@ st.divider()
 st.markdown("""
 **How to use:**
 1. Enter a valid Kaspa address (starts with `kaspa:`)
-2. Set how many transactions to fetch per batch (1-500)
-3. Click "Fetch Full History" to load all transactions
+2. Click "Fetch Full History" to load all transactions
 """)
 
 address = st.text_input("Kaspa Address:", value="kaspa:qyp4pmj4u48e2rq3976kjqx4mywlgera8rxufmary5xhwgj6a8c4lkgyxctpu92")
-limit = st.number_input("Transactions per batch", min_value=1, max_value=500, value=50)
 
 # Session State
 if 'history' not in st.session_state:
@@ -318,9 +346,18 @@ def display_results(address, transactions):
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     df = df.sort_values('timestamp')
     
+    # Calculate average purchase price
+    avg_purchase_price = calculate_average_purchase_price(history_with_balance, st.session_state.price_history)
+    
     # Create daily balance history
     if not df.empty:
-        min_date = df['timestamp'].min().date()
+        # Get the first price date to use as minimum date
+        if st.session_state.price_history:
+            first_price_date = pd.to_datetime(min([p['timestamp'] for p in st.session_state.price_history]), unit='ms').date()
+        else:
+            first_price_date = df['timestamp'].min().date()
+            
+        min_date = first_price_date
         max_date = df['timestamp'].max().date()
         date_range = pd.date_range(start=min_date, end=max_date, freq='D')
         
@@ -344,7 +381,7 @@ def display_results(address, transactions):
         # Merge with price data if available
         if st.session_state.price_history:
             price_df = pd.DataFrame(st.session_state.price_history)
-            price_df['date'] = pd.to_datetime(price_df['datetime'])
+            price_df['date'] = pd.to_datetime(price_df['timestamp'], unit='ms')
             price_df = price_df[['date', 'price']]
             
             merged_df = pd.merge(balance_df, price_df, on='date', how='left')
@@ -355,7 +392,7 @@ def display_results(address, transactions):
     
     # Metrics
     st.markdown('<div class="metrics-container">', unsafe_allow_html=True)
-    cols = st.columns(3)
+    cols = st.columns(4)
     with cols[0]:
         st.metric("Current Balance", f"{current_balance:,.8f} KAS")
     with cols[1]:
@@ -364,6 +401,11 @@ def display_results(address, transactions):
     with cols[2]:
         total_out = abs(df[df['direction'] == 'out']['net_change'].sum())
         st.metric("Total Sent", f"{total_out:,.8f} KAS")
+    with cols[3]:
+        if avg_purchase_price is not None:
+            st.metric("Avg Purchase Price", f"${avg_purchase_price:.4f}")
+        else:
+            st.metric("Avg Purchase Price", "N/A")
     st.markdown('</div>', unsafe_allow_html=True)
     
     # Main chart
@@ -390,6 +432,17 @@ def display_results(address, transactions):
             hovertemplate='<b>Date</b>: %{x|%Y-%m-%d}<br><b>Price</b>: $%{y:.4f}<extra></extra>',
             yaxis='y2'
         ))
+    
+    # Add average purchase price line if available
+    if avg_purchase_price is not None:
+        fig.add_hline(
+            y=avg_purchase_price,
+            line=dict(color="#FFA500", width=1.5, dash="dash"),
+            annotation_text=f"Avg Purchase: ${avg_purchase_price:.4f}",
+            annotation_position="bottom right",
+            annotation_font_color="#FFA500",
+            yref="y2"
+        )
     
     fig.update_layout(
         plot_bgcolor='#262730',
@@ -477,7 +530,7 @@ def display_results(address, transactions):
 # Main button
 if st.button("Fetch Full History"):
     with st.spinner("Fetching all transactions (this may take a while)..."):
-        all_txs = fetch_all_transactions(address, limit=limit)
+        all_txs = fetch_all_transactions(address)
         if all_txs:
             st.session_state.history = all_txs
             display_results(address, all_txs)
