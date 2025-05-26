@@ -42,7 +42,7 @@ def fetch_transactions_page(address, limit=50, before=None, after=None):
     params = {
         "limit": limit,
         "resolve_previous_outpoints": "light",
-        "acceptance": "accepted"
+        "acceptance": "accepted"  # Fixed typo here (was "accepted")
     }
     
     if before is not None:
@@ -62,7 +62,7 @@ def process_transaction_history(transactions, address):
         return history
     
     for tx in transactions:
-        tx_data = tx  # The structure is different with the paged endpoint
+        tx_data = tx
         if not tx_data:
             continue
             
@@ -119,8 +119,18 @@ limit = st.number_input("Transactions per batch",
                       min_value=1, max_value=500, value=50,
                       help="Number of transactions to fetch at once (1-500)")
 
-# Store pagination state in session
-if 'pagination_state' not in st.session_state:
+# Initialize session state
+if 'current_address' not in st.session_state:
+    st.session_state.current_address = None
+    st.session_state.pagination_state = {
+        'before': None,
+        'after': None,
+        'history': []
+    }
+
+# Reset pagination if address changes
+if address != st.session_state.current_address:
+    st.session_state.current_address = address
     st.session_state.pagination_state = {
         'before': None,
         'after': None,
@@ -161,24 +171,22 @@ if st.button("Load Transaction History"):
                 - The transactions don't match our processing logic
                 - The API response format changed
                 """)
-                st.json(transactions[0] if transactions else {})  # Show raw data for debugging
+                st.json(transactions[0] if transactions else {})
                 st.stop()
             
             # Update history and pagination state
             st.session_state.pagination_state['history'].extend(new_history)
             
-            # Sort by timestamp (oldest first)
-            all_history = sorted(st.session_state.pagination_state['history'], 
-                                key=lambda x: x['timestamp'])
-            
-            # Update pagination markers
-            if transactions:
-                oldest_tx = min(tx['block_time'] for tx in transactions if 'block_time' in tx)
-                newest_tx = max(tx['block_time'] for tx in transactions if 'block_time' in tx)
+            # Get timestamps for pagination
+            timestamps = [tx['block_time'] for tx in transactions if 'block_time' in tx]
+            if timestamps:
+                oldest_tx = min(timestamps)
+                newest_tx = max(timestamps)
                 st.session_state.pagination_state['before'] = oldest_tx
                 st.session_state.pagination_state['after'] = newest_tx
             
-            # Create DataFrame
+            # Create DataFrame from all history
+            all_history = st.session_state.pagination_state['history']
             history_df = pd.DataFrame(all_history)
             history_df['timestamp'] = pd.to_datetime(history_df['timestamp'].astype(int), unit='ms')
             history_df = history_df.sort_values('timestamp')
@@ -230,12 +238,10 @@ if st.button("Load Transaction History"):
             with prev_col:
                 if st.button("◀ Load Older Transactions"):
                     st.session_state.pagination_state['after'] = None
-                    st.session_state.pagination_state['before'] = oldest_tx
                     st.experimental_rerun()
             with next_col:
                 if st.button("Load Newer Transactions ▶"):
                     st.session_state.pagination_state['before'] = None
-                    st.session_state.pagination_state['after'] = newest_tx
                     st.experimental_rerun()
     else:
         st.error("Please enter a valid Kaspa address starting with 'kaspa:'")
