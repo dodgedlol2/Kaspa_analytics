@@ -28,109 +28,96 @@ def format_timestamp(timestamp_ms):
     except:
         return "N/A"
 
-def safe_get(data, *keys, default=None):
-    for key in keys:
-        try:
-            data = data[key]
-        except (KeyError, TypeError, IndexError):
-            return default
-    return data
+def fetch_full_transactions(address, limit=50, offset=0):
+    """Fetch full transaction history using the discovered endpoint"""
+    endpoint = f"/addresses/{address}/full-transactions"
+    params = {
+        "limit": limit,
+        "offset": offset,
+        "resolve_previous_outpoints": "full"  # Get full input details
+    }
+    return make_api_request(endpoint, params=params)
 
-def fetch_address_utxos(address):
-    """Fetch all UTXOs for an address"""
-    endpoint = f"/addresses/{address}/utxos"
-    data = make_api_request(endpoint)
-    if not data or not isinstance(data, list):
-        return None
-    return data
-
-def fetch_transaction(tx_id):
-    """Fetch full transaction details"""
-    endpoint = f"/transactions/{tx_id}"
-    return make_api_request(endpoint)
-
-def reconstruct_address_history(address):
-    """Reconstruct address history by analyzing UTXOs and their transactions"""
-    utxos = fetch_address_utxos(address)
-    if not utxos:
-        return None
-    
-    history = []
+def process_transaction_history(transactions, address):
+    """Process transactions into balance timeline"""
     balance = 0
+    history = []
     
-    # Process each UTXO to find the transactions that created them
-    for utxo in utxos:
-        if not isinstance(utxo, dict):
+    # Sort transactions by timestamp (oldest first)
+    sorted_txs = sorted(transactions, key=lambda x: safe_get(x, 'transaction', 'block_time', default=0))
+    
+    for tx in sorted_txs:
+        if not isinstance(tx, dict):
             continue
             
-        tx_id = safe_get(utxo, 'transactionId', default=None)
-        if not tx_id:
+        tx_data = safe_get(tx, 'transaction', default={})
+        inputs = safe_get(tx_data, 'inputs', default=[])
+        outputs = safe_get(tx_data, 'outputs', default=[])
+        timestamp = safe_get(tx_data, 'block_time', default=None)
+        tx_id = safe_get(tx_data, 'verboseData', 'transactionId', default='')
+        
+        if not timestamp:
             continue
             
-        # Get the transaction that created this UTXO
-        tx = fetch_transaction(tx_id)
-        if not tx:
-            continue
-            
-        # Find our address in the outputs
-        outputs = safe_get(tx, 'outputs', default=[])
+        # Calculate net change for this address
+        net_change = 0
+        
+        # Check outputs (money received)
         for out in outputs:
             if safe_get(out, 'script_public_key_address', default='') == address:
-                amount = float(safe_get(out, 'amount', default=0)) / 1e8
-                timestamp = safe_get(tx, 'block_time', default=None)
-                
-                if timestamp:
-                    balance += amount
-                    history.append({
-                        'timestamp': timestamp,
-                        'datetime': format_timestamp(timestamp),
-                        'balance': balance,
-                        'amount': amount,
-                        'transaction_id': tx_id,
-                        'direction': 'in'
-                    })
-    
-    # Now try to find transactions where this address was the sender (inputs)
-    # This is more complex and may require additional API endpoints
-    
-    # Sort by timestamp
-    if history:
-        history = sorted(history, key=lambda x: x['timestamp'])
+                amount = float(safe_get(out, 'amount', default=0)) / 1e8  # Convert to KAS
+                net_change += amount
+        
+        # Check inputs (money sent)
+        for inp in inputs:
+            # Check if this input comes from our address
+            prev_out = safe_get(inp, 'previous_outpoint', 'verboseData', 'scriptPublicKeyAddress', default='')
+            if prev_out == address:
+                amount = float(safe_get(inp, 'previous_outpoint', 'amount', default=0)) / 1e8
+                net_change -= amount
+        
+        balance += net_change
+        history.append({
+            'timestamp': timestamp,
+            'datetime': format_timestamp(timestamp),
+            'balance': balance,
+            'net_change': net_change,
+            'transaction_id': tx_id,
+            'direction': 'in' if net_change > 0 else 'out'
+        })
     
     return history
 
-def fetch_kaspa_price_history():
-    """Fetch simplified price history (placeholder)"""
-    # In production, replace with actual API call to CoinGecko or similar
-    return [
-        {'timestamp': int((datetime.now().timestamp() - i*86400)*1000), 'price': 0.05 + i*0.001}
-        for i in range(30)
-    ]
-
 # Main App
 st.title("Kaspa Address History Explorer")
-st.markdown("Visualize address balance history by analyzing UTXOs")
+st.markdown("Complete transaction history using Kaspa API")
 
 address = st.text_input("Enter Kaspa Address:", 
                        value="kaspa:qqkqkzjvr7zwxxmjxjkmxxdwju9kjs6e9u82uh59z07vgaks6gg62v8707g73")
 
-if st.button("Analyze Address History"):
+limit = st.number_input("Transactions per batch", min_value=1, max_value=500, value=50)
+offset = st.number_input("Starting offset", min_value=0, value=0)
+
+if st.button("Load Transaction History"):
     if address and address.startswith("kaspa:"):
-        with st.spinner("Reconstructing address history from UTXOs..."):
-            # First check balance
+        with st.spinner(f"Fetching transactions {offset} to {offset+limit}..."):
+            # Get current balance first
             balance_data = make_api_request(f"/addresses/{address}/balance")
-            if not balance_data:
-                st.error("Could not fetch address balance")
-                st.stop()
-            
             current_balance = float(safe_get(balance_data, 'balance', default=0)) / 1e8
             st.metric("Current Balance", f"{current_balance:,.8f} KAS")
             
-            # Reconstruct history
-            history = reconstruct_address_history(address)
+            # Get transaction history
+            transactions = fetch_full_transactions(address, limit=limit, offset=offset)
+            
+            if not transactions:
+                st.warning("No transactions found for this address")
+                st.stop()
+                
+            # Process history
+            history = process_transaction_history(transactions, address)
             
             if not history:
-                st.warning("No transaction history could be reconstructed")
+                st.warning("No valid transactions found")
                 st.stop()
                 
             # Create DataFrame
@@ -138,16 +125,9 @@ if st.button("Analyze Address History"):
             history_df['timestamp'] = pd.to_datetime(history_df['timestamp'].astype(int), unit='ms')
             history_df = history_df.sort_values('timestamp')
             
-            # Get price history
-            price_history = fetch_kaspa_price_history()
-            price_df = pd.DataFrame(price_history)
-            if 'timestamp' in price_df.columns:
-                price_df['timestamp'] = pd.to_datetime(price_df['timestamp'].astype(int), unit='ms')
-                price_df = price_df.sort_values('timestamp')
-            
             # Create visualization
-            fig = make_subplots(specs=[[{"secondary_y": True}]])
-
+            fig = go.Figure()
+            
             # Add balance line
             fig.add_trace(
                 go.Scatter(
@@ -157,47 +137,64 @@ if st.button("Analyze Address History"):
                     line=dict(color='#4B8BBE'),
                     fill='tozeroy',
                     fillcolor='rgba(75, 139, 190, 0.1)'
-                ),
-                secondary_y=False
+                )
             )
             
-            # Add price line if available
-            if not price_df.empty and 'price' in price_df.columns:
-                fig.add_trace(
-                    go.Scatter(
-                        x=price_df['timestamp'],
-                        y=price_df['price'],
-                        name="Price (USD)",
-                        line=dict(color='#FFA500'),
-                        yaxis="y2"
+            # Add transaction markers
+            fig.add_trace(
+                go.Scatter(
+                    x=history_df['timestamp'],
+                    y=history_df['balance'],
+                    mode='markers',
+                    name="Transactions",
+                    marker=dict(
+                        color=history_df['net_change'].apply(lambda x: 'green' if x > 0 else 'red'),
+                        size=8,
+                        line=dict(width=1, color='DarkSlateGrey')
                     ),
-                    secondary_y=True
+                    hovertext=history_df['net_change'].apply(lambda x: f"{x:+.8f} KAS")
                 )
+            )
             
             # Update layout
             fig.update_layout(
                 title=f"Address Balance History: {address[:15]}...",
                 xaxis_title="Date",
                 yaxis_title="Balance (KAS)",
-                yaxis2_title="Price (USD)",
                 hovermode="x unified",
                 height=600
             )
             
             st.plotly_chart(fig, use_container_width=True)
             
-            # Show transaction history
-            st.subheader("Transaction History")
+            # Show transaction details
+            st.subheader("Transaction Details")
             st.dataframe(
-                history_df[['datetime', 'amount', 'balance', 'transaction_id']].sort_values('datetime', ascending=False),
+                history_df[['datetime', 'net_change', 'balance', 'transaction_id', 'direction']]
+                .sort_values('datetime', ascending=False)
+                .style.applymap(lambda x: 'color: green' if x > 0 else 'color: red', subset=['net_change']),
                 column_config={
                     "datetime": "Date",
-                    "amount": st.column_config.NumberColumn("Amount Received", format="%.8f KAS"),
+                    "net_change": st.column_config.NumberColumn("Amount", format="%+.8f KAS"),
                     "balance": st.column_config.NumberColumn("Balance", format="%.8f KAS"),
-                    "transaction_id": "Transaction ID"
+                    "transaction_id": "Transaction ID",
+                    "direction": "Direction"
                 },
                 hide_index=True,
                 use_container_width=True
             )
+            
+            # Pagination controls
+            col1, col2 = st.columns(2)
+            with col1:
+                if offset > 0:
+                    if st.button("Previous Page"):
+                        offset = max(0, offset - limit)
+                        st.experimental_rerun()
+            with col2:
+                if len(transactions) == limit:
+                    if st.button("Next Page"):
+                        offset += limit
+                        st.experimental_rerun()
     else:
         st.error("Please enter a valid Kaspa address starting with 'kaspa:'")
