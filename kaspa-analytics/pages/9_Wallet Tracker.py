@@ -3,11 +3,19 @@ import requests
 import pandas as pd
 from datetime import datetime
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 
 # Configuration
 API_BASE_URL = "https://api.kaspa.org"
 st.set_page_config(page_title="Kaspa Address History", page_icon="⛓️", layout="wide")
+
+def safe_get(data, *keys, default=None):
+    """Safely get nested dictionary values"""
+    for key in keys:
+        try:
+            data = data[key]
+        except (KeyError, TypeError, IndexError):
+            return default
+    return data
 
 def make_api_request(endpoint, params=None):
     try:
@@ -42,6 +50,9 @@ def process_transaction_history(transactions, address):
     """Process transactions into balance timeline"""
     balance = 0
     history = []
+    
+    if not transactions or not isinstance(transactions, list):
+        return history
     
     # Sort transactions by timestamp (oldest first)
     sorted_txs = sorted(transactions, key=lambda x: safe_get(x, 'transaction', 'block_time', default=0))
@@ -93,7 +104,7 @@ st.title("Kaspa Address History Explorer")
 st.markdown("Complete transaction history using Kaspa API")
 
 address = st.text_input("Enter Kaspa Address:", 
-                       value="kaspa:qqkqkzjvr7zwxxmjxjkmxxdwju9kjs6e9u82uh59z07vgaks6gg62v8707g73")
+                       value="kaspa:qr6pqdkru9fgwlm8yyqzp7cww9vj7auuq5vratzy4ev3luzj79t5ycvp8euuf")
 
 limit = st.number_input("Transactions per batch", min_value=1, max_value=500, value=50)
 offset = st.number_input("Starting offset", min_value=0, value=0)
@@ -103,6 +114,10 @@ if st.button("Load Transaction History"):
         with st.spinner(f"Fetching transactions {offset} to {offset+limit}..."):
             # Get current balance first
             balance_data = make_api_request(f"/addresses/{address}/balance")
+            if not balance_data:
+                st.error("Failed to fetch balance data")
+                st.stop()
+                
             current_balance = float(safe_get(balance_data, 'balance', default=0)) / 1e8
             st.metric("Current Balance", f"{current_balance:,.8f} KAS")
             
@@ -172,7 +187,7 @@ if st.button("Load Transaction History"):
             st.dataframe(
                 history_df[['datetime', 'net_change', 'balance', 'transaction_id', 'direction']]
                 .sort_values('datetime', ascending=False)
-                .style.applymap(lambda x: 'color: green' if x > 0 else 'color: red', subset=['net_change']),
+                .style.apply(lambda x: ['color: green' if v > 0 else 'color: red' for v in x], subset=['net_change']),
                 column_config={
                     "datetime": "Date",
                     "net_change": st.column_config.NumberColumn("Amount", format="%+.8f KAS"),
@@ -181,7 +196,8 @@ if st.button("Load Transaction History"):
                     "direction": "Direction"
                 },
                 hide_index=True,
-                use_container_width=True
+                use_container_width=True,
+                height=400
             )
             
             # Pagination controls
