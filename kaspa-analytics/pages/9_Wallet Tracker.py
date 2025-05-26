@@ -1,21 +1,21 @@
 import streamlit as st
 import requests
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 import plotly.graph_objects as go
 import numpy as np
 from utils import load_price_data
-import concurrent.futures
+from tenacity import retry, stop_after_attempt, wait_exponential
 
 # Configuration
 API_BASE_URL = "https://api.kaspa.org"
-st.set_page_config(page_title="Kaspa Address History", page_icon="⛓️", layout="wide")
+st.set_page_config(page_title="Kaspa Wallet Tracker", page_icon="⛓️", layout="wide")
 
-# Custom CSS - matching the second page's style
+# Custom CSS
 st.markdown("""
 <style>
     .stApp { background-color: #0E1117; }
-    .st-emotion-cache-6qob1r, .sidebar-content { background-color: #262730 !important; }
+    .st-emotion-cache-6qob1r { background-color: #262730 !important; }
     .title-spacing { padding-left: 40px; margin-bottom: 15px; }
     div[data-testid="stVerticalBlock"] > div[data-testid="stVerticalBlockBorderWrapper"] {
         background-color: #262730 !important;
@@ -39,67 +39,12 @@ st.markdown("""
         opacity: 0.8 !important;
         color: #e0e0e0 !important;
     }
-    .stMetric { margin: 5px !important; height: 100% !important; }
-    h2 { color: #e0e0e0 !important; }
-    .hovertext text.hovertext { fill: #e0e0e0 !important; }
-    .range-slider .handle:after { background-color: #00FFCC !important; }
     .metrics-container {
         width: calc(100% - 40px) !important;
         margin-left: 20px !important;
         margin-right: 20px !important;
         margin-top: 10px !important;
         margin-bottom: 0px !important;
-    }
-    .control-label {
-        font-size: 11px !important;
-        color: #e0e0e0 !important;
-        margin-bottom: 2px !important;
-        white-space: nowrap;
-    }
-    .st-emotion-cache-1dp5vir {
-        border-top: 2px solid #3A3C4A !important;
-        margin-top: 1px !important;
-        margin-bottom: 2px !important;
-    }
-    [data-baseweb="select"] {
-        font-size: 12px !important;
-    }
-    [data-baseweb="select"] > div {
-        padding: 2px 6px !important;
-        border-radius: 4px !important;
-        border: 1px solid #3A3C4A !important;
-        background-color: #262730 !important;
-        transition: all 0.2s ease;
-    }
-    [data-baseweb="select"] > div:hover {
-        border-color: #00FFCC !important;
-    }
-    [data-baseweb="select"] > div[aria-expanded="true"],
-    [data-baseweb="select"] > div:focus-within {
-        border-color: #00FFCC !important;
-        box-shadow: 0 0 0 1px #00FFCC !important;
-    }
-    [role="option"] {
-        font-size: 12px !important;
-        padding: 8px 12px !important;
-    }
-    [role="option"]:hover {
-        background-color: #3A3C4A !important;
-    }
-    [aria-selected="true"] {
-        background-color: #00FFCC20 !important;
-        color: #00FFCC !important;
-    }
-    div[role="combobox"] > div {
-        font-size: 12px !important;
-        color: #e0e0e0 !important;
-    }
-    .stSelectbox [data-baseweb="select"] > div:has(> div[aria-selected="true"]) {
-        border-color: #00FFCC !important;
-        background-color: #00FFCC10 !important;
-    }
-    .stSelectbox [data-baseweb="select"] > div:has(> div[aria-selected="true"]) > div {
-        color: #00FFCC !important;
     }
     .stDataFrame {
         background-color: #262730 !important;
@@ -131,11 +76,13 @@ st.markdown("""
         border: 1px solid #3A3C4A !important;
         border-radius: 4px !important;
     }
-    .stNumberInput input {
-        background-color: #262730 !important;
-        color: #e0e0e0 !important;
-        border: 1px solid #3A3C4A !important;
-        border-radius: 4px !important;
+    .progress-bar-container {
+        margin-bottom: 20px;
+    }
+    .progress-text {
+        font-size: 14px;
+        color: #e0e0e0;
+        margin-bottom: 5px;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -146,11 +93,12 @@ def safe_get(data, *keys, default=None):
             data = data[key]
         except (KeyError, TypeError, IndexError):
             return default
-    return data
+    return default
 
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
 def make_api_request(endpoint, params=None):
     try:
-        response = requests.get(f"{API_BASE_URL}{endpoint}", params=params)
+        response = requests.get(f"{API_BASE_URL}{endpoint}", params=params, timeout=30)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
@@ -167,8 +115,8 @@ def format_timestamp(timestamp_ms):
     except:
         return "N/A"
 
-def fetch_transactions_page_improved(address, limit=500, before=None, after=None):
-    """Improved version with both before and after parameters"""
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
+def fetch_transactions_page(address, limit=500, before=None, after=None):
     endpoint = f"/addresses/{address}/full-transactions-page"
     params = {
         "limit": limit,
@@ -181,95 +129,74 @@ def fetch_transactions_page_improved(address, limit=500, before=None, after=None
         params["after"] = after
     return make_api_request(endpoint, params=params)
 
-def fetch_all_transactions_improved(address):
-    """Improved transaction fetching with parallel requests and better pagination"""
+def fetch_all_transactions_complete(address, max_transactions=10000, start_date=None, end_date=None):
+    """Fetch ALL transactions for an address using reliable sequential requests"""
     all_transactions = []
     seen_ids = set()
+    before = None
+    limit = 500  # Max allowed by API
+    total_fetched = 0
     
-    # First get the most recent transactions to establish time range
-    initial_batch = fetch_transactions_page_improved(address, limit=50)
-    if not initial_batch:
-        return []
+    # Convert dates to timestamps if provided
+    start_ts = int(start_date.timestamp() * 1000) if start_date else None
+    end_ts = int(end_date.timestamp() * 1000) if end_date else None
     
-    if len(initial_batch) < 50:
-        # If we got less than requested, this might be all transactions
-        return initial_batch
+    # Create progress container
+    progress_container = st.empty()
     
-    # Determine time range to fetch
-    newest_timestamp = max(tx['block_time'] for tx in initial_batch if 'block_time' in tx)
-    oldest_timestamp = min(tx['block_time'] for tx in initial_batch if 'block_time' in tx)
-    
-    # Split the time range into chunks for parallel fetching
-    time_chunks = []
-    current_end = newest_timestamp
-    chunk_size = 30 * 24 * 60 * 60 * 1000  # 30 days in milliseconds
-    
-    while current_end > oldest_timestamp:
-        time_chunks.append((current_end - chunk_size, current_end))
-        current_end -= chunk_size
-    
-    # Function to fetch transactions for a time range
-    def fetch_time_chunk(start, end):
-        chunk_txs = []
-        before = end
-        while True:
-            batch = fetch_transactions_page_improved(
-                address, 
-                limit=500, 
-                before=before,
-                after=start
-            )
-            if not batch:
-                break
+    while True:
+        # Update progress
+        progress_container.markdown(
+            f"""
+            <div class="progress-bar-container">
+                <div class="progress-text">Fetching transactions... {total_fetched} fetched</div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+        
+        # Fetch next batch
+        batch = fetch_transactions_page(address, limit=limit, before=before)
+        if not batch:
+            break
+            
+        # Filter out duplicates and apply date range
+        new_transactions = []
+        for tx in batch:
+            tx_id = safe_get(tx, 'transaction_id')
+            tx_time = safe_get(tx, 'block_time')
+            
+            if tx_id in seen_ids:
+                continue
                 
-            # Filter out duplicates and transactions outside our time range
-            new_txs = [
-                tx for tx in batch 
-                if tx['transaction_id'] not in seen_ids and 
-                start <= tx.get('block_time', 0) <= end
-            ]
-            
-            if not new_txs:
-                break
+            if start_ts and tx_time and tx_time < start_ts:
+                continue
                 
-            chunk_txs.extend(new_txs)
-            seen_ids.update(tx['transaction_id'] for tx in new_txs)
-            before = min(tx['block_time'] for tx in new_txs)
-            
-            # Early exit if we've hit the start of our time range
-            if before <= start:
-                break
+            if end_ts and tx_time and tx_time > end_ts:
+                continue
                 
-        return chunk_txs
-    
-    # Use ThreadPoolExecutor to fetch time chunks in parallel
-    with st.spinner("Fetching transactions in parallel..."):
-        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-            futures = []
-            for start, end in time_chunks:
-                futures.append(executor.submit(fetch_time_chunk, start, end))
+            new_transactions.append(tx)
+            seen_ids.add(tx_id)
+        
+        if not new_transactions:
+            break
             
-            # Initialize progress bar
-            progress_bar = st.progress(0)
-            completed = 0
-            total_chunks = len(time_chunks)
-            
-            for future in concurrent.futures.as_completed(futures):
-                chunk_result = future.result()
-                all_transactions.extend(chunk_result)
-                completed += 1
-                progress_bar.progress(completed / total_chunks)
+        # Add to our collection
+        all_transactions.extend(new_transactions)
+        total_fetched += len(new_transactions)
+        
+        # Set up for next request
+        before = min(tx['block_time'] for tx in new_transactions if 'block_time' in tx)
+        
+        # Safety check
+        if total_fetched >= max_transactions:
+            st.warning(f"Reached maximum of {max_transactions} transactions. Some may be missing.")
+            break
     
-    # Add the initial batch (removing any duplicates)
-    initial_batch_filtered = [
-        tx for tx in initial_batch 
-        if tx['transaction_id'] not in seen_ids
-    ]
-    all_transactions.extend(initial_batch_filtered)
+    progress_container.empty()
     
-    # Sort all transactions by timestamp
-    all_transactions.sort(key=lambda x: x.get('block_time', 0))
-    
+    # Sort by timestamp ascending
+    all_transactions.sort(key=lambda x: safe_get(x, 'block_time', 0))
     return all_transactions
 
 def extract_net_changes(transactions, address):
@@ -315,9 +242,8 @@ def compute_balance_from_current(current_balance, history):
     return history[::-1]
 
 def fetch_kaspa_price_history():
-    """Fetch historical KAS price data from Google Sheets"""
+    """Fetch historical KAS price data"""
     try:
-        # Use the existing price data loading mechanism
         if 'price_df' not in st.session_state or 'price_genesis_date' not in st.session_state:
             price_df, genesis_date = load_price_data()
             st.session_state.price_df = price_df
@@ -326,10 +252,8 @@ def fetch_kaspa_price_history():
             price_df = st.session_state.price_df
             genesis_date = st.session_state.price_genesis_date
         
-        # Convert to the format expected by the rest of the code
         price_history = []
         for index, row in price_df.iterrows():
-            # Convert date to timestamp in milliseconds
             timestamp = int(row['Date'].timestamp() * 1000)
             price_history.append({
                 'timestamp': timestamp,
@@ -347,11 +271,9 @@ def calculate_average_purchase_price_over_time(transactions, price_history):
     if not price_history or not transactions:
         return None
         
-    # Create a DataFrame with price history for easy lookup
     price_df = pd.DataFrame(price_history)
     price_df['date'] = pd.to_datetime(price_df['timestamp'], unit='ms')
     
-    # Process transactions in chronological order
     transactions_sorted = sorted(transactions, key=lambda x: x['timestamp'])
     
     total_kas = 0
@@ -362,7 +284,6 @@ def calculate_average_purchase_price_over_time(transactions, price_history):
         if tx['direction'] == 'in' and tx['net_change'] > 0:
             tx_date = datetime.fromtimestamp(tx['timestamp']/1000)
             
-            # Find the closest price date before the transaction
             price_row = price_df[price_df['date'] <= tx_date].sort_values('date', ascending=False).head(1)
             
             if not price_row.empty:
@@ -428,7 +349,6 @@ def display_results(address, transactions):
     
     # Create daily balance history
     if not df.empty:
-        # Get the first price date to use as minimum date
         if st.session_state.price_history:
             first_price_date = pd.to_datetime(min([p['timestamp'] for p in st.session_state.price_history]), unit='ms').date()
         else:
@@ -443,7 +363,6 @@ def display_results(address, transactions):
         tx_idx = 0
         
         for date in date_range:
-            # Apply all transactions up to this date
             while tx_idx < len(df) and df.iloc[tx_idx]['timestamp'].date() <= date.date():
                 current_balance_val = df.iloc[tx_idx]['balance']
                 tx_idx += 1
@@ -455,7 +374,6 @@ def display_results(address, transactions):
         
         balance_df = pd.DataFrame(daily_balance)
         
-        # Merge with price data if available
         if st.session_state.price_history:
             price_df = pd.DataFrame(st.session_state.price_history)
             price_df['date'] = pd.to_datetime(price_df['timestamp'], unit='ms')
@@ -464,7 +382,6 @@ def display_results(address, transactions):
             merged_df = pd.merge(balance_df, price_df, on='date', how='left')
             merged_df['price'] = merged_df['price'].ffill().bfill()
             
-            # Merge with average purchase price if available
             if not avg_price_df.empty:
                 avg_price_daily = avg_price_df.resample('D', on='timestamp').last().reset_index()
                 avg_price_daily = avg_price_daily[['timestamp', 'avg_purchase_price']]
@@ -496,7 +413,6 @@ def display_results(address, transactions):
     # Main chart
     fig = go.Figure()
     
-    # Add balance trace (primary y-axis)
     fig.add_trace(go.Scatter(
         x=merged_df['date'],
         y=merged_df['balance'],
@@ -506,7 +422,6 @@ def display_results(address, transactions):
         hovertemplate='<b>Date</b>: %{x|%Y-%m-%d}<br><b>Balance</b>: %{y:.8f} KAS<extra></extra>'
     ))
     
-    # Add price trace (secondary y-axis) if available
     if 'price' in merged_df and not merged_df['price'].isna().all():
         fig.add_trace(go.Scatter(
             x=merged_df['date'],
@@ -518,7 +433,6 @@ def display_results(address, transactions):
             yaxis='y2'
         ))
     
-    # Add average purchase price line if available
     if 'avg_purchase_price' in merged_df and not merged_df['avg_purchase_price'].isna().all():
         fig.add_trace(go.Scatter(
             x=merged_df['date'],
@@ -550,11 +464,6 @@ def display_results(address, transactions):
             showgrid=True,
             gridwidth=1,
             gridcolor='rgba(255, 255, 255, 0.1)',
-            minor=dict(
-                ticklen=6,
-                gridcolor='rgba(255, 255, 255, 0.05)',
-                gridwidth=0.5
-            ),
             linecolor='#3A3C4A',
             zerolinecolor='#3A3C4A'
         ),
@@ -563,11 +472,6 @@ def display_results(address, transactions):
             showgrid=True,
             gridwidth=1,
             gridcolor='rgba(255, 255, 255, 0.1)',
-            minor=dict(
-                ticklen=6,
-                gridcolor='rgba(255, 255, 255, 0.05)',
-                gridwidth=0.5
-            ),
             linecolor='#3A3C4A',
             zerolinecolor='#3A3C4A',
             color='#00FFCC'
@@ -588,17 +492,11 @@ def display_results(address, transactions):
             xanchor="right",
             x=1,
             bgcolor='rgba(38, 39, 48, 0.8)'
-        ),
-        hoverlabel=dict(
-            bgcolor='#262730',
-            bordercolor='#3A3C4A',
-            font_color='#e0e0e0'
         )
     )
     
     st.plotly_chart(fig, use_container_width=True)
     
-    # Average purchase price chart
     if not avg_price_df.empty:
         st.subheader("Average Purchase Price History")
         
@@ -632,22 +530,13 @@ def display_results(address, transactions):
             margin=dict(l=20, r=20, t=40, b=40),
             yaxis_title='Price (USD)',
             xaxis_title='Date',
-            showlegend=True,
-            legend=dict(
-                orientation="h",
-                yanchor="bottom",
-                y=1.02,
-                xanchor="right",
-                x=1
-            )
+            showlegend=True
         )
         
         st.plotly_chart(avg_fig, use_container_width=True)
     
-    # Transaction details
     st.subheader("Transaction Details")
     
-    # Merge with average price data if available
     if not avg_price_df.empty:
         avg_price_tx = avg_price_df[['transaction_id', 'avg_purchase_price', 'price_at_purchase']]
         df = pd.merge(df, avg_price_tx, on='transaction_id', how='left')
@@ -668,16 +557,20 @@ def display_results(address, transactions):
     )
 
 # UI Starts
-st.markdown('<div class="title-spacing"><h2>Kaspa Address History Explorer</h2></div>', unsafe_allow_html=True)
+st.markdown('<div class="title-spacing"><h2>Kaspa Wallet Tracker</h2></div>', unsafe_allow_html=True)
 st.divider()
 
-st.markdown("""
-**How to use:**
-1. Enter a valid Kaspa address (starts with `kaspa:`)
-2. Click "Fetch Full History" to load all transactions
-""")
-
+# Address input
 address = st.text_input("Kaspa Address:", value="kaspa:qyp4pmj4u48e2rq3976kjqx4mywlgera8rxufmary5xhwgj6a8c4lkgyxctpu92")
+
+# Filters
+col1, col2 = st.columns(2)
+with col1:
+    start_date = st.date_input("Start date", datetime.now() - timedelta(days=365))
+with col2:
+    end_date = st.date_input("End date", datetime.now())
+
+max_txs = st.slider("Maximum transactions to fetch", 100, 20000, 5000, step=100)
 
 # Session State
 if 'history' not in st.session_state:
@@ -696,11 +589,25 @@ if address != st.session_state.current_address:
     st.session_state.avg_price_history = None
 
 # Main button
-if st.button("Fetch Full History"):
-    with st.spinner("Fetching all transactions (this may take a while for large histories)..."):
-        all_txs = fetch_all_transactions_improved(address)
-        if all_txs:
-            st.session_state.history = all_txs
-            st.session_state.avg_price_history = None  # Reset to force recalculation
-            display_results(address, all_txs)
-            st.success(f"Successfully fetched {len(all_txs)} transactions")
+if st.button("Fetch Full History", type="primary"):
+    if not address.startswith('kaspa:'):
+        st.error("Please enter a valid Kaspa address starting with 'kaspa:'")
+    else:
+        with st.spinner("Initializing transaction fetch..."):
+            all_txs = fetch_all_transactions_complete(
+                address, 
+                max_transactions=max_txs,
+                start_date=start_date,
+                end_date=end_date
+            )
+            if all_txs:
+                st.session_state.history = all_txs
+                st.session_state.avg_price_history = None
+                display_results(address, all_txs)
+                st.success(f"Successfully fetched {len(all_txs)} transactions")
+            else:
+                st.error("No transactions found or failed to fetch")
+
+# Display cached results if available
+if st.session_state.history and st.session_state.current_address == address:
+    display_results(address, st.session_state.history)
