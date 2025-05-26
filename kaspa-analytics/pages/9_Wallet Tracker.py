@@ -323,13 +323,32 @@ def display_results(address, transactions):
     
     # Process transactions
     changes = extract_net_changes(transactions, address)
+    if not changes:
+        st.error("No transaction data to display")
+        return
+        
     txs_by_id = {tx['transaction_id']: tx for tx in changes}
     history = list(txs_by_id.values())
     history_with_balance = compute_balance_from_current(current_balance, history)
     
-    # Create DataFrame
-    df = pd.DataFrame(history_with_balance)
-    df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+    # Create DataFrame - ensure all required fields exist
+    required_fields = ['timestamp', 'datetime', 'net_change', 'transaction_id', 'direction']
+    df_data = []
+    for tx in history_with_balance:
+        # Ensure all required fields are present
+        tx_data = {field: tx.get(field) for field in required_fields}
+        tx_data['balance'] = tx.get('balance', 0)
+        df_data.append(tx_data)
+    
+    df = pd.DataFrame(df_data)
+    
+    # Convert timestamp if it exists
+    if 'timestamp' in df and not df['timestamp'].empty:
+        df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms', errors='coerce')
+    else:
+        st.error("Timestamp data missing from transactions")
+        return
+    
     df = df.sort_values('timestamp')
     
     # Calculate average purchase price over time
@@ -338,59 +357,64 @@ def display_results(address, transactions):
             st.session_state.avg_price_history = calculate_average_purchase_price_over_time(
                 history_with_balance, 
                 st.session_state.price_history
-            )
+            ) if st.session_state.price_history else None
     
     avg_price_df = pd.DataFrame(st.session_state.avg_price_history) if st.session_state.avg_price_history else pd.DataFrame()
-    if not avg_price_df.empty:
-        avg_price_df['timestamp'] = pd.to_datetime(avg_price_df['timestamp'], unit='ms')
+    if not avg_price_df.empty and 'timestamp' in avg_price_df:
+        avg_price_df['timestamp'] = pd.to_datetime(avg_price_df['timestamp'], unit='ms', errors='coerce')
     
     # Current average purchase price
     current_avg_price = avg_price_df['avg_purchase_price'].iloc[-1] if not avg_price_df.empty else None
     
     # Create daily balance history
     if not df.empty:
-        if st.session_state.price_history:
-            first_price_date = pd.to_datetime(min([p['timestamp'] for p in st.session_state.price_history]), unit='ms').date()
-        else:
-            first_price_date = df['timestamp'].min().date()
+        try:
+            if st.session_state.price_history:
+                first_price_date = pd.to_datetime(min([p['timestamp'] for p in st.session_state.price_history]), unit='ms').date()
+            else:
+                first_price_date = df['timestamp'].min().date()
+                
+            min_date = first_price_date
+            max_date = df['timestamp'].max().date()
+            date_range = pd.date_range(start=min_date, end=max_date, freq='D')
             
-        min_date = first_price_date
-        max_date = df['timestamp'].max().date()
-        date_range = pd.date_range(start=min_date, end=max_date, freq='D')
-        
-        daily_balance = []
-        current_balance_val = 0
-        tx_idx = 0
-        
-        for date in date_range:
-            while tx_idx < len(df) and df.iloc[tx_idx]['timestamp'].date() <= date.date():
-                current_balance_val = df.iloc[tx_idx]['balance']
-                tx_idx += 1
+            daily_balance = []
+            current_balance_val = 0
+            tx_idx = 0
             
-            daily_balance.append({
-                'date': date,
-                'balance': current_balance_val
-            })
-        
-        balance_df = pd.DataFrame(daily_balance)
-        
-        if st.session_state.price_history:
-            price_df = pd.DataFrame(st.session_state.price_history)
-            price_df['date'] = pd.to_datetime(price_df['timestamp'], unit='ms')
-            price_df = price_df[['date', 'price']]
+            for date in date_range:
+                while tx_idx < len(df) and df.iloc[tx_idx]['timestamp'].date() <= date.date():
+                    current_balance_val = df.iloc[tx_idx]['balance']
+                    tx_idx += 1
+                
+                daily_balance.append({
+                    'date': date,
+                    'balance': current_balance_val
+                })
             
-            merged_df = pd.merge(balance_df, price_df, on='date', how='left')
-            merged_df['price'] = merged_df['price'].ffill().bfill()
+            balance_df = pd.DataFrame(daily_balance)
             
-            if not avg_price_df.empty:
-                avg_price_daily = avg_price_df.resample('D', on='timestamp').last().reset_index()
-                avg_price_daily = avg_price_daily[['timestamp', 'avg_purchase_price']]
-                avg_price_daily = avg_price_daily.rename(columns={'timestamp': 'date'})
-                merged_df = pd.merge(merged_df, avg_price_daily, on='date', how='left')
-                merged_df['avg_purchase_price'] = merged_df['avg_purchase_price'].ffill()
-        else:
-            merged_df = balance_df
-            merged_df['price'] = np.nan
+            if st.session_state.price_history:
+                price_df = pd.DataFrame(st.session_state.price_history)
+                if 'timestamp' in price_df:
+                    price_df['date'] = pd.to_datetime(price_df['timestamp'], unit='ms', errors='coerce')
+                    price_df = price_df[['date', 'price']].dropna()
+                    
+                    merged_df = pd.merge(balance_df, price_df, on='date', how='left')
+                    merged_df['price'] = merged_df['price'].ffill().bfill()
+                    
+                    if not avg_price_df.empty and 'timestamp' in avg_price_df:
+                        avg_price_daily = avg_price_df.resample('D', on='timestamp').last().reset_index()
+                        avg_price_daily = avg_price_daily[['timestamp', 'avg_purchase_price']]
+                        avg_price_daily = avg_price_daily.rename(columns={'timestamp': 'date'})
+                        merged_df = pd.merge(merged_df, avg_price_daily, on='date', how='left')
+                        merged_df['avg_purchase_price'] = merged_df['avg_purchase_price'].ffill()
+            else:
+                merged_df = balance_df
+                merged_df['price'] = np.nan
+        except Exception as e:
+            st.error(f"Error processing balance history: {str(e)}")
+            return
     
     # Metrics
     st.markdown('<div class="metrics-container">', unsafe_allow_html=True)
