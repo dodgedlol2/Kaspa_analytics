@@ -4,6 +4,7 @@ import pandas as pd
 from datetime import datetime
 import plotly.graph_objects as go
 import numpy as np
+from utils import load_price_data
 
 # Configuration
 API_BASE_URL = "https://api.kaspa.org"
@@ -239,26 +240,28 @@ def fetch_all_transactions(address, limit=500):
     return all_transactions
 
 def fetch_kaspa_price_history():
-    """Fetch historical KAS price data from CoinGecko"""
+    """Fetch historical KAS price data from Google Sheets"""
     try:
-        url = "https://api.coingecko.com/api/v3/coins/kaspa/market_chart"
-        params = {
-            "vs_currency": "usd",
-            "days": "max",
-            "interval": "daily"
-        }
-        response = requests.get(url, params=params)
-        response.raise_for_status()
-        data = response.json()
+        # Use the existing price data loading mechanism
+        if 'price_df' not in st.session_state or 'price_genesis_date' not in st.session_state:
+            price_df, genesis_date = load_price_data()
+            st.session_state.price_df = price_df
+            st.session_state.price_genesis_date = genesis_date
+        else:
+            price_df = st.session_state.price_df
+            genesis_date = st.session_state.price_genesis_date
         
-        prices = data['prices']
+        # Convert to the format expected by the rest of the code
         price_history = []
-        for price in prices:
+        for index, row in price_df.iterrows():
+            # Convert date to timestamp in milliseconds
+            timestamp = int(row['Date'].timestamp() * 1000)
             price_history.append({
-                'timestamp': price[0],
-                'datetime': datetime.fromtimestamp(price[0]/1000).strftime('%Y-%m-%d'),
-                'price': price[1]
+                'timestamp': timestamp,
+                'datetime': row['Date'].strftime('%Y-%m-%d'),
+                'price': row['Price']
             })
+        
         return price_history
     except Exception as e:
         st.error(f"Failed to fetch price history: {str(e)}")
