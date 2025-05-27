@@ -128,39 +128,37 @@ except Exception as e:
     st.error(f"Failed to calculate power law: {str(e)}")
     st.stop()
 
-# Calculate rolling power law parameters (for the second chart)
-def calculate_rolling_power_law(df, window=365):
+# Calculate daily power law parameters (for the second chart)
+def calculate_daily_power_law(df):
     results = []
-    for i in range(window, len(df)):
-        window_df = df.iloc[i-window:i]
+    for date in df['Date'].unique():
+        daily_df = df[df['Date'] <= date]
         try:
-            a, b, r2 = fit_power_law(window_df, y_col='Volume_USD')
+            a, b, r2 = fit_power_law(daily_df, y_col='Volume_USD')
             results.append({
-                'Date': window_df['Date'].iloc[-1],
+                'Date': date,
                 'Slope': b,
-                'R2': r2,
-                'Intercept': a
+                'R2': r2
             })
-        except Exception as e:
-            print(f"Error calculating power law for window ending {window_df['Date'].iloc[-1]}: {str(e)}")
-            pass
+        except:
+            continue
     return pd.DataFrame(results)
 
-if 'rolling_power_law' not in st.session_state:
+if 'daily_power_law' not in st.session_state:
     try:
-        st.session_state.rolling_power_law = calculate_rolling_power_law(volume_df)
+        st.session_state.daily_power_law = calculate_daily_power_law(volume_df)
     except Exception as e:
-        st.error(f"Failed to calculate rolling power law: {str(e)}")
+        st.error(f"Failed to calculate daily power law: {str(e)}")
         st.stop()
 
-rolling_power_law = st.session_state.rolling_power_law
+daily_power_law = st.session_state.daily_power_law
 
 # Calculate 30-day change in R2 if we have enough data
 r2_change = None
 r2_change_pct = None
-if len(rolling_power_law) >= 30:
-    current_r2 = rolling_power_law['R2'].iloc[-1]
-    prev_r2 = rolling_power_law['R2'].iloc[-30]
+if len(daily_power_law) >= 30:
+    current_r2 = daily_power_law['R2'].iloc[-1]
+    prev_r2 = daily_power_law['R2'].iloc[-30]
     r2_change = current_r2 - prev_r2
     r2_change_pct = (r2_change / prev_r2) * 100
 
@@ -422,36 +420,36 @@ with cols[3]:
     st.metric("Current Price", f"${volume_df['Price'].iloc[-1]:.4f}")
 st.markdown('</div>', unsafe_allow_html=True)
 
-# ====== POWER LAW TRENDS CHART ======
-st.markdown('<div class="title-spacing"><h2>Power Law Parameter Trends</h2></div>', unsafe_allow_html=True)
+# ====== POWER LAW EVOLUTION CHART ======
+st.markdown('<div class="title-spacing"><h2>Power Law Parameter Evolution</h2></div>', unsafe_allow_html=True)
 st.divider()
 
-# Create the trends chart
-trend_fig = go.Figure()
+# Create the evolution chart
+evo_fig = go.Figure()
 
 # Add Slope trace
-trend_fig.add_trace(go.Scatter(
-    x=rolling_power_law['Date'],
-    y=rolling_power_law['Slope'],
+evo_fig.add_trace(go.Scatter(
+    x=daily_power_law['Date'],
+    y=daily_power_law['Slope'],
     mode='lines',
-    name='Slope (b)',
+    name='Power Law Slope (b)',
     line=dict(color='#00FFCC', width=2),
     hovertemplate='<b>Date</b>: %{x|%Y-%m-%d}<br><b>Slope</b>: %{y:.3f}<extra></extra>',
     yaxis='y'
 ))
 
 # Add R² trace (secondary y-axis)
-trend_fig.add_trace(go.Scatter(
-    x=rolling_power_law['Date'],
-    y=rolling_power_law['R2'],
+evo_fig.add_trace(go.Scatter(
+    x=daily_power_law['Date'],
+    y=daily_power_law['R2'],
     mode='lines',
-    name='R²',
+    name='R² Fit Quality',
     line=dict(color='#FFA726', width=2),
     hovertemplate='<b>Date</b>: %{x|%Y-%m-%d}<br><b>R²</b>: %{y:.3f}<extra></extra>',
     yaxis='y2'
 ))
 
-trend_fig.update_layout(
+evo_fig.update_layout(
     plot_bgcolor='#262730',
     paper_bgcolor='#262730',
     font_color='#e0e0e0',
@@ -480,7 +478,7 @@ trend_fig.update_layout(
         overlaying='y',
         side='right',
         showgrid=False,
-        range=[0, 1],  # R² is always between 0 and 1
+        range=[0, 1.05],  # R² is always between 0 and 1
         linecolor='#3A3C4A',
         zeroline=False,
         color='#FFA726'
@@ -500,75 +498,4 @@ trend_fig.update_layout(
     )
 )
 
-st.plotly_chart(trend_fig, use_container_width=True)
-
-# ====== LOG-LOG PLOT ======
-st.markdown('<div class="title-spacing"><h2>Log-Log Plot of Trading Volume</h2></div>', unsafe_allow_html=True)
-st.divider()
-
-# Create log-log plot
-log_fig = go.Figure()
-
-# Add actual data points
-log_fig.add_trace(go.Scatter(
-    x=volume_df['days_from_genesis'],
-    y=volume_df['Volume_USD'],
-    mode='markers',
-    name='Volume Data',
-    marker=dict(color='#00FFCC', size=5, opacity=0.7),
-    hovertemplate='<b>Days</b>: %{x}<br><b>Volume</b>: $%{y:,.0f}<extra></extra>'
-))
-
-# Add power law fit line
-x_fit = np.linspace(volume_df['days_from_genesis'].min(), volume_df['days_from_genesis'].max(), 100)
-y_fit = a * np.power(x_fit, b)
-
-log_fig.add_trace(go.Scatter(
-    x=x_fit,
-    y=y_fit,
-    mode='lines',
-    name=f'Power-Law Fit (R²={r2:.3f})',
-    line=dict(color='#FFA726', width=3),
-    hovertemplate='<b>Days</b>: %{x}<br><b>Fit</b>: $%{y:,.0f}<extra></extra>'
-))
-
-log_fig.update_layout(
-    plot_bgcolor='#262730',
-    paper_bgcolor='#262730',
-    font_color='#e0e0e0',
-    height=500,
-    margin=dict(l=20, r=20, t=60, b=100),
-    xaxis=dict(
-        type='log',
-        title='Days Since Genesis (Log Scale)',
-        showgrid=True,
-        gridwidth=1,
-        gridcolor='rgba(255, 255, 255, 0.1)',
-        linecolor='#3A3C4A',
-        zerolinecolor='#3A3C4A'
-    ),
-    yaxis=dict(
-        type='log',
-        title='Volume (USD, Log Scale)',
-        showgrid=True,
-        gridwidth=1,
-        gridcolor='rgba(255, 255, 255, 0.1)',
-        linecolor='#3A3C4A',
-        zerolinecolor='#3A3C4A'
-    ),
-    legend=dict(
-        orientation="h",
-        yanchor="bottom",
-        y=1.02,
-        xanchor="right",
-        x=1,
-        bgcolor='rgba(38, 39, 48, 0.8)'
-    ),
-    hoverlabel=dict(
-        bgcolor='#262730',
-        bordercolor='#3A3C4A',
-        font_color='#e0e0e0'
-    )
-)
-
-st.plotly_chart(log_fig, use_container_width=True)
+st.plotly_chart(evo_fig, use_container_width=True)
