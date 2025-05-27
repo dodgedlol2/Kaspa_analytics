@@ -97,6 +97,12 @@ st.markdown("""
     .stSelectbox [data-baseweb="select"] > div:has(> div[aria-selected="true"]) > div {
         color: #00FFCC !important;
     }
+    .delta-positive {
+        color: #00FFCC !important;
+    }
+    .delta-negative {
+        color: #FF5252 !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -115,12 +121,46 @@ volume_df['Date'] = pd.to_datetime(volume_df['Date']).dt.normalize()
 volume_df['MA_30'] = volume_df['Volume_USD'].rolling(30).mean()
 volume_df['MA_60'] = volume_df['Volume_USD'].rolling(60).mean()
 
-# Calculate power law fit
+# Calculate power law fit for the entire dataset
 try:
     a, b, r2 = fit_power_law(volume_df, y_col='Volume_USD')
 except Exception as e:
     st.error(f"Failed to calculate power law: {str(e)}")
     st.stop()
+
+# Calculate rolling power law parameters (for the second chart)
+def calculate_rolling_power_law(df, window=365):
+    results = []
+    for i in range(window, len(df)):
+        window_df = df.iloc[i-window:i]
+        try:
+            a, b, r2 = fit_power_law(window_df, y_col='Volume_USD')
+            results.append({
+                'Date': window_df['Date'].iloc[-1],
+                'Slope': b,
+                'R2': r2
+            })
+        except:
+            pass
+    return pd.DataFrame(results)
+
+if 'rolling_power_law' not in st.session_state:
+    try:
+        st.session_state.rolling_power_law = calculate_rolling_power_law(volume_df)
+    except Exception as e:
+        st.error(f"Failed to calculate rolling power law: {str(e)}")
+        st.stop()
+
+rolling_power_law = st.session_state.rolling_power_law
+
+# Calculate 30-day change in R2 if we have enough data
+r2_change = None
+r2_change_pct = None
+if len(rolling_power_law) >= 30:
+    current_r2 = rolling_power_law['R2'].iloc[-1]
+    prev_r2 = rolling_power_law['R2'].iloc[-30]
+    r2_change = current_r2 - prev_r2
+    r2_change_pct = (r2_change / prev_r2) * 100
 
 # ====== MAIN CHART CONTAINER ======
 with st.container():
@@ -365,9 +405,97 @@ cols = st.columns(4)
 with cols[0]:
     st.metric("Power-Law Slope", f"{b:.3f}")
 with cols[1]:
-    st.metric("Model Fit (R²)", f"{r2:.3f}")
+    if r2_change is not None:
+        delta_color = "delta-positive" if r2_change >= 0 else "delta-negative"
+        delta_text = f"{r2_change_pct:.1f}% (30D)"
+        st.metric("Model Fit (R²)", 
+                 f"{r2:.3f}", 
+                 delta=delta_text,
+                 delta_color=("normal" if r2_change >= 0 else "inverse"))
+    else:
+        st.metric("Model Fit (R²)", f"{r2:.3f}")
 with cols[2]:
     st.metric("Current Volume", f"${volume_df['Volume_USD'].iloc[-1]:,.0f}")
 with cols[3]:
     st.metric("Current Price", f"${volume_df['Price'].iloc[-1]:.4f}")
 st.markdown('</div>', unsafe_allow_html=True)
+
+# ====== POWER LAW TRENDS CHART ======
+st.markdown('<div class="title-spacing"><h2>Power Law Parameter Trends</h2></div>', unsafe_allow_html=True)
+st.divider()
+
+# Create the trends chart
+trend_fig = go.Figure()
+
+# Add Slope trace
+trend_fig.add_trace(go.Scatter(
+    x=rolling_power_law['Date'],
+    y=rolling_power_law['Slope'],
+    mode='lines',
+    name='Slope (b)',
+    line=dict(color='#00FFCC', width=2),
+    hovertemplate='<b>Date</b>: %{x|%Y-%m-%d}<br><b>Slope</b>: %{y:.3f}<extra></extra>',
+    yaxis='y'
+))
+
+# Add R² trace (secondary y-axis)
+trend_fig.add_trace(go.Scatter(
+    x=rolling_power_law['Date'],
+    y=rolling_power_law['R2'],
+    mode='lines',
+    name='R²',
+    line=dict(color='#FFA726', width=2),
+    hovertemplate='<b>Date</b>: %{x|%Y-%m-%d}<br><b>R²</b>: %{y:.3f}<extra></extra>',
+    yaxis='y2'
+))
+
+trend_fig.update_layout(
+    plot_bgcolor='#262730',
+    paper_bgcolor='#262730',
+    font_color='#e0e0e0',
+    hovermode='x unified',
+    height=500,
+    margin=dict(l=20, r=20, t=60, b=100),
+    xaxis=dict(
+        showgrid=True,
+        gridwidth=1,
+        gridcolor='rgba(255, 255, 255, 0.1)',
+        linecolor='#3A3C4A',
+        zerolinecolor='#3A3C4A',
+        title='Date'
+    ),
+    yaxis=dict(
+        title='Slope (b)',
+        showgrid=True,
+        gridwidth=1,
+        gridcolor='rgba(255, 255, 255, 0.1)',
+        linecolor='#3A3C4A',
+        zerolinecolor='#3A3C4A',
+        color='#00FFCC'
+    ),
+    yaxis2=dict(
+        title='R²',
+        overlaying='y',
+        side='right',
+        showgrid=False,
+        range=[0, 1],  # R² is always between 0 and 1
+        linecolor='#3A3C4A',
+        zeroline=False,
+        color='#FFA726'
+    ),
+    legend=dict(
+        orientation="h",
+        yanchor="bottom",
+        y=1.02,
+        xanchor="right",
+        x=1,
+        bgcolor='rgba(38, 39, 48, 0.8)'
+    ),
+    hoverlabel=dict(
+        bgcolor='#262730',
+        bordercolor='#3A3C4A',
+        font_color='#e0e0e0'
+    )
+)
+
+st.plotly_chart(trend_fig, use_container_width=True)
