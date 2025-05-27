@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 
 st.set_page_config(layout="wide")
 
-# Reuse the same CSS styling from your volume page
+# Custom CSS - matching the style of your other pages
 st.markdown("""
 <style>
     .stApp { background-color: #0E1117; }
@@ -111,46 +111,38 @@ if 'volume_df' not in st.session_state:
 volume_df = st.session_state.volume_df
 volume_df['Date'] = pd.to_datetime(volume_df['Date']).dt.normalize()
 
-# Calculate moving averages
-volume_df['MA_30_Volume'] = volume_df['Volume_USD'].rolling(30).mean()
-volume_df['MA_30_Price'] = volume_df['Price'].rolling(30).mean()
-
-# Calculate power law fits
+# Calculate power law fit for Price vs Volume
 try:
-    # Volume power law
-    a_vol, b_vol, r2_vol = fit_power_law(volume_df, y_col='Volume_USD')
-    
-    # Price power law
-    a_price, b_price, r2_price = fit_power_law(volume_df, y_col='Price')
+    a, b, r2 = fit_power_law(volume_df, x_col='Volume_USD', y_col='Price')
 except Exception as e:
     st.error(f"Failed to calculate power law: {str(e)}")
     st.stop()
 
 # ====== MAIN CHART CONTAINER ======
 with st.container():
-    st.markdown('<div class="title-spacing"><h2>Kaspa Price & Volume Power Law Analysis</h2></div>', unsafe_allow_html=True)
+    st.markdown('<div class="title-spacing"><h2>Kaspa Price vs Trading Volume Analysis</h2></div>', unsafe_allow_html=True)
     
     # First divider - under the title
     st.divider()
     
     # Dropdown container
-    col_spacer_left, col1, col2, col3, col4, col5, col6, spacer1, spacer2, spacer3, spacer4, spacer5, spacer6, spacer7 = st.columns(
-        [0.35, 1, 1, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 1]
+    col_spacer_left, col1, col2, col3, col4, col_spacer_right = st.columns(
+        [0.35, 1, 1, 1, 1, 1]
     )
 
     with col1:
-        st.markdown('<div class="control-label">Scale</div>', unsafe_allow_html=True)
-        scale_options = ["Linear", "Log"]
-        scale_type = st.selectbox("Scale", scale_options,
+        st.markdown('<div class="control-label">X-Axis Scale</div>', unsafe_allow_html=True)
+        x_scale_options = ["Linear", "Log"]
+        x_scale = st.selectbox("X-Axis Scale", x_scale_options,
                                index=1,
-                               label_visibility="collapsed", key="scale_select")
+                               label_visibility="collapsed", key="x_scale_select")
 
     with col2:
-        st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
-        x_scale_options = ["Linear", "Log"]
-        x_scale_type = st.selectbox("Time Scale", x_scale_options,
-                                index=0,
-                                label_visibility="collapsed", key="x_scale_select")
+        st.markdown('<div class="control-label">Y-Axis Scale</div>', unsafe_allow_html=True)
+        y_scale_options = ["Linear", "Log"]
+        y_scale = st.selectbox("Y-Axis Scale", y_scale_options,
+                                index=1,
+                                label_visibility="collapsed", key="y_scale_select")
 
     with col3:
         st.markdown('<div class="control-label">Period</div>', unsafe_allow_html=True)
@@ -160,25 +152,11 @@ with st.container():
                                   label_visibility="collapsed", key="time_range_select")
 
     with col4:
-        st.markdown('<div class="control-label">Volume Power Law</div>', unsafe_allow_html=True)
-        vol_pl_options = ["Hide", "Show"]
-        show_vol_pl = st.selectbox("Volume Power Law", vol_pl_options,
-                                      index=0,
-                                      label_visibility="collapsed", key="vol_pl_select")
-    
-    with col5:
-        st.markdown('<div class="control-label">Price Power Law</div>', unsafe_allow_html=True)
-        price_pl_options = ["Hide", "Show"]
-        show_price_pl = st.selectbox("Price Power Law", price_pl_options,
-                                 index=0,
-                                 label_visibility="collapsed", key="price_pl_select")
-    
-    with col6:
-        st.markdown('<div class="control-label">30D MA</div>', unsafe_allow_html=True)
-        ma30_options = ["Hide", "Show"]
-        show_ma30 = st.selectbox("30D MA", ma30_options,
-                                 index=0,
-                                 label_visibility="collapsed", key="ma30_select")
+        st.markdown('<div class="control-label">Power Law Fit</div>', unsafe_allow_html=True)
+        power_law_options = ["Hide", "Show"]
+        show_power_law = st.selectbox("Power Law Fit", power_law_options,
+                                      index=1,  # Default to shown
+                                      label_visibility="collapsed", key="power_law_select")
     
     # Second divider - under the dropdown menus
     st.divider()
@@ -202,110 +180,67 @@ with st.container():
 
     fig = go.Figure()
 
-    if x_scale_type == "Log":
-        x_values = filtered_df['days_from_genesis']
-        x_title = "Days Since Genesis (Log Scale)"
-        tickformat = None
-        hoverformat = None
-    else:
-        x_values = filtered_df['Date']
-        x_title = "Date"
-        tickformat = "%b %Y"
-        hoverformat = "%b %d, %Y"
-
-    # Add Volume trace (primary y-axis)
+    # Add scatter plot of Price vs Volume
     fig.add_trace(go.Scatter(
-        x=x_values,
-        y=filtered_df['Volume_USD'],
-        mode='lines',
-        name='Volume (USD)',
-        line=dict(color='#00FFCC', width=2),
-        hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Volume</b>: $%{y:,.0f}<extra></extra>',
-        text=filtered_df['Date'],
-        yaxis='y'
-    ))
-
-    # Add Price trace (secondary y-axis)
-    fig.add_trace(go.Scatter(
-        x=x_values,
+        x=filtered_df['Volume_USD'],
         y=filtered_df['Price'],
-        mode='lines',
-        name='Price (USD)',
-        line=dict(color='#FFA726', width=2),
-        hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Price</b>: $%{y:.4f}<extra></extra>',
-        text=filtered_df['Date'],
-        yaxis='y2'
+        mode='markers',
+        name='Daily Price vs Volume',
+        marker=dict(
+            color='#00FFCC',
+            size=8,
+            opacity=0.7,
+            line=dict(width=1, color='DarkSlateGrey')
+        ),
+        hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Volume</b>: $%{x:,.0f}<br><b>Price</b>: $%{y:.4f}<extra></extra>',
+        text=filtered_df['Date']
     ))
 
-    # Add moving averages if enabled
-    if show_ma30 == "Show":
-        fig.add_trace(go.Scatter(
-            x=x_values,
-            y=filtered_df['MA_30_Volume'],
-            mode='lines',
-            name='30D MA Volume',
-            line=dict(color='#00FFCC', width=1.5, dash='dash'),
-            hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>30D MA Volume</b>: $%{y:,.0f}<extra></extra>',
-            text=filtered_df['Date']
-        ))
+    # Add power law fit if enabled
+    if show_power_law == "Show":
+        x_fit = np.linspace(filtered_df['Volume_USD'].min(), filtered_df['Volume_USD'].max(), 100)
+        y_fit = a * np.power(x_fit, b)
         
         fig.add_trace(go.Scatter(
-            x=x_values,
-            y=filtered_df['MA_30_Price'],
+            x=x_fit,
+            y=y_fit,
             mode='lines',
-            name='30D MA Price',
-            line=dict(color='#FFA726', width=1.5, dash='dash'),
-            hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>30D MA Price</b>: $%{y:.4f}<extra></extra>',
-            text=filtered_df['Date'],
-            yaxis='y2'
+            name=f'Power-Law Fit (R²={r2:.3f})',
+            line=dict(color='#FFA726', width=3),
+            hovertemplate='<b>Volume</b>: $%{x:,.0f}<br><b>Predicted Price</b>: $%{y:.4f}<extra></extra>'
         ))
 
-    # Add power law fits if enabled
-    if show_vol_pl == "Show":
-        x_fit = filtered_df['days_from_genesis']
-        y_fit_vol = a_vol * np.power(x_fit, b_vol)
-        fit_x = x_fit if x_scale_type == "Log" else filtered_df['Date']
-
+        # Add confidence bands
         fig.add_trace(go.Scatter(
-            x=fit_x,
-            y=y_fit_vol,
+            x=x_fit,
+            y=y_fit * 0.5,
             mode='lines',
-            name=f'Volume Power-Law (R²={r2_vol:.3f})',
-            line=dict(color='#00FFCC', dash='dot', width=1.5)
+            name='-50% Deviation',
+            line=dict(color='rgba(255, 255, 255, 0.5)', width=1, dash='dot'),
+            hoverinfo='skip'
         ))
-
-    if show_price_pl == "Show":
-        x_fit = filtered_df['days_from_genesis']
-        y_fit_price = a_price * np.power(x_fit, b_price)
-        fit_x = x_fit if x_scale_type == "Log" else filtered_df['Date']
-
         fig.add_trace(go.Scatter(
-            x=fit_x,
-            y=y_fit_price,
+            x=x_fit,
+            y=y_fit * 1.5,
             mode='lines',
-            name=f'Price Power-Law (R²={r2_price:.3f})',
-            line=dict(color='#FFA726', dash='dot', width=1.5),
-            yaxis='y2'
+            name='+50% Deviation',
+            line=dict(color='rgba(255, 255, 255, 0.5)', width=1, dash='dot'),
+            hoverinfo='skip',
+            fill='tonexty',
+            fillcolor='rgba(100, 100, 100, 0.2)'
         ))
 
     fig.update_layout(
         plot_bgcolor='#262730',
         paper_bgcolor='#262730',
         font_color='#e0e0e0',
-        hovermode='x unified',
+        hovermode='closest',
         height=700,
         margin=dict(l=20, r=20, t=60, b=100),
-        yaxis_title='Volume (USD)',
-        xaxis_title=x_title,
+        xaxis_title='Trading Volume (USD)',
+        yaxis_title='Price (USD)',
         xaxis=dict(
-            rangeslider=dict(
-                visible=True,
-                thickness=0.1,
-                bgcolor='#262730',
-                bordercolor="#3A3C4A",
-                borderwidth=1
-            ),
-            type="log" if x_scale_type == "Log" else None,
+            type="log" if x_scale == "Log" else "linear",
             showgrid=True,
             gridwidth=1,
             gridcolor='rgba(255, 255, 255, 0.1)',
@@ -314,12 +249,11 @@ with st.container():
                 gridcolor='rgba(255, 255, 255, 0.05)',
                 gridwidth=0.5
             ),
-            tickformat=tickformat,
             linecolor='#3A3C4A',
             zerolinecolor='#3A3C4A'
         ),
         yaxis=dict(
-            type="log" if scale_type == "Log" else "linear",
+            type="log" if y_scale == "Log" else "linear",
             showgrid=True,
             gridwidth=1,
             gridcolor='rgba(255, 255, 255, 0.1)',
@@ -329,18 +263,7 @@ with st.container():
                 gridwidth=0.5
             ),
             linecolor='#3A3C4A',
-            zerolinecolor='#3A3C4A',
-            color='#00FFCC'
-        ),
-        yaxis2=dict(
-            title='Price (USD)',
-            overlaying='y',
-            side='right',
-            type="log" if scale_type == "Log" else "linear",
-            showgrid=False,
-            linecolor='#FFA726',
-            zeroline=False,
-            color='#FFA726'
+            zerolinecolor='#3A3C4A'
         ),
         legend=dict(
             orientation="h",
@@ -361,17 +284,13 @@ with st.container():
 
 # Stats
 st.markdown('<div class="metrics-container">', unsafe_allow_html=True)
-cols = st.columns(6)
+cols = st.columns(4)
 with cols[0]:
-    st.metric("Volume Power-Law Slope", f"{b_vol:.3f}")
+    st.metric("Power-Law Slope", f"{b:.3f}")
 with cols[1]:
-    st.metric("Volume Model Fit (R²)", f"{r2_vol:.3f}")
+    st.metric("Model Fit (R²)", f"{r2:.3f}")
 with cols[2]:
     st.metric("Current Volume", f"${volume_df['Volume_USD'].iloc[-1]:,.0f}")
 with cols[3]:
-    st.metric("Price Power-Law Slope", f"{b_price:.3f}")
-with cols[4]:
-    st.metric("Price Model Fit (R²)", f"{r2_price:.3f}")
-with cols[5]:
     st.metric("Current Price", f"${volume_df['Price'].iloc[-1]:.4f}")
 st.markdown('</div>', unsafe_allow_html=True)
