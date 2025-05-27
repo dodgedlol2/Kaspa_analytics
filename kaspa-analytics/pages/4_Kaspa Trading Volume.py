@@ -138,9 +138,11 @@ def calculate_rolling_power_law(df, window=365):
             results.append({
                 'Date': window_df['Date'].iloc[-1],
                 'Slope': b,
-                'R2': r2
+                'R2': r2,
+                'Intercept': a
             })
-        except:
+        except Exception as e:
+            print(f"Error calculating power law for window ending {window_df['Date'].iloc[-1]}: {str(e)}")
             pass
     return pd.DataFrame(results)
 
@@ -499,3 +501,74 @@ trend_fig.update_layout(
 )
 
 st.plotly_chart(trend_fig, use_container_width=True)
+
+# ====== LOG-LOG PLOT ======
+st.markdown('<div class="title-spacing"><h2>Log-Log Plot of Trading Volume</h2></div>', unsafe_allow_html=True)
+st.divider()
+
+# Create log-log plot
+log_fig = go.Figure()
+
+# Add actual data points
+log_fig.add_trace(go.Scatter(
+    x=volume_df['days_from_genesis'],
+    y=volume_df['Volume_USD'],
+    mode='markers',
+    name='Volume Data',
+    marker=dict(color='#00FFCC', size=5, opacity=0.7),
+    hovertemplate='<b>Days</b>: %{x}<br><b>Volume</b>: $%{y:,.0f}<extra></extra>'
+))
+
+# Add power law fit line
+x_fit = np.linspace(volume_df['days_from_genesis'].min(), volume_df['days_from_genesis'].max(), 100)
+y_fit = a * np.power(x_fit, b)
+
+log_fig.add_trace(go.Scatter(
+    x=x_fit,
+    y=y_fit,
+    mode='lines',
+    name=f'Power-Law Fit (R²={r2:.3f})',
+    line=dict(color='#FFA726', width=3),
+    hovertemplate='<b>Days</b>: %{x}<br><b>Fit</b>: $%{y:,.0f}<extra></extra>'
+))
+
+log_fig.update_layout(
+    plot_bgcolor='#262730',
+    paper_bgcolor='#262730',
+    font_color='#e0e0e0',
+    height=500,
+    margin=dict(l=20, r=20, t=60, b=100),
+    xaxis=dict(
+        type='log',
+        title='Days Since Genesis (Log Scale)',
+        showgrid=True,
+        gridwidth=1,
+        gridcolor='rgba(255, 255, 255, 0.1)',
+        linecolor='#3A3C4A',
+        zerolinecolor='#3A3C4A'
+    ),
+    yaxis=dict(
+        type='log',
+        title='Volume (USD, Log Scale)',
+        showgrid=True,
+        gridwidth=1,
+        gridcolor='rgba(255, 255, 255, 0.1)',
+        linecolor='#3A3C4A',
+        zerolinecolor='#3A3C4A'
+    ),
+    legend=dict(
+        orientation="h",
+        yanchor="bottom",
+        y=1.02,
+        xanchor="right",
+        x=1,
+        bgcolor='rgba(38, 39, 48, 0.8)'
+    ),
+    hoverlabel=dict(
+        bgcolor='#262730',
+        bordercolor='#3A3C4A',
+        font_color='#e0e0e0'
+    )
+)
+
+st.plotly_chart(log_fig, use_container_width=True)
