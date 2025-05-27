@@ -2,8 +2,8 @@ import streamlit as st
 import plotly.graph_objects as go
 import numpy as np
 import pandas as pd
-from utils import fit_power_law, load_data, load_price_data
 from datetime import datetime, timedelta
+from utils import fit_power_law, load_data, load_price_data
 
 st.set_page_config(layout="wide")
 
