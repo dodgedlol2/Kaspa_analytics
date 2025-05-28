@@ -36,7 +36,7 @@ st.markdown("""
     .stApp { 
         background-color: #1A1D26;
         overflow: hidden;
-        padding-top: 56.7px !important;
+        padding-top: 90px !important;
     }
     
     /* Main container adjustments */
