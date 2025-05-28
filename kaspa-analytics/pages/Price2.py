@@ -24,17 +24,18 @@ except Exception as e:
     st.error(f"Failed to calculate price power law: {str(e)}")
     st.stop()
 
-# Custom CSS - updated with new background color and removed borders
+# Custom CSS - updated with tighter spacing
 st.markdown("""
 <style>
     .stApp { background-color: #1A1D26; }
     .st-emotion-cache-6qob1r, .sidebar-content { background-color: #1A1D26 !important; }
-    .title-spacing { padding-left: 40px; margin-bottom: 15px; }
+    .title-spacing { padding-left: 10px; margin-bottom: 10px; }
     div[data-testid="stVerticalBlock"] > div[data-testid="stVerticalBlockBorderWrapper"] {
         background-color: #1A1D26 !important;
         border-radius: 0 !important;
         border: none !important;
         padding: 0 !important;
+        margin: 0 !important;
     }
     div[data-testid="stMetric"] {
         background-color: #1A1D26 !important;
@@ -57,9 +58,9 @@ st.markdown("""
     .hovertext text.hovertext { fill: #e0e0e0 !important; }
     .range-slider .handle:after { background-color: #00FFCC !important; }
     .metrics-container {
-        width: calc(100% - 40px) !important;
-        margin-left: 20px !important;
-        margin-right: 20px !important;
+        width: calc(100% - 20px) !important;
+        margin-left: 10px !important;
+        margin-right: 10px !important;
         margin-top: 10px !important;
         margin-bottom: 0px !important;
     }
@@ -114,6 +115,21 @@ st.markdown("""
     .stSelectbox [data-baseweb="select"] > div:has(> div[aria-selected="true"]) > div {
         color: #00FFCC !important;
     }
+    /* New styles for full-width chart */
+    .stPlotlyChart {
+        width: 100% !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+    .element-container {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+    .main .block-container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+        max-width: 100%;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -121,10 +137,8 @@ st.markdown("""
 with st.container():
     st.markdown('<div class="title-spacing"><h2>Kaspa Price Analysis</h2></div>', unsafe_allow_html=True)
     
-    # Dropdown container
-    col_spacer_left, col1, col2, col3, col4, spacer1, spacer2, spacer3, spacer4, spacer5, spacer6, spacer7, spacer8, spacer9 = st.columns(
-        [0.35, 1, 1, 1, 1, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 3]
-    )
+    # Dropdown container - tighter spacing
+    col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
 
     with col1:
         st.markdown('<div class="control-label">Price Scale</div>', unsafe_allow_html=True)
@@ -235,7 +249,7 @@ with st.container():
         font_color='#e0e0e0',
         hovermode='x unified',
         height=700,
-        margin=dict(l=20, r=20, t=60, b=100),
+        margin=dict(l=0, r=0, t=60, b=100),  # Reduced side margins to 0
         yaxis_title='Price (USD)',
         xaxis_title=x_title,
         xaxis=dict(
