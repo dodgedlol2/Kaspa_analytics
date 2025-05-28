@@ -115,7 +115,7 @@ with st.container():
     st.markdown('<div class="title-spacing"><h2>Kaspa Price</h2></div>', unsafe_allow_html=True)
     
     # Dropdown container - Added spacers as requested
-    spacer_left, col1, col2, col3, col4, spacer_right1, spacer_right2, spacer_right3 = st.columns([0.1, 1, 1, 1, 1, 0.5, 0.5, 5])
+    spacer_left, col1, col2, col3, col4, spacer_right1, spacer_right2, spacer_right3 = st.columns([0.1, 1, 1, 1, 1, 0.5, 0.5, 7])
 
     with col1:
         st.markdown('<div class="control-label">Price Scale</div>', unsafe_allow_html=True)
