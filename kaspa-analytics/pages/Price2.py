@@ -24,7 +24,7 @@ except Exception as e:
     st.error(f"Failed to calculate price power law: {str(e)}")
     st.stop()
 
-# Custom CSS - more aggressive spacing removal
+# Custom CSS with top padding adjustment
 st.markdown("""
 <style>
     /* Reset all margins and padding */
@@ -36,6 +36,7 @@ st.markdown("""
     .stApp { 
         background-color: #1A1D26;
         overflow: hidden;
+        padding-top: 56.7px !important;
     }
     
     /* Main container adjustments */
@@ -73,6 +74,7 @@ st.markdown("""
     
     /* Title spacing */
     .title-spacing { 
+        padding-top: 10px !important;
         padding-left: 10px !important; 
         margin-bottom: 10px !important;
     }
@@ -112,7 +114,7 @@ st.markdown("""
 with st.container():
     st.markdown('<div class="title-spacing"><h2>Kaspa Price Analysis</h2></div>', unsafe_allow_html=True)
     
-    # Dropdown container - tighter spacing
+    # Dropdown container
     col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
 
     with col1:
@@ -285,7 +287,7 @@ with st.container():
         )
     )
 
-    # Display the chart with full width and visible controls
+    # Display the chart
     st.plotly_chart(fig, use_container_width=True, config={
         'displayModeBar': True,
         'displaylogo': False,
