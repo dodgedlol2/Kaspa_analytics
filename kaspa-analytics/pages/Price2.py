@@ -167,7 +167,7 @@ with st.container():
         st.markdown('<div class="control-label">Power Law Fit</div>', unsafe_allow_html=True)
         power_law_options = ["Hide", "Show"]
         show_power_law = st.selectbox("Power Law Fit", power_law_options,
-                                      index=0,
+                                      index=1,  # Changed to default to "Show"
                                       label_visibility="collapsed", key="price_power_law_select")
 
     last_date = price_df['Date'].iloc[-1]
@@ -199,6 +199,17 @@ with st.container():
         tickformat = "%b %Y"
         hoverformat = "%b %d, %Y"
 
+    # Add price trace
+    fig.add_trace(go.Scatter(
+        x=x_values,
+        y=filtered_df['Price'],
+        mode='lines',
+        name='Price',
+        line=dict(color='#00FFCC', width=2.5),
+        hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Price</b>: $%{y:.4f}<extra></extra>',
+        text=filtered_df['Date']
+    ))
+
     if show_power_law == "Show":
         x_fit = filtered_df['days_from_genesis']
         y_fit = a_price * np.power(x_fit, b_price)
@@ -209,8 +220,9 @@ with st.container():
             y=y_fit,
             mode='lines',
             name=f'Power-Law Fit (R²={r2_price:.3f})',
-            line=dict(color='#FFA726', dash='dot', width=2)
-        ))
+            line=dict(color='#FFA726', dash='dot', width=2),
+            visible=True  # Ensure it's visible by default
+        )
 
         fig.add_trace(go.Scatter(
             x=fit_x,
@@ -219,7 +231,8 @@ with st.container():
             name='-60% Deviation',
             line=dict(color='rgba(255, 255, 255, 0.5)', dash='dot', width=1),
             hoverinfo='skip',
-            fill=None
+            fill=None,
+            visible=True  # Ensure it's visible by default
         ))
         fig.add_trace(go.Scatter(
             x=fit_x,
@@ -229,7 +242,8 @@ with st.container():
             line=dict(color='rgba(255, 255, 255, 0.5)', dash='dot', width=1),
             hoverinfo='skip',
             fill='tonexty',
-            fillcolor='rgba(100, 100, 100, 0.2)'
+            fillcolor='rgba(100, 100, 100, 0.2)',
+            visible=True  # Ensure it's visible by default
         ))
 
     fig.update_layout(
@@ -238,8 +252,8 @@ with st.container():
         font_color='#e0e0e0',
         hovermode='x unified',
         height=700,
-        margin=dict(l=0, r=0, t=60, b=100),  # Reduced side margins to 0
-        yaxis_title='Price (USD)',
+        margin=dict(l=0, r=0, t=60, b=100),
+        yaxis_title='',
         xaxis_title=x_title,
         xaxis=dict(
             rangeslider=dict(
