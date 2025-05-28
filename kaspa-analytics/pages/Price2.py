@@ -24,7 +24,7 @@ except Exception as e:
     st.error(f"Failed to calculate price power law: {str(e)}")
     st.stop()
 
-# Custom CSS - updated with new background color
+# Custom CSS - updated with new background color and removed borders
 st.markdown("""
 <style>
     .stApp { background-color: #1A1D26; }
@@ -32,9 +32,9 @@ st.markdown("""
     .title-spacing { padding-left: 40px; margin-bottom: 15px; }
     div[data-testid="stVerticalBlock"] > div[data-testid="stVerticalBlockBorderWrapper"] {
         background-color: #1A1D26 !important;
-        border-radius: 10px !important;
-        border: 1px solid #3A3C4A !important;
-        padding: 15px !important;
+        border-radius: 0 !important;
+        border: none !important;
+        padding: 0 !important;
     }
     div[data-testid="stMetric"] {
         background-color: #1A1D26 !important;
