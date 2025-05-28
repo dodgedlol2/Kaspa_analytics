@@ -228,7 +228,7 @@ with st.container():
         font_color='#e0e0e0',
         hovermode='x unified',
         height=700,
-        margin=dict(l=0, r=0, t=60, b=100),
+        margin=dict(l=0, r=40, t=60, b=100),
         yaxis_title='',
         xaxis_title=x_title,
         xaxis=dict(
