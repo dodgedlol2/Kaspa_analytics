@@ -24,7 +24,7 @@ except Exception as e:
     st.error(f"Failed to calculate price power law: {str(e)}")
     st.stop()
 
-# Custom CSS - more aggressive spacing removal
+# Custom CSS - improved dropdown styling
 st.markdown("""
 <style>
     /* Reset all margins and padding */
@@ -106,34 +106,58 @@ st.markdown("""
         padding-right: 0 !important;
     }
     
-    /* Custom selectbox styling */
-    div[data-baseweb="select"] > div:first-child {
-        border: 1px solid #3A3C4A !important;
+    /* Improved Selectbox Styling */
+    div[data-baseweb="select"] > div {
         background-color: #1A1D26 !important;
-        color: #e0e0e0 !important;
+        border: 1px solid #3A3C4A !important;
         border-radius: 4px !important;
+    }
+    
+    /* Selectbox value text */
+    div[data-baseweb="select"] > div > div > div {
+        color: #e0e0e0 !important;
+        font-size: 14px !important;
         padding: 8px 12px !important;
     }
     
-    div[data-baseweb="select"] > div:first-child:hover {
-        border-color: #00FFCC !important;
-    }
-    
-    div[data-baseweb="select"] > div:first-child > div:first-child {
+    /* Dropdown arrow */
+    div[data-baseweb="select"] > div > div:last-child > div {
         color: #e0e0e0 !important;
     }
     
+    /* Dropdown menu */
     div[data-baseweb="popover"] {
         background-color: #1A1D26 !important;
         border: 1px solid #3A3C4A !important;
+        border-radius: 4px !important;
     }
     
+    /* Dropdown options */
     li[role="option"] {
         color: #e0e0e0 !important;
+        font-size: 14px !important;
+        padding: 10px 12px !important;
     }
     
     li[role="option"]:hover {
         background-color: #2A2D38 !important;
+    }
+    
+    /* Focus/hover states */
+    div[data-baseweb="select"] > div:hover {
+        border-color: #00FFCC !important;
+    }
+    
+    div[data-baseweb="select"] > div:focus-within {
+        border-color: #00FFCC !important;
+        box-shadow: 0 0 0 1px #00FFCC !important;
+    }
+    
+    /* Make all selectboxes same height */
+    .stSelectbox > div > div > div {
+        min-height: 38px !important;
+        display: flex !important;
+        align-items: center !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -146,48 +170,37 @@ with st.container():
     col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
 
     with col1:
-        y_scale_options = {"Linear": "linear", "Log": "log"}
-        y_scale_label = "Price Scale: "
         y_scale = st.selectbox(
-            y_scale_label,
-            options=list(y_scale_options.keys()),
+            "Price Scale",
+            options=["Linear", "Log"],
             index=1 if st.session_state.get("price_y_scale", True) else 0,
-            label_visibility="collapsed",
             key="price_y_scale_select"
         )
 
     with col2:
-        x_scale_options = {"Linear": "linear", "Log": "log"}
-        x_scale_label = "Time Scale: "
         x_scale_type = st.selectbox(
-            x_scale_label,
-            options=list(x_scale_options.keys()),
+            "Time Scale",
+            options=["Linear", "Log"],
             index=0,
-            label_visibility="collapsed",
             key="price_x_scale_select"
         )
 
     with col3:
-        time_ranges = {"1W": "1W", "1M": "1M", "3M": "3M", "6M": "6M", "1Y": "1Y", "All": "All"}
-        time_range_label = "Period: "
+        time_ranges = ["1W", "1M", "3M", "6M", "1Y", "All"]
         if 'price_time_range' not in st.session_state:
             st.session_state.price_time_range = "All"
         time_range = st.selectbox(
-            time_range_label,
-            options=list(time_ranges.keys()),
-            index=list(time_ranges.keys()).index(st.session_state.price_time_range),
-            label_visibility="collapsed",
+            "Period",
+            options=time_ranges,
+            index=time_ranges.index(st.session_state.price_time_range),
             key="price_time_range_select"
         )
 
     with col4:
-        power_law_options = {"Hide": "Hide", "Show": "Show"}
-        power_law_label = "Power Law Fit: "
         show_power_law = st.selectbox(
-            power_law_label,
-            options=list(power_law_options.keys()),
+            "Power Law Fit",
+            options=["Hide", "Show"],
             index=0,
-            label_visibility="collapsed",
             key="price_power_law_select"
         )
 
