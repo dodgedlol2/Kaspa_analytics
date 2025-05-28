@@ -75,7 +75,7 @@ st.markdown("""
     /* Title spacing */
     .title-spacing { 
         padding-top: 50px !important;
-        padding-left: 30px !important; 
+        padding-left: 60px !important; 
         margin-bottom: 10px !important;
     }
     
@@ -112,7 +112,7 @@ st.markdown("""
 
 # ====== MAIN CHART CONTAINER ======
 with st.container():
-    st.markdown('<div class="title-spacing"><h2>Kaspa Price Analysis</h2></div>', unsafe_allow_html=True)
+    st.markdown('<div class="title-spacing"><h2>Kaspa Price</h2></div>', unsafe_allow_html=True)
     
     # Dropdown container
     col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
