@@ -204,10 +204,11 @@ with st.container():
         x=x_values,
         y=filtered_df['Price'],
         mode='lines',
-        name='Price (USD)',
+        name='Price',
         line=dict(color='#00FFCC', width=2.5),
         hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Price</b>: $%{y:.4f}<extra></extra>',
-        text=filtered_df['Date']
+        text=filtered_df['Date'],
+        showlegend=True
     ))
 
     if show_power_law == "Show":
@@ -220,7 +221,8 @@ with st.container():
             y=y_fit,
             mode='lines',
             name=f'Power-Law Fit (R²={r2_price:.3f})',
-            line=dict(color='#FFA726', dash='dot', width=2)
+            line=dict(color='#FFA726', dash='dot', width=2),
+            showlegend=True
         ))
 
         fig.add_trace(go.Scatter(
@@ -230,7 +232,8 @@ with st.container():
             name='-60% Deviation',
             line=dict(color='rgba(255, 255, 255, 0.5)', dash='dot', width=1),
             hoverinfo='skip',
-            fill=None
+            fill=None,
+            showlegend=True
         ))
         fig.add_trace(go.Scatter(
             x=fit_x,
@@ -240,7 +243,8 @@ with st.container():
             line=dict(color='rgba(255, 255, 255, 0.5)', dash='dot', width=1),
             hoverinfo='skip',
             fill='tonexty',
-            fillcolor='rgba(100, 100, 100, 0.2)'
+            fillcolor='rgba(100, 100, 100, 0.2)',
+            showlegend=True
         ))
 
     fig.update_layout(
@@ -250,7 +254,7 @@ with st.container():
         hovermode='x unified',
         height=700,
         margin=dict(l=0, r=0, t=60, b=100),  # Reduced side margins to 0
-        yaxis_title='Price (USD)',
+        yaxis_title='',
         xaxis_title=x_title,
         xaxis=dict(
             rangeslider=dict(
