@@ -199,17 +199,6 @@ with st.container():
         tickformat = "%b %Y"
         hoverformat = "%b %d, %Y"
 
-    # Add price trace
-    fig.add_trace(go.Scatter(
-        x=x_values,
-        y=filtered_df['Price'],
-        mode='lines',
-        name='Price (USD)',
-        line=dict(color='#00FFCC', width=2.5),
-        hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Price</b>: $%{y:.4f}<extra></extra>',
-        text=filtered_df['Date']
-    ))
-
     if show_power_law == "Show":
         x_fit = filtered_df['days_from_genesis']
         y_fit = a_price * np.power(x_fit, b_price)
