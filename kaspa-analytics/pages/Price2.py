@@ -105,6 +105,36 @@ st.markdown("""
         padding-left: 0 !important;
         padding-right: 0 !important;
     }
+    
+    /* Custom selectbox styling */
+    div[data-baseweb="select"] > div:first-child {
+        border: 1px solid #3A3C4A !important;
+        background-color: #1A1D26 !important;
+        color: #e0e0e0 !important;
+        border-radius: 4px !important;
+        padding: 8px 12px !important;
+    }
+    
+    div[data-baseweb="select"] > div:first-child:hover {
+        border-color: #00FFCC !important;
+    }
+    
+    div[data-baseweb="select"] > div:first-child > div:first-child {
+        color: #e0e0e0 !important;
+    }
+    
+    div[data-baseweb="popover"] {
+        background-color: #1A1D26 !important;
+        border: 1px solid #3A3C4A !important;
+    }
+    
+    li[role="option"] {
+        color: #e0e0e0 !important;
+    }
+    
+    li[role="option"]:hover {
+        background-color: #2A2D38 !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -116,34 +146,50 @@ with st.container():
     col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
 
     with col1:
-        st.markdown('<div class="control-label">Price Scale</div>', unsafe_allow_html=True)
-        y_scale_options = ["Linear", "Log"]
-        y_scale = st.selectbox("Price Scale", y_scale_options,
-                             index=1 if st.session_state.get("price_y_scale", True) else 0,
-                             label_visibility="collapsed", key="price_y_scale_select")
+        y_scale_options = {"Linear": "linear", "Log": "log"}
+        y_scale_label = "Price Scale: "
+        y_scale = st.selectbox(
+            y_scale_label,
+            options=list(y_scale_options.keys()),
+            index=1 if st.session_state.get("price_y_scale", True) else 0,
+            label_visibility="collapsed",
+            key="price_y_scale_select"
+        )
 
     with col2:
-        st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
-        x_scale_options = ["Linear", "Log"]
-        x_scale_type = st.selectbox("Time Scale", x_scale_options,
-                                  index=0,
-                                  label_visibility="collapsed", key="price_x_scale_select")
+        x_scale_options = {"Linear": "linear", "Log": "log"}
+        x_scale_label = "Time Scale: "
+        x_scale_type = st.selectbox(
+            x_scale_label,
+            options=list(x_scale_options.keys()),
+            index=0,
+            label_visibility="collapsed",
+            key="price_x_scale_select"
+        )
 
     with col3:
-        st.markdown('<div class="control-label">Period</div>', unsafe_allow_html=True)
-        time_ranges = ["1W", "1M", "3M", "6M", "1Y", "All"]
+        time_ranges = {"1W": "1W", "1M": "1M", "3M": "3M", "6M": "6M", "1Y": "1Y", "All": "All"}
+        time_range_label = "Period: "
         if 'price_time_range' not in st.session_state:
             st.session_state.price_time_range = "All"
-        time_range = st.selectbox("Time Range", time_ranges,
-                                index=time_ranges.index(st.session_state.price_time_range),
-                                label_visibility="collapsed", key="price_time_range_select")
+        time_range = st.selectbox(
+            time_range_label,
+            options=list(time_ranges.keys()),
+            index=list(time_ranges.keys()).index(st.session_state.price_time_range),
+            label_visibility="collapsed",
+            key="price_time_range_select"
+        )
 
     with col4:
-        st.markdown('<div class="control-label">Power Law Fit</div>', unsafe_allow_html=True)
-        power_law_options = ["Hide", "Show"]
-        show_power_law = st.selectbox("Power Law Fit", power_law_options,
-                                    index=0,
-                                    label_visibility="collapsed", key="price_power_law_select")
+        power_law_options = {"Hide": "Hide", "Show": "Show"}
+        power_law_label = "Power Law Fit: "
+        show_power_law = st.selectbox(
+            power_law_label,
+            options=list(power_law_options.keys()),
+            index=0,
+            label_visibility="collapsed",
+            key="price_power_law_select"
+        )
 
     last_date = price_df['Date'].iloc[-1]
     if time_range == "1W":
