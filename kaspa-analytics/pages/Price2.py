@@ -35,7 +35,7 @@ st.markdown("""
     
     /* Chart container with right padding */
     .stPlotlyChart {
-        width: calc(100% - 1.5cm) !important;
+        width: calc(100% - 0.1cm) !important;
         margin-right: 0.1cm !important;
         padding-left: 0 !important;
         padding-right: 0 !important;
