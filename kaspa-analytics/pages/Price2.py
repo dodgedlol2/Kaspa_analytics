@@ -24,7 +24,7 @@ except Exception as e:
     st.error(f"Failed to calculate price power law: {str(e)}")
     st.stop()
 
-# Custom CSS - updated with tighter spacing
+# Custom CSS - updated with tighter spacing and chart adjustments
 st.markdown("""
 <style>
     .stApp { background-color: #1A1D26; }
@@ -115,7 +115,7 @@ st.markdown("""
     .stSelectbox [data-baseweb="select"] > div:has(> div[aria-selected="true"]) > div {
         color: #00FFCC !important;
     }
-    /* New styles for full-width chart */
+    /* Chart container styles */
     .stPlotlyChart {
         width: 100% !important;
         padding-left: 0 !important;
@@ -126,9 +126,24 @@ st.markdown("""
         padding-right: 0 !important;
     }
     .main .block-container {
-        padding-left: 1rem;
-        padding-right: 1rem;
-        max-width: 100%;
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+        max-width: 100% !important;
+    }
+    /* Make modebar always visible */
+    .modebar {
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    /* Remove any remaining padding */
+    .st-emotion-cache-1v0mbdj {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+    /* Adjust legend position */
+    .legend {
+        left: 20px !important;
+        right: auto !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -294,18 +309,29 @@ with st.container():
             orientation="h",
             yanchor="bottom",
             y=1.02,
-            xanchor="right",
-            x=1,
+            xanchor="left",
+            x=0,
             bgcolor='rgba(26, 29, 38, 0.8)'
         ),
         hoverlabel=dict(
             bgcolor='#1A1D26',
             bordercolor='#3A3C4A',
             font_color='#e0e0e0'
+        ),
+        modebar=dict(
+            bgcolor='rgba(26, 29, 38, 0.8)',
+            color='#e0e0e0',
+            activecolor='#00FFCC'
         )
     )
 
-    st.plotly_chart(fig, use_container_width=True)
+    # Display the chart with config to make controls always visible
+    st.plotly_chart(fig, use_container_width=True, config={
+        'displayModeBar': True,
+        'displaylogo': False,
+        'modeBarButtonsToRemove': ['lasso2d', 'select2d'],
+        'modeBarButtonsToAdd': ['hoverclosest', 'hovercompare'],
+    })
 
 # Stats
 st.markdown('<div class="metrics-container">', unsafe_allow_html=True)
