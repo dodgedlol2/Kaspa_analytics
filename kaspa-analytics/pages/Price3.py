@@ -63,6 +63,10 @@ st.markdown("""
         padding: 0 !important;
         margin: 0 !important;
     }
+    
+    #chart-container {
+        height: 700px !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -175,16 +179,20 @@ with st.container():
         'grid': {
             'vertLines': {'color': 'rgba(255, 255, 255, 0.1)'},
             'horzLines': {'color': 'rgba(255, 255, 255, 0.1)'},
-        }
+        },
+        'height': 700  # Set height here instead of in render function
     }
 
-    # Render the chart
-    renderLightweightCharts([
-        {
-            'chart': chartOptions,
-            'series': series
-        }
-    ], 'chart', height=700)
+    # Create a container for the chart with fixed height
+    chart_container = st.container()
+    with chart_container:
+        # Render the chart
+        renderLightweightCharts([
+            {
+                'chart': chartOptions,
+                'series': series
+            }
+        ], key='chart')
 
 # Metrics section
 st.markdown('<div class="metrics-container">', unsafe_allow_html=True)
