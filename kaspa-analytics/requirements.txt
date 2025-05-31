@@ -4,3 +4,4 @@ numpy>=1.26.0
 gspread>=6.0.0
 scikit-learn>=1.0.0
 plotly>=5.18.0
+lightweight-charts>=1.0.0
