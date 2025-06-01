@@ -204,8 +204,8 @@ with st.container():
     # Create the main figure
     fig = go.Figure()
 
-    # Add scatter trace for all price vs hashrate points (original teal color)
-    fig.add_trace(go.Scatter(
+    # Add scattergl trace for all price vs hashrate points (original teal color)
+    fig.add_trace(go.Scattergl(
         x=analysis_df['Hashrate_PH'],
         y=analysis_df['Price'],
         mode='markers',
@@ -220,9 +220,9 @@ with st.container():
         text=analysis_df['Date'].dt.strftime('%Y-%m-%d')
     ))
 
-    # Add colored scatter trace for last 7 points (teal to purple gradient)
+    # Add colored scattergl trace for last 7 points (teal to purple gradient)
     for i, row in last_7.iterrows():
-        fig.add_trace(go.Scatter(
+        fig.add_trace(go.Scattergl(
             x=[row['Hashrate_PH']],
             y=[row['Price']],
             mode='markers',
@@ -339,8 +339,8 @@ with st.container():
         x_title = 'Date'
         hover_template = '<b>Date</b>: %{x|%Y-%m-%d}<br><b>Ratio</b>: %{y:.6f}<extra></extra>'
     
-    # Main ratio line
-    ratio_fig.add_trace(go.Scatter(
+    # Main ratio line using scattergl
+    ratio_fig.add_trace(go.Scattergl(
         x=x_values,
         y=analysis_df['Price_Hashrate_Ratio'],
         mode='lines+markers',
@@ -351,10 +351,10 @@ with st.container():
         customdata=analysis_df['Date'].dt.strftime('%Y-%m-%d')
     ))
     
-    # Add colored markers for last 7 points
+    # Add colored markers for last 7 points using scattergl
     for i, row in last_7.iterrows():
         x_val = row['Days_Since_Genesis'] if time_scale == "Log" else row['Date']
-        ratio_fig.add_trace(go.Scatter(
+        ratio_fig.add_trace(go.Scattergl(
             x=[x_val],
             y=[row['Price_Hashrate_Ratio']],
             mode='markers',
@@ -456,4 +456,3 @@ with cols[4]:
     st.metric("Current Hashrate", f"{df['Hashrate_PH'].iloc[-1]:.2f} PH/s")
 with cols[5]:
     st.metric("Current Price", f"${price_df['Price'].iloc[-1]:.4f}")
-st.markdown('</div>', unsafe_allow_html=True)
