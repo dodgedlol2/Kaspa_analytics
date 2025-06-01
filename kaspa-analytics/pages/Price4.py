@@ -593,8 +593,7 @@ fig.update_layout(
         gridcolor='rgba(255, 255, 255, 0.08)',
         linecolor='rgba(255, 255, 255, 0.2)',
         tickfont=dict(size=12, color='#94a3b8'),
-        titlefont=dict(size=14, color='#cbd5e1'),
-        tickformat='.2e' if y_scale == "Log" else None
+        titlefont=dict(size=14, color='#cbd5e1')
     ),
     legend=dict(
         orientation="h",
