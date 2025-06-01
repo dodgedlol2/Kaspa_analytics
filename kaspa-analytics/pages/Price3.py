@@ -75,7 +75,7 @@ st.markdown("""
     /* Title spacing */
     .title-spacing { 
         padding-top: 50px !important;
-        padding-left: 60px !important; 
+        padding-left: 50px !important; 
         margin-bottom: 10px !important;
     }
     
