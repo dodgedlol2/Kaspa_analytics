@@ -278,14 +278,21 @@ with st.container():
         hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Price</b>: $%{y:.4f}<extra></extra>',
         text=filtered_df['Date'],
         showlegend=True,
-        yaxis='y'  # Explicitly assign to primary y-axis
+        yaxis='y'  # Primary y-axis for price data
     ))
 
+    # Calculate price range for y-axis scaling (only based on visible price data)
+    price_min = filtered_df['Price'].min()
+    price_max = filtered_df['Price'].max()
+    price_range = price_max - price_min
+    price_margin = price_range * 0.05  # 5% margin
+    
     if show_power_law == "Show":
         x_fit = filtered_df['days_from_genesis']
         y_fit = a_price * np.power(x_fit, b_price)
         fit_x = x_fit if x_scale_type == "Log" else filtered_df['Date']
 
+        # Power law traces use secondary y-axis to not interfere with price scaling
         fig.add_trace(go.Scatter(
             x=fit_x,
             y=y_fit,
@@ -293,7 +300,8 @@ with st.container():
             name=f'Power-Law Fit (R²={r2_price:.3f})',
             line=dict(color='#FFA726', dash='dot', width=2),
             showlegend=True,
-            yaxis='y'  # Use same y-axis as price
+            yaxis='y2',  # Secondary y-axis
+            opacity=0.8
         ))
 
         fig.add_trace(go.Scatter(
@@ -301,23 +309,25 @@ with st.container():
             y=y_fit * 0.4,
             mode='lines',
             name='-60% Deviation',
-            line=dict(color='rgba(255, 255, 255, 0.5)', dash='dot', width=1),
+            line=dict(color='rgba(255, 255, 255, 0.3)', dash='dot', width=1),
             hoverinfo='skip',
             fill=None,
             showlegend=True,
-            yaxis='y'  # Use same y-axis as price
+            yaxis='y2',  # Secondary y-axis
+            opacity=0.6
         ))
         fig.add_trace(go.Scatter(
             x=fit_x,
             y=y_fit * 2.2,
             mode='lines',
             name='+120% Deviation',
-            line=dict(color='rgba(255, 255, 255, 0.5)', dash='dot', width=1),
+            line=dict(color='rgba(255, 255, 255, 0.3)', dash='dot', width=1),
             hoverinfo='skip',
             fill='tonexty',
-            fillcolor='rgba(100, 100, 100, 0.2)',
+            fillcolor='rgba(100, 100, 100, 0.1)',
             showlegend=True,
-            yaxis='y'  # Use same y-axis as price
+            yaxis='y2',  # Secondary y-axis
+            opacity=0.6
         ))
 
     fig.update_layout(
@@ -350,8 +360,13 @@ with st.container():
             linecolor='#3A3C4A',
             zerolinecolor='#3A3C4A'
         ),
+        # Primary y-axis for price data - this will control the main scaling
         yaxis=dict(
             type="log" if y_scale == "Log" else "linear",
+            range=[
+                np.log10(price_min - price_margin) if y_scale == "Log" and price_min > price_margin else (price_min - price_margin),
+                np.log10(price_max + price_margin) if y_scale == "Log" else (price_max + price_margin)
+            ] if y_scale == "Linear" or (y_scale == "Log" and price_min > price_margin) else None,
             autorange=True,
             showgrid=True,
             gridwidth=1,
@@ -362,7 +377,19 @@ with st.container():
                 gridwidth=0.5
             ),
             linecolor='#3A3C4A',
-            zerolinecolor='#3A3C4A'
+            zerolinecolor='#3A3C4A',
+            side='left',
+            fixedrange=False  # Allow zooming on price axis
+        ),
+        # Secondary y-axis for power law traces (overlaid, invisible)
+        yaxis2=dict(
+            type="log" if y_scale == "Log" else "linear",
+            overlaying='y',
+            side='right',
+            showgrid=False,
+            showticklabels=False,  # Hide secondary axis labels
+            autorange=True,
+            fixedrange=True  # Don't allow interaction with secondary axis
         ),
         legend=dict(
             orientation="h",
