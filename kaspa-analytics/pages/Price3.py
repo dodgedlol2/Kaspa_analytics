@@ -24,7 +24,7 @@ except Exception as e:
     st.error(f"Failed to calculate price power law: {str(e)}")
     st.stop()
 
-# Custom CSS with top padding adjustment
+# Custom CSS with top padding adjustment and improved metric alignment
 st.markdown("""
 <style>
     /* Reset all margins and padding */
@@ -79,15 +79,18 @@ st.markdown("""
         margin-bottom: 10px !important;
     }
     
-    /* Metrics styling - Updated with teal color scheme */
+    /* Metrics styling - Updated with teal color scheme and improved alignment */
     div[data-testid="stMetric"] {
         background-color: #1A1D26 !important;
         border: 1px solid #00FFCC !important;
         border-radius: 12px !important;
         padding: 20px !important;
-        text-align: center !important;
+        text-align: left !important;
         box-shadow: 0 2px 8px rgba(0, 255, 204, 0.1) !important;
         transition: all 0.3s ease !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
     }
     
     div[data-testid="stMetric"]:hover {
@@ -104,6 +107,8 @@ st.markdown("""
         text-transform: uppercase !important;
         letter-spacing: 0.5px !important;
         margin-bottom: 8px !important;
+        text-align: left !important;
+        width: 100% !important;
     }
     
     /* Metric value styling */
@@ -112,13 +117,24 @@ st.markdown("""
         font-size: 24px !important;
         font-weight: 900 !important;
         line-height: 1.2 !important;
+        text-align: left !important;
+        width: 100% !important;
     }
     
-    /* Delta styling for 30-day change */
+    /* Delta styling for percentage changes */
     div[data-testid="stMetric"] div[data-testid="metric-container"] div[data-testid="metric-delta"] {
         color: #00FFCC !important;
         font-size: 16px !important;
         font-weight: 600 !important;
+        text-align: left !important;
+        width: 100% !important;
+        margin-top: 4px !important;
+    }
+    
+    /* Ensure all metric content aligns left */
+    div[data-testid="stMetric"] * {
+        text-align: left !important;
+        justify-content: flex-start !important;
     }
     
     /* Make modebar always visible */
@@ -335,21 +351,62 @@ with st.container():
         'modeBarButtonsToAdd': ['hoverclosest', 'hovercompare'],
     })
 
-# Calculate 30-day percentage change
-last_price = price_df['Price'].iloc[-1]
-thirty_days_ago = price_df['Date'].iloc[-1] - timedelta(days=30)
-price_30_days_ago = price_df[price_df['Date'] >= thirty_days_ago]['Price'].iloc[0] if len(price_df[price_df['Date'] >= thirty_days_ago]) > 0 else price_df['Price'].iloc[0]
-pct_change_30d = ((last_price - price_30_days_ago) / price_30_days_ago) * 100
+# Calculate individual metric changes over 30 days
+last_date = price_df['Date'].iloc[-1]
+thirty_days_ago = last_date - timedelta(days=30)
 
-# Stats - Updated with better spacing and alignment
+# Get data from 30 days ago (or closest available)
+df_30_days_ago = price_df[price_df['Date'] >= thirty_days_ago]
+if len(df_30_days_ago) > 0:
+    # Current values
+    current_price = price_df['Price'].iloc[-1]
+    current_slope = b_price
+    current_r2 = r2_price
+    
+    # Values from 30 days ago - recalculate power law for 30 days ago data
+    price_30_days_ago_data = price_df[price_df['Date'] <= thirty_days_ago]
+    if len(price_30_days_ago_data) > 10:  # Need sufficient data for power law fit
+        try:
+            a_price_30d, b_price_30d, r2_price_30d = fit_power_law(price_30_days_ago_data, y_col='Price')
+        except:
+            # Fallback to current values if fit fails
+            b_price_30d = current_slope
+            r2_price_30d = current_r2
+    else:
+        b_price_30d = current_slope
+        r2_price_30d = current_r2
+    
+    price_30_days_ago = df_30_days_ago['Price'].iloc[0]
+    
+    # Calculate percentage changes
+    price_pct_change = ((current_price - price_30_days_ago) / price_30_days_ago) * 100
+    slope_pct_change = ((current_slope - b_price_30d) / abs(b_price_30d)) * 100 if b_price_30d != 0 else 0
+    r2_pct_change = ((current_r2 - r2_price_30d) / r2_price_30d) * 100 if r2_price_30d != 0 else 0
+    
+else:
+    # Fallback if not enough historical data
+    price_pct_change = 0
+    slope_pct_change = 0
+    r2_pct_change = 0
+    current_price = price_df['Price'].iloc[-1]
+
+# For the 30-day change metric, we show the price change again (as it's specifically about price change)
+overall_30d_change = price_pct_change
+
+# Stats - Updated with individual logic for each metric and left alignment
 st.markdown('<div class="metrics-container">', unsafe_allow_html=True)
 spacer1, col1, col2, col3, col4, spacer2 = st.columns([0.5, 2, 2, 2, 2, 0.5])
+
 with col1:
-    st.metric("Power-Law Slope", f"{b_price:.3f}", delta=f"{pct_change_30d:+.1f}%")
+    st.metric("Power-Law Slope", f"{b_price:.3f}", delta=f"{slope_pct_change:+.1f}%")
+
 with col2:
-    st.metric("Model Fit (R²)", f"{r2_price:.3f}", delta=f"{pct_change_30d:+.1f}%")
+    st.metric("Model Fit (R²)", f"{r2_price:.3f}", delta=f"{r2_pct_change:+.1f}%")
+
 with col3:
-    st.metric("Current Price", f"${price_df['Price'].iloc[-1]:.4f}", delta=f"{pct_change_30d:+.1f}%")
+    st.metric("Current Price", f"${current_price:.4f}", delta=f"{price_pct_change:+.1f}%")
+
 with col4:
-    st.metric("30D Change", f"{pct_change_30d:+.1f}%", delta=f"{pct_change_30d:+.1f}%")
+    st.metric("30D Change", f"{overall_30d_change:+.1f}%", delta=f"{price_pct_change:+.1f}%")
+
 st.markdown('</div>', unsafe_allow_html=True)
