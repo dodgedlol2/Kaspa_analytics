@@ -82,11 +82,11 @@ st.markdown("""
     /* Metrics styling - Updated with teal color scheme and improved alignment */
     div[data-testid="stMetric"] {
         background-color: #1A1D26 !important;
-        border: none !important;
+        border: 1px solid #00FFCC !important;
         border-radius: 12px !important;
         padding: 20px !important;
         text-align: left !important;
-        box-shadow: none !important;
+        box-shadow: 0 2px 8px rgba(0, 255, 204, 0.1) !important;
         transition: all 0.3s ease !important;
         display: flex !important;
         flex-direction: column !important;
@@ -94,8 +94,9 @@ st.markdown("""
     }
     
     div[data-testid="stMetric"]:hover {
-        box-shadow: none !important;
-        transform: none !important;
+        border-color: #00E6B8 !important;
+        box-shadow: 0 4px 16px rgba(0, 255, 204, 0.2) !important;
+        transform: translateY(-2px) !important;
     }
     
     /* Metric label styling */
@@ -159,8 +160,21 @@ st.markdown("""
     
     /* Metrics container styling for better alignment - moved closer to chart */
     .metrics-container {
-        padding: 10px 50px !important;
-        margin-top: -10px !important;
+        padding: 0px 50px !important;
+        margin-top: -80px !important;
+        position: relative !important;
+        z-index: 10 !important;
+    }
+    
+    /* Additional spacing reduction for chart container */
+    .stPlotlyChart > div {
+        margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
+    }
+    
+    /* Force remove bottom margin from plotly container */
+    .js-plotly-plot {
+        margin-bottom: 0 !important;
     }
 </style>
 """, unsafe_allow_html=True)
