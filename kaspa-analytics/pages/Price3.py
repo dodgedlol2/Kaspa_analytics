@@ -75,7 +75,7 @@ st.markdown("""
     /* Title spacing */
     .title-spacing { 
         padding-top: 50px !important;
-        padding-left: 60px !important; 
+        padding-left: 50px !important; 
         margin-bottom: 10px !important;
     }
     
@@ -112,6 +112,13 @@ st.markdown("""
         font-size: 24px !important;
         font-weight: 900 !important;
         line-height: 1.2 !important;
+    }
+    
+    /* Delta styling for 30-day change */
+    div[data-testid="stMetric"] div[data-testid="metric-container"] div[data-testid="metric-delta"] {
+        color: #00FFCC !important;
+        font-size: 16px !important;
+        font-weight: 600 !important;
     }
     
     /* Make modebar always visible */
@@ -328,23 +335,21 @@ with st.container():
         'modeBarButtonsToAdd': ['hoverclosest', 'hovercompare'],
     })
 
-# Stats - Updated with better spacing and alignment
-st.markdown('<div class="metrics-container">', unsafe_allow_html=True)
-
 # Calculate 30-day percentage change
 last_price = price_df['Price'].iloc[-1]
 thirty_days_ago = price_df['Date'].iloc[-1] - timedelta(days=30)
 price_30_days_ago = price_df[price_df['Date'] >= thirty_days_ago]['Price'].iloc[0] if len(price_df[price_df['Date'] >= thirty_days_ago]) > 0 else price_df['Price'].iloc[0]
 pct_change_30d = ((last_price - price_30_days_ago) / price_30_days_ago) * 100
 
-col1, col2, col3, col4 = st.columns([2.5, 2.5, 2.5, 2.5])
+# Stats - Updated with better spacing and alignment
+st.markdown('<div class="metrics-container">', unsafe_allow_html=True)
+spacer1, col1, col2, col3, col4, spacer2 = st.columns([0.5, 2, 2, 2, 2, 0.5])
 with col1:
-    st.metric("Power-Law Slope", f"{b_price:.3f}")
+    st.metric("Power-Law Slope", f"{b_price:.3f}", delta=f"{pct_change_30d:+.1f}%")
 with col2:
-    st.metric("Model Fit (R²)", f"{r2_price:.3f}")
+    st.metric("Model Fit (R²)", f"{r2_price:.3f}", delta=f"{pct_change_30d:+.1f}%")
 with col3:
-    st.metric("Current Price", f"${price_df['Price'].iloc[-1]:.4f}")
+    st.metric("Current Price", f"${price_df['Price'].iloc[-1]:.4f}", delta=f"{pct_change_30d:+.1f}%")
 with col4:
-    delta_color = "normal" if pct_change_30d >= 0 else "inverse"
     st.metric("30D Change", f"{pct_change_30d:+.1f}%", delta=f"{pct_change_30d:+.1f}%")
 st.markdown('</div>', unsafe_allow_html=True)
