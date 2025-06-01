@@ -268,7 +268,7 @@ with st.container():
         tickformat = "%b %Y"
         hoverformat = "%b %d, %Y"
 
-    # Add price trace
+    # Add price trace with yaxis reference for primary scaling
     fig.add_trace(go.Scatter(
         x=x_values,
         y=filtered_df['Price'],
@@ -277,7 +277,8 @@ with st.container():
         line=dict(color='#00FFCC', width=2.5),
         hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Price</b>: $%{y:.4f}<extra></extra>',
         text=filtered_df['Date'],
-        showlegend=True
+        showlegend=True,
+        yaxis='y'  # Explicitly assign to primary y-axis
     ))
 
     if show_power_law == "Show":
@@ -291,7 +292,8 @@ with st.container():
             mode='lines',
             name=f'Power-Law Fit (R²={r2_price:.3f})',
             line=dict(color='#FFA726', dash='dot', width=2),
-            showlegend=True
+            showlegend=True,
+            yaxis='y'  # Use same y-axis as price
         ))
 
         fig.add_trace(go.Scatter(
@@ -302,7 +304,8 @@ with st.container():
             line=dict(color='rgba(255, 255, 255, 0.5)', dash='dot', width=1),
             hoverinfo='skip',
             fill=None,
-            showlegend=True
+            showlegend=True,
+            yaxis='y'  # Use same y-axis as price
         ))
         fig.add_trace(go.Scatter(
             x=fit_x,
@@ -313,7 +316,8 @@ with st.container():
             hoverinfo='skip',
             fill='tonexty',
             fillcolor='rgba(100, 100, 100, 0.2)',
-            showlegend=True
+            showlegend=True,
+            yaxis='y'  # Use same y-axis as price
         ))
 
     fig.update_layout(
@@ -348,6 +352,7 @@ with st.container():
         ),
         yaxis=dict(
             type="log" if y_scale == "Log" else "linear",
+            autorange=True,
             showgrid=True,
             gridwidth=1,
             gridcolor='rgba(255, 255, 255, 0.1)',
@@ -379,12 +384,14 @@ with st.container():
         )
     )
 
-    # Display the chart
+    # Display the chart with autorange configuration
     st.plotly_chart(fig, use_container_width=True, config={
         'displayModeBar': True,
         'displaylogo': False,
         'modeBarButtonsToRemove': ['lasso2d', 'select2d'],
         'modeBarButtonsToAdd': ['hoverclosest', 'hovercompare'],
+        'doubleClick': 'autosize',
+        'scrollZoom': True,
     })
 
 # Calculate individual metric changes over 30 days
