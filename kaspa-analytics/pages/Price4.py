@@ -161,7 +161,7 @@ st.markdown("""
     /* Metrics container styling for better alignment - moved closer to chart */
     .metrics-container {
         padding: 0px 50px !important;
-        margin-top: -80px !important;
+        margin-top: -120px !important;
         position: relative !important;
         z-index: 10 !important;
     }
@@ -175,6 +175,29 @@ st.markdown("""
     /* Force remove bottom margin from plotly container */
     .js-plotly-plot {
         margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
+    }
+    
+    /* Target all possible Streamlit container spacing */
+    .element-container:has(.stPlotlyChart) {
+        margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
+    }
+    
+    /* Remove spacing from parent containers */
+    div[data-testid="stVerticalBlock"]:has(.stPlotlyChart) {
+        margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
+    }
+    
+    /* Force all plotly-related divs to have no bottom spacing */
+    .stPlotlyChart, 
+    .stPlotlyChart > div,
+    .stPlotlyChart > div > div,
+    .js-plotly-plot,
+    .plotly-graph-div {
+        margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
     }
 </style>
 """, unsafe_allow_html=True)
