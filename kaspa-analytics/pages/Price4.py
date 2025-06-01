@@ -5,7 +5,12 @@ import pandas as pd
 from utils import fit_power_law, load_price_data
 from datetime import datetime, timedelta
 
-st.set_page_config(layout="wide")
+st.set_page_config(
+    page_title="Kaspa Analytics Pro",
+    page_icon="💎",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
 
 # Data loading and processing
 if 'price_df' not in st.session_state or 'price_genesis_date' not in st.session_state:
@@ -24,456 +29,679 @@ except Exception as e:
     st.error(f"Failed to calculate price power law: {str(e)}")
     st.stop()
 
-# Custom CSS with top padding adjustment and improved metric alignment
+# Enhanced Custom CSS with Modern Design
 st.markdown("""
 <style>
-    /* Reset all margins and padding */
-    html, body, .stApp, .main, .block-container, .stPlotlyChart {
-        margin: 0 !important;
-        padding: 0 !important;
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    
+    /* Global Reset and Base Styles */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
     }
     
-    .stApp { 
-        background-color: #1A1D26;
-        overflow: hidden;
-        padding-top: 100px !important;
+    html, body, .stApp {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        background: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 50%, #0f1419 100%);
+        color: #e2e8f0;
+        overflow-x: hidden;
     }
     
-    /* Main container adjustments */
+    .stApp {
+        background-attachment: fixed;
+    }
+    
+    /* Remove Streamlit defaults */
     .main .block-container {
-        padding-left: 0px !important;
-        padding-right: 0px !important;
+        padding: 0 !important;
         max-width: 100% !important;
     }
     
-    /* Chart container */
-    .stPlotlyChart {
-        width: 100% !important;
-        padding-left: 0 !important;
-        padding-right: 0 !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
+    /* Animated Background Pattern */
+    .stApp::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+            radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.1) 0%, transparent 50%);
+        pointer-events: none;
+        z-index: -1;
     }
     
-    /* Remove all borders and spacing */
-    .element-container, 
-    .st-emotion-cache-1v0mbdj, 
-    .st-emotion-cache-1wrcr25,
-    .st-emotion-cache-1kyxreq {
-        padding: 0 !important;
-        margin: 0 !important;
-        border: none !important;
+    /* Header Section */
+    .header-container {
+        background: rgba(15, 20, 25, 0.8);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 20px 40px;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     }
     
-    /* Force full width for all elements */
-    div[data-testid="stVerticalBlock"] > div[data-testid="stVerticalBlockBorderWrapper"] {
-        padding: 0 !important;
-        margin: 0 !important;
-        border: none !important;
+    .header-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        max-width: 1400px;
+        margin: 0 auto;
     }
     
-    /* Title spacing */
-    .title-spacing { 
-        padding-top: 50px !important;
-        padding-left: 50px !important; 
-        margin-bottom: 10px !important;
+    .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
     }
     
-    /* Metrics styling - Updated with teal color scheme and improved alignment */
-    div[data-testid="stMetric"] {
-        background-color: #1A1D26 !important;
-        border: 1px solid #00FFCC !important;
+    .brand h1 {
+        font-size: 28px;
+        font-weight: 800;
+        background: linear-gradient(135deg, #00d4ff 0%, #ff00a8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin: 0;
+    }
+    
+    .brand-subtitle {
+        font-size: 12px;
+        color: #64748b;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .header-stats {
+        display: flex;
+        gap: 30px;
+        align-items: center;
+    }
+    
+    .header-stat {
+        text-align: center;
+    }
+    
+    .header-stat-value {
+        font-size: 18px;
+        font-weight: 700;
+        color: #00d4ff;
+        display: block;
+    }
+    
+    .header-stat-label {
+        font-size: 11px;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-top: 2px;
+    }
+    
+    /* Control Panel */
+    .control-panel {
+        background: rgba(15, 20, 25, 0.6);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 24px 32px;
+        margin: 24px 40px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+    
+    .control-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 24px;
+        align-items: end;
+    }
+    
+    .control-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .control-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 4px;
+    }
+    
+    /* Enhanced Selectbox Styling */
+    .stSelectbox > div > div {
+        background: rgba(30, 41, 59, 0.8) !important;
+        border: 1px solid rgba(100, 116, 139, 0.3) !important;
         border-radius: 12px !important;
-        padding: 20px !important;
-        text-align: left !important;
-        box-shadow: 0 2px 8px rgba(0, 255, 204, 0.1) !important;
+        backdrop-filter: blur(10px) !important;
         transition: all 0.3s ease !important;
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: flex-start !important;
     }
     
-    div[data-testid="stMetric"]:hover {
-        border-color: #00E6B8 !important;
-        box-shadow: 0 4px 16px rgba(0, 255, 204, 0.2) !important;
-        transform: translateY(-2px) !important;
+    .stSelectbox > div > div:hover {
+        border-color: #00d4ff !important;
+        box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1) !important;
     }
     
-    /* Metric label styling */
-    div[data-testid="stMetric"] label {
-        color: #e0e0e0 !important;
-        font-size: 14px !important;
+    .stSelectbox > div > div > div {
+        color: #e2e8f0 !important;
         font-weight: 500 !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.5px !important;
-        margin-bottom: 8px !important;
-        text-align: left !important;
-        width: 100% !important;
     }
     
-    /* Metric value styling */
-    div[data-testid="stMetric"] div[data-testid="metric-container"] > div {
-        color: #00FFCC !important;
-        font-size: 24px !important;
-        font-weight: 900 !important;
-        line-height: 1.2 !important;
-        text-align: left !important;
-        width: 100% !important;
+    /* Chart Container */
+    .chart-section {
+        margin: 0 40px 40px 40px;
+        background: rgba(15, 20, 25, 0.4);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 32px;
+        box-shadow: 0 12px 48px rgba(0, 0, 0, 0.3);
     }
     
-    /* Delta styling for percentage changes */
-    div[data-testid="stMetric"] div[data-testid="metric-container"] div[data-testid="metric-delta"] {
-        color: #00FFCC !important;
-        font-size: 16px !important;
-        font-weight: 600 !important;
-        text-align: left !important;
-        width: 100% !important;
-        margin-top: 4px !important;
+    .chart-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 24px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
     
-    /* Ensure all metric content aligns left */
-    div[data-testid="stMetric"] * {
-        text-align: left !important;
-        justify-content: flex-start !important;
+    .chart-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #f1f5f9;
+        margin: 0;
     }
     
-    /* Make modebar always visible */
-    .modebar {
-        opacity: 1 !important;
-        visibility: visible !important;
-        background-color: rgba(26, 29, 38, 0.8) !important;
+    .chart-subtitle {
+        font-size: 14px;
+        color: #64748b;
+        margin-top: 4px;
     }
     
-    /* Additional aggressive resets */
-    .st-emotion-cache-1kyxreq, 
-    .st-emotion-cache-1wrcr25,
-    .st-emotion-cache-1v0mbdj {
+    /* Enhanced Metrics Grid */
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 24px;
+        margin: 32px 40px;
+    }
+    
+    .metric-card {
+        background: rgba(15, 20, 25, 0.6);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 24px;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+    }
+    
+    .metric-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #00d4ff, #ff00a8, #00ff88);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .metric-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(0, 212, 255, 0.3);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(0, 212, 255, 0.1);
+    }
+    
+    .metric-card:hover::before {
+        opacity: 1;
+    }
+    
+    /* Streamlit Metric Overrides */
+    div[data-testid="stMetric"] {
+        background: transparent !important;
+        border: none !important;
         padding: 0 !important;
-        margin: 0 !important;
+        box-shadow: none !important;
     }
     
-    /* Remove any remaining Streamlit container padding */
-    .st-emotion-cache-1n76uvr {
-        padding-left: 0 !important;
-        padding-right: 0 !important;
+    div[data-testid="stMetric"] label {
+        color: #94a3b8 !important;
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 1px !important;
+        margin-bottom: 8px !important;
     }
     
-    /* Metrics container styling for better alignment - moved closer to chart */
-    .metrics-container {
-        padding: 0px 50px !important;
-        margin-top: -120px !important;
-        position: relative !important;
-        z-index: 10 !important;
+    div[data-testid="stMetric"] div[data-testid="metric-container"] > div:first-child {
+        color: #f1f5f9 !important;
+        font-size: 32px !important;
+        font-weight: 800 !important;
+        line-height: 1.2 !important;
+        margin-bottom: 4px !important;
     }
     
-    /* Additional spacing reduction for chart container */
-    .stPlotlyChart > div {
-        margin-bottom: 0 !important;
-        padding-bottom: 0 !important;
+    div[data-testid="stMetric"] div[data-testid="metric-container"] div[data-testid="metric-delta"] {
+        color: #00ff88 !important;
+        font-size: 14px !important;
+        font-weight: 600 !important;
     }
     
-    /* Force remove bottom margin from plotly container */
-    .js-plotly-plot {
-        margin-bottom: 0 !important;
-        padding-bottom: 0 !important;
+    /* Plotly Chart Styling */
+    .stPlotlyChart {
+        border-radius: 12px;
+        overflow: hidden;
     }
     
-    /* Target all possible Streamlit container spacing */
-    .element-container:has(.stPlotlyChart) {
-        margin-bottom: 0 !important;
-        padding-bottom: 0 !important;
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
     }
     
-    /* Remove spacing from parent containers */
-    div[data-testid="stVerticalBlock"]:has(.stPlotlyChart) {
-        margin-bottom: 0 !important;
-        padding-bottom: 0 !important;
+    ::-webkit-scrollbar-track {
+        background: rgba(30, 41, 59, 0.3);
+        border-radius: 4px;
     }
     
-    /* Force all plotly-related divs to have no bottom spacing */
-    .stPlotlyChart, 
-    .stPlotlyChart > div,
-    .stPlotlyChart > div > div,
-    .js-plotly-plot,
-    .plotly-graph-div {
-        margin-bottom: 0 !important;
-        padding-bottom: 0 !important;
+    ::-webkit-scrollbar-thumb {
+        background: rgba(100, 116, 139, 0.5);
+        border-radius: 4px;
     }
+    
+    ::-webkit-scrollbar-thumb:hover {
+        background: rgba(100, 116, 139, 0.7);
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .header-container {
+            padding: 16px 20px;
+        }
+        
+        .control-panel, .chart-section {
+            margin: 16px 20px;
+            padding: 20px;
+        }
+        
+        .metrics-grid {
+            margin: 24px 20px;
+            grid-template-columns: 1fr;
+        }
+        
+        .brand h1 {
+            font-size: 24px;
+        }
+        
+        .header-stats {
+            display: none;
+        }
+    }
+    
+    /* Loading Animation */
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+    
+    .loading {
+        animation: pulse 2s infinite;
+    }
+    
+    /* Success/Error States */
+    .success-indicator {
+        color: #00ff88;
+    }
+    
+    .error-indicator {
+        color: #ff4757;
+    }
+    
+    /* Hide Streamlit Elements */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    .stDeployButton {display: none;}
 </style>
 """, unsafe_allow_html=True)
 
-# ====== MAIN CHART CONTAINER ======
-with st.container():
-    st.markdown('<div class="title-spacing"><h2>Kaspa Price</h2></div>', unsafe_allow_html=True)
-    
-    # Dropdown container - Added spacers as requested
-    spacer_left, col1, col2, col3, col4, spacer_right1, spacer_right2, spacer_right3 = st.columns([0.4, 1, 1, 1, 1, 0.5, 0.5, 7])
+# Calculate current metrics for header
+current_price = price_df['Price'].iloc[-1]
+last_date = price_df['Date'].iloc[-1]
+thirty_days_ago = last_date - timedelta(days=30)
+df_30_days_ago = price_df[price_df['Date'] >= thirty_days_ago]
 
+if len(df_30_days_ago) > 0:
+    price_30_days_ago = df_30_days_ago['Price'].iloc[0]
+    price_pct_change = ((current_price - price_30_days_ago) / price_30_days_ago) * 100
+else:
+    price_pct_change = 0
+
+# Header Section
+st.markdown(f"""
+<div class="header-container">
+    <div class="header-content">
+        <div class="brand">
+            <div>
+                <h1>Kaspa Analytics Pro</h1>
+                <div class="brand-subtitle">Advanced Market Intelligence</div>
+            </div>
+        </div>
+        <div class="header-stats">
+            <div class="header-stat">
+                <span class="header-stat-value">${current_price:.4f}</span>
+                <div class="header-stat-label">Current Price</div>
+            </div>
+            <div class="header-stat">
+                <span class="header-stat-value" style="color: {'#00ff88' if price_pct_change >= 0 else '#ff4757'}">{price_pct_change:+.1f}%</span>
+                <div class="header-stat-label">30D Change</div>
+            </div>
+            <div class="header-stat">
+                <span class="header-stat-value">{r2_price:.3f}</span>
+                <div class="header-stat-label">Model Fit</div>
+            </div>
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# Control Panel
+st.markdown("""
+<div class="control-panel">
+    <div style="margin-bottom: 16px;">
+        <h3 style="color: #f1f5f9; margin: 0; font-size: 18px; font-weight: 600;">Chart Configuration</h3>
+        <p style="color: #64748b; margin: 4px 0 0 0; font-size: 14px;">Customize your analysis view</p>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# Controls in the panel
+with st.container():
+    col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 2])
+    
     with col1:
         st.markdown('<div class="control-label">Price Scale</div>', unsafe_allow_html=True)
         y_scale_options = ["Linear", "Log"]
         y_scale = st.selectbox("Price Scale", y_scale_options,
-                             index=1 if st.session_state.get("price_y_scale", True) else 0,
-                             label_visibility="collapsed", key="price_y_scale_select")
+                             index=1, label_visibility="collapsed", key="price_y_scale_select")
 
     with col2:
         st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
         x_scale_options = ["Linear", "Log"]
         x_scale_type = st.selectbox("Time Scale", x_scale_options,
-                                  index=0,
-                                  label_visibility="collapsed", key="price_x_scale_select")
+                                  index=0, label_visibility="collapsed", key="price_x_scale_select")
 
     with col3:
-        st.markdown('<div class="control-label">Period</div>', unsafe_allow_html=True)
+        st.markdown('<div class="control-label">Time Period</div>', unsafe_allow_html=True)
         time_ranges = ["1W", "1M", "3M", "6M", "1Y", "All"]
-        if 'price_time_range' not in st.session_state:
-            st.session_state.price_time_range = "All"
         time_range = st.selectbox("Time Range", time_ranges,
-                                index=time_ranges.index(st.session_state.price_time_range),
-                                label_visibility="collapsed", key="price_time_range_select")
+                                index=5, label_visibility="collapsed", key="price_time_range_select")
 
     with col4:
-        st.markdown('<div class="control-label">Power Law Fit</div>', unsafe_allow_html=True)
+        st.markdown('<div class="control-label">Power Law</div>', unsafe_allow_html=True)
         power_law_options = ["Hide", "Show"]
         show_power_law = st.selectbox("Power Law Fit", power_law_options,
-                                    index=0,
-                                    label_visibility="collapsed", key="price_power_law_select")
+                                    index=1, label_visibility="collapsed", key="price_power_law_select")
 
-    last_date = price_df['Date'].iloc[-1]
-    if time_range == "1W":
-        start_date = last_date - timedelta(days=7)
-    elif time_range == "1M":
-        start_date = last_date - timedelta(days=30)
-    elif time_range == "3M":
-        start_date = last_date - timedelta(days=90)
-    elif time_range == "6M":
-        start_date = last_date - timedelta(days=180)
-    elif time_range == "1Y":
-        start_date = last_date - timedelta(days=365)
-    else:
-        start_date = price_df['Date'].iloc[0]
+# Chart Section
+st.markdown("""
+<div class="chart-section">
+    <div class="chart-header">
+        <div>
+            <h2 class="chart-title">Kaspa Price Analysis</h2>
+            <div class="chart-subtitle">Historical price data with power-law modeling</div>
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
-    filtered_df = price_df[price_df['Date'] >= start_date]
+# Data filtering based on time range
+last_date = price_df['Date'].iloc[-1]
+if time_range == "1W":
+    start_date = last_date - timedelta(days=7)
+elif time_range == "1M":
+    start_date = last_date - timedelta(days=30)
+elif time_range == "3M":
+    start_date = last_date - timedelta(days=90)
+elif time_range == "6M":
+    start_date = last_date - timedelta(days=180)
+elif time_range == "1Y":
+    start_date = last_date - timedelta(days=365)
+else:
+    start_date = price_df['Date'].iloc[0]
 
-    fig = go.Figure()
+filtered_df = price_df[price_df['Date'] >= start_date]
 
-    if x_scale_type == "Log":
-        x_values = filtered_df['days_from_genesis']
-        x_title = "Days Since Genesis (Log Scale)"
-        tickformat = None
-        hoverformat = None
-    else:
-        x_values = filtered_df['Date']
-        x_title = "Date"
-        tickformat = "%b %Y"
-        hoverformat = "%b %d, %Y"
+# Create the chart
+fig = go.Figure()
 
-    # Add price trace with yaxis reference for primary scaling
+if x_scale_type == "Log":
+    x_values = filtered_df['days_from_genesis']
+    x_title = "Days Since Genesis (Log Scale)"
+else:
+    x_values = filtered_df['Date']
+    x_title = "Date"
+
+# Add price trace with enhanced styling
+fig.add_trace(go.Scatter(
+    x=x_values,
+    y=filtered_df['Price'],
+    mode='lines',
+    name='Kaspa Price',
+    line=dict(
+        color='#00d4ff',
+        width=3,
+        shape='spline',
+        smoothing=0.3
+    ),
+    hovertemplate='<b>%{fullData.name}</b><br>' +
+                  'Date: %{text}<br>' +
+                  'Price: $%{y:.6f}<br>' +
+                  '<extra></extra>',
+    text=[d.strftime('%Y-%m-%d') for d in filtered_df['Date']],
+    showlegend=True,
+    fill='tonexty' if len(fig.data) > 0 else None,
+    fillcolor='rgba(0, 212, 255, 0.1)'
+))
+
+# Add power law if enabled
+if show_power_law == "Show":
+    x_fit = filtered_df['days_from_genesis']
+    y_fit = a_price * np.power(x_fit, b_price)
+    fit_x = x_fit if x_scale_type == "Log" else filtered_df['Date']
+
+    # Main power law line
     fig.add_trace(go.Scatter(
-        x=x_values,
-        y=filtered_df['Price'],
+        x=fit_x,
+        y=y_fit,
         mode='lines',
-        name='Price',
-        line=dict(color='#00FFCC', width=2.5),
-        hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Price</b>: $%{y:.4f}<extra></extra>',
-        text=filtered_df['Date'],
+        name=f'Power Law Fit (R²={r2_price:.3f})',
+        line=dict(color='#ff00a8', width=2.5, dash='solid'),
         showlegend=True,
-        yaxis='y'  # Primary y-axis for price data
+        hovertemplate='<b>Power Law Fit</b><br>' +
+                      'R² = %{customdata:.3f}<br>' +
+                      'Value: $%{y:.6f}<br>' +
+                      '<extra></extra>',
+        customdata=[r2_price] * len(fit_x)
     ))
 
-    # Calculate price range for y-axis scaling (only based on visible price data)
-    price_min = filtered_df['Price'].min()
-    price_max = filtered_df['Price'].max()
-    price_range = price_max - price_min
-    price_margin = price_range * 0.05  # 5% margin
+    # Deviation bands
+    fig.add_trace(go.Scatter(
+        x=fit_x,
+        y=y_fit * 0.4,
+        mode='lines',
+        name='Support (-60%)',
+        line=dict(color='rgba(0, 255, 136, 0.6)', width=1.5, dash='dot'),
+        showlegend=True,
+        hoverinfo='skip'
+    ))
     
-    if show_power_law == "Show":
-        x_fit = filtered_df['days_from_genesis']
-        y_fit = a_price * np.power(x_fit, b_price)
-        fit_x = x_fit if x_scale_type == "Log" else filtered_df['Date']
+    fig.add_trace(go.Scatter(
+        x=fit_x,
+        y=y_fit * 2.2,
+        mode='lines',
+        name='Resistance (+120%)',
+        line=dict(color='rgba(255, 71, 87, 0.6)', width=1.5, dash='dot'),
+        fill='tonexty',
+        fillcolor='rgba(100, 100, 100, 0.1)',
+        showlegend=True,
+        hoverinfo='skip'
+    ))
 
-        # Power law traces use secondary y-axis to not interfere with price scaling
-        fig.add_trace(go.Scatter(
-            x=fit_x,
-            y=y_fit,
-            mode='lines',
-            name=f'Power-Law Fit (R²={r2_price:.3f})',
-            line=dict(color='#FFA726', dash='dot', width=2),
-            showlegend=True,
-            yaxis='y2',  # Secondary y-axis
-            opacity=0.8
-        ))
-
-        fig.add_trace(go.Scatter(
-            x=fit_x,
-            y=y_fit * 0.4,
-            mode='lines',
-            name='-60% Deviation',
-            line=dict(color='rgba(255, 255, 255, 0.3)', dash='dot', width=1),
-            hoverinfo='skip',
-            fill=None,
-            showlegend=True,
-            yaxis='y2',  # Secondary y-axis
-            opacity=0.6
-        ))
-        fig.add_trace(go.Scatter(
-            x=fit_x,
-            y=y_fit * 2.2,
-            mode='lines',
-            name='+120% Deviation',
-            line=dict(color='rgba(255, 255, 255, 0.3)', dash='dot', width=1),
-            hoverinfo='skip',
-            fill='tonexty',
-            fillcolor='rgba(100, 100, 100, 0.1)',
-            showlegend=True,
-            yaxis='y2',  # Secondary y-axis
-            opacity=0.6
-        ))
-
-    fig.update_layout(
-        plot_bgcolor='#1A1D26',
-        paper_bgcolor='#1A1D26',
-        font_color='#e0e0e0',
-        hovermode='x unified',
-        height=700,
-        margin=dict(l=0, r=40, t=60, b=100),
-        yaxis_title='',
-        xaxis_title=x_title,
-        xaxis=dict(
-            rangeslider=dict(
-                visible=True,
-                thickness=0.1,
-                bgcolor='#1A1D26',
-                bordercolor="#3A3C4A",
-                borderwidth=1
-            ),
-            type="log" if x_scale_type == "Log" else None,
-            showgrid=True,
-            gridwidth=1,
-            gridcolor='rgba(255, 255, 255, 0.1)',
-            minor=dict(
-                ticklen=6,
-                gridcolor='rgba(255, 255, 255, 0.05)',
-                gridwidth=0.5
-            ),
-            tickformat=tickformat,
-            linecolor='#3A3C4A',
-            zerolinecolor='#3A3C4A'
-        ),
-        # Primary y-axis for price data - this will control the main scaling
-        yaxis=dict(
-            type="log" if y_scale == "Log" else "linear",
-            range=[
-                np.log10(price_min - price_margin) if y_scale == "Log" and price_min > price_margin else (price_min - price_margin),
-                np.log10(price_max + price_margin) if y_scale == "Log" else (price_max + price_margin)
-            ] if y_scale == "Linear" or (y_scale == "Log" and price_min > price_margin) else None,
-            autorange=True,
-            showgrid=True,
-            gridwidth=1,
-            gridcolor='rgba(255, 255, 255, 0.1)',
-            minor=dict(
-                ticklen=6,
-                gridcolor='rgba(255, 255, 255, 0.05)',
-                gridwidth=0.5
-            ),
-            linecolor='#3A3C4A',
-            zerolinecolor='#3A3C4A',
-            side='left',
-            fixedrange=False  # Allow zooming on price axis
-        ),
-        # Secondary y-axis for power law traces (overlaid, invisible)
-        yaxis2=dict(
-            type="log" if y_scale == "Log" else "linear",
-            overlaying='y',
-            side='right',
-            showgrid=False,
-            showticklabels=False,  # Hide secondary axis labels
-            autorange=True,
-            fixedrange=True  # Don't allow interaction with secondary axis
-        ),
-        legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=1.02,
-            xanchor="left",
-            x=0,
-            bgcolor='rgba(26, 29, 38, 0.8)'
-        ),
-        hoverlabel=dict(
-            bgcolor='#1A1D26',
-            bordercolor='#3A3C4A',
-            font_color='#e0e0e0'
-        ),
-        modebar=dict(
-            bgcolor='rgba(26, 29, 38, 0.8)',
-            color='#e0e0e0',
-            activecolor='#00FFCC'
+# Enhanced chart layout
+fig.update_layout(
+    plot_bgcolor='rgba(0,0,0,0)',
+    paper_bgcolor='rgba(0,0,0,0)',
+    font=dict(family='Inter', color='#e2e8f0'),
+    hovermode='x unified',
+    height=650,
+    margin=dict(l=0, r=0, t=40, b=0),
+    xaxis=dict(
+        title=x_title,
+        type="log" if x_scale_type == "Log" else None,
+        showgrid=True,
+        gridwidth=1,
+        gridcolor='rgba(255, 255, 255, 0.08)',
+        linecolor='rgba(255, 255, 255, 0.2)',
+        tickfont=dict(size=12, color='#94a3b8'),
+        titlefont=dict(size=14, color='#cbd5e1'),
+        rangeslider=dict(
+            visible=True,
+            thickness=0.06,
+            bgcolor='rgba(15, 20, 25, 0.8)',
+            bordercolor="rgba(255, 255, 255, 0.1)",
+            borderwidth=1
         )
+    ),
+    yaxis=dict(
+        title='Price (USD)',
+        type="log" if y_scale == "Log" else "linear",
+        showgrid=True,
+        gridwidth=1,
+        gridcolor='rgba(255, 255, 255, 0.08)',
+        linecolor='rgba(255, 255, 255, 0.2)',
+        tickfont=dict(size=12, color='#94a3b8'),
+        titlefont=dict(size=14, color='#cbd5e1'),
+        tickformat='.2e' if y_scale == "Log" else None
+    ),
+    legend=dict(
+        orientation="h",
+        yanchor="bottom",
+        y=1.02,
+        xanchor="left",
+        x=0,
+        bgcolor='rgba(15, 20, 25, 0.8)',
+        bordercolor='rgba(255, 255, 255, 0.1)',
+        borderwidth=1,
+        font=dict(size=12)
+    ),
+    hoverlabel=dict(
+        bgcolor='rgba(15, 20, 25, 0.95)',
+        bordercolor='rgba(0, 212, 255, 0.5)',
+        font=dict(color='#e2e8f0', size=12),
+        align='left'
     )
+)
 
-    # Display the chart with autorange configuration
+# Display chart with container
+with st.container():
     st.plotly_chart(fig, use_container_width=True, config={
         'displayModeBar': True,
         'displaylogo': False,
-        'modeBarButtonsToRemove': ['lasso2d', 'select2d'],
+        'modeBarButtonsToRemove': ['lasso2d', 'select2d', 'autoScale2d'],
         'modeBarButtonsToAdd': ['hoverclosest', 'hovercompare'],
-        'doubleClick': 'autosize',
-        'scrollZoom': True,
+        'toImageButtonOptions': {
+            'format': 'png',
+            'filename': f'kaspa_price_analysis_{datetime.now().strftime("%Y%m%d")}',
+            'height': 650,
+            'width': 1200,
+            'scale': 2
+        }
     })
 
-# Calculate individual metric changes over 30 days
-last_date = price_df['Date'].iloc[-1]
-thirty_days_ago = last_date - timedelta(days=30)
-
-# Get data from 30 days ago (or closest available)
-df_30_days_ago = price_df[price_df['Date'] >= thirty_days_ago]
+# Calculate comprehensive metrics
 if len(df_30_days_ago) > 0:
-    # Current values
-    current_price = price_df['Price'].iloc[-1]
-    current_slope = b_price
-    current_r2 = r2_price
-    
-    # Values from 30 days ago - recalculate power law for 30 days ago data
     price_30_days_ago_data = price_df[price_df['Date'] <= thirty_days_ago]
-    if len(price_30_days_ago_data) > 10:  # Need sufficient data for power law fit
+    if len(price_30_days_ago_data) > 10:
         try:
             a_price_30d, b_price_30d, r2_price_30d = fit_power_law(price_30_days_ago_data, y_col='Price')
         except:
-            # Fallback to current values if fit fails
-            b_price_30d = current_slope
-            r2_price_30d = current_r2
+            b_price_30d = b_price
+            r2_price_30d = r2_price
     else:
-        b_price_30d = current_slope
-        r2_price_30d = current_r2
+        b_price_30d = b_price
+        r2_price_30d = r2_price
     
-    price_30_days_ago = df_30_days_ago['Price'].iloc[0]
-    
-    # Calculate percentage changes
-    price_pct_change = ((current_price - price_30_days_ago) / price_30_days_ago) * 100
-    slope_pct_change = ((current_slope - b_price_30d) / abs(b_price_30d)) * 100 if b_price_30d != 0 else 0
-    r2_pct_change = ((current_r2 - r2_price_30d) / r2_price_30d) * 100 if r2_price_30d != 0 else 0
-    
+    slope_pct_change = ((b_price - b_price_30d) / abs(b_price_30d)) * 100 if b_price_30d != 0 else 0
+    r2_pct_change = ((r2_price - r2_price_30d) / r2_price_30d) * 100 if r2_price_30d != 0 else 0
 else:
-    # Fallback if not enough historical data
-    price_pct_change = 0
     slope_pct_change = 0
     r2_pct_change = 0
-    current_price = price_df['Price'].iloc[-1]
 
-# For the overall change tracking (removed 30D change metric)
-overall_30d_change = price_pct_change
+# Enhanced Metrics Section
+st.markdown('<div class="metrics-grid">', unsafe_allow_html=True)
 
-# Stats - Updated with individual logic for each metric and left alignment
-st.markdown('<div class="metrics-container">', unsafe_allow_html=True)
-spacer1, col1, col2, col3, spacer2 = st.columns([0.5, 2.5, 2.5, 2.5, 0.5])
+col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    st.metric("Power-Law Slope", f"{b_price:.3f}", delta=f"{slope_pct_change:+.1f}%")
+    st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+    st.metric(
+        "Power-Law Slope", 
+        f"{b_price:.4f}", 
+        delta=f"{slope_pct_change:+.2f}%",
+        help="Indicates the growth trajectory strength"
+    )
+    st.markdown('</div>', unsafe_allow_html=True)
 
 with col2:
-    st.metric("Model Fit (R²)", f"{r2_price:.3f}", delta=f"{r2_pct_change:+.1f}%")
+    st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+    st.metric(
+        "Model Accuracy (R²)", 
+        f"{r2_price:.4f}", 
+        delta=f"{r2_pct_change:+.2f}%",
+        help="How well the power law fits the data (closer to 1.0 is better)"
+    )
+    st.markdown('</div>', unsafe_allow_html=True)
 
 with col3:
-    st.metric("Current Price", f"${current_price:.4f}", delta=f"{price_pct_change:+.1f}%")
+    st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+    st.metric(
+        "Current Price", 
+        f"${current_price:.6f}", 
+        delta=f"{price_pct_change:+.2f}%",
+        help="Latest recorded price with 30-day change"
+    )
+    st.markdown('</div>', unsafe_allow_html=True)
+
+with col4:
+    st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+    market_cap_estimate = current_price * 24e9  # Rough estimate
+    st.metric(
+        "Est. Market Cap", 
+        f"${market_cap_estimate/1e9:.2f}B", 
+        delta=f"{price_pct_change:+.2f}%",
+        help="Estimated market capitalization"
+    )
+    st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown('</div>', unsafe_allow_html=True)
+
+# Footer info
+st.markdown("""
+<div style="text-align: center; padding: 40px 20px; color: #64748b; font-size: 12px;">
+    <p>Kaspa Analytics Pro • Advanced cryptocurrency market analysis • Data updated in real-time</p>
+    <p style="margin-top: 8px;">Built with professional-grade visualization tools for institutional analysis</p>
+</div>
+""", unsafe_allow_html=True)
