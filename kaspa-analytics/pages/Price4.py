@@ -560,7 +560,7 @@ if show_power_law == "Show":
         hoverinfo='skip'
     ))
 
-# Enhanced chart layout
+# Enhanced chart layout with FIXED title configuration
 fig.update_layout(
     plot_bgcolor='rgba(0,0,0,0)',
     paper_bgcolor='rgba(0,0,0,0)',
@@ -569,14 +569,16 @@ fig.update_layout(
     height=650,
     margin=dict(l=0, r=0, t=40, b=0),
     xaxis=dict(
-        title=x_title,
+        title=dict(
+            text=x_title,
+            font=dict(size=14, color='#cbd5e1')
+        ),
         type="log" if x_scale_type == "Log" else None,
         showgrid=True,
         gridwidth=1,
         gridcolor='rgba(255, 255, 255, 0.08)',
         linecolor='rgba(255, 255, 255, 0.2)',
         tickfont=dict(size=12, color='#94a3b8'),
-        titlefont=dict(size=14, color='#cbd5e1'),
         rangeslider=dict(
             visible=True,
             thickness=0.06,
@@ -586,14 +588,16 @@ fig.update_layout(
         )
     ),
     yaxis=dict(
-        title='Price (USD)',
+        title=dict(
+            text='Price (USD)',
+            font=dict(size=14, color='#cbd5e1')
+        ),
         type="log" if y_scale == "Log" else "linear",
         showgrid=True,
         gridwidth=1,
         gridcolor='rgba(255, 255, 255, 0.08)',
         linecolor='rgba(255, 255, 255, 0.2)',
-        tickfont=dict(size=12, color='#94a3b8'),
-        titlefont=dict(size=14, color='#cbd5e1')
+        tickfont=dict(size=12, color='#94a3b8')
     ),
     legend=dict(
         orientation="h",
