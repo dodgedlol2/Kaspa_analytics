@@ -88,14 +88,12 @@ st.markdown("""
         background: transparent;
         padding: 24px 28px 20px 28px;
         position: relative;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
     }
     
     .chart-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 16px;
     }
     
     .chart-title {
