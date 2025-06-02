@@ -134,8 +134,8 @@ st.markdown("""
     /* Enhanced Controls Section */
     .controls-section {
         padding: 16px 28px 20px 28px;
-        background: rgba(15, 23, 42, 0.15);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        background: transparent;
+        border: none;
     }
     
     .control-label {
