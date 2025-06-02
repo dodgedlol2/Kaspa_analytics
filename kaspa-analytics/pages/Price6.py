@@ -371,11 +371,13 @@ st.markdown("""
     
     /* Enhanced Metrics Grid */
     .metrics-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
+        display: flex;
+        flex-direction: row;
         gap: 28px;
         margin: 40px 40px;
-        width: 100%;
+        width: calc(100% - 80px);
+        justify-content: space-between;
+        align-items: stretch;
     }
     
     .metric-card {
@@ -388,6 +390,8 @@ st.markdown("""
         overflow: hidden !important;
         transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
         cursor: pointer !important;
+        flex: 1;
+        min-width: 0;
     }
     
     .metric-card::before {
