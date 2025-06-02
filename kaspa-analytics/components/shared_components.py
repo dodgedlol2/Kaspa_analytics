@@ -7,11 +7,11 @@ def render_page_config(page_title="Kaspa Analytics Pro", page_icon="💎"):
         page_title=page_title,
         page_icon=page_icon,
         layout="wide",
-        initial_sidebar_state="collapsed"
+        initial_sidebar_state="expanded"  # Show sidebar by default
     )
 
-def render_custom_css():
-    """Render all custom CSS styling for the application"""
+def render_custom_css_with_sidebar():
+    """Enhanced CSS with proper header layout and left sidebar"""
     st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -29,7 +29,7 @@ def render_custom_css():
             background-attachment: fixed !important;
         }
         
-        /* Force header above everything */
+        /* Professional Header - Clean layout */
         .professional-header {
             position: fixed !important;
             top: 0 !important;
@@ -40,7 +40,7 @@ def render_custom_css():
             background: rgba(15, 20, 25, 0.98) !important;
             backdrop-filter: blur(25px) !important;
             border-bottom: 1px solid rgba(0, 212, 255, 0.2) !important;
-            padding: 16px 40px !important;
+            padding: 0 40px !important;
             z-index: 999999999 !important;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6) !important;
             display: flex !important;
@@ -48,20 +48,6 @@ def render_custom_css():
             justify-content: space-between !important;
         }
         
-        /* Push main content down */
-        .main .block-container {
-            padding-top: 100px !important;
-            padding-left: 0 !important;
-            padding-right: 0 !important;
-            max-width: 100% !important;
-        }
-        
-        /* Hide sidebar completely for now */
-        section[data-testid="stSidebar"] {
-            display: none !important;
-        }
-        
-        /* Header content styling */
         .header-content {
             display: flex !important;
             align-items: center !important;
@@ -71,16 +57,11 @@ def render_custom_css():
             margin: 0 auto !important;
         }
         
+        /* Brand section - Left side */
         .brand-section {
             display: flex !important;
             align-items: center !important;
-            gap: 20px !important;
-        }
-        
-        .logo-container {
-            display: flex !important;
-            align-items: center !important;
-            gap: 12px !important;
+            gap: 15px !important;
         }
         
         .logo {
@@ -98,7 +79,7 @@ def render_custom_css():
         }
         
         .brand-text h1 {
-            font-size: 28px !important;
+            font-size: 26px !important;
             font-weight: 800 !important;
             background: linear-gradient(135deg, #00d4ff 0%, #ff00a8 100%) !important;
             -webkit-background-clip: text !important;
@@ -108,48 +89,15 @@ def render_custom_css():
         }
         
         .brand-subtitle {
-            font-size: 12px !important;
+            font-size: 11px !important;
             color: #64748b !important;
             font-weight: 500 !important;
             text-transform: uppercase !important;
-            letter-spacing: 1.2px !important;
+            letter-spacing: 1px !important;
             margin-top: 2px !important;
         }
         
-        .nav-section {
-            display: flex !important;
-            align-items: center !important;
-            gap: 8px !important;
-        }
-        
-        .nav-button {
-            background: rgba(30, 41, 59, 0.6) !important;
-            border: 1px solid rgba(100, 116, 139, 0.3) !important;
-            border-radius: 12px !important;
-            padding: 10px 16px !important;
-            color: #cbd5e1 !important;
-            font-size: 13px !important;
-            font-weight: 600 !important;
-            display: flex !important;
-            align-items: center !important;
-            gap: 8px !important;
-            cursor: pointer !important;
-            transition: all 0.3s ease !important;
-        }
-        
-        .nav-button:hover {
-            background: rgba(0, 212, 255, 0.1) !important;
-            border-color: rgba(0, 212, 255, 0.4) !important;
-            color: #00d4ff !important;
-            transform: translateY(-1px) !important;
-        }
-        
-        .nav-button.active {
-            background: rgba(0, 212, 255, 0.15) !important;
-            border-color: rgba(0, 212, 255, 0.5) !important;
-            color: #00d4ff !important;
-        }
-        
+        /* Auth section - Right side */
         .auth-section {
             display: flex !important;
             align-items: center !important;
@@ -165,6 +113,12 @@ def render_custom_css():
             font-size: 13px !important;
             font-weight: 600 !important;
             cursor: pointer !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .login-button:hover {
+            border-color: rgba(0, 212, 255, 0.6) !important;
+            color: #00d4ff !important;
         }
         
         .signup-button {
@@ -177,6 +131,75 @@ def render_custom_css():
             font-weight: 700 !important;
             cursor: pointer !important;
             box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3) !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .signup-button:hover {
+            transform: translateY(-1px) !important;
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4) !important;
+        }
+        
+        /* Hide the top navigation from header */
+        .nav-section {
+            display: none !important;
+        }
+        
+        /* Sidebar Styling */
+        section[data-testid="stSidebar"] {
+            background: rgba(15, 20, 25, 0.95) !important;
+            border-right: 1px solid rgba(0, 212, 255, 0.2) !important;
+            margin-top: 80px !important;
+            backdrop-filter: blur(25px) !important;
+        }
+        
+        .sidebar-nav {
+            padding: 20px 0 !important;
+        }
+        
+        .sidebar-nav-item {
+            display: flex !important;
+            align-items: center !important;
+            gap: 12px !important;
+            padding: 12px 20px !important;
+            margin: 4px 10px !important;
+            border-radius: 12px !important;
+            color: #cbd5e1 !important;
+            text-decoration: none !important;
+            font-size: 14px !important;
+            font-weight: 500 !important;
+            transition: all 0.3s ease !important;
+            cursor: pointer !important;
+            border: 1px solid transparent !important;
+        }
+        
+        .sidebar-nav-item:hover {
+            background: rgba(0, 212, 255, 0.1) !important;
+            border-color: rgba(0, 212, 255, 0.3) !important;
+            color: #00d4ff !important;
+        }
+        
+        .sidebar-nav-item.active {
+            background: rgba(0, 212, 255, 0.15) !important;
+            border-color: rgba(0, 212, 255, 0.5) !important;
+            color: #00d4ff !important;
+        }
+        
+        .sidebar-nav-icon {
+            width: 18px !important;
+            text-align: center !important;
+        }
+        
+        /* Main content adjustments */
+        .main .block-container {
+            padding-top: 100px !important;
+            padding-left: 20px !important;
+            padding-right: 20px !important;
+            max-width: 100% !important;
+        }
+        
+        /* Streamlit sidebar content styling */
+        .css-1d391kg .css-1v3fvcr {
+            background: transparent !important;
         }
         
         /* Hide Streamlit elements */
@@ -188,71 +211,45 @@ def render_custom_css():
         /* Mobile responsive */
         @media (max-width: 768px) {
             .professional-header {
-                height: 120px !important;
-                padding: 12px 20px !important;
+                height: 70px !important;
+                padding: 0 20px !important;
             }
             
-            .header-content {
-                flex-direction: column !important;
-                gap: 10px !important;
+            .brand-text h1 {
+                font-size: 22px !important;
+            }
+            
+            .brand-subtitle {
+                font-size: 10px !important;
             }
             
             .main .block-container {
-                padding-top: 140px !important;
+                padding-top: 90px !important;
             }
         }
     </style>
     """, unsafe_allow_html=True)
 
-def render_professional_header(
-    current_page="Home",
-    user_name=None,
-    user_role=None,
-    show_auth=True,
-    custom_nav_items=None
-):
-    """Render a professional header with navigation and auth"""
+def render_clean_header(user_name=None, user_role=None, show_auth=True):
+    """Render a clean header with just branding and auth"""
     
-    # Default navigation items
-    default_nav_items = [
-        {"name": "Dashboard", "icon": "fas fa-tachometer-alt"},
-        {"name": "Analytics", "icon": "fas fa-chart-line"},
-        {"name": "Portfolio", "icon": "fas fa-wallet"},
-        {"name": "Research", "icon": "fas fa-microscope"},
-        {"name": "Alerts", "icon": "fas fa-bell"},
-    ]
-    
-    nav_items = custom_nav_items if custom_nav_items else default_nav_items
-    
-    # Build navigation buttons - Fixed HTML escaping
-    nav_buttons_html = ""
-    for item in nav_items:
-        active_class = "active" if item["name"] == current_page else ""
-        nav_buttons_html += f'<div class="nav-button {active_class}"><i class="{item["icon"]}"></i><span>{item["name"]}</span></div>'
-    
-    # Build auth section - Fixed HTML
+    # Build auth section
     if user_name:
-        # User is logged in - create user menu
         user_initials = "".join([name[0].upper() for name in user_name.split()[:2]])
         auth_html = f'<div style="display: flex; align-items: center; gap: 10px; background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(100, 116, 139, 0.3); border-radius: 12px; padding: 8px 12px;"><div style="width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, #00d4ff 0%, #ff00a8 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 14px;">{user_initials}</div><div><div style="font-size: 13px; font-weight: 600; color: #f1f5f9;">{user_name}</div><div style="font-size: 11px; color: #64748b;">{user_role or "Free Plan"}</div></div></div>'
     else:
-        # User not logged in - Fixed HTML on single line
         auth_html = '<div class="auth-section"><button class="login-button"><i class="fas fa-sign-in-alt"></i> Login</button><button class="signup-button"><i class="fas fa-rocket"></i> Get Started</button></div>' if show_auth else ""
     
-    # Complete header HTML - all on single lines to avoid Streamlit markdown issues
     header_html = f'''
     <div class="professional-header">
         <div class="header-content">
             <div class="brand-section">
-                <div class="logo-container">
-                    <div class="logo"><i class="fas fa-gem"></i></div>
-                    <div class="brand-text">
-                        <h1>KaspaMetrics</h1>
-                        <div class="brand-subtitle">Advanced Market Intelligence Platform</div>
-                    </div>
+                <div class="logo"><i class="fas fa-gem"></i></div>
+                <div class="brand-text">
+                    <h1>KaspaMetrics</h1>
+                    <div class="brand-subtitle">Advanced Market Intelligence Platform</div>
                 </div>
             </div>
-            <div class="nav-section">{nav_buttons_html}</div>
             {auth_html}
         </div>
     </div>
@@ -260,23 +257,50 @@ def render_professional_header(
     
     st.markdown(header_html, unsafe_allow_html=True)
 
-def render_page_header(title, subtitle=None, show_breadcrumb=False, breadcrumb_items=None):
-    """Render a page-specific header section"""
+def render_sidebar_navigation(current_page="Home"):
+    """Render navigation in the sidebar"""
     
-    breadcrumb_html = ""
-    if show_breadcrumb and breadcrumb_items:
-        breadcrumb_parts = []
-        for i, item in enumerate(breadcrumb_items):
-            if i == len(breadcrumb_items) - 1:
-                breadcrumb_parts.append(f'<span style="color: #00d4ff;">{item}</span>')
-            else:
-                breadcrumb_parts.append(f'<span style="color: #64748b;">{item}</span>')
+    nav_items = [
+        {"name": "Dashboard", "icon": "fas fa-tachometer-alt", "page": "Dashboard"},
+        {"name": "Price Analysis", "icon": "fas fa-chart-line", "page": "Analytics"},
+        {"name": "Portfolio", "icon": "fas fa-wallet", "page": "Portfolio"},
+        {"name": "Research", "icon": "fas fa-microscope", "page": "Research"},
+        {"name": "Alerts", "icon": "fas fa-bell", "page": "Alerts"},
+        {"name": "Settings", "icon": "fas fa-cog", "page": "Settings"},
+    ]
+    
+    # Custom sidebar navigation
+    st.sidebar.markdown("## Navigation")
+    
+    for item in nav_items:
+        active_class = "active" if item["page"] == current_page else ""
         
-        breadcrumb_html = f'<div style="margin-bottom: 16px;"><div style="font-size: 12px; color: #64748b; display: flex; align-items: center; gap: 8px;">{" ".join(breadcrumb_parts)}</div></div>'
+        # Using columns for better layout
+        col_icon, col_text = st.sidebar.columns([1, 4])
+        
+        with col_icon:
+            if item["page"] == current_page:
+                st.markdown(f'<i class="{item["icon"]}" style="color: #00d4ff;"></i>', unsafe_allow_html=True)
+            else:
+                st.markdown(f'<i class="{item["icon"]}" style="color: #cbd5e1;"></i>', unsafe_allow_html=True)
+        
+        with col_text:
+            if st.button(item["name"], key=f"nav_{item['page']}", use_container_width=True):
+                st.switch_page(f"pages/{item['page']}.py")
+    
+    # Add separator
+    st.sidebar.markdown("---")
+    
+    # Add some quick stats or info
+    st.sidebar.markdown("### Quick Stats")
+    st.sidebar.metric("KAS Price", "$0.0873", "2.4%")
+    st.sidebar.metric("24h Volume", "$45.2M", "-5.1%")
+
+def render_simple_page_header(title, subtitle=None):
+    """Simple page header without breadcrumbs"""
     
     subtitle_html = f'<p style="color: #94a3b8; font-size: 16px; margin: 8px 0 0 0;">{subtitle}</p>' if subtitle else ""
     
-    # Fixed HTML - remove problematic multiline formatting
-    page_header_html = f'<div style="padding: 0 40px 32px 40px;">{breadcrumb_html}<h1 style="color: #f1f5f9; font-size: 36px; font-weight: 800; margin: 0;">{title}</h1>{subtitle_html}</div>'
+    page_header_html = f'<div style="padding: 0 0 32px 0;"><h1 style="color: #f1f5f9; font-size: 36px; font-weight: 800; margin: 0;">{title}</h1>{subtitle_html}</div>'
     
     st.markdown(page_header_html, unsafe_allow_html=True)
