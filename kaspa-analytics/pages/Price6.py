@@ -688,25 +688,25 @@ with st.container():
     col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
     
     with col1:
-        st.markdown('<div class="control-group"><div class="control-label">📈 Price Scale</div></div>', unsafe_allow_html=True)
+        st.markdown('<div class="control-group"><div class="control-label">Price Scale</div></div>', unsafe_allow_html=True)
         y_scale_options = ["Linear", "Log"]
         y_scale = st.selectbox("", y_scale_options,
                              index=1, label_visibility="collapsed", key="price_y_scale_select")
 
     with col2:
-        st.markdown('<div class="control-group"><div class="control-label">⏱️ Time Scale</div></div>', unsafe_allow_html=True)
+        st.markdown('<div class="control-group"><div class="control-label">Time Scale</div></div>', unsafe_allow_html=True)
         x_scale_options = ["Linear", "Log"]
         x_scale_type = st.selectbox("", x_scale_options,
                                   index=0, label_visibility="collapsed", key="price_x_scale_select")
 
     with col3:
-        st.markdown('<div class="control-group"><div class="control-label">📅 Time Period</div></div>', unsafe_allow_html=True)
+        st.markdown('<div class="control-group"><div class="control-label">Time Period</div></div>', unsafe_allow_html=True)
         time_ranges = ["1W", "1M", "3M", "6M", "1Y", "All"]
         time_range = st.selectbox("", time_ranges,
                                 index=5, label_visibility="collapsed", key="price_time_range_select")
 
     with col4:
-        st.markdown('<div class="control-group"><div class="control-label">📊 Power Law</div></div>', unsafe_allow_html=True)
+        st.markdown('<div class="control-group"><div class="control-label">Power Law</div></div>', unsafe_allow_html=True)
         power_law_options = ["Hide", "Show"]
         show_power_law = st.selectbox("", power_law_options,
                                     index=1, label_visibility="collapsed", key="price_power_law_select")
