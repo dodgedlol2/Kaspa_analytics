@@ -174,6 +174,47 @@ def render_custom_css_with_sidebar():
             padding: 16px 12px !important;
         }
         
+        /* HIDE ALL STREAMLIT DEFAULT NAVIGATION */
+        .css-1d391kg .css-1v3fvcr {
+            display: none !important;
+        }
+        
+        .css-1d391kg .css-17eq0hr {
+            display: none !important;
+        }
+        
+        /* Hide Streamlit's page navigation completely */
+        nav[data-testid="stSidebarNav"] {
+            display: none !important;
+        }
+        
+        .css-1dp5vir {
+            display: none !important;
+        }
+        
+        /* Hide any Streamlit sidebar navigation */
+        section[data-testid="stSidebar"] nav {
+            display: none !important;
+        }
+        
+        section[data-testid="stSidebar"] ul {
+            display: none !important;
+        }
+        
+        section[data-testid="stSidebar"] .css-17eq0hr {
+            display: none !important;
+        }
+        
+        /* Hide radio buttons if they appear */
+        .stRadio {
+            display: none !important;
+        }
+        
+        /* Hide selectbox navigation if it exists */
+        .stSelectbox {
+            display: none !important;
+        }
+        
         /* Head metrics styling - same as your current Market Metrics */
         .head-metric {
             font-size: 12px !important;
