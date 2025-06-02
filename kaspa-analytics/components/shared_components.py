@@ -7,17 +7,17 @@ def render_page_config(page_title="Kaspa Analytics Pro", page_icon="💎"):
         page_title=page_title,
         page_icon=page_icon,
         layout="wide",
-        initial_sidebar_state="expanded"  # Show sidebar by default
+        initial_sidebar_state="expanded"
     )
 
 def render_custom_css_with_sidebar():
-    """Enhanced CSS with proper header layout and left sidebar"""
+    """Enhanced CSS with beautiful sidebar dropdowns and glow effects"""
     st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
         @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
         
-        /* Base styles */
+        /* Base styles with background effects */
         html, body, .stApp {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
             background: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 50%, #0f1419 100%) !important;
@@ -29,7 +29,29 @@ def render_custom_css_with_sidebar():
             background-attachment: fixed !important;
         }
         
-        /* Professional Header - Clean layout */
+        /* Background gradient effects */
+        .stApp::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.15) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+            animation: backgroundShift 20s ease-in-out infinite;
+        }
+        
+        @keyframes backgroundShift {
+            0%, 100% { opacity: 1; transform: translateX(0px) translateY(0px); }
+            50% { opacity: 0.8; transform: translateX(20px) translateY(-20px); }
+        }
+        
+        /* Professional Header */
         .professional-header {
             position: fixed !important;
             top: 0 !important;
@@ -57,7 +79,6 @@ def render_custom_css_with_sidebar():
             margin: 0 auto !important;
         }
         
-        /* Brand section - Left side */
         .brand-section {
             display: flex !important;
             align-items: center !important;
@@ -97,7 +118,6 @@ def render_custom_css_with_sidebar():
             margin-top: 2px !important;
         }
         
-        /* Auth section - Right side */
         .auth-section {
             display: flex !important;
             align-items: center !important;
@@ -139,54 +159,198 @@ def render_custom_css_with_sidebar():
             box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4) !important;
         }
         
-        /* Hide the top navigation from header */
-        .nav-section {
-            display: none !important;
-        }
-        
-        /* Sidebar Styling */
+        /* Beautiful Sidebar Styling */
         section[data-testid="stSidebar"] {
-            background: rgba(15, 20, 25, 0.95) !important;
-            border-right: 1px solid rgba(0, 212, 255, 0.2) !important;
+            background: rgba(10, 14, 26, 0.95) !important;
+            border-right: 1px solid rgba(0, 212, 255, 0.15) !important;
             margin-top: 80px !important;
             backdrop-filter: blur(25px) !important;
+            box-shadow: 8px 0 32px rgba(0, 0, 0, 0.4) !important;
         }
         
-        .sidebar-nav {
-            padding: 20px 0 !important;
+        /* Hide default Streamlit sidebar content */
+        section[data-testid="stSidebar"] > div {
+            background: transparent !important;
         }
         
-        .sidebar-nav-item {
+        /* Sidebar Section Containers */
+        .sidebar-section {
+            margin: 12px 8px !important;
+            background: rgba(15, 20, 25, 0.6) !important;
+            backdrop-filter: blur(25px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            border-radius: 16px !important;
+            overflow: hidden !important;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+        
+        .sidebar-section:hover {
+            border-color: rgba(0, 212, 255, 0.2) !important;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+        }
+        
+        /* Dropdown Header */
+        .dropdown-header {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            padding: 16px 20px !important;
+            cursor: pointer !important;
+            transition: all 0.3s ease !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+        }
+        
+        .dropdown-header:hover {
+            background: rgba(0, 212, 255, 0.05) !important;
+        }
+        
+        .dropdown-header.active {
+            background: rgba(0, 212, 255, 0.1) !important;
+            border-bottom-color: rgba(0, 212, 255, 0.2) !important;
+        }
+        
+        .dropdown-title {
             display: flex !important;
             align-items: center !important;
             gap: 12px !important;
-            padding: 12px 20px !important;
-            margin: 4px 10px !important;
-            border-radius: 12px !important;
-            color: #cbd5e1 !important;
-            text-decoration: none !important;
             font-size: 14px !important;
+            font-weight: 600 !important;
+            color: #cbd5e1 !important;
+        }
+        
+        .dropdown-icon {
+            width: 16px !important;
+            text-align: center !important;
+            color: #00d4ff !important;
+        }
+        
+        .dropdown-chevron {
+            font-size: 12px !important;
+            color: #64748b !important;
+            transition: transform 0.3s ease !important;
+        }
+        
+        .dropdown-chevron.expanded {
+            transform: rotate(90deg) !important;
+        }
+        
+        /* Dropdown Content */
+        .dropdown-content {
+            max-height: 0 !important;
+            overflow: hidden !important;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            background: rgba(10, 14, 20, 0.4) !important;
+        }
+        
+        .dropdown-content.expanded {
+            max-height: 500px !important;
+            padding-bottom: 8px !important;
+        }
+        
+        /* Navigation Items */
+        .nav-item {
+            display: flex !important;
+            align-items: center !important;
+            gap: 12px !important;
+            padding: 10px 20px 10px 48px !important;
+            margin: 2px 8px !important;
+            border-radius: 8px !important;
+            color: #94a3b8 !important;
+            font-size: 13px !important;
             font-weight: 500 !important;
-            transition: all 0.3s ease !important;
             cursor: pointer !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
             border: 1px solid transparent !important;
         }
         
-        .sidebar-nav-item:hover {
-            background: rgba(0, 212, 255, 0.1) !important;
-            border-color: rgba(0, 212, 255, 0.3) !important;
+        .nav-item:hover {
+            background: rgba(0, 212, 255, 0.08) !important;
             color: #00d4ff !important;
+            transform: translateX(4px) !important;
+            border-color: rgba(0, 212, 255, 0.2) !important;
+            box-shadow: 0 2px 8px rgba(0, 212, 255, 0.1) !important;
         }
         
-        .sidebar-nav-item.active {
+        .nav-item.active {
             background: rgba(0, 212, 255, 0.15) !important;
-            border-color: rgba(0, 212, 255, 0.5) !important;
             color: #00d4ff !important;
+            border-color: rgba(0, 212, 255, 0.4) !important;
+            box-shadow: 0 4px 16px rgba(0, 212, 255, 0.2) !important;
         }
         
-        .sidebar-nav-icon {
-            width: 18px !important;
+        .nav-item-icon {
+            width: 14px !important;
             text-align: center !important;
+            font-size: 12px !important;
+        }
+        
+        /* Live Stats Section */
+        .live-stats {
+            padding: 16px !important;
+        }
+        
+        .stats-title {
+            font-size: 12px !important;
+            font-weight: 600 !important;
+            color: #64748b !important;
+            text-transform: uppercase !important;
+            letter-spacing: 1px !important;
+            margin-bottom: 12px !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+        }
+        
+        .live-dot {
+            width: 6px !important;
+            height: 6px !important;
+            background: #00ff88 !important;
+            border-radius: 50% !important;
+            animation: pulse 2s infinite !important;
+            box-shadow: 0 0 8px #00ff88 !important;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+        }
+        
+        .stat-item {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            padding: 8px 0 !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+        }
+        
+        .stat-item:last-child {
+            border-bottom: none !important;
+        }
+        
+        .stat-label {
+            font-size: 11px !important;
+            color: #94a3b8 !important;
+            font-weight: 500 !important;
+        }
+        
+        .stat-value {
+            font-size: 12px !important;
+            font-weight: 600 !important;
+            color: #f1f5f9 !important;
+        }
+        
+        .stat-change {
+            font-size: 10px !important;
+            font-weight: 600 !important;
+            margin-left: 4px !important;
+        }
+        
+        .stat-change.positive {
+            color: #10b981 !important;
+        }
+        
+        .stat-change.negative {
+            color: #ef4444 !important;
         }
         
         /* Main content adjustments */
@@ -195,11 +359,6 @@ def render_custom_css_with_sidebar():
             padding-left: 20px !important;
             padding-right: 20px !important;
             max-width: 100% !important;
-        }
-        
-        /* Streamlit sidebar content styling */
-        .css-1d391kg .css-1v3fvcr {
-            background: transparent !important;
         }
         
         /* Hide Streamlit elements */
@@ -217,10 +376,6 @@ def render_custom_css_with_sidebar():
             
             .brand-text h1 {
                 font-size: 22px !important;
-            }
-            
-            .brand-subtitle {
-                font-size: 10px !important;
             }
             
             .main .block-container {
@@ -257,44 +412,134 @@ def render_clean_header(user_name=None, user_role=None, show_auth=True):
     
     st.markdown(header_html, unsafe_allow_html=True)
 
-def render_sidebar_navigation(current_page="Home"):
-    """Render navigation in the sidebar"""
+def render_beautiful_sidebar(current_page="Price"):
+    """Render beautiful sidebar with dropdown navigation like Glassnode"""
     
-    nav_items = [
-        {"name": "Dashboard", "icon": "fas fa-tachometer-alt", "page": "Dashboard"},
-        {"name": "Price Analysis", "icon": "fas fa-chart-line", "page": "Analytics"},
-        {"name": "Portfolio", "icon": "fas fa-wallet", "page": "Portfolio"},
-        {"name": "Research", "icon": "fas fa-microscope", "page": "Research"},
-        {"name": "Alerts", "icon": "fas fa-bell", "page": "Alerts"},
-        {"name": "Settings", "icon": "fas fa-cog", "page": "Settings"},
-    ]
+    # Define navigation structure
+    nav_structure = {
+        "Market Metrics": {
+            "icon": "fas fa-chart-area",
+            "items": [
+                {"name": "Price", "icon": "fas fa-dollar-sign", "page": "Price"},
+                {"name": "Market Cap", "icon": "fas fa-coins", "page": "MarketCap"},
+                {"name": "Trading Volume", "icon": "fas fa-chart-bar", "page": "Volume"},
+                {"name": "Supply", "icon": "fas fa-layer-group", "page": "Supply"}
+            ]
+        },
+        "Mining": {
+            "icon": "fas fa-microchip",
+            "items": [
+                {"name": "Hashrate", "icon": "fas fa-tachometer-alt", "page": "Hashrate"},
+                {"name": "Difficulty", "icon": "fas fa-puzzle-piece", "page": "Difficulty"},
+                {"name": "Mining Revenue", "icon": "fas fa-money-bill-wave", "page": "Revenue"}
+            ]
+        },
+        "Network": {
+            "icon": "fas fa-network-wired",
+            "items": [
+                {"name": "Transactions", "icon": "fas fa-exchange-alt", "page": "Transactions"},
+                {"name": "Addresses", "icon": "fas fa-wallet", "page": "Addresses"},
+                {"name": "Blocks", "icon": "fas fa-cube", "page": "Blocks"}
+            ]
+        }
+    }
     
-    # Custom sidebar navigation
-    st.sidebar.markdown("## Navigation")
+    # Create sidebar navigation HTML
+    sidebar_html = ""
     
-    for item in nav_items:
-        active_class = "active" if item["page"] == current_page else ""
+    for section_name, section_data in nav_structure.items():
+        # Check if any item in this section is active
+        section_active = any(item["page"] == current_page for item in section_data["items"])
         
-        # Using columns for better layout
-        col_icon, col_text = st.sidebar.columns([1, 4])
+        sidebar_html += f'''
+        <div class="sidebar-section">
+            <div class="dropdown-header {'active' if section_active else ''}" onclick="toggleDropdown('{section_name.replace(' ', '')}')">
+                <div class="dropdown-title">
+                    <i class="{section_data['icon']} dropdown-icon"></i>
+                    <span>{section_name}</span>
+                </div>
+                <i class="fas fa-chevron-right dropdown-chevron" id="chevron-{section_name.replace(' ', '')}"></i>
+            </div>
+            <div class="dropdown-content {'expanded' if section_active else ''}" id="dropdown-{section_name.replace(' ', '')}">
+        '''
         
-        with col_icon:
-            if item["page"] == current_page:
-                st.markdown(f'<i class="{item["icon"]}" style="color: #00d4ff;"></i>', unsafe_allow_html=True)
-            else:
-                st.markdown(f'<i class="{item["icon"]}" style="color: #cbd5e1;"></i>', unsafe_allow_html=True)
+        for item in section_data["items"]:
+            active_class = "active" if item["page"] == current_page else ""
+            sidebar_html += f'''
+                <div class="nav-item {active_class}" onclick="navigateTo('{item['page']}')">
+                    <i class="{item['icon']} nav-item-icon"></i>
+                    <span>{item['name']}</span>
+                </div>
+            '''
         
-        with col_text:
-            if st.button(item["name"], key=f"nav_{item['page']}", use_container_width=True):
-                st.switch_page(f"pages/{item['page']}.py")
+        sidebar_html += '</div></div>'
     
-    # Add separator
-    st.sidebar.markdown("---")
+    # Add live stats section
+    sidebar_html += '''
+    <div class="sidebar-section">
+        <div class="live-stats">
+            <div class="stats-title">
+                <div class="live-dot"></div>
+                <span>Live Stats</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">KAS Price</span>
+                <div>
+                    <span class="stat-value">$0.0873</span>
+                    <span class="stat-change positive">+2.4%</span>
+                </div>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Market Cap</span>
+                <div>
+                    <span class="stat-value">$2.1B</span>
+                    <span class="stat-change positive">+1.8%</span>
+                </div>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">24h Volume</span>
+                <div>
+                    <span class="stat-value">$45.2M</span>
+                    <span class="stat-change negative">-5.1%</span>
+                </div>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Hashrate</span>
+                <div>
+                    <span class="stat-value">1.2 EH/s</span>
+                    <span class="stat-change positive">+0.3%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    '''
     
-    # Add some quick stats or info
-    st.sidebar.markdown("### Quick Stats")
-    st.sidebar.metric("KAS Price", "$0.0873", "2.4%")
-    st.sidebar.metric("24h Volume", "$45.2M", "-5.1%")
+    # Add JavaScript for dropdown functionality
+    js_code = '''
+    <script>
+        function toggleDropdown(sectionId) {
+            const dropdown = document.getElementById('dropdown-' + sectionId);
+            const chevron = document.getElementById('chevron-' + sectionId);
+            
+            if (dropdown.classList.contains('expanded')) {
+                dropdown.classList.remove('expanded');
+                chevron.classList.remove('expanded');
+            } else {
+                dropdown.classList.add('expanded');
+                chevron.classList.add('expanded');
+            }
+        }
+        
+        function navigateTo(page) {
+            // You can implement page navigation here
+            console.log('Navigating to:', page);
+            // Example: window.location.href = '/pages/' + page + '.py';
+        }
+    </script>
+    '''
+    
+    # Render the sidebar
+    st.sidebar.markdown(sidebar_html + js_code, unsafe_allow_html=True)
 
 def render_simple_page_header(title, subtitle=None):
     """Simple page header without breadcrumbs"""
