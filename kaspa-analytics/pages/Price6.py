@@ -29,7 +29,7 @@ except Exception as e:
     st.error(f"Failed to calculate price power law: {str(e)}")
     st.stop()
 
-# Enhanced Custom CSS with Modern Design and Streamlined Title
+# Enhanced Custom CSS with Modern Design and Simplified Title
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -83,62 +83,27 @@ st.markdown("""
         transition: all 0.3s ease;
     }
     
-    /* Streamlined Title Section - No borders, elegant line */
+    /* Simplified Title Section - Clean with subtle glow */
     .chart-title-section {
         background: transparent;
-        padding: 20px 28px 12px 28px;
+        padding: 24px 28px 20px 28px;
         position: relative;
-        border-bottom: none;
-    }
-    
-    .chart-title-section::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 28px;
-        right: 28px;
-        height: 1px;
-        background: linear-gradient(90deg, 
-            transparent 0%, 
-            rgba(100, 116, 139, 0.3) 20%, 
-            rgba(148, 163, 184, 0.5) 50%, 
-            rgba(100, 116, 139, 0.3) 80%, 
-            transparent 100%);
-        animation: shimmer 3s ease-in-out infinite;
-    }
-    
-    @keyframes shimmer {
-        0%, 100% { opacity: 0.5; transform: scaleX(1); }
-        50% { opacity: 1; transform: scaleX(1.02); }
     }
     
     .chart-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 8px;
     }
     
     .chart-title {
-        font-size: 22px;
+        font-size: 28px;
         font-weight: 700;
         color: #f1f5f9;
         margin: 0;
         letter-spacing: 0.5px;
-        text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
-        background: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-    
-    .chart-subtitle {
-        font-size: 12px;
-        color: #64748b;
-        font-weight: 500;
-        margin-top: 2px;
-        letter-spacing: 0.8px;
-        text-transform: uppercase;
+        text-shadow: 0 0 30px rgba(241, 245, 249, 0.3);
+        filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.1));
     }
     
     .live-indicator {
@@ -319,15 +284,12 @@ if len(df_30_days_ago) > 0:
 else:
     price_pct_change = 0
 
-# Streamlined Chart Section with elegant title treatment
+# Simplified Chart Section with clean title treatment
 st.markdown("""
 <div class="chart-section">
     <div class="chart-title-section">
         <div class="chart-header">
-            <div>
-                <h1 class="chart-title">Kaspa Price</h1>
-                <div class="chart-subtitle">Advanced Market Analysis</div>
-            </div>
+            <h1 class="chart-title">Kaspa Price</h1>
             <div class="live-indicator">
                 <div class="live-dot"></div>
                 <span>Live Data</span>
