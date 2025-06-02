@@ -424,6 +424,59 @@ st.markdown("""
         opacity: 1;
     }
     
+    /* Custom Metric Styling */
+    .metric-label {
+        color: #94a3b8 !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 1.2px !important;
+        margin-bottom: 12px !important;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .metric-value {
+        color: #f1f5f9 !important;
+        font-size: 36px !important;
+        font-weight: 800 !important;
+        line-height: 1.1 !important;
+        margin-bottom: 6px !important;
+        text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        position: relative;
+        z-index: 1;
+    }
+    
+    .metric-delta {
+        font-size: 15px !important;
+        font-weight: 700 !important;
+        margin-bottom: 8px;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .metric-delta.positive {
+        color: #00ff88 !important;
+    }
+    
+    .metric-delta.negative {
+        color: #ff4757 !important;
+    }
+    
+    .metric-delta.neutral {
+        color: #64748b !important;
+    }
+    
+    .metric-help {
+        color: #64748b !important;
+        font-size: 11px !important;
+        font-weight: 400 !important;
+        line-height: 1.4;
+        position: relative;
+        z-index: 1;
+        opacity: 0.8;
+    }
+    
     /* Force metric containers to inherit card styling */
     .metric-card > div {
         background: transparent !important;
@@ -864,106 +917,86 @@ price_range_pct = ((max_price - min_price) / min_price) * 100
 # Enhanced Metrics Section
 st.markdown('<div class="metrics-grid">', unsafe_allow_html=True)
 
-col1, col2, col3, col4 = st.columns(4)
+# First row of metrics
+st.markdown(f"""
+<div class="metric-card">
+    <div class="metric-label">💎 POWER-LAW SLOPE</div>
+    <div class="metric-value">{b_price:.4f}</div>
+    <div class="metric-delta {'positive' if slope_pct_change >= 0 else 'negative'}">{slope_pct_change:+.2f}%</div>
+    <div class="metric-help">Growth trajectory strength - higher values indicate steeper exponential growth</div>
+</div>
+""", unsafe_allow_html=True)
 
-with col1:
-    with st.container():
-        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-        st.metric(
-            "💎 Power-Law Slope", 
-            f"{b_price:.4f}", 
-            delta=f"{slope_pct_change:+.2f}%",
-            help="Growth trajectory strength - higher values indicate steeper exponential growth"
-        )
-        st.markdown('</div>', unsafe_allow_html=True)
+st.markdown(f"""
+<div class="metric-card">
+    <div class="metric-label">🎯 MODEL ACCURACY (R²)</div>
+    <div class="metric-value">{r2_price:.4f}</div>
+    <div class="metric-delta {'positive' if r2_pct_change >= 0 else 'negative'}">{r2_pct_change:+.2f}%</div>
+    <div class="metric-help">Power law fit quality - values closer to 1.0 indicate better model accuracy</div>
+</div>
+""", unsafe_allow_html=True)
 
-with col2:
-    with st.container():
-        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-        st.metric(
-            "🎯 Model Accuracy (R²)", 
-            f"{r2_price:.4f}", 
-            delta=f"{r2_pct_change:+.2f}%",
-            help="Power law fit quality - values closer to 1.0 indicate better model accuracy"
-        )
-        st.markdown('</div>', unsafe_allow_html=True)
+st.markdown(f"""
+<div class="metric-card">
+    <div class="metric-label">📈 CURRENT PRICE</div>
+    <div class="metric-value">${current_price:.6f}</div>
+    <div class="metric-delta {'positive' if price_pct_change >= 0 else 'negative'}">{price_pct_change:+.2f}%</div>
+    <div class="metric-help">Latest recorded price with 30-day percentage change</div>
+</div>
+""", unsafe_allow_html=True)
 
-with col3:
-    with st.container():
-        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-        st.metric(
-            "📈 Current Price", 
-            f"${current_price:.6f}", 
-            delta=f"{price_pct_change:+.2f}%",
-            help="Latest recorded price with 30-day percentage change"
-        )
-        st.markdown('</div>', unsafe_allow_html=True)
-
-with col4:
-    with st.container():
-        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-        st.metric(
-            "📊 Volatility (30D)", 
-            f"{volatility_30d:.2f}%", 
-            delta=f"{price_range_pct:.1f}% range",
-            help="30-day rolling volatility and price range for the selected period"
-        )
-        st.markdown('</div>', unsafe_allow_html=True)
+st.markdown(f"""
+<div class="metric-card">
+    <div class="metric-label">📊 VOLATILITY (30D)</div>
+    <div class="metric-value">{volatility_30d:.2f}%</div>
+    <div class="metric-delta positive">{price_range_pct:.1f}% range</div>
+    <div class="metric-help">30-day rolling volatility and price range for the selected period</div>
+</div>
+""", unsafe_allow_html=True)
 
 st.markdown('</div>', unsafe_allow_html=True)
 
-# Enhanced second row of metrics
+# Second row of metrics
 st.markdown('<div class="metrics-grid">', unsafe_allow_html=True)
 
-col1, col2, col3, col4 = st.columns(4)
+market_cap_estimate = current_price * 24e9
+days_active = (last_date - genesis_date).days
 
-with col1:
-    with st.container():
-        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-        market_cap_estimate = current_price * 24e9  # Rough estimate
-        st.metric(
-            "💰 Est. Market Cap", 
-            f"${market_cap_estimate/1e9:.2f}B", 
-            delta=f"{price_pct_change:+.2f}%",
-            help="Estimated market capitalization based on circulating supply"
-        )
-        st.markdown('</div>', unsafe_allow_html=True)
+st.markdown(f"""
+<div class="metric-card">
+    <div class="metric-label">💰 EST. MARKET CAP</div>
+    <div class="metric-value">${market_cap_estimate/1e9:.2f}B</div>
+    <div class="metric-delta {'positive' if price_pct_change >= 0 else 'negative'}">{price_pct_change:+.2f}%</div>
+    <div class="metric-help">Estimated market capitalization based on circulating supply</div>
+</div>
+""", unsafe_allow_html=True)
 
-with col2:
-    with st.container():
-        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-        # Calculate days since genesis for current date
-        days_active = (last_date - genesis_date).days
-        st.metric(
-            "⏳ Days Active", 
-            f"{days_active:,}", 
-            delta="Since Genesis",
-            help="Total days since Kaspa network genesis block"
-        )
-        st.markdown('</div>', unsafe_allow_html=True)
+st.markdown(f"""
+<div class="metric-card">
+    <div class="metric-label">⏳ DAYS ACTIVE</div>
+    <div class="metric-value">{days_active:,}</div>
+    <div class="metric-delta neutral">Since Genesis</div>
+    <div class="metric-help">Total days since Kaspa network genesis block</div>
+</div>
+""", unsafe_allow_html=True)
 
-with col3:
-    with st.container():
-        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-        # Price high/low for selected period
-        st.metric(
-            "📊 Period High", 
-            f"${max_price:.6f}", 
-            delta=f"+{((max_price/current_price-1)*100):+.1f}%",
-            help=f"Highest price in selected {time_range} period"
-        )
-        st.markdown('</div>', unsafe_allow_html=True)
+st.markdown(f"""
+<div class="metric-card">
+    <div class="metric-label">📊 PERIOD HIGH</div>
+    <div class="metric-value">${max_price:.6f}</div>
+    <div class="metric-delta positive">+{((max_price/current_price-1)*100):+.1f}%</div>
+    <div class="metric-help">Highest price in selected {time_range} period</div>
+</div>
+""", unsafe_allow_html=True)
 
-with col4:
-    with st.container():
-        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-        st.metric(
-            "📉 Period Low", 
-            f"${min_price:.6f}", 
-            delta=f"{((min_price/current_price-1)*100):+.1f}%",
-            help=f"Lowest price in selected {time_range} period"
-        )
-        st.markdown('</div>', unsafe_allow_html=True)
+st.markdown(f"""
+<div class="metric-card">
+    <div class="metric-label">📉 PERIOD LOW</div>
+    <div class="metric-value">${min_price:.6f}</div>
+    <div class="metric-delta negative">{((min_price/current_price-1)*100):+.1f}%</div>
+    <div class="metric-help">Lowest price in selected {time_range} period</div>
+</div>
+""", unsafe_allow_html=True)
 
 st.markdown('</div>', unsafe_allow_html=True)
 
