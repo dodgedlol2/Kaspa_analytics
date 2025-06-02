@@ -85,32 +85,45 @@ st.markdown("""
     
     /* Clean Title Section */
     .title-section {
-        padding: 32px 0px 24px 0px;
-        text-align: center;
+        padding: 12px 40px 24px 40px;
         background: transparent;
     }
     
     .main-title {
         font-size: 42px;
-        font-weight: 700;
+        font-weight: 800;
         color: #f1f5f9;
         margin: 0 0 16px 0;
-        letter-spacing: 1px;
+        letter-spacing: 1.2px;
+        text-align: left;
         text-shadow: 0 0 40px rgba(241, 245, 249, 0.4);
         filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.15));
-        background: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 100%);
+        background: linear-gradient(135deg, #f1f5f9 0%, #00d4ff 50%, #cbd5e1 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
+        position: relative;
+    }
+    
+    .main-title::after {
+        content: '';
+        position: absolute;
+        bottom: -8px;
+        left: 0;
+        width: 60px;
+        height: 3px;
+        background: linear-gradient(90deg, #00d4ff, #ffffff);
+        border-radius: 2px;
+        box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
     }
     
     .title-underline {
-        width: 120px;
-        height: 2px;
-        background: linear-gradient(90deg, transparent 0%, #ffffff 20%, #ffffff 80%, transparent 100%);
-        margin: 0 auto;
-        border-radius: 2px;
-        box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+        width: 100%;
+        height: 1px;
+        background: linear-gradient(90deg, #ffffff 0%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0.1) 100%);
+        margin: 0;
+        border-radius: 1px;
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
     }
     .controls-section {
         padding: 16px 0px 20px 0px;
