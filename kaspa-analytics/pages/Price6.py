@@ -30,7 +30,7 @@ except Exception as e:
     st.stop()
 
 # Enhanced Custom CSS with Modern Design
-st.markdown("""
+st.markdown(""", unsafe_allow_html=True)
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
     
