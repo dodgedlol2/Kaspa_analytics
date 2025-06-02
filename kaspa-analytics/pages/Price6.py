@@ -29,7 +29,7 @@ except Exception as e:
     st.error(f"Failed to calculate price power law: {str(e)}")
     st.stop()
 
-# Enhanced Custom CSS with Modern Design - Title Section Removed
+# Enhanced Custom CSS with Modern Design and Animated Title
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -71,6 +71,39 @@ st.markdown("""
         50% { opacity: 0.8; transform: translateX(20px) translateY(-20px); }
     }
     
+    @keyframes shimmer {
+        0% {
+            background-position: -200% center;
+            text-shadow: 0 0 10px rgba(241, 245, 249, 0.3);
+        }
+        50% {
+            text-shadow: 
+                0 0 20px rgba(0, 212, 255, 0.6),
+                0 0 30px rgba(0, 212, 255, 0.4),
+                0 0 40px rgba(0, 212, 255, 0.2);
+        }
+        100% {
+            background-position: 200% center;
+            text-shadow: 0 0 10px rgba(241, 245, 249, 0.3);
+        }
+    }
+    
+    @keyframes glow {
+        0%, 100% {
+            text-shadow: 
+                0 0 10px rgba(241, 245, 249, 0.3),
+                0 0 20px rgba(0, 212, 255, 0.2),
+                0 0 30px rgba(0, 212, 255, 0.1);
+        }
+        50% {
+            text-shadow: 
+                0 0 20px rgba(241, 245, 249, 0.5),
+                0 0 30px rgba(0, 212, 255, 0.4),
+                0 0 40px rgba(0, 212, 255, 0.3),
+                0 0 50px rgba(0, 212, 255, 0.2);
+        }
+    }
+    
     .chart-section {
         margin: 12px 40px 28px 40px;
         background: rgba(30, 41, 59, 0.4);
@@ -83,37 +116,39 @@ st.markdown("""
         transition: all 0.3s ease;
     }
     
-    /* Clean Title Section */
+    /* Reduced spacing and smaller title */
     .title-section {
-        padding: 0px 40px 20px 40px;
+        padding: 20px 40px 8px 40px;
         background: transparent;
     }
     
     .main-title {
-        font-size: 32px;
+        font-size: 24px;
         font-weight: 700;
         color: #f1f5f9;
-        margin: 0 0 12px 0;
-        letter-spacing: 1px;
+        margin: 0 0 8px 0;
+        letter-spacing: 0.5px;
         text-align: left;
-        text-shadow: 0 0 20px rgba(241, 245, 249, 0.2);
-        filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.08));
         background: linear-gradient(135deg, #f1f5f9 0%, #00d4ff 50%, #cbd5e1 100%);
+        background-size: 200% auto;
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
+        animation: shimmer 3s ease-in-out infinite, glow 2s ease-in-out infinite alternate;
+        position: relative;
     }
     
     .title-underline {
         width: 100%;
         height: 1px;
         background: linear-gradient(90deg, #ffffff 0%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0.1) 100%);
-        margin: 0;
+        margin: 0 0 16px 0;
         border-radius: 1px;
         box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
     }
+    
     .controls-section {
-        padding: 16px 0px 20px 0px;
+        padding: 8px 0px 16px 0px;
         background: transparent;
         border: none;
     }
@@ -151,7 +186,7 @@ st.markdown("""
     }
     
     .chart-content {
-        padding: 20px 28px;
+        padding: 16px 28px;
         position: relative;
     }
     
@@ -244,7 +279,7 @@ if len(df_30_days_ago) > 0:
 else:
     price_pct_change = 0
 
-# Clean title section with white underline
+# Clean title section with reduced spacing and animated title
 st.markdown("""
 <div class="title-section">
     <h1 class="main-title">Kaspa Price</h1>
