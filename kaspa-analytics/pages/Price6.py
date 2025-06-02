@@ -223,7 +223,7 @@ st.markdown("""
         color: #f1f5f9 !important;
         font-weight: 600 !important;
         font-size: 14px !important;
-        padding: 10px 16px !important;
+        padding: 8px 16px !important;
     }
     
     .chart-content {
