@@ -915,37 +915,50 @@ min_price = filtered_df['Price'].min()
 price_range_pct = ((max_price - min_price) / min_price) * 100
 
 # Enhanced Metrics Section
+st.markdown('<div class="metrics-grid">', unsafe_allow_html=True)
+
+# Power-Law Slope
 st.markdown(f"""
-<div class="metrics-grid">
-    <div class="metric-card">
-        <div class="metric-label">💎 POWER-LAW SLOPE</div>
-        <div class="metric-value">{b_price:.4f}</div>
-        <div class="metric-delta {'positive' if slope_pct_change >= 0 else 'negative'}">{slope_pct_change:+.2f}%</div>
-        <div class="metric-help">Growth trajectory strength - higher values indicate steeper exponential growth</div>
-    </div>
-    
-    <div class="metric-card">
-        <div class="metric-label">🎯 MODEL ACCURACY (R²)</div>
-        <div class="metric-value">{r2_price:.4f}</div>
-        <div class="metric-delta {'positive' if r2_pct_change >= 0 else 'negative'}">{r2_pct_change:+.2f}%</div>
-        <div class="metric-help">Power law fit quality - values closer to 1.0 indicate better model accuracy</div>
-    </div>
-    
-    <div class="metric-card">
-        <div class="metric-label">📈 CURRENT PRICE</div>
-        <div class="metric-value">${current_price:.6f}</div>
-        <div class="metric-delta {'positive' if price_pct_change >= 0 else 'negative'}">{price_pct_change:+.2f}%</div>
-        <div class="metric-help">Latest recorded price with 30-day percentage change</div>
-    </div>
-    
-    <div class="metric-card">
-        <div class="metric-label">💰 EST. MARKET CAP</div>
-        <div class="metric-value">${(current_price * 24e9)/1e9:.2f}B</div>
-        <div class="metric-delta {'positive' if price_pct_change >= 0 else 'negative'}">{price_pct_change:+.2f}%</div>
-        <div class="metric-help">Estimated market capitalization based on circulating supply</div>
-    </div>
+<div class="metric-card">
+    <div class="metric-label">💎 POWER-LAW SLOPE</div>
+    <div class="metric-value">{b_price:.4f}</div>
+    <div class="metric-delta {'positive' if slope_pct_change >= 0 else 'negative'}">{slope_pct_change:+.2f}%</div>
+    <div class="metric-help">Growth trajectory strength - higher values indicate steeper exponential growth</div>
 </div>
 """, unsafe_allow_html=True)
+
+# Model Accuracy
+st.markdown(f"""
+<div class="metric-card">
+    <div class="metric-label">🎯 MODEL ACCURACY (R²)</div>
+    <div class="metric-value">{r2_price:.4f}</div>
+    <div class="metric-delta {'positive' if r2_pct_change >= 0 else 'negative'}">{r2_pct_change:+.2f}%</div>
+    <div class="metric-help">Power law fit quality - values closer to 1.0 indicate better model accuracy</div>
+</div>
+""", unsafe_allow_html=True)
+
+# Current Price
+st.markdown(f"""
+<div class="metric-card">
+    <div class="metric-label">📈 CURRENT PRICE</div>
+    <div class="metric-value">${current_price:.6f}</div>
+    <div class="metric-delta {'positive' if price_pct_change >= 0 else 'negative'}">{price_pct_change:+.2f}%</div>
+    <div class="metric-help">Latest recorded price with 30-day percentage change</div>
+</div>
+""", unsafe_allow_html=True)
+
+# Market Cap
+market_cap_estimate = current_price * 24e9
+st.markdown(f"""
+<div class="metric-card">
+    <div class="metric-label">💰 EST. MARKET CAP</div>
+    <div class="metric-value">${market_cap_estimate/1e9:.2f}B</div>
+    <div class="metric-delta {'positive' if price_pct_change >= 0 else 'negative'}">{price_pct_change:+.2f}%</div>
+    <div class="metric-help">Estimated market capitalization based on circulating supply</div>
+</div>
+""", unsafe_allow_html=True)
+
+st.markdown('</div>', unsafe_allow_html=True)
 
 # Enhanced Footer with additional information
 st.markdown(f"""
