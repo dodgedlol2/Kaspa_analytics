@@ -72,7 +72,7 @@ st.markdown("""
     }
     
     .chart-section {
-        margin: 32px 40px 28px 40px;
+        margin: 12px 40px 28px 40px;
         background: rgba(30, 41, 59, 0.4);
         backdrop-filter: blur(25px);
         border: none;
@@ -85,36 +85,23 @@ st.markdown("""
     
     /* Clean Title Section */
     .title-section {
-        padding: 12px 40px 24px 40px;
+        padding: 0px 40px 20px 40px;
         background: transparent;
     }
     
     .main-title {
-        font-size: 42px;
-        font-weight: 800;
+        font-size: 32px;
+        font-weight: 700;
         color: #f1f5f9;
-        margin: 0 0 16px 0;
-        letter-spacing: 1.2px;
+        margin: 0 0 12px 0;
+        letter-spacing: 1px;
         text-align: left;
-        text-shadow: 0 0 40px rgba(241, 245, 249, 0.4);
-        filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.15));
+        text-shadow: 0 0 20px rgba(241, 245, 249, 0.2);
+        filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.08));
         background: linear-gradient(135deg, #f1f5f9 0%, #00d4ff 50%, #cbd5e1 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
-        position: relative;
-    }
-    
-    .main-title::after {
-        content: '';
-        position: absolute;
-        bottom: -8px;
-        left: 0;
-        width: 60px;
-        height: 3px;
-        background: linear-gradient(90deg, #00d4ff, #ffffff);
-        border-radius: 2px;
-        box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
     }
     
     .title-underline {
