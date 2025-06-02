@@ -427,6 +427,118 @@ def render_minimal_sidebar_css():
     </style>
     """, unsafe_allow_html=True)
 
+def render_beautiful_header(user_name=None, user_role=None, show_auth=True):
+    """Beautiful header component matching your original design exactly"""
+    
+    # Build auth section
+    if user_name:
+        user_initials = "".join([name[0].upper() for name in user_name.split()[:2]])
+        auth_html = f'''
+        <div style="display: flex; align-items: center; gap: 10px; background: rgba(15, 20, 25, 0.7); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 12px 16px;">
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #00d4ff 0%, #ff00a8 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 16px;">{user_initials}</div>
+            <div>
+                <div style="font-size: 14px; font-weight: 600; color: #f1f5f9;">{user_name}</div>
+                <div style="font-size: 11px; color: #64748b;">{user_role or "Free Plan"}</div>
+            </div>
+        </div>
+        '''
+    else:
+        auth_html = '''
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <button style="background: transparent; border: 1px solid rgba(100, 116, 139, 0.4); border-radius: 10px; padding: 8px 16px; color: #cbd5e1; font-size: 13px; font-weight: 600; cursor: pointer;">
+                <i class="fas fa-sign-in-alt"></i> Login
+            </button>
+            <button style="background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%); border: none; border-radius: 10px; padding: 10px 20px; color: white; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);">
+                <i class="fas fa-rocket"></i> Get Started
+            </button>
+        </div>
+        ''' if show_auth else ""
+    
+    # Get current price data for header stats (you'll need to pass this data)
+    # For now, using placeholder - you can update this to use real data
+    header_html = f'''
+    <div class="header-container">
+        <div class="header-content">
+            <div class="brand">
+                <div>
+                    <h1>KaspaMetrics</h1>
+                    <div class="brand-subtitle">Advanced Market Intelligence Platform</div>
+                </div>
+            </div>
+            <div class="header-stats">
+                <div class="header-stat">
+                    <span class="header-stat-value" id="current-price">$0.0873</span>
+                    <div class="header-stat-label">Current Price</div>
+                </div>
+                <div class="header-stat">
+                    <span class="header-stat-value" id="price-change" style="color: #00ff88">+2.4%</span>
+                    <div class="header-stat-label">30D Change</div>
+                </div>
+                <div class="header-stat">
+                    <span class="header-stat-value" id="model-fit">0.885</span>
+                    <div class="header-stat-label">Model Fit</div>
+                </div>
+                <div class="header-stat">
+                    <div class="status-badge">
+                        <div class="live-dot"></div>
+                        <span>Live Data</span>
+                    </div>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center;">
+                {auth_html}
+            </div>
+        </div>
+    </div>
+    '''
+    
+    st.markdown(header_html, unsafe_allow_html=True)
+
+def update_header_stats(current_price, price_pct_change, r2_price):
+    """Function to update header stats with real data"""
+    js_update = f"""
+    <script>
+        // Update header stats with real data
+        const priceElement = document.getElementById('current-price');
+        const changeElement = document.getElementById('price-change');
+        const fitElement = document.getElementById('model-fit');
+        
+        if (priceElement) priceElement.textContent = '${current_price:.4f}';
+        if (changeElement) {{
+            changeElement.textContent = '{price_pct_change:+.1f}%';
+            changeElement.style.color = '{("#00ff88" if price_pct_change >= 0 else "#ff4757")}';
+        }}
+        if (fitElement) fitElement.textContent = '{r2_price:.3f}';
+    </script>
+    """
+    st.components.v1.html(js_update, height=0)
+    """Minimal sidebar like Kaspalytics/Glassnode"""
+    
+    # Simple navigation
+    nav_items = [
+        {"name": "Dashboard", "icon": "fas fa-home", "page": "Dashboard"},
+        {"name": "Price Analysis", "icon": "fas fa-chart-line", "page": "Price Analysis"},
+        {"name": "On-Chain Metrics", "icon": "fas fa-link", "page": "OnChain"},
+        {"name": "Mining Analytics", "icon": "fas fa-microchip", "page": "Mining"},
+        {"name": "Portfolio", "icon": "fas fa-wallet", "page": "Portfolio"},
+        {"name": "Alerts", "icon": "fas fa-bell", "page": "Alerts"},
+    ]
+    
+    # Navigation section
+    st.sidebar.markdown('<div class="sidebar-section">', unsafe_allow_html=True)
+    st.sidebar.markdown('<div class="sidebar-title">Analytics</div>', unsafe_allow_html=True)
+    
+    for item in nav_items:
+        active_class = "active" if item["page"] == current_page else ""
+        
+        nav_html = f'''
+        <div class="sidebar-nav-item {active_class}">
+            <i class="{item['icon']} sidebar-nav-icon"></i>
+            <span>{item['name']}</span>
+        </div>
+        '''
+        st.sidebar.markdown(nav_html, unsafe_allow_html=True)
+    
 def render_minimal_sidebar(current_page="Price Analysis"):
     """Minimal sidebar like Kaspalytics/Glassnode"""
     
@@ -454,6 +566,30 @@ def render_minimal_sidebar(current_page="Price Analysis"):
         </div>
         '''
         st.sidebar.markdown(nav_html, unsafe_allow_html=True)
+    
+    st.sidebar.markdown('</div>', unsafe_allow_html=True)
+    
+    # Simple price display
+    st.sidebar.markdown('<div class="sidebar-section">', unsafe_allow_html=True)
+    st.sidebar.markdown('<div class="sidebar-title">Live Price</div>', unsafe_allow_html=True)
+    
+    price_html = '''
+    <div class="sidebar-price">
+        <div class="sidebar-price-value">$0.08734</div>
+        <div class="sidebar-price-change positive">+2.4% (24h)</div>
+    </div>
+    '''
+    st.sidebar.markdown(price_html, unsafe_allow_html=True)
+    st.sidebar.markdown('</div>', unsafe_allow_html=True)
+    
+    # Simple stats
+    st.sidebar.markdown('<div class="sidebar-section">', unsafe_allow_html=True)
+    st.sidebar.markdown('<div class="sidebar-title">Quick Stats</div>', unsafe_allow_html=True)
+    
+    # Using simple Streamlit metrics for clean look
+    st.sidebar.metric("Market Cap", "$2.1B", "1.8%")
+    st.sidebar.metric("24h Volume", "$45.2M", "-5.1%")
+    st.sidebar.metric("Circulating", "24.0B KAS", "")
     
     st.sidebar.markdown('</div>', unsafe_allow_html=True)
     
