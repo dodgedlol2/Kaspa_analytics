@@ -276,17 +276,6 @@ st.markdown("""
         position: relative;
     }
     
-    .control-label::after {
-        content: '';
-        position: absolute;
-        bottom: -3px;
-        left: 0;
-        width: 20px;
-        height: 2px;
-        background: linear-gradient(90deg, #00d4ff, #ff00a8);
-        border-radius: 1px;
-    }
-    
     /* Revolutionary Selectbox Styling */
     .stSelectbox {
         position: relative;
@@ -461,16 +450,6 @@ st.markdown("""
     
     .metric-delta.neutral {
         color: #64748b !important;
-    }
-    
-    .metric-help {
-        color: #64748b !important;
-        font-size: 11px !important;
-        font-weight: 400 !important;
-        line-height: 1.4;
-        position: relative;
-        z-index: 1;
-        opacity: 0.8;
     }
     
     /* Force metric containers to inherit card styling */
@@ -688,25 +667,25 @@ with st.container():
     col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
     
     with col1:
-        st.markdown('<div class="control-group"><div class="control-label">Price Scale</div></div>', unsafe_allow_html=True)
+        st.markdown('<div class="control-group"><div class="control-label">📈 Price Scale</div></div>', unsafe_allow_html=True)
         y_scale_options = ["Linear", "Log"]
         y_scale = st.selectbox("", y_scale_options,
                              index=1, label_visibility="collapsed", key="price_y_scale_select")
 
     with col2:
-        st.markdown('<div class="control-group"><div class="control-label">Time Scale</div></div>', unsafe_allow_html=True)
+        st.markdown('<div class="control-group"><div class="control-label">⏱️ Time Scale</div></div>', unsafe_allow_html=True)
         x_scale_options = ["Linear", "Log"]
         x_scale_type = st.selectbox("", x_scale_options,
                                   index=0, label_visibility="collapsed", key="price_x_scale_select")
 
     with col3:
-        st.markdown('<div class="control-group"><div class="control-label">Time Period</div></div>', unsafe_allow_html=True)
+        st.markdown('<div class="control-group"><div class="control-label">📅 Time Period</div></div>', unsafe_allow_html=True)
         time_ranges = ["1W", "1M", "3M", "6M", "1Y", "All"]
         time_range = st.selectbox("", time_ranges,
                                 index=5, label_visibility="collapsed", key="price_time_range_select")
 
     with col4:
-        st.markdown('<div class="control-group"><div class="control-label">Power Law</div></div>', unsafe_allow_html=True)
+        st.markdown('<div class="control-group"><div class="control-label">📊 Power Law</div></div>', unsafe_allow_html=True)
         power_law_options = ["Hide", "Show"]
         show_power_law = st.selectbox("", power_law_options,
                                     index=1, label_visibility="collapsed", key="price_power_law_select")
@@ -919,7 +898,6 @@ with col1:
         <div class="metric-label">POWER-LAW SLOPE</div>
         <div class="metric-value">{b_price:.4f}</div>
         <div class="metric-delta {'positive' if slope_pct_change >= 0 else 'negative'}">{slope_pct_change:+.2f}%</div>
-        <div class="metric-help">Growth trajectory strength - higher values indicate steeper exponential growth</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -929,7 +907,6 @@ with col2:
         <div class="metric-label">MODEL ACCURACY (R²)</div>
         <div class="metric-value">{r2_price:.4f}</div>
         <div class="metric-delta {'positive' if r2_pct_change >= 0 else 'negative'}">{r2_pct_change:+.2f}%</div>
-        <div class="metric-help">Power law fit quality - values closer to 1.0 indicate better model accuracy</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -939,7 +916,6 @@ with col3:
         <div class="metric-label">CURRENT PRICE</div>
         <div class="metric-value">${current_price:.6f}</div>
         <div class="metric-delta {'positive' if price_pct_change >= 0 else 'negative'}">{price_pct_change:+.2f}%</div>
-        <div class="metric-help">Latest recorded price with 30-day percentage change</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -950,7 +926,6 @@ with col4:
         <div class="metric-label">EST. MARKET CAP</div>
         <div class="metric-value">${market_cap_estimate/1e9:.2f}B</div>
         <div class="metric-delta {'positive' if price_pct_change >= 0 else 'negative'}">{price_pct_change:+.2f}%</div>
-        <div class="metric-help">Estimated market capitalization based on circulating supply</div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -966,20 +941,6 @@ st.markdown(f"""
         <p style="color: #64748b; font-size: 14px; margin-bottom: 20px;">
             Professional-grade cryptocurrency market analysis • Real-time data processing • Advanced predictive modeling
         </p>
-        <div style="display: flex; justify-content: center; gap: 40px; margin-bottom: 20px; flex-wrap: wrap;">
-            <div style="text-align: center;">
-                <div style="color: #00d4ff; font-weight: 700; font-size: 16px;">{len(filtered_df):,}</div>
-                <div style="color: #64748b; font-size: 12px; text-transform: uppercase;">Data Points</div>
-            </div>
-            <div style="text-align: center;">
-                <div style="color: #ff00a8; font-weight: 700; font-size: 16px;">Standard</div>
-                <div style="color: #64748b; font-size: 12px; text-transform: uppercase;">Analysis Mode</div>
-            </div>
-            <div style="text-align: center;">
-                <div style="color: #00ff88; font-weight: 700; font-size: 16px;">Live</div>
-                <div style="color: #64748b; font-size: 12px; text-transform: uppercase;">Data Status</div>
-            </div>
-        </div>
         <div style="color: #475569; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">
             Last Updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')} • 
             Built for institutional-grade analysis
