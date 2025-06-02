@@ -378,15 +378,15 @@ st.markdown("""
     }
     
     .metric-card {
-        background: rgba(15, 20, 25, 0.7);
-        backdrop-filter: blur(25px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 20px;
-        padding: 28px;
-        position: relative;
-        overflow: hidden;
-        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        cursor: pointer;
+        background: rgba(15, 20, 25, 0.7) !important;
+        backdrop-filter: blur(25px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 20px !important;
+        padding: 28px !important;
+        position: relative !important;
+        overflow: hidden !important;
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        cursor: pointer !important;
     }
     
     .metric-card::before {
@@ -416,23 +416,32 @@ st.markdown("""
     }
     
     .metric-card:hover {
-        transform: translateY(-8px) scale(1.02);
-        box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5);
+        transform: translateY(-8px) scale(1.02) !important;
+        box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5) !important;
     }
     
     .metric-card:hover::before {
         opacity: 1;
     }
     
+    /* Force metric containers to inherit card styling */
+    .metric-card > div {
+        background: transparent !important;
+        border: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
     /* Streamlit Metric Overrides */
-    div[data-testid="stMetric"] {
+    .metric-card div[data-testid="stMetric"] {
         background: transparent !important;
         border: none !important;
         padding: 0 !important;
         box-shadow: none !important;
+        margin: 0 !important;
     }
     
-    div[data-testid="stMetric"] label {
+    .metric-card div[data-testid="stMetric"] label {
         color: #94a3b8 !important;
         font-size: 13px !important;
         font-weight: 600 !important;
@@ -441,7 +450,7 @@ st.markdown("""
         margin-bottom: 12px !important;
     }
     
-    div[data-testid="stMetric"] div[data-testid="metric-container"] > div:first-child {
+    .metric-card div[data-testid="stMetric"] div[data-testid="metric-container"] > div:first-child {
         color: #f1f5f9 !important;
         font-size: 36px !important;
         font-weight: 800 !important;
@@ -450,7 +459,7 @@ st.markdown("""
         text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
     }
     
-    div[data-testid="stMetric"] div[data-testid="metric-container"] div[data-testid="metric-delta"] {
+    .metric-card div[data-testid="stMetric"] div[data-testid="metric-container"] div[data-testid="metric-delta"] {
         color: #00ff88 !important;
         font-size: 15px !important;
         font-weight: 700 !important;
@@ -858,44 +867,48 @@ st.markdown('<div class="metrics-grid">', unsafe_allow_html=True)
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-    st.metric(
-        "💎 Power-Law Slope", 
-        f"{b_price:.4f}", 
-        delta=f"{slope_pct_change:+.2f}%",
-        help="Growth trajectory strength - higher values indicate steeper exponential growth"
-    )
-    st.markdown('</div>', unsafe_allow_html=True)
+    with st.container():
+        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+        st.metric(
+            "💎 Power-Law Slope", 
+            f"{b_price:.4f}", 
+            delta=f"{slope_pct_change:+.2f}%",
+            help="Growth trajectory strength - higher values indicate steeper exponential growth"
+        )
+        st.markdown('</div>', unsafe_allow_html=True)
 
 with col2:
-    st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-    st.metric(
-        "🎯 Model Accuracy (R²)", 
-        f"{r2_price:.4f}", 
-        delta=f"{r2_pct_change:+.2f}%",
-        help="Power law fit quality - values closer to 1.0 indicate better model accuracy"
-    )
-    st.markdown('</div>', unsafe_allow_html=True)
+    with st.container():
+        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+        st.metric(
+            "🎯 Model Accuracy (R²)", 
+            f"{r2_price:.4f}", 
+            delta=f"{r2_pct_change:+.2f}%",
+            help="Power law fit quality - values closer to 1.0 indicate better model accuracy"
+        )
+        st.markdown('</div>', unsafe_allow_html=True)
 
 with col3:
-    st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-    st.metric(
-        "📈 Current Price", 
-        f"${current_price:.6f}", 
-        delta=f"{price_pct_change:+.2f}%",
-        help="Latest recorded price with 30-day percentage change"
-    )
-    st.markdown('</div>', unsafe_allow_html=True)
+    with st.container():
+        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+        st.metric(
+            "📈 Current Price", 
+            f"${current_price:.6f}", 
+            delta=f"{price_pct_change:+.2f}%",
+            help="Latest recorded price with 30-day percentage change"
+        )
+        st.markdown('</div>', unsafe_allow_html=True)
 
 with col4:
-    st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-    st.metric(
-        "📊 Volatility (30D)", 
-        f"{volatility_30d:.2f}%", 
-        delta=f"{price_range_pct:.1f}% range",
-        help="30-day rolling volatility and price range for the selected period"
-    )
-    st.markdown('</div>', unsafe_allow_html=True)
+    with st.container():
+        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+        st.metric(
+            "📊 Volatility (30D)", 
+            f"{volatility_30d:.2f}%", 
+            delta=f"{price_range_pct:.1f}% range",
+            help="30-day rolling volatility and price range for the selected period"
+        )
+        st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown('</div>', unsafe_allow_html=True)
 
@@ -905,48 +918,52 @@ st.markdown('<div class="metrics-grid">', unsafe_allow_html=True)
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-    market_cap_estimate = current_price * 24e9  # Rough estimate
-    st.metric(
-        "💰 Est. Market Cap", 
-        f"${market_cap_estimate/1e9:.2f}B", 
-        delta=f"{price_pct_change:+.2f}%",
-        help="Estimated market capitalization based on circulating supply"
-    )
-    st.markdown('</div>', unsafe_allow_html=True)
+    with st.container():
+        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+        market_cap_estimate = current_price * 24e9  # Rough estimate
+        st.metric(
+            "💰 Est. Market Cap", 
+            f"${market_cap_estimate/1e9:.2f}B", 
+            delta=f"{price_pct_change:+.2f}%",
+            help="Estimated market capitalization based on circulating supply"
+        )
+        st.markdown('</div>', unsafe_allow_html=True)
 
 with col2:
-    st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-    # Calculate days since genesis for current date
-    days_active = (last_date - genesis_date).days
-    st.metric(
-        "⏳ Days Active", 
-        f"{days_active:,}", 
-        delta="Since Genesis",
-        help="Total days since Kaspa network genesis block"
-    )
-    st.markdown('</div>', unsafe_allow_html=True)
+    with st.container():
+        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+        # Calculate days since genesis for current date
+        days_active = (last_date - genesis_date).days
+        st.metric(
+            "⏳ Days Active", 
+            f"{days_active:,}", 
+            delta="Since Genesis",
+            help="Total days since Kaspa network genesis block"
+        )
+        st.markdown('</div>', unsafe_allow_html=True)
 
 with col3:
-    st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-    # Price high/low for selected period
-    st.metric(
-        "📊 Period High", 
-        f"${max_price:.6f}", 
-        delta=f"+{((max_price/current_price-1)*100):+.1f}%",
-        help=f"Highest price in selected {time_range} period"
-    )
-    st.markdown('</div>', unsafe_allow_html=True)
+    with st.container():
+        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+        # Price high/low for selected period
+        st.metric(
+            "📊 Period High", 
+            f"${max_price:.6f}", 
+            delta=f"+{((max_price/current_price-1)*100):+.1f}%",
+            help=f"Highest price in selected {time_range} period"
+        )
+        st.markdown('</div>', unsafe_allow_html=True)
 
 with col4:
-    st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-    st.metric(
-        "📉 Period Low", 
-        f"${min_price:.6f}", 
-        delta=f"{((min_price/current_price-1)*100):+.1f}%",
-        help=f"Lowest price in selected {time_range} period"
-    )
-    st.markdown('</div>', unsafe_allow_html=True)
+    with st.container():
+        st.markdown('<div class="metric-card">', unsafe_allow_html=True)
+        st.metric(
+            "📉 Period Low", 
+            f"${min_price:.6f}", 
+            delta=f"{((min_price/current_price-1)*100):+.1f}%",
+            help=f"Lowest price in selected {time_range} period"
+        )
+        st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown('</div>', unsafe_allow_html=True)
 
