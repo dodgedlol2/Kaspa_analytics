@@ -509,9 +509,10 @@ st.markdown("""
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     }
     
-    /* Fix Plotly Modebar (toolbar) styling - remove black background */
+    /* Fix Plotly Modebar (toolbar) styling - remove black background and move down */
     .stPlotlyChart .modebar {
         background: transparent !important;
+        transform: translateY(15px) !important;
     }
     
     .stPlotlyChart .modebar-group {
@@ -867,8 +868,9 @@ fig.update_layout(
         title=dict(
             text='Price (USD)',
             font=dict(size=14, color='#cbd5e1', weight=600),
-            standoff=60
+            standoff=0
         ),
+        title_side='right',
         type="log" if y_scale == "Log" else "linear",
         showgrid=True,
         gridwidth=1,
