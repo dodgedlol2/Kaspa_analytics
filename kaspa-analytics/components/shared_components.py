@@ -444,102 +444,50 @@ def render_beautiful_sidebar(current_page="Price"):
         }
     }
     
-    # Create sidebar navigation HTML
-    sidebar_html = ""
-    
-    for section_name, section_data in nav_structure.items():
-        # Check if any item in this section is active
-        section_active = any(item["page"] == current_page for item in section_data["items"])
-        
-        sidebar_html += f'''
-        <div class="sidebar-section">
-            <div class="dropdown-header {'active' if section_active else ''}" onclick="toggleDropdown('{section_name.replace(' ', '')}')">
-                <div class="dropdown-title">
-                    <i class="{section_data['icon']} dropdown-icon"></i>
-                    <span>{section_name}</span>
-                </div>
-                <i class="fas fa-chevron-right dropdown-chevron" id="chevron-{section_name.replace(' ', '')}"></i>
-            </div>
-            <div class="dropdown-content {'expanded' if section_active else ''}" id="dropdown-{section_name.replace(' ', '')}">
-        '''
-        
-        for item in section_data["items"]:
-            active_class = "active" if item["page"] == current_page else ""
-            sidebar_html += f'''
-                <div class="nav-item {active_class}" onclick="navigateTo('{item['page']}')">
-                    <i class="{item['icon']} nav-item-icon"></i>
-                    <span>{item['name']}</span>
-                </div>
-            '''
-        
-        sidebar_html += '</div></div>'
-    
-    # Add live stats section
-    sidebar_html += '''
-    <div class="sidebar-section">
-        <div class="live-stats">
-            <div class="stats-title">
-                <div class="live-dot"></div>
-                <span>Live Stats</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-label">KAS Price</span>
-                <div>
-                    <span class="stat-value">$0.0873</span>
-                    <span class="stat-change positive">+2.4%</span>
-                </div>
-            </div>
-            <div class="stat-item">
-                <span class="stat-label">Market Cap</span>
-                <div>
-                    <span class="stat-value">$2.1B</span>
-                    <span class="stat-change positive">+1.8%</span>
-                </div>
-            </div>
-            <div class="stat-item">
-                <span class="stat-label">24h Volume</span>
-                <div>
-                    <span class="stat-value">$45.2M</span>
-                    <span class="stat-change negative">-5.1%</span>
-                </div>
-            </div>
-            <div class="stat-item">
-                <span class="stat-label">Hashrate</span>
-                <div>
-                    <span class="stat-value">1.2 EH/s</span>
-                    <span class="stat-change positive">+0.3%</span>
-                </div>
-            </div>
-        </div>
-    </div>
-    '''
-    
-    # Add JavaScript for dropdown functionality
-    js_code = '''
-    <script>
-        function toggleDropdown(sectionId) {
-            const dropdown = document.getElementById('dropdown-' + sectionId);
-            const chevron = document.getElementById('chevron-' + sectionId);
+    # Create sidebar navigation using Streamlit components
+    with st.sidebar:
+        # Navigation sections
+        for section_name, section_data in nav_structure.items():
+            # Check if any item in this section is active
+            section_active = any(item["page"] == current_page for item in section_data["items"])
             
-            if (dropdown.classList.contains('expanded')) {
-                dropdown.classList.remove('expanded');
-                chevron.classList.remove('expanded');
-            } else {
-                dropdown.classList.add('expanded');
-                chevron.classList.add('expanded');
-            }
-        }
+            # Create expander for each section
+            with st.expander(f"{section_data['icon']} {section_name}", expanded=section_active):
+                for item in section_data["items"]:
+                    # Create columns for icon and text
+                    col_icon, col_text = st.columns([1, 4])
+                    
+                    with col_icon:
+                        if item["page"] == current_page:
+                            st.markdown(f'<i class="{item["icon"]}" style="color: #00d4ff; font-size: 12px;"></i>', unsafe_allow_html=True)
+                        else:
+                            st.markdown(f'<i class="{item["icon"]}" style="color: #94a3b8; font-size: 12px;"></i>', unsafe_allow_html=True)
+                    
+                    with col_text:
+                        # Use button for navigation
+                        button_style = ""
+                        if item["page"] == current_page:
+                            button_style = "background-color: rgba(0, 212, 255, 0.15); color: #00d4ff; border: 1px solid rgba(0, 212, 255, 0.4);"
+                        
+                        if st.button(
+                            item["name"], 
+                            key=f"nav_{item['page']}", 
+                            use_container_width=True,
+                            help=f"Navigate to {item['name']}"
+                        ):
+                            st.switch_page(f"pages/{item['page']}.py")
         
-        function navigateTo(page) {
-            // You can implement page navigation here
-            console.log('Navigating to:', page);
-            // Example: window.location.href = '/pages/' + page + '.py';
-        }
-    </script>
-    '''
-    
-    # Render the sidebar
-    st.sidebar.markdown(sidebar_html + js_code, unsafe_allow_html=True)
+        # Add separator
+        st.markdown("---")
+        
+        # Live Stats Section
+        st.markdown("### 🔴 Live Stats")
+        
+        # Create stats using metrics for clean look
+        st.metric("KAS Price", "$0.0873", "2.4%")
+        st.metric("Market Cap", "$2.1B", "1.8%") 
+        st.metric("24h Volume", "$45.2M", "-5.1%")
+        st.metric("Hashrate", "1.2 EH/s", "0.3%")
 
 def render_simple_page_header(title, subtitle=None):
     """Simple page header without breadcrumbs"""
