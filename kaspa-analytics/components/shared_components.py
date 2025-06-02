@@ -350,6 +350,19 @@ def render_custom_css_with_sidebar():
             color: #00d4ff !important;
         }
         
+        /* Force all sidebar icons to be the same color as text */
+        .head-metric .fas,
+        .head-metric .fab,
+        .head-metric .far {
+            color: inherit !important;
+        }
+        
+        .sub-metric .fas,
+        .sub-metric .fab,
+        .sub-metric .far {
+            color: inherit !important;
+        }
+        
         /* Main content adjustments */
         .main .block-container {
             padding-top: 100px !important;
