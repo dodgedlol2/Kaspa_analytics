@@ -370,7 +370,7 @@ def render_clean_header(user_name=None, user_role=None, show_auth=True):
     st.markdown(header_html, unsafe_allow_html=True)
 
 def render_beautiful_sidebar(current_page="Price"):
-    """Render ultra-compact file explorer style sidebar with clean text headers"""
+    """Render ultra-compact sidebar with clean clickable text headers"""
     
     # Define navigation structure
     nav_structure = {
@@ -401,105 +401,79 @@ def render_beautiful_sidebar(current_page="Price"):
         }
     }
     
-    # Initialize session state for expanded sections
-    if 'expanded_sections' not in st.session_state:
-        st.session_state.expanded_sections = {
-            "Market Metrics": True,  # Start with Market Metrics expanded
-            "Mining": False,
-            "Network": False
-        }
+    # Build the complete sidebar HTML
+    sidebar_html = '<div style="padding: 12px 8px;">'
     
-    # Auto-expand section that contains current page
     for section_name, section_data in nav_structure.items():
-        if any(item["page"] == current_page for item in section_data["items"]):
-            st.session_state.expanded_sections[section_name] = True
-    
-    with st.sidebar:
-        # Add minimal spacing
-        st.markdown('<div style="height: 8px;"></div>', unsafe_allow_html=True)
+        section_id = section_name.replace(' ', '_')
         
-        for section_name, section_data in nav_structure.items():
-            is_expanded = st.session_state.expanded_sections.get(section_name, False)
-            chevron_icon = "fa-chevron-down" if is_expanded else "fa-chevron-right"
+        # Check if this section contains the current page
+        has_current_page = any(item["page"] == current_page for item in section_data["items"])
+        is_expanded = section_name == "Market Metrics" or has_current_page  # Market Metrics default expanded
+        
+        chevron_icon = "fa-chevron-down" if is_expanded else "fa-chevron-right"
+        chevron_class = "expanded" if is_expanded else ""
+        
+        # Section header
+        sidebar_html += f'''
+        <div class="sidebar-section-header" onclick="toggleSection('{section_id}')" style="cursor: pointer;">
+            <i class="fas {chevron_icon} section-chevron {chevron_class}" id="chevron-{section_id}"></i>
+            <i class="fas fa-{section_data['icon']} section-icon"></i>
+            <span>{section_name}</span>
+        </div>
+        '''
+        
+        # Navigation items container
+        container_style = "display: block;" if is_expanded else "display: none;"
+        sidebar_html += f'<div class="nav-items-container" id="items-{section_id}" style="{container_style}">'
+        
+        for item in section_data["items"]:
+            active_class = "active" if item["page"] == current_page else ""
+            icon_class = "active" if item["page"] == current_page else ""
             
-            # Create clickable section header with clean HTML
-            section_id = section_name.replace(' ', '_')
-            
-            # Use HTML for clean clickable header
-            header_html = f'''
-            <div class="sidebar-section-header" onclick="toggleSection_{section_id}()" style="cursor: pointer;">
-                <i class="fas {chevron_icon} section-chevron"></i>
-                <i class="fas fa-{section_data['icon']} section-icon"></i>
-                <span>{section_name}</span>
+            sidebar_html += f'''
+            <div class="nav-item-row">
+                <i class="fas fa-{item['icon']} nav-item-icon {icon_class}"></i>
+                <span class="nav-item-text {active_class}" onclick="navigateTo('{item['page']}')">{item['name']}</span>
             </div>
-            
-            <script>
-            function toggleSection_{section_id}() {{
-                // Use Streamlit's component communication
-                window.parent.postMessage({{
-                    type: 'streamlit:setComponentValue',
-                    value: 'toggle_{section_id}'
-                }}, '*');
-            }}
-            </script>
             '''
-            
-            st.markdown(header_html, unsafe_allow_html=True)
-            
-            # Hidden button to handle the toggle logic
-            if st.button("", key=f"hidden_toggle_{section_id}", help="", label_visibility="hidden"):
-                st.session_state.expanded_sections[section_name] = not st.session_state.expanded_sections[section_name]
-                st.rerun()
-            
-            # Hide the button with CSS
-            st.markdown(f'''
-            <style>
-            button[data-testid="baseButton-secondary"]:has-text("") {{
-                display: none !important;
-            }}
-            div[data-testid="stButton"]:has(button[data-testid="baseButton-secondary"]:empty) {{
-                display: none !important;
-            }}
-            </style>
-            ''', unsafe_allow_html=True)
-            
-            # Show navigation items only if expanded
-            if is_expanded:
-                st.markdown('<div class="nav-items-container">', unsafe_allow_html=True)
-                
-                for item in section_data["items"]:
-                    # Create compact row
-                    col_icon, col_button = st.columns([1, 8])
-                    
-                    with col_icon:
-                        icon_class = "active" if item["page"] == current_page else ""
-                        st.markdown(f'<i class="fas fa-{item["icon"]} nav-item-icon {icon_class}"></i>', unsafe_allow_html=True)
-                    
-                    with col_button:
-                        # Apply active styling
-                        container_class = "active-nav-item" if item["page"] == current_page else ""
-                        if container_class:
-                            st.markdown(f'<div class="{container_class}">', unsafe_allow_html=True)
-                        
-                        # Compact navigation button
-                        if st.button(
-                            item["name"], 
-                            key=f"nav_{item['page']}", 
-                            use_container_width=True
-                        ):
-                            st.write(f"Navigate to {item['name']}")
-                            # st.switch_page(f"pages/{item['page']}.py")
-                        
-                        if container_class:
-                            st.markdown('</div>', unsafe_allow_html=True)
-                
-                st.markdown('</div>', unsafe_allow_html=True)
-            
-            # Minimal spacing between sections
-            st.markdown('<div style="height: 4px;"></div>', unsafe_allow_html=True)
+        
+        sidebar_html += '</div>'
+        sidebar_html += '<div style="height: 4px;"></div>'
     
-    # Alternative simpler approach - using clickable text with session state
-    # This creates a much cleaner interface
+    sidebar_html += '</div>'
+    
+    # Add JavaScript for functionality
+    js_code = '''
+    <script>
+    function toggleSection(sectionId) {
+        const itemsContainer = document.getElementById('items-' + sectionId);
+        const chevron = document.getElementById('chevron-' + sectionId);
+        
+        if (itemsContainer.style.display === 'none') {
+            itemsContainer.style.display = 'block';
+            chevron.classList.remove('fa-chevron-right');
+            chevron.classList.add('fa-chevron-down');
+            chevron.classList.add('expanded');
+        } else {
+            itemsContainer.style.display = 'none';
+            chevron.classList.remove('fa-chevron-down');
+            chevron.classList.add('fa-chevron-right');
+            chevron.classList.remove('expanded');
+        }
+    }
+    
+    function navigateTo(page) {
+        console.log('Navigate to:', page);
+        // Implement your navigation logic here
+        // window.location.href = '/pages/' + page + '.py';
+    }
+    </script>
+    '''
+    
+    # Render in sidebar
+    with st.sidebar:
+        st.markdown(sidebar_html + js_code, unsafe_allow_html=True)
 
 def render_simple_page_header(title, subtitle=None):
     """Simple page header without breadcrumbs"""
