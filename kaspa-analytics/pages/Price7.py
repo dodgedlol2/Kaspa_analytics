@@ -7,7 +7,9 @@ from datetime import datetime, timedelta
 from components.shared_components import (
     render_page_config,
     render_minimal_sidebar_css,
-    render_minimal_sidebar
+    render_minimal_sidebar,
+    render_beautiful_header,
+    update_header_stats
 )
 
 # MUST be first Streamlit command
@@ -48,41 +50,14 @@ if len(df_30_days_ago) > 0:
 else:
     price_pct_change = 0
 
-# Header Section - EXACTLY your original beautiful header
-header_html = f"""
-<div class="header-container">
-    <div class="header-content">
-        <div class="brand">
-            <div>
-                <h1>KaspaMetrics</h1>
-                <div class="brand-subtitle">Advanced Market Intelligence Platform</div>
-            </div>
-        </div>
-        <div class="header-stats">
-            <div class="header-stat">
-                <span class="header-stat-value">${current_price:.4f}</span>
-                <div class="header-stat-label">Current Price</div>
-            </div>
-            <div class="header-stat">
-                <span class="header-stat-value" style="color: {'#00ff88' if price_pct_change >= 0 else '#ff4757'}">{price_pct_change:+.1f}%</span>
-                <div class="header-stat-label">30D Change</div>
-            </div>
-            <div class="header-stat">
-                <span class="header-stat-value">{r2_price:.3f}</span>
-                <div class="header-stat-label">Model Fit</div>
-            </div>
-            <div class="header-stat">
-                <div class="status-badge">
-                    <div class="live-dot"></div>
-                    <span>Live Data</span>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-"""
+# Render beautiful component header (instead of inline header)
+render_beautiful_header(
+    user_name=None,  # Change to "John Doe" to test user menu
+    show_auth=True
+)
 
-st.markdown(header_html, unsafe_allow_html=True)
+# Update header with real data
+update_header_stats(current_price, price_pct_change, r2_price)
 
 # Chart Section - EXACTLY your original beautiful chart section
 st.markdown("""
