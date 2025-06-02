@@ -915,90 +915,37 @@ min_price = filtered_df['Price'].min()
 price_range_pct = ((max_price - min_price) / min_price) * 100
 
 # Enhanced Metrics Section
-st.markdown('<div class="metrics-grid">', unsafe_allow_html=True)
-
-# First row of metrics
 st.markdown(f"""
-<div class="metric-card">
-    <div class="metric-label">💎 POWER-LAW SLOPE</div>
-    <div class="metric-value">{b_price:.4f}</div>
-    <div class="metric-delta {'positive' if slope_pct_change >= 0 else 'negative'}">{slope_pct_change:+.2f}%</div>
-    <div class="metric-help">Growth trajectory strength - higher values indicate steeper exponential growth</div>
+<div class="metrics-grid">
+    <div class="metric-card">
+        <div class="metric-label">💎 POWER-LAW SLOPE</div>
+        <div class="metric-value">{b_price:.4f}</div>
+        <div class="metric-delta {'positive' if slope_pct_change >= 0 else 'negative'}">{slope_pct_change:+.2f}%</div>
+        <div class="metric-help">Growth trajectory strength - higher values indicate steeper exponential growth</div>
+    </div>
+    
+    <div class="metric-card">
+        <div class="metric-label">🎯 MODEL ACCURACY (R²)</div>
+        <div class="metric-value">{r2_price:.4f}</div>
+        <div class="metric-delta {'positive' if r2_pct_change >= 0 else 'negative'}">{r2_pct_change:+.2f}%</div>
+        <div class="metric-help">Power law fit quality - values closer to 1.0 indicate better model accuracy</div>
+    </div>
+    
+    <div class="metric-card">
+        <div class="metric-label">📈 CURRENT PRICE</div>
+        <div class="metric-value">${current_price:.6f}</div>
+        <div class="metric-delta {'positive' if price_pct_change >= 0 else 'negative'}">{price_pct_change:+.2f}%</div>
+        <div class="metric-help">Latest recorded price with 30-day percentage change</div>
+    </div>
+    
+    <div class="metric-card">
+        <div class="metric-label">💰 EST. MARKET CAP</div>
+        <div class="metric-value">${(current_price * 24e9)/1e9:.2f}B</div>
+        <div class="metric-delta {'positive' if price_pct_change >= 0 else 'negative'}">{price_pct_change:+.2f}%</div>
+        <div class="metric-help">Estimated market capitalization based on circulating supply</div>
+    </div>
 </div>
 """, unsafe_allow_html=True)
-
-st.markdown(f"""
-<div class="metric-card">
-    <div class="metric-label">🎯 MODEL ACCURACY (R²)</div>
-    <div class="metric-value">{r2_price:.4f}</div>
-    <div class="metric-delta {'positive' if r2_pct_change >= 0 else 'negative'}">{r2_pct_change:+.2f}%</div>
-    <div class="metric-help">Power law fit quality - values closer to 1.0 indicate better model accuracy</div>
-</div>
-""", unsafe_allow_html=True)
-
-st.markdown(f"""
-<div class="metric-card">
-    <div class="metric-label">📈 CURRENT PRICE</div>
-    <div class="metric-value">${current_price:.6f}</div>
-    <div class="metric-delta {'positive' if price_pct_change >= 0 else 'negative'}">{price_pct_change:+.2f}%</div>
-    <div class="metric-help">Latest recorded price with 30-day percentage change</div>
-</div>
-""", unsafe_allow_html=True)
-
-st.markdown(f"""
-<div class="metric-card">
-    <div class="metric-label">📊 VOLATILITY (30D)</div>
-    <div class="metric-value">{volatility_30d:.2f}%</div>
-    <div class="metric-delta positive">{price_range_pct:.1f}% range</div>
-    <div class="metric-help">30-day rolling volatility and price range for the selected period</div>
-</div>
-""", unsafe_allow_html=True)
-
-st.markdown('</div>', unsafe_allow_html=True)
-
-# Second row of metrics
-st.markdown('<div class="metrics-grid">', unsafe_allow_html=True)
-
-market_cap_estimate = current_price * 24e9
-days_active = (last_date - genesis_date).days
-
-st.markdown(f"""
-<div class="metric-card">
-    <div class="metric-label">💰 EST. MARKET CAP</div>
-    <div class="metric-value">${market_cap_estimate/1e9:.2f}B</div>
-    <div class="metric-delta {'positive' if price_pct_change >= 0 else 'negative'}">{price_pct_change:+.2f}%</div>
-    <div class="metric-help">Estimated market capitalization based on circulating supply</div>
-</div>
-""", unsafe_allow_html=True)
-
-st.markdown(f"""
-<div class="metric-card">
-    <div class="metric-label">⏳ DAYS ACTIVE</div>
-    <div class="metric-value">{days_active:,}</div>
-    <div class="metric-delta neutral">Since Genesis</div>
-    <div class="metric-help">Total days since Kaspa network genesis block</div>
-</div>
-""", unsafe_allow_html=True)
-
-st.markdown(f"""
-<div class="metric-card">
-    <div class="metric-label">📊 PERIOD HIGH</div>
-    <div class="metric-value">${max_price:.6f}</div>
-    <div class="metric-delta positive">+{((max_price/current_price-1)*100):+.1f}%</div>
-    <div class="metric-help">Highest price in selected {time_range} period</div>
-</div>
-""", unsafe_allow_html=True)
-
-st.markdown(f"""
-<div class="metric-card">
-    <div class="metric-label">📉 PERIOD LOW</div>
-    <div class="metric-value">${min_price:.6f}</div>
-    <div class="metric-delta negative">{((min_price/current_price-1)*100):+.1f}%</div>
-    <div class="metric-help">Lowest price in selected {time_range} period</div>
-</div>
-""", unsafe_allow_html=True)
-
-st.markdown('</div>', unsafe_allow_html=True)
 
 # Enhanced Footer with additional information
 st.markdown(f"""
