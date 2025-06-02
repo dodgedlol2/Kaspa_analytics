@@ -1,285 +1,234 @@
-# Add this to your shared_components.py file
+import streamlit as st
 
-def render_custom_css_with_sidebar_fix():
+def render_aggressive_header_fix():
     """
-    Enhanced CSS that ensures header stays above sidebar
+    Ultra-aggressive CSS to force header above everything
     """
     st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
         @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
         
-        /* ========== SIDEBAR Z-INDEX FIXES ========== */
+        /* NUCLEAR OPTION - Override everything */
+        * {
+            box-sizing: border-box;
+        }
         
-        /* Streamlit sidebar has z-index of 999999, so we need to go higher */
+        /* Force header to be absolutely positioned above everything */
         .professional-header {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            width: 100vw !important;
+            height: 80px !important;
             background: rgba(15, 20, 25, 0.98) !important;
             backdrop-filter: blur(25px) !important;
             border-bottom: 1px solid rgba(0, 212, 255, 0.2) !important;
             padding: 16px 40px !important;
-            position: fixed !important;  /* Changed from sticky to fixed */
-            top: 0 !important;
-            left: 0 !important;
-            right: 0 !important;
-            width: 100% !important;
-            z-index: 9999999 !important;  /* Higher than sidebar's 999999 */
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+            z-index: 999999999 !important;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6) !important;
             margin: 0 !important;
-        }
-        
-        /* Ensure header content is also high z-index */
-        .header-content {
-            position: relative !important;
-            z-index: 9999999 !important;
             display: flex !important;
             align-items: center !important;
             justify-content: space-between !important;
-            max-width: 1400px !important;
-            margin: 0 auto !important;
         }
         
-        /* Push main content down to account for fixed header */
-        .main .block-container {
-            padding-top: 90px !important;  /* Adjust based on your header height */
-            padding-left: 0 !important;
-            padding-right: 0 !important;
-            max-width: 100% !important;
-        }
-        
-        /* Sidebar adjustments */
-        .css-1d391kg {  /* Streamlit sidebar */
-            z-index: 999998 !important;  /* Lower than header */
-            margin-top: 80px !important;  /* Push sidebar below header */
-        }
-        
-        .css-1dp5vir {  /* Another sidebar selector */
+        /* Override ALL Streamlit sidebar z-indexes */
+        .css-1d391kg,
+        .css-1dp5vir,
+        .css-17eq0hr,
+        .css-1v3fvcr,
+        .css-12w0qpk,
+        .css-163ttbj,
+        .css-1rs6os,
+        .css-1lcbmhc,
+        .css-1y4p8pa,
+        section[data-testid="stSidebar"],
+        .stSidebar,
+        div[data-testid="stSidebar"] {
             z-index: 999998 !important;
             margin-top: 80px !important;
         }
         
-        /* Sidebar content */
-        .css-17eq0hr {
-            margin-top: 20px !important;
+        /* Force main content below header */
+        .main,
+        .main .block-container,
+        .css-k1vhr4,
+        .css-18e3th9,
+        .css-1d391kg,
+        div[data-testid="stAppViewContainer"] {
+            padding-top: 100px !important;
+            margin-top: 0 !important;
         }
         
-        /* Alternative: Hide sidebar completely if you don't need it */
-        /* 
-        section[data-testid="stSidebar"] {
-            display: none !important;
-        }
-        */
-        
-        /* ========== ORIGINAL STYLES ========== */
-        
+        /* Base app styles */
         html, body, .stApp {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 50%, #0f1419 100%);
-            color: #e2e8f0;
-            overflow-x: hidden;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+            background: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 50%, #0f1419 100%) !important;
+            color: #e2e8f0 !important;
+            overflow-x: hidden !important;
+            margin: 0 !important;
+            padding: 0 !important;
         }
         
         .stApp {
-            background-attachment: fixed;
+            background-attachment: fixed !important;
         }
         
-        .stApp::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.15) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: -1;
-            animation: backgroundShift 20s ease-in-out infinite;
+        /* Header content styling */
+        .header-content {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            width: 100% !important;
+            max-width: 1400px !important;
+            margin: 0 auto !important;
+            position: relative !important;
+            z-index: 999999999 !important;
         }
         
-        @keyframes backgroundShift {
-            0%, 100% { opacity: 1; transform: translateX(0px) translateY(0px); }
-            50% { opacity: 0.8; transform: translateX(20px) translateY(-20px); }
-        }
-        
-        /* Brand section styles */
         .brand-section {
-            display: flex;
-            align-items: center;
-            gap: 20px;
+            display: flex !important;
+            align-items: center !important;
+            gap: 20px !important;
         }
         
         .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            display: flex !important;
+            align-items: center !important;
+            gap: 12px !important;
         }
         
         .logo {
-            width: 45px;
-            height: 45px;
-            background: linear-gradient(135deg, #00d4ff 0%, #ff00a8 100%);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            color: white;
-            font-weight: 800;
-            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+            width: 45px !important;
+            height: 45px !important;
+            background: linear-gradient(135deg, #00d4ff 0%, #ff00a8 100%) !important;
+            border-radius: 12px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 24px !important;
+            color: white !important;
+            font-weight: 800 !important;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3) !important;
         }
         
         .brand-text h1 {
-            font-size: 28px;
-            font-weight: 800;
-            background: linear-gradient(135deg, #00d4ff 0%, #ff00a8 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin: 0;
-            text-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
-            line-height: 1.1;
+            font-size: 28px !important;
+            font-weight: 800 !important;
+            background: linear-gradient(135deg, #00d4ff 0%, #ff00a8 100%) !important;
+            -webkit-background-clip: text !important;
+            -webkit-text-fill-color: transparent !important;
+            margin: 0 !important;
+            text-shadow: 0 0 30px rgba(0, 212, 255, 0.3) !important;
+            line-height: 1.1 !important;
         }
         
         .brand-subtitle {
-            font-size: 12px;
-            color: #64748b;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 1.2px;
-            margin-top: 2px;
+            font-size: 12px !important;
+            color: #64748b !important;
+            font-weight: 500 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 1.2px !important;
+            margin-top: 2px !important;
         }
         
         .nav-section {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
         }
         
         .nav-button {
-            background: rgba(30, 41, 59, 0.6);
-            border: 1px solid rgba(100, 116, 139, 0.3);
-            border-radius: 12px;
-            padding: 10px 16px;
-            color: #cbd5e1;
-            text-decoration: none;
-            font-size: 13px;
-            font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            backdrop-filter: blur(10px);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
+            background: rgba(30, 41, 59, 0.6) !important;
+            border: 1px solid rgba(100, 116, 139, 0.3) !important;
+            border-radius: 12px !important;
+            padding: 10px 16px !important;
+            color: #cbd5e1 !important;
+            text-decoration: none !important;
+            font-size: 13px !important;
+            font-weight: 600 !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            backdrop-filter: blur(10px) !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+            cursor: pointer !important;
         }
         
         .nav-button:hover {
-            background: rgba(0, 212, 255, 0.1);
-            border-color: rgba(0, 212, 255, 0.4);
-            color: #00d4ff;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.2);
+            background: rgba(0, 212, 255, 0.1) !important;
+            border-color: rgba(0, 212, 255, 0.4) !important;
+            color: #00d4ff !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.2) !important;
         }
         
         .nav-button.active {
-            background: rgba(0, 212, 255, 0.15);
-            border-color: rgba(0, 212, 255, 0.5);
-            color: #00d4ff;
+            background: rgba(0, 212, 255, 0.15) !important;
+            border-color: rgba(0, 212, 255, 0.5) !important;
+            color: #00d4ff !important;
         }
         
         .auth-section {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            display: flex !important;
+            align-items: center !important;
+            gap: 12px !important;
         }
         
         .login-button {
-            background: transparent;
-            border: 1px solid rgba(100, 116, 139, 0.4);
-            border-radius: 10px;
-            padding: 8px 16px;
-            color: #cbd5e1;
-            font-size: 13px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            cursor: pointer;
+            background: transparent !important;
+            border: 1px solid rgba(100, 116, 139, 0.4) !important;
+            border-radius: 10px !important;
+            padding: 8px 16px !important;
+            color: #cbd5e1 !important;
+            font-size: 13px !important;
+            font-weight: 600 !important;
+            transition: all 0.3s ease !important;
+            cursor: pointer !important;
         }
         
         .login-button:hover {
-            border-color: rgba(0, 212, 255, 0.6);
-            color: #00d4ff;
+            border-color: rgba(0, 212, 255, 0.6) !important;
+            color: #00d4ff !important;
         }
         
         .signup-button {
-            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
-            border: none;
-            border-radius: 10px;
-            padding: 10px 20px;
-            color: white;
-            font-size: 13px;
-            font-weight: 700;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%) !important;
+            border: none !important;
+            border-radius: 10px !important;
+            padding: 10px 20px !important;
+            color: white !important;
+            font-size: 13px !important;
+            font-weight: 700 !important;
+            transition: all 0.3s ease !important;
+            cursor: pointer !important;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3) !important;
         }
         
         .signup-button:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
+            transform: translateY(-1px) !important;
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4) !important;
         }
         
-        .user-menu {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(30, 41, 59, 0.6);
-            border: 1px solid rgba(100, 116, 139, 0.3);
-            border-radius: 12px;
-            padding: 8px 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        /* Hide Streamlit elements */
+        #MainMenu {visibility: hidden !important;}
+        footer {visibility: hidden !important;}
+        header {visibility: hidden !important;}
+        .stDeployButton {display: none !important;}
+        
+        /* Override any remaining z-index issues */
+        div[role="dialog"],
+        .css-1cpxqw2,
+        .css-1y4p8pa {
+            z-index: 999997 !important;
         }
         
-        .user-menu:hover {
-            background: rgba(30, 41, 59, 0.8);
-            border-color: rgba(0, 212, 255, 0.4);
-        }
-        
-        .user-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            background: linear-gradient(135deg, #00d4ff 0%, #ff00a8 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 700;
-            font-size: 14px;
-        }
-        
-        .user-info {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-        }
-        
-        .user-name {
-            font-size: 13px;
-            font-weight: 600;
-            color: #f1f5f9;
-            line-height: 1;
-        }
-        
-        .user-role {
-            font-size: 11px;
-            color: #64748b;
-            line-height: 1;
-        }
-        
-        /* Responsive design */
+        /* Mobile responsive */
         @media (max-width: 768px) {
             .professional-header {
+                height: 120px !important;
                 padding: 12px 20px !important;
             }
             
@@ -288,118 +237,115 @@ def render_custom_css_with_sidebar_fix():
                 gap: 15px !important;
             }
             
-            .nav-section {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-            
-            .brand-text h1 {
-                font-size: 24px;
-            }
-            
-            .nav-button {
-                padding: 8px 12px;
-                font-size: 12px;
-            }
-            
             .main .block-container {
-                padding-top: 140px !important;  /* More space on mobile */
+                padding-top: 140px !important;
             }
         }
         
-        /* Hide Streamlit default elements */
-        #MainMenu {visibility: hidden;}
-        footer {visibility: hidden;}
-        header {visibility: hidden;}
-        .stDeployButton {display: none;}
-        
-        /* Additional sidebar fixes for different Streamlit versions */
-        .css-1d391kg, .css-1dp5vir, .css-17eq0hr, .css-1v3fvcr {
-            z-index: 999998 !important;
-        }
-        
-        /* If sidebar is collapsed, adjust accordingly */
-        .css-1rs6os.edgvbvh3 {
-            z-index: 999998 !important;
-        }
-        
     </style>
     """, unsafe_allow_html=True)
 
-# Alternative approach: Completely hide sidebar if not needed
-def render_custom_css_no_sidebar():
+def render_debug_header():
     """
-    CSS that completely hides the sidebar for a cleaner look
+    Simple header with debug info to test z-index
     """
-    st.markdown("""
-    <style>
-        /* Hide sidebar completely */
-        section[data-testid="stSidebar"] {
-            display: none !important;
-        }
-        
-        .css-1d391kg {
-            display: none !important;
-        }
-        
-        /* Adjust main content to use full width */
-        .main .block-container {
-            padding-left: 0 !important;
-            max-width: 100% !important;
-            padding-top: 90px !important;
-        }
-        
-        /* Your existing header styles here... */
-        .professional-header {
-            background: rgba(15, 20, 25, 0.98) !important;
-            backdrop-filter: blur(25px) !important;
-            border-bottom: 1px solid rgba(0, 212, 255, 0.2) !important;
-            padding: 16px 40px !important;
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            right: 0 !important;
-            width: 100% !important;
-            z-index: 9999999 !important;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
-        }
-        
-        /* Rest of your existing styles... */
-        
-    </style>
-    """, unsafe_allow_html=True)
+    debug_html = """
+    <div class="professional-header" style="background: red !important; z-index: 999999999 !important;">
+        <div class="header-content">
+            <div class="brand-section">
+                <div class="logo-container">
+                    <div class="logo">
+                        <i class="fas fa-gem"></i>
+                    </div>
+                    <div class="brand-text">
+                        <h1>DEBUG HEADER - Should be on top!</h1>
+                        <div class="brand-subtitle">Z-Index Test</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-button active">
+                    <i class="fas fa-bug"></i>
+                    <span>DEBUG MODE</span>
+                </div>
+            </div>
+            
+            <div class="auth-section">
+                <button class="login-button">Test</button>
+            </div>
+        </div>
+    </div>
+    """
+    
+    st.markdown(debug_html, unsafe_allow_html=True)
 
-# Option 3: Smart sidebar handling
-def render_header_with_sidebar_detection():
+def render_javascript_fix():
     """
-    Detect if sidebar is being used and adjust header accordingly
+    JavaScript solution to force header on top after page loads
     """
-    # Check if any sidebar elements exist
-    sidebar_check = """
+    js_code = """
     <script>
-        function adjustHeaderForSidebar() {
-            const sidebar = document.querySelector('section[data-testid="stSidebar"]');
+        function forceHeaderOnTop() {
+            // Find the header
             const header = document.querySelector('.professional-header');
             
-            if (sidebar && header) {
-                const sidebarWidth = sidebar.offsetWidth;
-                if (sidebarWidth > 0) {
-                    // Sidebar is open, adjust header
-                    header.style.marginLeft = sidebarWidth + 'px';
-                    header.style.width = `calc(100% - ${sidebarWidth}px)`;
-                } else {
-                    // Sidebar is closed, full width header
-                    header.style.marginLeft = '0px';
-                    header.style.width = '100%';
+            // Find all sidebar elements
+            const sidebarElements = document.querySelectorAll(`
+                .css-1d391kg,
+                .css-1dp5vir,
+                .css-17eq0hr,
+                .css-1v3fvcr,
+                section[data-testid="stSidebar"],
+                .stSidebar,
+                div[data-testid="stSidebar"]
+            `);
+            
+            if (header) {
+                // Force header styles
+                header.style.position = 'fixed';
+                header.style.top = '0';
+                header.style.left = '0';
+                header.style.right = '0';
+                header.style.width = '100vw';
+                header.style.zIndex = '999999999';
+                header.style.background = 'rgba(15, 20, 25, 0.98)';
+                header.style.backdropFilter = 'blur(25px)';
+                
+                console.log('Header forced to top with z-index:', header.style.zIndex);
+            }
+            
+            // Lower sidebar z-index
+            sidebarElements.forEach((element, index) => {
+                if (element) {
+                    element.style.zIndex = '999998';
+                    element.style.marginTop = '80px';
+                    console.log(`Sidebar element ${index} z-index lowered`);
                 }
+            });
+            
+            // Push main content down
+            const mainContent = document.querySelector('.main .block-container');
+            if (mainContent) {
+                mainContent.style.paddingTop = '100px';
+                console.log('Main content pushed down');
             }
         }
         
-        // Run on load and when sidebar changes
-        window.addEventListener('load', adjustHeaderForSidebar);
-        setTimeout(adjustHeaderForSidebar, 100);
-        setTimeout(adjustHeaderForSidebar, 500);
+        // Run immediately and on various events
+        document.addEventListener('DOMContentLoaded', forceHeaderOnTop);
+        window.addEventListener('load', forceHeaderOnTop);
+        
+        // Keep trying for a few seconds in case Streamlit is still loading
+        setTimeout(forceHeaderOnTop, 100);
+        setTimeout(forceHeaderOnTop, 500);
+        setTimeout(forceHeaderOnTop, 1000);
+        setTimeout(forceHeaderOnTop, 2000);
+        
+        // Watch for sidebar changes
+        const observer = new MutationObserver(forceHeaderOnTop);
+        observer.observe(document.body, { childList: true, subtree: true });
     </script>
     """
     
-    st.components.v1.html(sidebar_check, height=0)
+    st.components.v1.html(js_code, height=0)
