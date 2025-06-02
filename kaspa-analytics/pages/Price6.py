@@ -466,7 +466,7 @@ if show_power_law == "Show":
         y=y_fit,
         mode='lines',
         name=f'Power Law Fit (R²={r2_price:.3f})',
-        line=dict(color='#e2e8f0', width=2.5, dash='solid'),
+        line=dict(color='#ff00a8', width=3, dash='solid'),
         showlegend=True,
         hovertemplate='<b>Power Law Fit</b><br>R² = %{customdata:.3f}<br>Value: $%{y:.6f}<br><extra></extra>',
         customdata=[r2_price] * len(fit_x)
@@ -477,7 +477,7 @@ if show_power_law == "Show":
         y=y_fit * 0.4,
         mode='lines',
         name='Support (-60%)',
-        line=dict(color='rgba(148, 163, 184, 0.6)', width=1.5, dash='dot'),
+        line=dict(color='rgba(0, 255, 136, 0.6)', width=1.5, dash='dot'),
         showlegend=True,
         hoverinfo='skip'
     ))
@@ -487,14 +487,14 @@ if show_power_law == "Show":
         y=y_fit * 2.2,
         mode='lines',
         name='Resistance (+120%)',
-        line=dict(color='rgba(148, 163, 184, 0.6)', width=1.5, dash='dot'),
+        line=dict(color='rgba(255, 71, 87, 0.6)', width=1.5, dash='dot'),
         fill='tonexty',
-        fillcolor='rgba(100, 116, 139, 0.08)',
+        fillcolor='rgba(100, 100, 100, 0.1)',
         showlegend=True,
         hoverinfo='skip'
     ))
 
-# Enhanced chart layout with proper logarithmic scaling
+# Enhanced chart layout
 fig.update_layout(
     plot_bgcolor='rgba(0,0,0,0)',
     paper_bgcolor='rgba(0,0,0,0)',
@@ -510,14 +510,6 @@ fig.update_layout(
         gridcolor='rgba(255, 255, 255, 0.08)',
         linecolor='rgba(255, 255, 255, 0.2)',
         tickfont=dict(size=12, color='#94a3b8'),
-        # Enhanced logarithmic ticks for x-axis
-        minor=dict(
-            showgrid=True,
-            gridcolor='rgba(255, 255, 255, 0.04)',
-            gridwidth=0.5,
-            dtick=1,
-            tick0=1
-        ) if x_scale_type == "Log" else None,
         rangeslider=dict(
             visible=True,
             thickness=0.08,
@@ -534,18 +526,7 @@ fig.update_layout(
         gridcolor='rgba(255, 255, 255, 0.08)',
         linecolor='rgba(255, 255, 255, 0.2)',
         tickfont=dict(size=12, color='#94a3b8'),
-        tickprefix="$",
-        # Enhanced logarithmic ticks for y-axis - this creates the physicist-style log scale
-        minor=dict(
-            showgrid=True,
-            gridcolor='rgba(255, 255, 255, 0.04)',
-            gridwidth=0.5,
-            dtick=1,
-            tick0=0.00001
-        ) if y_scale == "Log" else None,
-        # Set major ticks to powers of 10 for log scale
-        dtick=1 if y_scale == "Log" else None,
-        tick0=0.00001 if y_scale == "Log" else None
+        tickprefix="$"
     ),
     legend=dict(
         orientation="h",
