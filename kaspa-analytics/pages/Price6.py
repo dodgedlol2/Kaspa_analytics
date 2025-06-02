@@ -29,7 +29,7 @@ except Exception as e:
     st.error(f"Failed to calculate price power law: {str(e)}")
     st.stop()
 
-# Enhanced Custom CSS with Modern Design
+# Enhanced Custom CSS with Modern Design and Streamlined Title
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -83,53 +83,94 @@ st.markdown("""
         transition: all 0.3s ease;
     }
     
+    /* Streamlined Title Section - No borders, elegant line */
     .chart-title-section {
-        background: rgba(15, 23, 42, 0.2);
-        backdrop-filter: blur(15px);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        padding: 16px 28px 12px 28px;
+        background: transparent;
+        padding: 20px 28px 12px 28px;
         position: relative;
+        border-bottom: none;
+    }
+    
+    .chart-title-section::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 28px;
+        right: 28px;
+        height: 1px;
+        background: linear-gradient(90deg, 
+            transparent 0%, 
+            rgba(100, 116, 139, 0.3) 20%, 
+            rgba(148, 163, 184, 0.5) 50%, 
+            rgba(100, 116, 139, 0.3) 80%, 
+            transparent 100%);
+        animation: shimmer 3s ease-in-out infinite;
+    }
+    
+    @keyframes shimmer {
+        0%, 100% { opacity: 0.5; transform: scaleX(1); }
+        50% { opacity: 1; transform: scaleX(1.02); }
     }
     
     .chart-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 0;
+        margin-bottom: 8px;
     }
     
     .chart-title {
-        font-size: 18px;
-        font-weight: 600;
+        font-size: 22px;
+        font-weight: 700;
         color: #f1f5f9;
         margin: 0;
         letter-spacing: 0.5px;
+        text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        background: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .chart-subtitle {
+        font-size: 12px;
+        color: #64748b;
+        font-weight: 500;
+        margin-top: 2px;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
     }
     
     .live-indicator {
         display: flex;
         align-items: center;
-        gap: 5px;
+        gap: 6px;
         font-size: 11px;
         color: #00ff88;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.5px;
+        background: rgba(0, 255, 136, 0.1);
+        border: 1px solid rgba(0, 255, 136, 0.3);
+        border-radius: 20px;
+        padding: 6px 12px;
+        backdrop-filter: blur(10px);
     }
     
     .live-dot {
-        width: 5px;
-        height: 5px;
+        width: 6px;
+        height: 6px;
         background: #00ff88;
         border-radius: 50%;
         animation: pulse 2s infinite;
-        box-shadow: 0 0 6px #00ff88;
+        box-shadow: 0 0 8px #00ff88;
     }
     
+    /* Enhanced Controls Section */
     .controls-section {
-        padding: 16px 28px;
+        padding: 16px 28px 20px 28px;
+        background: rgba(15, 23, 42, 0.15);
         border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-        background: rgba(15, 23, 42, 0.1);
     }
     
     .control-label {
@@ -278,17 +319,18 @@ if len(df_30_days_ago) > 0:
 else:
     price_pct_change = 0
 
-# Streamlined Chart Section
+# Streamlined Chart Section with elegant title treatment
 st.markdown("""
 <div class="chart-section">
     <div class="chart-title-section">
         <div class="chart-header">
             <div>
-                <h2 class="chart-title">Kaspa Price</h2>
+                <h1 class="chart-title">Kaspa Price</h1>
+                <div class="chart-subtitle">Advanced Market Analysis</div>
             </div>
             <div class="live-indicator">
                 <div class="live-dot"></div>
-                <span>LIVE</span>
+                <span>Live Data</span>
             </div>
         </div>
     </div>
