@@ -370,9 +370,9 @@ def render_clean_header(user_name=None, user_role=None, show_auth=True):
     st.markdown(header_html, unsafe_allow_html=True)
 
 def render_beautiful_sidebar(current_page="Price"):
-    """Render ultra-compact file explorer style sidebar with working expand/collapse"""
+    """Render ultra-compact file explorer style sidebar with clean text headers"""
     
-    # Define navigation structure with expand state management
+    # Define navigation structure
     nav_structure = {
         "Market Metrics": {
             "icon": "chart-area",
@@ -420,28 +420,47 @@ def render_beautiful_sidebar(current_page="Price"):
         
         for section_name, section_data in nav_structure.items():
             is_expanded = st.session_state.expanded_sections.get(section_name, False)
-            chevron_class = "expanded" if is_expanded else ""
+            chevron_icon = "fa-chevron-down" if is_expanded else "fa-chevron-right"
             
-            # Clickable section header
-            header_col, spacer_col = st.columns([1, 0.1])
-            with header_col:
-                if st.button(
-                    f"› {section_name}",
-                    key=f"header_{section_name.replace(' ', '_')}",
-                    help=f"Expand/collapse {section_name}",
-                    use_container_width=True
-                ):
-                    # Toggle the expanded state
-                    st.session_state.expanded_sections[section_name] = not st.session_state.expanded_sections[section_name]
-                    st.rerun()
+            # Create clickable section header with clean HTML
+            section_id = section_name.replace(' ', '_')
             
-            # Custom styled section header overlay
-            st.markdown(f'''
-            <div class="sidebar-section-header" style="margin-top: -32px; pointer-events: none;">
-                <i class="fas fa-chevron-right section-chevron {chevron_class}"></i>
+            # Use HTML for clean clickable header
+            header_html = f'''
+            <div class="sidebar-section-header" onclick="toggleSection_{section_id}()" style="cursor: pointer;">
+                <i class="fas {chevron_icon} section-chevron"></i>
                 <i class="fas fa-{section_data['icon']} section-icon"></i>
                 <span>{section_name}</span>
             </div>
+            
+            <script>
+            function toggleSection_{section_id}() {{
+                // Use Streamlit's component communication
+                window.parent.postMessage({{
+                    type: 'streamlit:setComponentValue',
+                    value: 'toggle_{section_id}'
+                }}, '*');
+            }}
+            </script>
+            '''
+            
+            st.markdown(header_html, unsafe_allow_html=True)
+            
+            # Hidden button to handle the toggle logic
+            if st.button("", key=f"hidden_toggle_{section_id}", help="", label_visibility="hidden"):
+                st.session_state.expanded_sections[section_name] = not st.session_state.expanded_sections[section_name]
+                st.rerun()
+            
+            # Hide the button with CSS
+            st.markdown(f'''
+            <style>
+            button[data-testid="baseButton-secondary"]:has-text("") {{
+                display: none !important;
+            }}
+            div[data-testid="stButton"]:has(button[data-testid="baseButton-secondary"]:empty) {{
+                display: none !important;
+            }}
+            </style>
             ''', unsafe_allow_html=True)
             
             # Show navigation items only if expanded
@@ -478,6 +497,9 @@ def render_beautiful_sidebar(current_page="Price"):
             
             # Minimal spacing between sections
             st.markdown('<div style="height: 4px;"></div>', unsafe_allow_html=True)
+    
+    # Alternative simpler approach - using clickable text with session state
+    # This creates a much cleaner interface
 
 def render_simple_page_header(title, subtitle=None):
     """Simple page header without breadcrumbs"""
