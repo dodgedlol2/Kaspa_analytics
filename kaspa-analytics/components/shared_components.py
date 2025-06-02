@@ -360,48 +360,65 @@ def render_clean_header(user_name=None, user_role=None, show_auth=True):
     st.markdown(header_html, unsafe_allow_html=True)
 
 def render_beautiful_sidebar(current_page="Price"):
-    """Super simple clean text sidebar - no complex functionality"""
+    """Super simple clean text sidebar - icons forced to grey colors"""
     
-    # Simple navigation structure
+    # Simple navigation structure - using generic icons to force grey
     navigation = [
         {
             "head": "📊 MARKET METRICS",
             "items": [
                 "💰 PRICE",
-                "🪙 MARKET CAP", 
-                "📈 TRADING VOLUME",
-                "📦 SUPPLY"
+                "💰 MARKET CAP", 
+                "💰 TRADING VOLUME",
+                "💰 SUPPLY"
             ]
         },
         {
             "head": "⛏️ MINING",
             "items": [
                 "⚡ HASHRATE",
-                "🧩 DIFFICULTY", 
-                "💰 MINING REVENUE"
+                "⚡ DIFFICULTY", 
+                "⚡ MINING REVENUE"
             ]
         },
         {
             "head": "🌐 NETWORK",
             "items": [
                 "🔄 TRANSACTIONS",
-                "👛 ADDRESSES",
-                "🧊 BLOCKS"
+                "🔄 ADDRESSES",
+                "🔄 BLOCKS"
             ]
         }
     ]
     
-    # Build simple HTML
+    # Build HTML with forced grey styling
     sidebar_html = ""
     
     for section in navigation:
-        # Head metric
-        sidebar_html += f'<div class="head-metric">{section["head"]}</div>'
+        # Head metric with forced styling
+        sidebar_html += f'''
+        <div class="head-metric">
+            <span style="color: #94a3b8; font-size: 10px; width: 14px; text-align: center; filter: grayscale(100%) brightness(0) invert(1) opacity(0.6);">
+                {section["head"].split()[0]}
+            </span>
+            <span style="color: #94a3b8;">{section["head"].split()[1]}</span>
+        </div>
+        '''
         
-        # Sub metrics
+        # Sub metrics with forced grey icons
         for item in section["items"]:
             active_class = "active" if "PRICE" in item and current_page == "Price" else ""
-            sidebar_html += f'<div class="sub-metric {active_class}">{item}</div>'
+            text_color = "#00d4ff" if active_class else "#64748b"
+            icon_opacity = "0.8" if active_class else "0.4"
+            
+            sidebar_html += f'''
+            <div class="sub-metric {active_class}">
+                <span style="color: {text_color}; font-size: 10px; width: 14px; text-align: center; filter: grayscale(100%) brightness(0) invert(1) opacity({icon_opacity});">
+                    {item.split()[0]}
+                </span>
+                <span style="color: {text_color};">{item.split()[1]}</span>
+            </div>
+            '''
     
     # Render in sidebar
     with st.sidebar:
