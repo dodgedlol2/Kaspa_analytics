@@ -163,48 +163,28 @@ def render_custom_css_with_sidebar():
         section[data-testid="stSidebar"] {
             background: rgba(10, 14, 26, 0.95) !important;
             border-right: 1px solid rgba(0, 212, 255, 0.15) !important;
-            margin-top: 100px !important;
+            margin-top: 100px !important; /* Moved down from 80px to 100px */
             backdrop-filter: blur(25px) !important;
             box-shadow: 8px 0 32px rgba(0, 0, 0, 0.4) !important;
         }
         
-        /* FORCE COLLAPSE BUTTON TO BE VISIBLE */
+        /* Fix sidebar collapse/expand button positioning */
         button[data-testid="collapsedControl"] {
-            display: block !important;
-            position: fixed !important;
-            top: 110px !important;
-            left: 16px !important;
-            z-index: 999999999 !important; /* Higher than header */
-            background: rgba(0, 212, 255, 0.8) !important;
-            border: 2px solid rgba(0, 212, 255, 1) !important;
-            border-radius: 6px !important;
-            width: 28px !important;
-            height: 28px !important;
-            color: white !important;
-            box-shadow: 0 4px 12px rgba(0, 212, 255, 0.4) !important;
+            top: 110px !important; /* Position below header */
+            left: 8px !important; /* Ensure it's visible when collapsed */
+            z-index: 999999998 !important; /* Lower than header but visible */
+            background: rgba(15, 20, 25, 0.9) !important;
+            border: 1px solid rgba(0, 212, 255, 0.3) !important;
+            border-radius: 8px !important;
+            width: 32px !important;
+            height: 32px !important;
         }
         
-        button[data-testid="collapsedControl"]:hover {
-            background: rgba(0, 212, 255, 1) !important;
-            transform: scale(1.1) !important;
-        }
-        
-        /* Alternative selectors for collapse button */
+        /* Ensure collapse button is always visible */
         .css-1rs6os {
-            display: block !important;
-            position: fixed !important;
             top: 110px !important;
-            left: 16px !important;
-            z-index: 999999999 !important;
-        }
-        
-        /* Ensure sidebar toggle button is always there */
-        div[data-testid="stSidebarCollapse"] {
-            display: block !important;
-            position: fixed !important;
-            top: 110px !important;
-            left: 16px !important;
-            z-index: 999999999 !important;
+            left: 8px !important;
+            z-index: 999999998 !important;
         }
         
         /* Hide default Streamlit sidebar content */
@@ -214,14 +194,18 @@ def render_custom_css_with_sidebar():
         }
         
         /* AGGRESSIVE HIDING OF VIEW MORE/LESS BUTTONS */
+        
+        /* Hide all minimal buttons in sidebar */
         section[data-testid="stSidebar"] button[data-testid="baseButton-minimal"] {
             display: none !important;
         }
         
+        /* Hide buttons containing "View" text */
         section[data-testid="stSidebar"] button:contains("View") {
             display: none !important;
         }
         
+        /* Hide the entire container of View buttons */
         section[data-testid="stSidebar"] .css-1vq4p4l {
             display: none !important;
         }
@@ -230,6 +214,7 @@ def render_custom_css_with_sidebar():
             display: none !important;
         }
         
+        /* Hide any button with "more" or "less" text */
         section[data-testid="stSidebar"] button[title*="View"] {
             display: none !important;
         }
@@ -243,18 +228,53 @@ def render_custom_css_with_sidebar():
             display: none !important;
         }
         
-        /* HIDE ALL STREAMLIT DEFAULT NAVIGATION */
-        nav[data-testid="stSidebarNav"] { display: none !important; }
-        .css-1d391kg .css-1v3fvcr { display: none !important; }
-        .css-1d391kg .css-17eq0hr { display: none !important; }
-        .css-1dp5vir { display: none !important; }
-        section[data-testid="stSidebar"] nav { display: none !important; }
-        section[data-testid="stSidebar"] ul { display: none !important; }
-        section[data-testid="stSidebar"] .css-17eq0hr { display: none !important; }
-        .stRadio { display: none !important; }
-        .stSelectbox { display: none !important; }
+        /* But make sure collapse button stays visible */
+        button[data-testid="collapsedControl"] {
+            display: block !important;
+        }
         
-        /* Head metrics styling */
+        /* HIDE ALL STREAMLIT DEFAULT NAVIGATION */
+        .css-1d391kg .css-1v3fvcr {
+            display: none !important;
+        }
+        
+        .css-1d391kg .css-17eq0hr {
+            display: none !important;
+        }
+        
+        /* Hide Streamlit's page navigation completely */
+        nav[data-testid="stSidebarNav"] {
+            display: none !important;
+        }
+        
+        .css-1dp5vir {
+            display: none !important;
+        }
+        
+        /* Hide any Streamlit sidebar navigation */
+        section[data-testid="stSidebar"] nav {
+            display: none !important;
+        }
+        
+        section[data-testid="stSidebar"] ul {
+            display: none !important;
+        }
+        
+        section[data-testid="stSidebar"] .css-17eq0hr {
+            display: none !important;
+        }
+        
+        /* Hide radio buttons if they appear */
+        .stRadio {
+            display: none !important;
+        }
+        
+        /* Hide selectbox navigation if it exists */
+        .stSelectbox {
+            display: none !important;
+        }
+        
+        /* Head metrics styling - same as your current Market Metrics */
         .head-metric {
             font-size: 12px !important;
             font-weight: 600 !important;
@@ -277,7 +297,20 @@ def render_custom_css_with_sidebar():
             margin-top: 8px !important;
         }
         
-        /* Sub metrics styling */
+        /* Head metric icons - same color as text */
+        .head-metric i {
+            color: #94a3b8 !important;
+            font-size: 10px !important;
+            width: 14px !important;
+            text-align: center !important;
+            transition: color 0.2s ease !important;
+        }
+        
+        .head-metric:hover i {
+            color: #cbd5e1 !important;
+        }
+        
+        /* Sub metrics styling - same font/caps but lighter color */
         .sub-metric {
             font-size: 12px !important;
             font-weight: 600 !important;
@@ -297,6 +330,23 @@ def render_custom_css_with_sidebar():
         }
         
         .sub-metric.active {
+            color: #00d4ff !important;
+        }
+        
+        /* Sub metric icons - same color as text */
+        .sub-metric i {
+            color: #64748b !important;
+            font-size: 10px !important;
+            width: 14px !important;
+            text-align: center !important;
+            transition: color 0.2s ease !important;
+        }
+        
+        .sub-metric:hover i {
+            color: #94a3b8 !important;
+        }
+        
+        .sub-metric.active i {
             color: #00d4ff !important;
         }
         
@@ -360,65 +410,48 @@ def render_clean_header(user_name=None, user_role=None, show_auth=True):
     st.markdown(header_html, unsafe_allow_html=True)
 
 def render_beautiful_sidebar(current_page="Price"):
-    """Super simple clean text sidebar - icons forced to grey colors"""
+    """Super simple clean text sidebar - no complex functionality"""
     
-    # Simple navigation structure - using generic icons to force grey
+    # Simple navigation structure
     navigation = [
         {
             "head": "📊 MARKET METRICS",
             "items": [
                 "💰 PRICE",
-                "💰 MARKET CAP", 
-                "💰 TRADING VOLUME",
-                "💰 SUPPLY"
+                "🪙 MARKET CAP", 
+                "📈 TRADING VOLUME",
+                "📦 SUPPLY"
             ]
         },
         {
             "head": "⛏️ MINING",
             "items": [
                 "⚡ HASHRATE",
-                "⚡ DIFFICULTY", 
-                "⚡ MINING REVENUE"
+                "🧩 DIFFICULTY", 
+                "💰 MINING REVENUE"
             ]
         },
         {
             "head": "🌐 NETWORK",
             "items": [
                 "🔄 TRANSACTIONS",
-                "🔄 ADDRESSES",
-                "🔄 BLOCKS"
+                "👛 ADDRESSES",
+                "🧊 BLOCKS"
             ]
         }
     ]
     
-    # Build HTML with forced grey styling
+    # Build simple HTML
     sidebar_html = ""
     
     for section in navigation:
-        # Head metric with forced styling
-        sidebar_html += f'''
-        <div class="head-metric">
-            <span style="color: #94a3b8; font-size: 10px; width: 14px; text-align: center; filter: grayscale(100%) brightness(0) invert(1) opacity(0.6);">
-                {section["head"].split()[0]}
-            </span>
-            <span style="color: #94a3b8;">{section["head"].split()[1]}</span>
-        </div>
-        '''
+        # Head metric
+        sidebar_html += f'<div class="head-metric">{section["head"]}</div>'
         
-        # Sub metrics with forced grey icons
+        # Sub metrics
         for item in section["items"]:
             active_class = "active" if "PRICE" in item and current_page == "Price" else ""
-            text_color = "#00d4ff" if active_class else "#64748b"
-            icon_opacity = "0.8" if active_class else "0.4"
-            
-            sidebar_html += f'''
-            <div class="sub-metric {active_class}">
-                <span style="color: {text_color}; font-size: 10px; width: 14px; text-align: center; filter: grayscale(100%) brightness(0) invert(1) opacity({icon_opacity});">
-                    {item.split()[0]}
-                </span>
-                <span style="color: {text_color};">{item.split()[1]}</span>
-            </div>
-            '''
+            sidebar_html += f'<div class="sub-metric {active_class}">{item}</div>'
     
     # Render in sidebar
     with st.sidebar:
