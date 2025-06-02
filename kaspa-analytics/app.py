@@ -416,7 +416,19 @@ st.sidebar.markdown("""
 if data_loaded:
     current_price = df['Price'].iloc[-1] if 'Price' in df.columns else 0.0
     total_data_points = len(df)
-    days_since_genesis = (datetime.now() - genesis_date).days if genesis_date else 0
+    # Fix datetime subtraction issue
+    if genesis_date:
+        try:
+            # Convert genesis_date to datetime if it's a pandas Timestamp
+            if hasattr(genesis_date, 'to_pydatetime'):
+                genesis_dt = genesis_date.to_pydatetime()
+            else:
+                genesis_dt = genesis_date
+            days_since_genesis = (datetime.now() - genesis_dt).days
+        except Exception:
+            days_since_genesis = 0
+    else:
+        days_since_genesis = 0
 else:
     current_price = 0.0
     total_data_points = 0
