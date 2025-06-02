@@ -6,58 +6,91 @@ from utils import fit_power_law, load_price_data
 from datetime import datetime, timedelta
 from components.shared_components import (
     render_page_config,
-    render_cohesive_css,
-    render_styled_header,
-    render_styled_sidebar_navigation
+    render_minimal_sidebar_css,
+    render_minimal_sidebar
 )
 
 # MUST be first Streamlit command
-render_page_config(page_title="Price Analysis - Kaspa Analytics Pro")
+render_page_config(page_title="Kaspa Analytics Pro", page_icon="💎")
 
-# Apply cohesive CSS that matches your existing design
-render_cohesive_css()
+# Apply minimal sidebar CSS while preserving original design
+render_minimal_sidebar_css()
 
-# Render styled header that matches your chart sections
-render_styled_header(
-    user_name=None,  # Change to "John Doe" to test user menu
-    show_auth=True
-)
+# Render minimal sidebar navigation
+render_minimal_sidebar(current_page="Price Analysis")
 
-# Render styled sidebar navigation
-render_styled_sidebar_navigation(current_page="Analytics")
-
-# Data loading (with caching for performance)
-@st.cache_data(ttl=300)  # Cache for 5 minutes
-def get_price_data():
+# Data loading and processing - EXACTLY as your original
+if 'price_df' not in st.session_state or 'price_genesis_date' not in st.session_state:
     try:
-        return load_price_data()
+        st.session_state.price_df, st.session_state.price_genesis_date = load_price_data()
     except Exception as e:
         st.error(f"Failed to load price data: {str(e)}")
         st.stop()
 
-# Load data
-if 'price_df' not in st.session_state or 'price_genesis_date' not in st.session_state:
-    st.session_state.price_df, st.session_state.price_genesis_date = get_price_data()
-
 price_df = st.session_state.price_df
 genesis_date = st.session_state.price_genesis_date
 
-# Calculate power law
 try:
     a_price, b_price, r2_price = fit_power_law(price_df, y_col='Price')
 except Exception as e:
     st.error(f"Failed to calculate price power law: {str(e)}")
     st.stop()
 
-# Chart Section - Your existing styling preserved and enhanced
+# Calculate current metrics for header - EXACTLY as your original
+current_price = price_df['Price'].iloc[-1]
+last_date = price_df['Date'].iloc[-1]
+thirty_days_ago = last_date - timedelta(days=30)
+df_30_days_ago = price_df[price_df['Date'] >= thirty_days_ago]
+
+if len(df_30_days_ago) > 0:
+    price_30_days_ago = df_30_days_ago['Price'].iloc[0]
+    price_pct_change = ((current_price - price_30_days_ago) / price_30_days_ago) * 100
+else:
+    price_pct_change = 0
+
+# Header Section - EXACTLY your original beautiful header
+header_html = f"""
+<div class="header-container">
+    <div class="header-content">
+        <div class="brand">
+            <div>
+                <h1>KaspaMetrics</h1>
+                <div class="brand-subtitle">Advanced Market Intelligence Platform</div>
+            </div>
+        </div>
+        <div class="header-stats">
+            <div class="header-stat">
+                <span class="header-stat-value">${current_price:.4f}</span>
+                <div class="header-stat-label">Current Price</div>
+            </div>
+            <div class="header-stat">
+                <span class="header-stat-value" style="color: {'#00ff88' if price_pct_change >= 0 else '#ff4757'}">{price_pct_change:+.1f}%</span>
+                <div class="header-stat-label">30D Change</div>
+            </div>
+            <div class="header-stat">
+                <span class="header-stat-value">{r2_price:.3f}</span>
+                <div class="header-stat-label">Model Fit</div>
+            </div>
+            <div class="header-stat">
+                <div class="status-badge">
+                    <div class="live-dot"></div>
+                    <span>Live Data</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+"""
+
+st.markdown(header_html, unsafe_allow_html=True)
+
+# Chart Section - EXACTLY your original beautiful chart section
 st.markdown("""
 <div class="chart-section">
     <div class="chart-title-section">
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0;">
+        <div class="chart-header">
             <div>
-                <h2 style="font-size: 28px; font-weight: 800; background: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0;">
-                    Kaspa Price Analysis
-                </h2>
+                <h2 class="chart-title">Kaspa Price Analysis</h2>
             </div>
             <div class="live-indicator">
                 <div class="live-dot"></div>
@@ -65,32 +98,35 @@ st.markdown("""
             </div>
         </div>
     </div>
-    <div style="padding: 24px 48px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+    <div class="controls-section">
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# Controls section with your existing styling
+# Controls - EXACTLY as your original
 with st.container():
     col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
     
     with col1:
-        st.markdown('<div style="color: #94a3b8; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 6px;">Price Scale</div>', unsafe_allow_html=True)
+        st.markdown('<div class="control-label">Price Scale</div>', unsafe_allow_html=True)
         y_scale = st.selectbox("", ["Linear", "Log"], index=1, label_visibility="collapsed", key="price_y_scale_select")
 
     with col2:
-        st.markdown('<div style="color: #94a3b8; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 6px;">Time Scale</div>', unsafe_allow_html=True)
+        st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
         x_scale_type = st.selectbox("", ["Linear", "Log"], index=0, label_visibility="collapsed", key="price_x_scale_select")
 
     with col3:
-        st.markdown('<div style="color: #94a3b8; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 6px;">Time Period</div>', unsafe_allow_html=True)
+        st.markdown('<div class="control-label">Time Period</div>', unsafe_allow_html=True)
         time_range = st.selectbox("", ["1W", "1M", "3M", "6M", "1Y", "All"], index=5, label_visibility="collapsed", key="price_time_range_select")
 
     with col4:
-        st.markdown('<div style="color: #94a3b8; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 6px;">Power Law</div>', unsafe_allow_html=True)
+        st.markdown('<div class="control-label">Power Law</div>', unsafe_allow_html=True)
         show_power_law = st.selectbox("", ["Hide", "Show"], index=1, label_visibility="collapsed", key="price_power_law_select")
 
-# Data filtering based on time range
+# Chart content section
+st.markdown('<div class="chart-content"></div>', unsafe_allow_html=True)
+
+# Data filtering - EXACTLY as your original
 last_date = price_df['Date'].iloc[-1]
 if time_range == "1W":
     start_date = last_date - timedelta(days=7)
@@ -107,7 +143,7 @@ else:
 
 filtered_df = price_df[price_df['Date'] >= start_date]
 
-# Create the enhanced chart with your existing styling
+# Create the chart - EXACTLY as your original
 fig = go.Figure()
 
 if x_scale_type == "Log":
@@ -117,7 +153,7 @@ else:
     x_values = filtered_df['Date']
     x_title = "Date"
 
-# Add price trace
+# Add price trace - EXACTLY as your original
 fig.add_trace(go.Scatter(
     x=x_values,
     y=filtered_df['Price'],
@@ -130,7 +166,7 @@ fig.add_trace(go.Scatter(
     fillcolor='rgba(0, 212, 255, 0.1)'
 ))
 
-# Add power law if enabled
+# Add power law if enabled - EXACTLY as your original
 if show_power_law == "Show":
     x_fit = filtered_df['days_from_genesis']
     y_fit = a_price * np.power(x_fit, b_price)
@@ -169,7 +205,7 @@ if show_power_law == "Show":
         hoverinfo='skip'
     ))
 
-# Enhanced chart layout matching your existing style
+# Chart layout - EXACTLY as your original
 fig.update_layout(
     plot_bgcolor='rgba(0,0,0,0)',
     paper_bgcolor='rgba(0,0,0,0)',
@@ -222,38 +258,27 @@ fig.update_layout(
     )
 )
 
-# Display chart with your existing container styling
-st.markdown('<div style="padding: 32px 48px;">', unsafe_allow_html=True)
-
-st.plotly_chart(fig, use_container_width=True, config={
-    'displayModeBar': True,
-    'displaylogo': False,
-    'modeBarButtonsToRemove': ['lasso2d', 'select2d'],
-    'modeBarButtonsToAdd': ['hoverclosest', 'hovercompare'],
-    'toImageButtonOptions': {
-        'format': 'png',
-        'filename': f'kaspa_analysis_{datetime.now().strftime("%Y%m%d_%H%M")}',
-        'height': 700,
-        'width': 1400,
-        'scale': 2
-    }
-})
-
-st.markdown('</div>', unsafe_allow_html=True)
+# Display chart - EXACTLY as your original
+with st.container():
+    st.plotly_chart(fig, use_container_width=True, config={
+        'displayModeBar': True,
+        'displaylogo': False,
+        'modeBarButtonsToRemove': ['lasso2d', 'select2d'],
+        'modeBarButtonsToAdd': ['hoverclosest', 'hovercompare'],
+        'toImageButtonOptions': {
+            'format': 'png',
+            'filename': f'kaspa_analysis_{datetime.now().strftime("%Y%m%d_%H%M")}',
+            'height': 700,
+            'width': 1400,
+            'scale': 2
+        }
+    })
 
 # Close the chart section
 st.markdown('</div>', unsafe_allow_html=True)
 
-# Calculate comprehensive metrics for your existing metric cards
-current_price = price_df['Price'].iloc[-1]
-last_date = price_df['Date'].iloc[-1]
-thirty_days_ago = last_date - timedelta(days=30)
-df_30_days_ago = price_df[price_df['Date'] >= thirty_days_ago]
-
+# Calculate comprehensive metrics - EXACTLY as your original
 if len(df_30_days_ago) > 0:
-    price_30_days_ago = df_30_days_ago['Price'].iloc[0]
-    price_pct_change = ((current_price - price_30_days_ago) / price_30_days_ago) * 100
-    
     price_30_days_ago_data = price_df[price_df['Date'] <= thirty_days_ago]
     if len(price_30_days_ago_data) > 10:
         try:
@@ -268,78 +293,38 @@ if len(df_30_days_ago) > 0:
     slope_pct_change = ((b_price - b_price_30d) / abs(b_price_30d)) * 100 if b_price_30d != 0 else 0
     r2_pct_change = ((r2_price - r2_price_30d) / r2_price_30d) * 100 if r2_price_30d != 0 else 0
 else:
-    price_pct_change = 0
     slope_pct_change = 0
     r2_pct_change = 0
 
-# Enhanced Metrics Section - Using your existing metric card styling
+# Enhanced Metrics Section - EXACTLY your original beautiful metric cards
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
     metric_html = f"""
-    <div style="background: rgba(15, 20, 25, 0.7) !important; backdrop-filter: blur(25px) !important; 
-         border: 1px solid rgba(255, 255, 255, 0.1) !important; border-radius: 20px !important; 
-         padding: 28px !important; position: relative !important; overflow: hidden !important; 
-         transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important; cursor: pointer !important; 
-         margin: 20px 20px 20px 0 !important;">
-        <div style="color: #94a3b8 !important; font-size: 13px !important; font-weight: 600 !important; 
-             text-transform: uppercase !important; letter-spacing: 1.2px !important; margin-bottom: 12px !important;">
-            POWER-LAW SLOPE
-        </div>
-        <div style="color: #f1f5f9 !important; font-size: 36px !important; font-weight: 800 !important; 
-             line-height: 1.1 !important; margin-bottom: 6px !important; text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);">
-            {b_price:.4f}
-        </div>
-        <div style="font-size: 15px !important; font-weight: 700 !important; margin-bottom: 8px; 
-             color: {'#00ff88' if slope_pct_change >= 0 else '#ff4757'} !important;">
-            {slope_pct_change:+.2f}%
-        </div>
+    <div class="metric-card">
+        <div class="metric-label">POWER-LAW SLOPE</div>
+        <div class="metric-value">{b_price:.4f}</div>
+        <div class="metric-delta {'positive' if slope_pct_change >= 0 else 'negative'}">{slope_pct_change:+.2f}%</div>
     </div>
     """
     st.markdown(metric_html, unsafe_allow_html=True)
 
 with col2:
     metric_html = f"""
-    <div style="background: rgba(15, 20, 25, 0.7) !important; backdrop-filter: blur(25px) !important; 
-         border: 1px solid rgba(255, 255, 255, 0.1) !important; border-radius: 20px !important; 
-         padding: 28px !important; position: relative !important; overflow: hidden !important; 
-         transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important; cursor: pointer !important; 
-         margin: 20px 10px !important;">
-        <div style="color: #94a3b8 !important; font-size: 13px !important; font-weight: 600 !important; 
-             text-transform: uppercase !important; letter-spacing: 1.2px !important; margin-bottom: 12px !important;">
-            MODEL ACCURACY (R²)
-        </div>
-        <div style="color: #f1f5f9 !important; font-size: 36px !important; font-weight: 800 !important; 
-             line-height: 1.1 !important; margin-bottom: 6px !important; text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);">
-            {r2_price:.4f}
-        </div>
-        <div style="font-size: 15px !important; font-weight: 700 !important; margin-bottom: 8px; 
-             color: {'#00ff88' if r2_pct_change >= 0 else '#ff4757'} !important;">
-            {r2_pct_change:+.2f}%
-        </div>
+    <div class="metric-card">
+        <div class="metric-label">MODEL ACCURACY (R²)</div>
+        <div class="metric-value">{r2_price:.4f}</div>
+        <div class="metric-delta {'positive' if r2_pct_change >= 0 else 'negative'}">{r2_pct_change:+.2f}%</div>
     </div>
     """
     st.markdown(metric_html, unsafe_allow_html=True)
 
 with col3:
     metric_html = f"""
-    <div style="background: rgba(15, 20, 25, 0.7) !important; backdrop-filter: blur(25px) !important; 
-         border: 1px solid rgba(255, 255, 255, 0.1) !important; border-radius: 20px !important; 
-         padding: 28px !important; position: relative !important; overflow: hidden !important; 
-         transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important; cursor: pointer !important; 
-         margin: 20px 10px !important;">
-        <div style="color: #94a3b8 !important; font-size: 13px !important; font-weight: 600 !important; 
-             text-transform: uppercase !important; letter-spacing: 1.2px !important; margin-bottom: 12px !important;">
-            CURRENT PRICE
-        </div>
-        <div style="color: #f1f5f9 !important; font-size: 36px !important; font-weight: 800 !important; 
-             line-height: 1.1 !important; margin-bottom: 6px !important; text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);">
-            ${current_price:.6f}
-        </div>
-        <div style="font-size: 15px !important; font-weight: 700 !important; margin-bottom: 8px; 
-             color: {'#00ff88' if price_pct_change >= 0 else '#ff4757'} !important;">
-            {price_pct_change:+.2f}%
-        </div>
+    <div class="metric-card">
+        <div class="metric-label">CURRENT PRICE</div>
+        <div class="metric-value">${current_price:.6f}</div>
+        <div class="metric-delta {'positive' if price_pct_change >= 0 else 'negative'}">{price_pct_change:+.2f}%</div>
     </div>
     """
     st.markdown(metric_html, unsafe_allow_html=True)
@@ -347,28 +332,15 @@ with col3:
 with col4:
     market_cap_estimate = current_price * 24e9
     metric_html = f"""
-    <div style="background: rgba(15, 20, 25, 0.7) !important; backdrop-filter: blur(25px) !important; 
-         border: 1px solid rgba(255, 255, 255, 0.1) !important; border-radius: 20px !important; 
-         padding: 28px !important; position: relative !important; overflow: hidden !important; 
-         transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important; cursor: pointer !important; 
-         margin: 20px 0 20px 10px !important;">
-        <div style="color: #94a3b8 !important; font-size: 13px !important; font-weight: 600 !important; 
-             text-transform: uppercase !important; letter-spacing: 1.2px !important; margin-bottom: 12px !important;">
-            EST. MARKET CAP
-        </div>
-        <div style="color: #f1f5f9 !important; font-size: 36px !important; font-weight: 800 !important; 
-             line-height: 1.1 !important; margin-bottom: 6px !important; text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);">
-            ${market_cap_estimate/1e9:.2f}B
-        </div>
-        <div style="font-size: 15px !important; font-weight: 700 !important; margin-bottom: 8px; 
-             color: {'#00ff88' if price_pct_change >= 0 else '#ff4757'} !important;">
-            {price_pct_change:+.2f}%
-        </div>
+    <div class="metric-card">
+        <div class="metric-label">EST. MARKET CAP</div>
+        <div class="metric-value">${market_cap_estimate/1e9:.2f}B</div>
+        <div class="metric-delta {'positive' if price_pct_change >= 0 else 'negative'}">{price_pct_change:+.2f}%</div>
     </div>
     """
     st.markdown(metric_html, unsafe_allow_html=True)
 
-# Footer matching your existing style
+# Footer - EXACTLY your original beautiful footer
 footer_html = f"""
 <div style="text-align: center; padding: 50px 40px; margin-top: 40px; 
      background: rgba(15, 20, 25, 0.4); backdrop-filter: blur(20px);
