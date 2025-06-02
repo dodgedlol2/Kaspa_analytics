@@ -294,6 +294,7 @@ st.markdown("""
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
         position: relative;
         overflow: hidden;
+        min-height: 48px !important;
     }
     
     .stSelectbox > div > div::before {
@@ -322,7 +323,11 @@ st.markdown("""
         color: #f1f5f9 !important;
         font-weight: 600 !important;
         font-size: 14px !important;
-        padding: 12px 16px !important;
+        padding: 14px 16px !important;
+        display: flex !important;
+        align-items: center !important;
+        height: auto !important;
+        line-height: 1.2 !important;
     }
     
     /* Selectbox dropdown styling */
@@ -340,7 +345,10 @@ st.markdown("""
         transition: all 0.2s ease !important;
         border-radius: 8px !important;
         margin: 4px !important;
-        padding: 8px 12px !important;
+        padding: 10px 12px !important;
+        line-height: 1.2 !important;
+        display: flex !important;
+        align-items: center !important;
     }
     
     .stSelectbox [role="option"]:hover {
