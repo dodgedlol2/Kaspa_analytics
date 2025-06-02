@@ -159,7 +159,7 @@ def render_custom_css_with_sidebar():
             box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4) !important;
         }
         
-        /* Beautiful Sidebar Styling */
+        /* Beautiful Sidebar Styling - Clean like Glassnode */
         section[data-testid="stSidebar"] {
             background: rgba(10, 14, 26, 0.95) !important;
             border-right: 1px solid rgba(0, 212, 255, 0.15) !important;
@@ -173,184 +173,105 @@ def render_custom_css_with_sidebar():
             background: transparent !important;
         }
         
-        /* Sidebar Section Containers */
-        .sidebar-section {
-            margin: 12px 8px !important;
-            background: rgba(15, 20, 25, 0.6) !important;
-            backdrop-filter: blur(25px) !important;
-            border: 1px solid rgba(255, 255, 255, 0.08) !important;
-            border-radius: 16px !important;
-            overflow: hidden !important;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        }
-        
-        .sidebar-section:hover {
-            border-color: rgba(0, 212, 255, 0.2) !important;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
-        }
-        
-        /* Dropdown Header */
-        .dropdown-header {
-            display: flex !important;
-            align-items: center !important;
-            justify-content: space-between !important;
-            padding: 16px 20px !important;
-            cursor: pointer !important;
-            transition: all 0.3s ease !important;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
-        }
-        
-        .dropdown-header:hover {
-            background: rgba(0, 212, 255, 0.05) !important;
-        }
-        
-        .dropdown-header.active {
-            background: rgba(0, 212, 255, 0.1) !important;
-            border-bottom-color: rgba(0, 212, 255, 0.2) !important;
-        }
-        
-        .dropdown-title {
-            display: flex !important;
-            align-items: center !important;
-            gap: 12px !important;
+        /* Remove default Streamlit expander styling */
+        .streamlit-expanderHeader {
+            background: transparent !important;
+            border: none !important;
+            border-radius: 0 !important;
+            padding: 12px 16px !important;
             font-size: 14px !important;
             font-weight: 600 !important;
             color: #cbd5e1 !important;
+            transition: all 0.3s ease !important;
         }
         
-        .dropdown-icon {
-            width: 16px !important;
-            text-align: center !important;
+        .streamlit-expanderHeader:hover {
+            background: rgba(0, 212, 255, 0.05) !important;
             color: #00d4ff !important;
         }
         
-        .dropdown-chevron {
-            font-size: 12px !important;
-            color: #64748b !important;
-            transition: transform 0.3s ease !important;
+        /* Remove expander borders and styling */
+        .streamlit-expanderContent {
+            background: transparent !important;
+            border: none !important;
+            padding: 0 !important;
         }
         
-        .dropdown-chevron.expanded {
-            transform: rotate(90deg) !important;
-        }
-        
-        /* Dropdown Content */
-        .dropdown-content {
-            max-height: 0 !important;
-            overflow: hidden !important;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-            background: rgba(10, 14, 20, 0.4) !important;
-        }
-        
-        .dropdown-content.expanded {
-            max-height: 500px !important;
-            padding-bottom: 8px !important;
-        }
-        
-        /* Navigation Items */
-        .nav-item {
-            display: flex !important;
-            align-items: center !important;
-            gap: 12px !important;
-            padding: 10px 20px 10px 48px !important;
-            margin: 2px 8px !important;
+        /* Clean button styling */
+        .stButton > button {
+            background: transparent !important;
+            border: none !important;
             border-radius: 8px !important;
-            color: #94a3b8 !important;
+            padding: 8px 12px !important;
+            width: 100% !important;
+            text-align: left !important;
             font-size: 13px !important;
             font-weight: 500 !important;
-            cursor: pointer !important;
+            color: #94a3b8 !important;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-            border: 1px solid transparent !important;
+            margin: 2px 0 !important;
         }
         
-        .nav-item:hover {
+        .stButton > button:hover {
             background: rgba(0, 212, 255, 0.08) !important;
             color: #00d4ff !important;
             transform: translateX(4px) !important;
-            border-color: rgba(0, 212, 255, 0.2) !important;
             box-shadow: 0 2px 8px rgba(0, 212, 255, 0.1) !important;
         }
         
-        .nav-item.active {
+        .stButton > button:focus {
             background: rgba(0, 212, 255, 0.15) !important;
             color: #00d4ff !important;
-            border-color: rgba(0, 212, 255, 0.4) !important;
+            box-shadow: 0 4px 16px rgba(0, 212, 255, 0.2) !important;
+            outline: none !important;
+        }
+        
+        /* Active button styling */
+        .active-nav-button > button {
+            background: rgba(0, 212, 255, 0.15) !important;
+            color: #00d4ff !important;
+            border-left: 3px solid #00d4ff !important;
+            padding-left: 9px !important;
             box-shadow: 0 4px 16px rgba(0, 212, 255, 0.2) !important;
         }
         
-        .nav-item-icon {
-            width: 14px !important;
+        /* Hide expander icons */
+        .streamlit-expanderHeader svg {
+            display: none !important;
+        }
+        
+        /* Custom section headers */
+        .sidebar-section-header {
+            display: flex !important;
+            align-items: center !important;
+            gap: 10px !important;
+            padding: 12px 16px !important;
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            color: #cbd5e1 !important;
+            cursor: pointer !important;
+            transition: all 0.3s ease !important;
+            border-radius: 8px !important;
+            margin: 4px 8px !important;
+        }
+        
+        .sidebar-section-header:hover {
+            background: rgba(0, 212, 255, 0.05) !important;
+            color: #00d4ff !important;
+        }
+        
+        .section-icon {
+            color: #00d4ff !important;
+            font-size: 14px !important;
+            width: 16px !important;
             text-align: center !important;
-            font-size: 12px !important;
         }
         
-        /* Live Stats Section */
-        .live-stats {
-            padding: 16px !important;
-        }
-        
-        .stats-title {
-            font-size: 12px !important;
-            font-weight: 600 !important;
-            color: #64748b !important;
-            text-transform: uppercase !important;
-            letter-spacing: 1px !important;
-            margin-bottom: 12px !important;
-            display: flex !important;
-            align-items: center !important;
-            gap: 8px !important;
-        }
-        
-        .live-dot {
-            width: 6px !important;
-            height: 6px !important;
-            background: #00ff88 !important;
-            border-radius: 50% !important;
-            animation: pulse 2s infinite !important;
-            box-shadow: 0 0 8px #00ff88 !important;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.7; transform: scale(1.1); }
-        }
-        
-        .stat-item {
-            display: flex !important;
-            justify-content: space-between !important;
-            align-items: center !important;
-            padding: 8px 0 !important;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
-        }
-        
-        .stat-item:last-child {
-            border-bottom: none !important;
-        }
-        
-        .stat-label {
-            font-size: 11px !important;
-            color: #94a3b8 !important;
-            font-weight: 500 !important;
-        }
-        
-        .stat-value {
-            font-size: 12px !important;
-            font-weight: 600 !important;
-            color: #f1f5f9 !important;
-        }
-        
-        .stat-change {
-            font-size: 10px !important;
-            font-weight: 600 !important;
-            margin-left: 4px !important;
-        }
-        
-        .stat-change.positive {
-            color: #10b981 !important;
-        }
-        
-        .stat-change.negative {
-            color: #ef4444 !important;
+        /* Navigation item container */
+        .nav-item-container {
+            margin-left: 8px !important;
+            padding-left: 24px !important;
+            border-left: 1px solid rgba(255, 255, 255, 0.05) !important;
         }
         
         /* Main content adjustments */
@@ -413,81 +334,91 @@ def render_clean_header(user_name=None, user_role=None, show_auth=True):
     st.markdown(header_html, unsafe_allow_html=True)
 
 def render_beautiful_sidebar(current_page="Price"):
-    """Render beautiful sidebar with dropdown navigation like Glassnode"""
+    """Render clean sidebar navigation like Glassnode - no panels, no metrics"""
     
     # Define navigation structure
     nav_structure = {
         "Market Metrics": {
-            "icon": "fas fa-chart-area",
+            "icon": "chart-area",
             "items": [
-                {"name": "Price", "icon": "fas fa-dollar-sign", "page": "Price"},
-                {"name": "Market Cap", "icon": "fas fa-coins", "page": "MarketCap"},
-                {"name": "Trading Volume", "icon": "fas fa-chart-bar", "page": "Volume"},
-                {"name": "Supply", "icon": "fas fa-layer-group", "page": "Supply"}
+                {"name": "Price", "icon": "dollar-sign", "page": "Price"},
+                {"name": "Market Cap", "icon": "coins", "page": "MarketCap"},
+                {"name": "Trading Volume", "icon": "chart-bar", "page": "Volume"},
+                {"name": "Supply", "icon": "layer-group", "page": "Supply"}
             ]
         },
         "Mining": {
-            "icon": "fas fa-microchip",
+            "icon": "microchip",
             "items": [
-                {"name": "Hashrate", "icon": "fas fa-tachometer-alt", "page": "Hashrate"},
-                {"name": "Difficulty", "icon": "fas fa-puzzle-piece", "page": "Difficulty"},
-                {"name": "Mining Revenue", "icon": "fas fa-money-bill-wave", "page": "Revenue"}
+                {"name": "Hashrate", "icon": "tachometer-alt", "page": "Hashrate"},
+                {"name": "Difficulty", "icon": "puzzle-piece", "page": "Difficulty"},
+                {"name": "Mining Revenue", "icon": "money-bill-wave", "page": "Revenue"}
             ]
         },
         "Network": {
-            "icon": "fas fa-network-wired",
+            "icon": "network-wired",
             "items": [
-                {"name": "Transactions", "icon": "fas fa-exchange-alt", "page": "Transactions"},
-                {"name": "Addresses", "icon": "fas fa-wallet", "page": "Addresses"},
-                {"name": "Blocks", "icon": "fas fa-cube", "page": "Blocks"}
+                {"name": "Transactions", "icon": "exchange-alt", "page": "Transactions"},
+                {"name": "Addresses", "icon": "wallet", "page": "Addresses"},
+                {"name": "Blocks", "icon": "cube", "page": "Blocks"}
             ]
         }
     }
     
-    # Create sidebar navigation using Streamlit components
+    # Create clean sidebar navigation using Streamlit components
     with st.sidebar:
+        # Add some top spacing
+        st.markdown("<br>", unsafe_allow_html=True)
+        
         # Navigation sections
         for section_name, section_data in nav_structure.items():
             # Check if any item in this section is active
             section_active = any(item["page"] == current_page for item in section_data["items"])
             
-            # Create expander for each section
-            with st.expander(f"{section_data['icon']} {section_name}", expanded=section_active):
-                for item in section_data["items"]:
-                    # Create columns for icon and text
-                    col_icon, col_text = st.columns([1, 4])
+            # Custom section header without icons showing in text
+            st.markdown(f'''
+            <div class="sidebar-section-header">
+                <i class="fas fa-{section_data['icon']} section-icon"></i>
+                <span>{section_name}</span>
+            </div>
+            ''', unsafe_allow_html=True)
+            
+            # Navigation items in a clean container
+            st.markdown('<div class="nav-item-container">', unsafe_allow_html=True)
+            
+            for item in section_data["items"]:
+                # Create columns for icon and button
+                col_icon, col_button = st.columns([1, 5])
+                
+                with col_icon:
+                    if item["page"] == current_page:
+                        st.markdown(f'<i class="fas fa-{item["icon"]}" style="color: #00d4ff; font-size: 12px; margin-top: 8px;"></i>', unsafe_allow_html=True)
+                    else:
+                        st.markdown(f'<i class="fas fa-{item["icon"]}" style="color: #64748b; font-size: 12px; margin-top: 8px;"></i>', unsafe_allow_html=True)
+                
+                with col_button:
+                    # Apply active styling conditionally
+                    if item["page"] == current_page:
+                        st.markdown('<div class="active-nav-button">', unsafe_allow_html=True)
                     
-                    with col_icon:
-                        if item["page"] == current_page:
-                            st.markdown(f'<i class="{item["icon"]}" style="color: #00d4ff; font-size: 12px;"></i>', unsafe_allow_html=True)
-                        else:
-                            st.markdown(f'<i class="{item["icon"]}" style="color: #94a3b8; font-size: 12px;"></i>', unsafe_allow_html=True)
+                    # Navigation button
+                    if st.button(
+                        item["name"], 
+                        key=f"nav_{item['page']}", 
+                        use_container_width=True,
+                        help=f"Navigate to {item['name']}"
+                    ):
+                        # You can implement actual navigation here
+                        st.write(f"Navigating to {item['name']}...")
+                        # st.switch_page(f"pages/{item['page']}.py")
                     
-                    with col_text:
-                        # Use button for navigation
-                        button_style = ""
-                        if item["page"] == current_page:
-                            button_style = "background-color: rgba(0, 212, 255, 0.15); color: #00d4ff; border: 1px solid rgba(0, 212, 255, 0.4);"
-                        
-                        if st.button(
-                            item["name"], 
-                            key=f"nav_{item['page']}", 
-                            use_container_width=True,
-                            help=f"Navigate to {item['name']}"
-                        ):
-                            st.switch_page(f"pages/{item['page']}.py")
-        
-        # Add separator
-        st.markdown("---")
-        
-        # Live Stats Section
-        st.markdown("### 🔴 Live Stats")
-        
-        # Create stats using metrics for clean look
-        st.metric("KAS Price", "$0.0873", "2.4%")
-        st.metric("Market Cap", "$2.1B", "1.8%") 
-        st.metric("24h Volume", "$45.2M", "-5.1%")
-        st.metric("Hashrate", "1.2 EH/s", "0.3%")
+                    if item["page"] == current_page:
+                        st.markdown('</div>', unsafe_allow_html=True)
+            
+            st.markdown('</div>', unsafe_allow_html=True)
+            
+            # Add spacing between sections
+            st.markdown("<br>", unsafe_allow_html=True)
 
 def render_simple_page_header(title, subtitle=None):
     """Simple page header without breadcrumbs"""
