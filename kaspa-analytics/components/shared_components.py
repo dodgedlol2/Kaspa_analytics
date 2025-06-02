@@ -286,7 +286,7 @@ def render_custom_css_with_sidebar():
             transition: color 0.2s ease !important;
             display: flex !important;
             align-items: center !important;
-            gap: 6px !important;
+            gap: 8px !important;
         }
         
         .head-metric:hover {
@@ -300,8 +300,8 @@ def render_custom_css_with_sidebar():
         /* Head metric icons - same color as text */
         .head-metric i {
             color: #94a3b8 !important;
-            font-size: 10px !important;
-            width: 14px !important;
+            font-size: 12px !important;
+            width: 16px !important;
             text-align: center !important;
             transition: color 0.2s ease !important;
         }
@@ -322,7 +322,7 @@ def render_custom_css_with_sidebar():
             transition: color 0.2s ease !important;
             display: flex !important;
             align-items: center !important;
-            gap: 6px !important;
+            gap: 8px !important;
         }
         
         .sub-metric:hover {
@@ -336,8 +336,8 @@ def render_custom_css_with_sidebar():
         /* Sub metric icons - same color as text */
         .sub-metric i {
             color: #64748b !important;
-            font-size: 10px !important;
-            width: 14px !important;
+            font-size: 12px !important;
+            width: 16px !important;
             text-align: center !important;
             transition: color 0.2s ease !important;
         }
@@ -348,19 +348,6 @@ def render_custom_css_with_sidebar():
         
         .sub-metric.active i {
             color: #00d4ff !important;
-        }
-        
-        /* Force all sidebar icons to be the same color as text */
-        .head-metric .fas,
-        .head-metric .fab,
-        .head-metric .far {
-            color: inherit !important;
-        }
-        
-        .sub-metric .fas,
-        .sub-metric .fab,
-        .sub-metric .far {
-            color: inherit !important;
         }
         
         /* Main content adjustments */
@@ -425,31 +412,31 @@ def render_clean_header(user_name=None, user_role=None, show_auth=True):
 def render_beautiful_sidebar(current_page="Price"):
     """Super simple clean text sidebar - no complex functionality"""
     
-    # Simple navigation structure
+    # Simple navigation structure with Font Awesome icons
     navigation = [
         {
-            "head": "📊 MARKET METRICS",
+            "head": '<i class="fas fa-chart-line"></i> MARKET METRICS',
             "items": [
-                "💰 PRICE",
-                "🪙 MARKET CAP", 
-                "📈 TRADING VOLUME",
-                "📦 SUPPLY"
+                '<i class="fas fa-dollar-sign"></i> PRICE',
+                '<i class="fas fa-coins"></i> MARKET CAP', 
+                '<i class="fas fa-chart-bar"></i> TRADING VOLUME',
+                '<i class="fas fa-layer-group"></i> SUPPLY'
             ]
         },
         {
-            "head": "⛏️ MINING",
+            "head": '<i class="fas fa-hammer"></i> MINING',
             "items": [
-                "⚡ HASHRATE",
-                "🧩 DIFFICULTY", 
-                "💰 MINING REVENUE"
+                '<i class="fas fa-bolt"></i> HASHRATE',
+                '<i class="fas fa-puzzle-piece"></i> DIFFICULTY', 
+                '<i class="fas fa-money-bill-wave"></i> MINING REVENUE'
             ]
         },
         {
-            "head": "🌐 NETWORK",
+            "head": '<i class="fas fa-network-wired"></i> NETWORK',
             "items": [
-                "🔄 TRANSACTIONS",
-                "👛 ADDRESSES",
-                "🧊 BLOCKS"
+                '<i class="fas fa-exchange-alt"></i> TRANSACTIONS',
+                '<i class="fas fa-wallet"></i> ADDRESSES',
+                '<i class="fas fa-cube"></i> BLOCKS'
             ]
         }
     ]
