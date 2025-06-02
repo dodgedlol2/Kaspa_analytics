@@ -168,16 +168,69 @@ def render_custom_css_with_sidebar():
             box-shadow: 8px 0 32px rgba(0, 0, 0, 0.4) !important;
         }
         
-        /* Move sidebar collapse/expand button down */
+        /* Fix sidebar collapse/expand button positioning */
         button[data-testid="collapsedControl"] {
-            top: 100px !important; /* Move down to match sidebar */
-            z-index: 999999998 !important; /* Lower than header */
+            top: 110px !important; /* Position below header */
+            left: 8px !important; /* Ensure it's visible when collapsed */
+            z-index: 999999998 !important; /* Lower than header but visible */
+            background: rgba(15, 20, 25, 0.9) !important;
+            border: 1px solid rgba(0, 212, 255, 0.3) !important;
+            border-radius: 8px !important;
+            width: 32px !important;
+            height: 32px !important;
+        }
+        
+        /* Ensure collapse button is always visible */
+        .css-1rs6os {
+            top: 110px !important;
+            left: 8px !important;
+            z-index: 999999998 !important;
         }
         
         /* Hide default Streamlit sidebar content */
         section[data-testid="stSidebar"] > div {
             background: transparent !important;
             padding: 16px 12px !important;
+        }
+        
+        /* AGGRESSIVE HIDING OF VIEW MORE/LESS BUTTONS */
+        
+        /* Hide all minimal buttons in sidebar */
+        section[data-testid="stSidebar"] button[data-testid="baseButton-minimal"] {
+            display: none !important;
+        }
+        
+        /* Hide buttons containing "View" text */
+        section[data-testid="stSidebar"] button:contains("View") {
+            display: none !important;
+        }
+        
+        /* Hide the entire container of View buttons */
+        section[data-testid="stSidebar"] .css-1vq4p4l {
+            display: none !important;
+        }
+        
+        section[data-testid="stSidebar"] .css-1rs6os.edgvbvh3 {
+            display: none !important;
+        }
+        
+        /* Hide any button with "more" or "less" text */
+        section[data-testid="stSidebar"] button[title*="View"] {
+            display: none !important;
+        }
+        
+        section[data-testid="stSidebar"] button[aria-label*="View"] {
+            display: none !important;
+        }
+        
+        /* Nuclear option - hide ALL buttons except collapse button */
+        section[data-testid="stSidebar"] button:not([data-testid="collapsedControl"]) {
+            display: none !important;
+        }
+        
+        /* But make sure collapse button stays visible */
+        button[data-testid="collapsedControl"] {
+            display: block !important;
         }
         
         /* HIDE ALL STREAMLIT DEFAULT NAVIGATION */
@@ -221,31 +274,6 @@ def render_custom_css_with_sidebar():
             display: none !important;
         }
         
-        /* HIDE THE "VIEW MORE/LESS" BUTTON */
-        button[data-testid="baseButton-minimal"]:contains("View") {
-            display: none !important;
-        }
-        
-        /* Hide any buttons with "View" text in sidebar */
-        section[data-testid="stSidebar"] button[data-testid="baseButton-minimal"] {
-            display: none !important;
-        }
-        
-        /* Hide the View more/less button container */
-        .css-1vq4p4l {
-            display: none !important;
-        }
-        
-        /* Hide the page navigation expand/collapse button */
-        section[data-testid="stSidebar"] .css-1rs6os {
-            display: none !important;
-        }
-        
-        /* Hide any minimal buttons in sidebar */
-        section[data-testid="stSidebar"] .stButton button[data-testid="baseButton-minimal"] {
-            display: none !important;
-        }
-        
         /* Head metrics styling - same as your current Market Metrics */
         .head-metric {
             font-size: 12px !important;
@@ -267,6 +295,19 @@ def render_custom_css_with_sidebar():
         
         .head-metric:first-child {
             margin-top: 8px !important;
+        }
+        
+        /* Head metric icons - same color as text */
+        .head-metric i {
+            color: #94a3b8 !important;
+            font-size: 10px !important;
+            width: 14px !important;
+            text-align: center !important;
+            transition: color 0.2s ease !important;
+        }
+        
+        .head-metric:hover i {
+            color: #cbd5e1 !important;
         }
         
         /* Sub metrics styling - same font/caps but lighter color */
@@ -292,11 +333,21 @@ def render_custom_css_with_sidebar():
             color: #00d4ff !important;
         }
         
-        /* Icons styling */
-        .metric-icon {
+        /* Sub metric icons - same color as text */
+        .sub-metric i {
+            color: #64748b !important;
             font-size: 10px !important;
             width: 14px !important;
             text-align: center !important;
+            transition: color 0.2s ease !important;
+        }
+        
+        .sub-metric:hover i {
+            color: #94a3b8 !important;
+        }
+        
+        .sub-metric.active i {
+            color: #00d4ff !important;
         }
         
         /* Main content adjustments */
