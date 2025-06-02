@@ -72,21 +72,22 @@ st.markdown("""
     }
     
     .chart-section {
-        margin: 40px 40px 32px 40px;
-        background: rgba(15, 20, 25, 0.6);
+        margin: 32px 40px 28px 40px;
+        background: rgba(30, 41, 59, 0.4);
         backdrop-filter: blur(25px);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 16px;
         overflow: hidden;
-        box-shadow: 0 12px 48px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
         position: relative;
+        transition: all 0.3s ease;
     }
     
     .chart-title-section {
-        background: rgba(30, 41, 59, 0.3);
+        background: rgba(15, 23, 42, 0.2);
         backdrop-filter: blur(15px);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 20px 32px 16px 32px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 16px 28px 12px 28px;
         position: relative;
     }
     
@@ -98,35 +99,37 @@ st.markdown("""
     }
     
     .chart-title {
-        font-size: 22px;
-        font-weight: 700;
-        background: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+        font-size: 18px;
+        font-weight: 600;
+        color: #f1f5f9;
         margin: 0;
+        letter-spacing: 0.5px;
     }
     
     .live-indicator {
         display: flex;
         align-items: center;
-        gap: 6px;
-        font-size: 12px;
+        gap: 5px;
+        font-size: 11px;
         color: #00ff88;
         font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
     
     .live-dot {
-        width: 6px;
-        height: 6px;
+        width: 5px;
+        height: 5px;
         background: #00ff88;
         border-radius: 50%;
         animation: pulse 2s infinite;
-        box-shadow: 0 0 8px #00ff88;
+        box-shadow: 0 0 6px #00ff88;
     }
     
     .controls-section {
-        padding: 20px 32px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 16px 28px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        background: rgba(15, 23, 42, 0.1);
     }
     
     .control-label {
@@ -162,7 +165,7 @@ st.markdown("""
     }
     
     .chart-content {
-        padding: 24px 32px;
+        padding: 20px 28px;
         position: relative;
     }
     
@@ -281,7 +284,7 @@ st.markdown("""
     <div class="chart-title-section">
         <div class="chart-header">
             <div>
-                <h2 class="chart-title">Kaspa Price Analysis</h2>
+                <h2 class="chart-title">Kaspa Price</h2>
             </div>
             <div class="live-indicator">
                 <div class="live-dot"></div>
@@ -402,8 +405,8 @@ fig.update_layout(
     paper_bgcolor='rgba(0,0,0,0)',
     font=dict(family='Inter', color='#e2e8f0'),
     hovermode='x unified',
-    height=650,
-    margin=dict(l=40, r=40, t=50, b=0),
+    height=600,
+    margin=dict(l=30, r=30, t=40, b=0),
     xaxis=dict(
         title=dict(text=x_title, font=dict(size=13, color='#cbd5e1', weight=600), standoff=25),
         type="log" if x_scale_type == "Log" else None,
