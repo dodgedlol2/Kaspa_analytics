@@ -159,7 +159,7 @@ def render_custom_css_with_sidebar():
             box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4) !important;
         }
         
-        /* Beautiful Sidebar Styling - Compact File Explorer Style */
+        /* Ultra-clean sidebar - just text */
         section[data-testid="stSidebar"] {
             background: rgba(10, 14, 26, 0.95) !important;
             border-right: 1px solid rgba(0, 212, 255, 0.15) !important;
@@ -174,166 +174,69 @@ def render_custom_css_with_sidebar():
             padding: 12px 8px !important;
         }
         
-        /* Section Headers - Compact folder style */
-        .sidebar-section-header {
+        /* Hide ALL button styling completely */
+        .stButton {
+            display: none !important;
+        }
+        
+        /* Custom clickable text styling */
+        .sidebar-text-item {
+            padding: 2px 4px !important;
+            margin: 1px 0 !important;
+            cursor: pointer !important;
+            transition: all 0.2s ease !important;
+            font-size: 12px !important;
+            user-select: none !important;
             display: flex !important;
             align-items: center !important;
             gap: 6px !important;
-            padding: 6px 8px !important;
-            font-size: 12px !important;
+        }
+        
+        .sidebar-text-item:hover {
+            background: rgba(255, 255, 255, 0.02) !important;
+        }
+        
+        .sidebar-section-text {
             font-weight: 600 !important;
             color: #94a3b8 !important;
             text-transform: uppercase !important;
             letter-spacing: 0.5px !important;
             margin: 8px 0 4px 0 !important;
-            cursor: pointer !important;
-            transition: all 0.2s ease !important;
-            border-radius: 4px !important;
         }
         
-        .sidebar-section-header:hover {
-            background: rgba(255, 255, 255, 0.02) !important;
+        .sidebar-nav-text {
+            font-weight: 400 !important;
+            color: #94a3b8 !important;
+            margin-left: 12px !important;
+            border-left: 1px solid rgba(255, 255, 255, 0.03) !important;
+            padding-left: 8px !important;
+        }
+        
+        .sidebar-nav-text:hover {
             color: #cbd5e1 !important;
+        }
+        
+        .sidebar-nav-text.active {
+            color: #00d4ff !important;
+            font-weight: 500 !important;
+        }
+        
+        .sidebar-icon {
+            font-size: 9px !important;
+            width: 12px !important;
+            text-align: center !important;
         }
         
         .section-icon {
             color: #64748b !important;
-            font-size: 10px !important;
-            width: 12px !important;
-            text-align: center !important;
         }
         
-        .section-chevron {
-            font-size: 8px !important;
+        .nav-icon {
             color: #64748b !important;
-            transition: transform 0.2s ease !important;
         }
         
-        .section-chevron.expanded {
-            transform: rotate(90deg) !important;
-        }
-        
-        /* Navigation Items Container - Compact tree */
-        .nav-items-container {
-            margin-left: 12px !important;
-            border-left: 1px solid rgba(255, 255, 255, 0.03) !important;
-            padding-left: 8px !important;
-            margin-bottom: 8px !important;
-        }
-        
-        /* Hide all Streamlit button styling completely */
-        .stButton {
-            margin: 0 !important;
-            padding: 0 !important;
-        }
-        
-        .stButton > button {
-            background: transparent !important;
-            border: none !important;
-            border-radius: 0 !important;
-            padding: 2px 4px !important;
-            width: 100% !important;
-            text-align: left !important;
-            font-size: 12px !important;
-            font-weight: 400 !important;
-            color: #94a3b8 !important;
-            transition: all 0.2s ease !important;
-            margin: 0 !important;
-            box-shadow: none !important;
-            min-height: 20px !important;
-            height: 20px !important;
-        }
-        
-        .stButton > button:hover {
-            background: transparent !important;
-            color: #cbd5e1 !important;
-            transform: none !important;
-            box-shadow: none !important;
-        }
-        
-        .stButton > button:focus {
-            background: transparent !important;
+        .nav-icon.active {
             color: #00d4ff !important;
-            outline: none !important;
-            box-shadow: none !important;
-        }
-        
-        .stButton > button:active {
-            background: transparent !important;
-            transform: none !important;
-        }
-        
-        /* Active navigation item - like selected file */
-        .active-nav-item .stButton > button {
-            color: #00d4ff !important;
-            font-weight: 500 !important;
-        }
-        
-        .active-nav-item .stButton > button:hover {
-            color: #00d4ff !important;
-        }
-        
-        /* Navigation item row - very compact */
-        .nav-item-row {
-            display: flex !important;
-            align-items: center !important;
-            margin: 1px 0 !important;
-            height: 20px !important;
-            padding: 2px 4px !important;
-            cursor: pointer !important;
-            transition: all 0.2s ease !important;
-        }
-        
-        .nav-item-row:hover {
-            background: rgba(255, 255, 255, 0.02) !important;
-        }
-        
-        /* File/nav item icons - very small */
-        .nav-item-icon {
-            color: #64748b !important;
-            font-size: 9px !important;
-            width: 12px !important;
-            text-align: center !important;
-            margin-right: 6px !important;
-            margin-top: 0 !important;
-        }
-        
-        .nav-item-icon.active {
-            color: #00d4ff !important;
-        }
-        
-        /* Navigation item text - clean clickable text */
-        .nav-item-text {
-            font-size: 12px !important;
-            font-weight: 400 !important;
-            color: #94a3b8 !important;
-            cursor: pointer !important;
-            transition: all 0.2s ease !important;
-            user-select: none !important;
-        }
-        
-        .nav-item-text:hover {
-            color: #cbd5e1 !important;
-        }
-        
-        .nav-item-text.active {
-            color: #00d4ff !important;
-            font-weight: 500 !important;
-        }
-        
-        /* Streamlit columns - make them compact */
-        .element-container {
-            margin: 0 !important;
-            padding: 0 !important;
-        }
-        
-        .stColumn {
-            padding: 0 !important;
-            gap: 0 !important;
-        }
-        
-        .stColumn > div {
-            padding: 0 !important;
         }
         
         /* Main content adjustments */
@@ -396,12 +299,13 @@ def render_clean_header(user_name=None, user_role=None, show_auth=True):
     st.markdown(header_html, unsafe_allow_html=True)
 
 def render_beautiful_sidebar(current_page="Price"):
-    """Render ultra-compact sidebar with clean clickable text headers"""
+    """Ultra-lean sidebar with just clickable text - no buttons or borders"""
     
-    # Define navigation structure
+    # Navigation structure
     nav_structure = {
         "Market Metrics": {
             "icon": "chart-area",
+            "expanded": True,
             "items": [
                 {"name": "Price", "icon": "dollar-sign", "page": "Price"},
                 {"name": "Market Cap", "icon": "coins", "page": "MarketCap"},
@@ -410,7 +314,8 @@ def render_beautiful_sidebar(current_page="Price"):
             ]
         },
         "Mining": {
-            "icon": "microchip",
+            "icon": "microchip", 
+            "expanded": False,
             "items": [
                 {"name": "Hashrate", "icon": "tachometer-alt", "page": "Hashrate"},
                 {"name": "Difficulty", "icon": "puzzle-piece", "page": "Difficulty"},
@@ -419,6 +324,7 @@ def render_beautiful_sidebar(current_page="Price"):
         },
         "Network": {
             "icon": "network-wired",
+            "expanded": False, 
             "items": [
                 {"name": "Transactions", "icon": "exchange-alt", "page": "Transactions"},
                 {"name": "Addresses", "icon": "wallet", "page": "Addresses"},
@@ -427,101 +333,95 @@ def render_beautiful_sidebar(current_page="Price"):
         }
     }
     
-    # Use session state to track expanded sections
-    if 'expanded_sections' not in st.session_state:
-        st.session_state.expanded_sections = {
-            "Market_Metrics": True,
-            "Mining": False,
-            "Network": False
-        }
-    
     # Auto-expand section containing current page
     for section_name, section_data in nav_structure.items():
         if any(item["page"] == current_page for item in section_data["items"]):
-            section_key = section_name.replace(' ', '_')
-            st.session_state.expanded_sections[section_key] = True
+            section_data["expanded"] = True
     
-    with st.sidebar:
-        st.markdown("")  # Add some spacing
+    # Initialize session state
+    if 'sidebar_expanded' not in st.session_state:
+        st.session_state.sidebar_expanded = {k: v["expanded"] for k, v in nav_structure.items()}
+    
+    # Build pure HTML sidebar
+    sidebar_html = '<div style="padding: 8px;">'
+    
+    for section_name, section_data in nav_structure.items():
+        is_expanded = st.session_state.sidebar_expanded.get(section_name, section_data["expanded"])
+        chevron = "▼" if is_expanded else "▶"
         
-        for section_name, section_data in nav_structure.items():
-            section_key = section_name.replace(' ', '_')
-            is_expanded = st.session_state.expanded_sections.get(section_key, False)
-            
-            # Create toggle button for section
-            col1, col2 = st.columns([0.1, 0.9])
-            
-            with col1:
-                # Toggle button
-                if st.button(
-                    "▼" if is_expanded else "▶", 
-                    key=f"toggle_{section_key}",
-                    help=f"Expand/collapse {section_name}"
-                ):
-                    st.session_state.expanded_sections[section_key] = not is_expanded
-                    st.rerun()
-            
-            with col2:
-                # Section header text
-                st.markdown(f'''
-                <div style="display: flex; align-items: center; gap: 6px; margin-top: -32px; padding: 6px 0; pointer-events: none;">
-                    <i class="fas fa-{section_data['icon']} section-icon"></i>
-                    <span style="font-size: 12px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">{section_name}</span>
+        # Section header - clickable text only
+        sidebar_html += f'''
+        <div class="sidebar-text-item sidebar-section-text" onclick="toggleSection('{section_name}')">
+            <span style="color: #64748b; font-size: 10px;">{chevron}</span>
+            <i class="fas fa-{section_data['icon']} sidebar-icon section-icon"></i>
+            <span>{section_name}</span>
+        </div>
+        '''
+        
+        # Navigation items - only if expanded
+        if is_expanded:
+            for item in section_data["items"]:
+                active_class = "active" if item["page"] == current_page else ""
+                icon_class = "active" if item["page"] == current_page else ""
+                
+                sidebar_html += f'''
+                <div class="sidebar-text-item sidebar-nav-text {active_class}" onclick="navigateTo('{item['page']}')">
+                    <i class="fas fa-{item['icon']} sidebar-icon nav-icon {icon_class}"></i>
+                    <span>{item['name']}</span>
                 </div>
-                ''', unsafe_allow_html=True)
-            
-            # Show items if expanded
-            if is_expanded:
-                st.markdown('<div style="margin-left: 12px; border-left: 1px solid rgba(255, 255, 255, 0.03); padding-left: 8px;">', unsafe_allow_html=True)
-                
-                for item in section_data["items"]:
-                    # Create navigation item
-                    col_icon, col_text = st.columns([1, 8])
-                    
-                    with col_icon:
-                        icon_color = "#00d4ff" if item["page"] == current_page else "#64748b"
-                        st.markdown(f'<i class="fas fa-{item["icon"]}" style="color: {icon_color}; font-size: 9px; margin-top: 6px;"></i>', unsafe_allow_html=True)
-                    
-                    with col_text:
-                        # Navigation text
-                        text_color = "#00d4ff" if item["page"] == current_page else "#94a3b8"
-                        font_weight = "500" if item["page"] == current_page else "400"
-                        
-                        if st.button(
-                            item["name"],
-                            key=f"nav_{item['page']}",
-                            help=f"Navigate to {item['name']}",
-                            use_container_width=True
-                        ):
-                            st.write(f"Navigate to {item['name']}")
-                            # st.switch_page(f"pages/{item['page']}.py")
-                        
-                        # Override button styling with CSS
-                        st.markdown(f'''
-                        <style>
-                        div[data-testid="stButton"]:has(button[key="nav_{item['page']}"]) button {{
-                            background: transparent !important;
-                            border: none !important;
-                            padding: 2px 4px !important;
-                            height: 20px !important;
-                            min-height: 20px !important;
-                            font-size: 12px !important;
-                            font-weight: {font_weight} !important;
-                            color: {text_color} !important;
-                            text-align: left !important;
-                            border-radius: 0 !important;
-                        }}
-                        div[data-testid="stButton"]:has(button[key="nav_{item['page']}"]) button:hover {{
-                            color: #cbd5e1 !important;
-                            background: rgba(255, 255, 255, 0.02) !important;
-                        }}
-                        </style>
-                        ''', unsafe_allow_html=True)
-                
-                st.markdown('</div>', unsafe_allow_html=True)
-            
-            # Add spacing between sections
-            st.markdown('<div style="height: 4px;"></div>', unsafe_allow_html=True)
+                '''
+        
+        sidebar_html += '<div style="height: 4px;"></div>'
+    
+    sidebar_html += '</div>'
+    
+    # JavaScript for functionality
+    js_code = '''
+    <script>
+    function toggleSection(sectionName) {
+        // This would need to communicate back to Streamlit
+        // For now, just log
+        console.log('Toggle:', sectionName);
+    }
+    
+    function navigateTo(page) {
+        console.log('Navigate to:', page);
+        // st.switch_page implementation would go here
+    }
+    </script>
+    '''
+    
+    # Use st.components.v1.html for better HTML rendering
+    with st.sidebar:
+        st.components.v1.html(sidebar_html + js_code, height=400, scrolling=False)
+        
+        # Add hidden buttons for Streamlit functionality
+        st.markdown("---")
+        st.markdown("**Quick Actions**")
+        
+        # Simple expand/collapse buttons
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            if st.button("📊", help="Toggle Market Metrics"):
+                st.session_state.sidebar_expanded["Market Metrics"] = not st.session_state.sidebar_expanded.get("Market Metrics", True)
+                st.rerun()
+        with col2:
+            if st.button("⛏️", help="Toggle Mining"):
+                st.session_state.sidebar_expanded["Mining"] = not st.session_state.sidebar_expanded.get("Mining", False)
+                st.rerun()
+        with col3:
+            if st.button("🌐", help="Toggle Network"):
+                st.session_state.sidebar_expanded["Network"] = not st.session_state.sidebar_expanded.get("Network", False)
+                st.rerun()
+        
+        # Navigation buttons
+        st.markdown("**Navigate**")
+        if st.button("💰 Price", use_container_width=True):
+            st.write("Navigate to Price")
+        if st.button("🪙 Market Cap", use_container_width=True):
+            st.write("Navigate to Market Cap")
+        if st.button("📈 Trading Volume", use_container_width=True):
+            st.write("Navigate to Trading Volume")
 
 def render_simple_page_header(title, subtitle=None):
     """Simple page header without breadcrumbs"""
