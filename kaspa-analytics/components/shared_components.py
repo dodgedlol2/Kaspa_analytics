@@ -1,21 +1,75 @@
-import streamlit as st
-from datetime import datetime
+# Add this to your shared_components.py file
 
-def render_page_config(page_title="Kaspa Analytics Pro", page_icon="💎"):
-    """Set consistent page config across all pages"""
-    st.set_page_config(
-        page_title=page_title,
-        page_icon=page_icon,
-        layout="wide",
-        initial_sidebar_state="collapsed"
-    )
-
-def render_custom_css():
-    """Render all custom CSS styling for the application"""
+def render_custom_css_with_sidebar_fix():
+    """
+    Enhanced CSS that ensures header stays above sidebar
+    """
     st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
         @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+        
+        /* ========== SIDEBAR Z-INDEX FIXES ========== */
+        
+        /* Streamlit sidebar has z-index of 999999, so we need to go higher */
+        .professional-header {
+            background: rgba(15, 20, 25, 0.98) !important;
+            backdrop-filter: blur(25px) !important;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.2) !important;
+            padding: 16px 40px !important;
+            position: fixed !important;  /* Changed from sticky to fixed */
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            width: 100% !important;
+            z-index: 9999999 !important;  /* Higher than sidebar's 999999 */
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+            margin: 0 !important;
+        }
+        
+        /* Ensure header content is also high z-index */
+        .header-content {
+            position: relative !important;
+            z-index: 9999999 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            max-width: 1400px !important;
+            margin: 0 auto !important;
+        }
+        
+        /* Push main content down to account for fixed header */
+        .main .block-container {
+            padding-top: 90px !important;  /* Adjust based on your header height */
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+            max-width: 100% !important;
+        }
+        
+        /* Sidebar adjustments */
+        .css-1d391kg {  /* Streamlit sidebar */
+            z-index: 999998 !important;  /* Lower than header */
+            margin-top: 80px !important;  /* Push sidebar below header */
+        }
+        
+        .css-1dp5vir {  /* Another sidebar selector */
+            z-index: 999998 !important;
+            margin-top: 80px !important;
+        }
+        
+        /* Sidebar content */
+        .css-17eq0hr {
+            margin-top: 20px !important;
+        }
+        
+        /* Alternative: Hide sidebar completely if you don't need it */
+        /* 
+        section[data-testid="stSidebar"] {
+            display: none !important;
+        }
+        */
+        
+        /* ========== ORIGINAL STYLES ========== */
         
         html, body, .stApp {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -26,11 +80,6 @@ def render_custom_css():
         
         .stApp {
             background-attachment: fixed;
-        }
-        
-        .main .block-container {
-            padding: 0 !important;
-            max-width: 100% !important;
         }
         
         .stApp::before {
@@ -54,27 +103,7 @@ def render_custom_css():
             50% { opacity: 0.8; transform: translateX(20px) translateY(-20px); }
         }
         
-        /* Header Styles */
-        .professional-header {
-            background: rgba(15, 20, 25, 0.95);
-            backdrop-filter: blur(25px);
-            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
-            padding: 16px 40px;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-            margin-bottom: 2rem;
-        }
-        
-        .header-content {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-        
+        /* Brand section styles */
         .brand-section {
             display: flex;
             align-items: center;
@@ -248,15 +277,15 @@ def render_custom_css():
             line-height: 1;
         }
         
-        /* Responsive Design */
+        /* Responsive design */
         @media (max-width: 768px) {
             .professional-header {
-                padding: 12px 20px;
+                padding: 12px 20px !important;
             }
             
             .header-content {
-                flex-direction: column;
-                gap: 15px;
+                flex-direction: column !important;
+                gap: 15px !important;
             }
             
             .nav-section {
@@ -272,176 +301,105 @@ def render_custom_css():
                 padding: 8px 12px;
                 font-size: 12px;
             }
+            
+            .main .block-container {
+                padding-top: 140px !important;  /* More space on mobile */
+            }
         }
         
-        /* Hide Streamlit elements */
+        /* Hide Streamlit default elements */
         #MainMenu {visibility: hidden;}
         footer {visibility: hidden;}
         header {visibility: hidden;}
         .stDeployButton {display: none;}
         
+        /* Additional sidebar fixes for different Streamlit versions */
+        .css-1d391kg, .css-1dp5vir, .css-17eq0hr, .css-1v3fvcr {
+            z-index: 999998 !important;
+        }
+        
+        /* If sidebar is collapsed, adjust accordingly */
+        .css-1rs6os.edgvbvh3 {
+            z-index: 999998 !important;
+        }
+        
     </style>
     """, unsafe_allow_html=True)
 
-def render_professional_header(
-    current_page="Home",
-    user_name=None,
-    user_role=None,
-    show_auth=True,
-    custom_nav_items=None
-):
+# Alternative approach: Completely hide sidebar if not needed
+def render_custom_css_no_sidebar():
     """
-    Render a professional header with navigation and auth
-    
-    Args:
-        current_page (str): Current active page name
-        user_name (str): Logged in user name (None if not logged in)
-        user_role (str): User role/subscription level
-        show_auth (bool): Whether to show auth buttons
-        custom_nav_items (list): Custom navigation items [{"name": "Page", "icon": "fas fa-icon"}]
+    CSS that completely hides the sidebar for a cleaner look
     """
-    
-    # Default navigation items
-    default_nav_items = [
-        {"name": "Dashboard", "icon": "fas fa-tachometer-alt"},
-        {"name": "Analytics", "icon": "fas fa-chart-line"},
-        {"name": "Portfolio", "icon": "fas fa-wallet"},
-        {"name": "Research", "icon": "fas fa-microscope"},
-        {"name": "Alerts", "icon": "fas fa-bell"},
-    ]
-    
-    nav_items = custom_nav_items if custom_nav_items else default_nav_items
-    
-    # Build navigation buttons
-    nav_buttons_html = ""
-    for item in nav_items:
-        active_class = "active" if item["name"] == current_page else ""
-        nav_buttons_html += f"""
-        <div class="nav-button {active_class}">
-            <i class="{item['icon']}"></i>
-            <span>{item['name']}</span>
-        </div>
-        """
-    
-    # Build auth section
-    if user_name:
-        # User is logged in
-        user_initials = "".join([name[0].upper() for name in user_name.split()[:2]])
-        auth_html = f"""
-        <div class="user-menu">
-            <div class="user-avatar">{user_initials}</div>
-            <div class="user-info">
-                <div class="user-name">{user_name}</div>
-                <div class="user-role">{user_role or 'Free Plan'}</div>
-            </div>
-            <i class="fas fa-chevron-down" style="color: #64748b; font-size: 12px;"></i>
-        </div>
-        """
-    else:
-        # User not logged in
-        auth_html = """
-        <div class="auth-section">
-            <button class="login-button">
-                <i class="fas fa-sign-in-alt"></i>
-                Login
-            </button>
-            <button class="signup-button">
-                <i class="fas fa-rocket"></i>
-                Get Started
-            </button>
-        </div>
-        """ if show_auth else ""
-    
-    # Complete header HTML
-    header_html = f"""
-    <div class="professional-header">
-        <div class="header-content">
-            <div class="brand-section">
-                <div class="logo-container">
-                    <div class="logo">
-                        <i class="fas fa-gem"></i>
-                    </div>
-                    <div class="brand-text">
-                        <h1>KaspaMetrics</h1>
-                        <div class="brand-subtitle">Advanced Market Intelligence Platform</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="nav-section">
-                {nav_buttons_html}
-            </div>
-            
-            <div class="auth-section">
-                {auth_html}
-            </div>
-        </div>
-    </div>
-    """
-    
-    st.markdown(header_html, unsafe_allow_html=True)
-
-def render_page_header(title, subtitle=None, show_breadcrumb=False, breadcrumb_items=None):
-    """
-    Render a page-specific header section
-    
-    Args:
-        title (str): Page title
-        subtitle (str): Page subtitle/description
-        show_breadcrumb (bool): Whether to show breadcrumb navigation
-        breadcrumb_items (list): Breadcrumb items ["Home", "Analytics", "Price Analysis"]
-    """
-    
-    breadcrumb_html = ""
-    if show_breadcrumb and breadcrumb_items:
-        breadcrumb_parts = []
-        for i, item in enumerate(breadcrumb_items):
-            if i == len(breadcrumb_items) - 1:
-                # Last item (current page)
-                breadcrumb_parts.append(f'<span style="color: #00d4ff;">{item}</span>')
-            else:
-                breadcrumb_parts.append(f'<span style="color: #64748b;">{item}</span>')
+    st.markdown("""
+    <style>
+        /* Hide sidebar completely */
+        section[data-testid="stSidebar"] {
+            display: none !important;
+        }
         
-        breadcrumb_html = f"""
-        <div style="margin-bottom: 16px;">
-            <div style="font-size: 12px; color: #64748b; display: flex; align-items: center; gap: 8px;">
-                {' <i class="fas fa-chevron-right" style="font-size: 10px;"></i> '.join(breadcrumb_parts)}
-            </div>
-        </div>
-        """
-    
-    subtitle_html = f'<p style="color: #94a3b8; font-size: 16px; margin: 8px 0 0 0; font-weight: 400;">{subtitle}</p>' if subtitle else ""
-    
-    page_header_html = f"""
-    <div style="padding: 0 40px 32px 40px;">
-        {breadcrumb_html}
-        <h1 style="color: #f1f5f9; font-size: 36px; font-weight: 800; margin: 0; line-height: 1.2;">
-            {title}
-        </h1>
-        {subtitle_html}
-    </div>
-    """
-    
-    st.markdown(page_header_html, unsafe_allow_html=True)
+        .css-1d391kg {
+            display: none !important;
+        }
+        
+        /* Adjust main content to use full width */
+        .main .block-container {
+            padding-left: 0 !important;
+            max-width: 100% !important;
+            padding-top: 90px !important;
+        }
+        
+        /* Your existing header styles here... */
+        .professional-header {
+            background: rgba(15, 20, 25, 0.98) !important;
+            backdrop-filter: blur(25px) !important;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.2) !important;
+            padding: 16px 40px !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            width: 100% !important;
+            z-index: 9999999 !important;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+        }
+        
+        /* Rest of your existing styles... */
+        
+    </style>
+    """, unsafe_allow_html=True)
 
-# Utility function to easily update branding
-def update_branding(
-    app_name="KaspaMetrics",
-    subtitle="Advanced Market Intelligence Platform",
-    primary_color="#00d4ff",
-    secondary_color="#ff00a8",
-    logo_icon="fas fa-gem"
-):
+# Option 3: Smart sidebar handling
+def render_header_with_sidebar_detection():
     """
-    Utility function to easily update app branding
-    Call this before render_custom_css() to customize colors and branding
+    Detect if sidebar is being used and adjust header accordingly
     """
-    # This could be expanded to dynamically update CSS variables
-    # For now, it serves as a template for future customization
-    return {
-        "app_name": app_name,
-        "subtitle": subtitle,
-        "primary_color": primary_color,
-        "secondary_color": secondary_color,
-        "logo_icon": logo_icon
-    }
+    # Check if any sidebar elements exist
+    sidebar_check = """
+    <script>
+        function adjustHeaderForSidebar() {
+            const sidebar = document.querySelector('section[data-testid="stSidebar"]');
+            const header = document.querySelector('.professional-header');
+            
+            if (sidebar && header) {
+                const sidebarWidth = sidebar.offsetWidth;
+                if (sidebarWidth > 0) {
+                    // Sidebar is open, adjust header
+                    header.style.marginLeft = sidebarWidth + 'px';
+                    header.style.width = `calc(100% - ${sidebarWidth}px)`;
+                } else {
+                    // Sidebar is closed, full width header
+                    header.style.marginLeft = '0px';
+                    header.style.width = '100%';
+                }
+            }
+        }
+        
+        // Run on load and when sidebar changes
+        window.addEventListener('load', adjustHeaderForSidebar);
+        setTimeout(adjustHeaderForSidebar, 100);
+        setTimeout(adjustHeaderForSidebar, 500);
+    </script>
+    """
+    
+    st.components.v1.html(sidebar_check, height=0)
