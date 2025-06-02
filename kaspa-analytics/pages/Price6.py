@@ -75,7 +75,7 @@ st.markdown("""
         margin: 32px 40px 28px 40px;
         background: rgba(30, 41, 59, 0.4);
         backdrop-filter: blur(25px);
-        border: 1px solid rgba(255, 255, 255, 0.12);
+        border: none;
         border-radius: 16px;
         overflow: hidden;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
