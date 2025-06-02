@@ -975,7 +975,7 @@ with col4:
     """, unsafe_allow_html=True)
 
 # Enhanced Footer with additional information
-st.markdown(f"""
+st.markdown("""
 <div style="text-align: center; padding: 50px 40px; margin-top: 40px; 
      background: rgba(15, 20, 25, 0.4); backdrop-filter: blur(20px);
      border-top: 1px solid rgba(255, 255, 255, 0.1);">
@@ -987,7 +987,7 @@ st.markdown(f"""
             Professional-grade cryptocurrency market analysis • Real-time data processing • Advanced predictive modeling
         </p>
         <div style="color: #475569; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">
-            Last Updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')} • 
+            Last Updated: """ + datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC') + """ • 
             Built for institutional-grade analysis
         </div>
     </div>
