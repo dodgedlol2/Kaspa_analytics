@@ -83,7 +83,35 @@ st.markdown("""
         transition: all 0.3s ease;
     }
     
-    /* Enhanced Controls Section */
+    /* Clean Title Section */
+    .title-section {
+        padding: 32px 0px 24px 0px;
+        text-align: center;
+        background: transparent;
+    }
+    
+    .main-title {
+        font-size: 42px;
+        font-weight: 700;
+        color: #f1f5f9;
+        margin: 0 0 16px 0;
+        letter-spacing: 1px;
+        text-shadow: 0 0 40px rgba(241, 245, 249, 0.4);
+        filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.15));
+        background: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .title-underline {
+        width: 120px;
+        height: 2px;
+        background: linear-gradient(90deg, transparent 0%, #ffffff 20%, #ffffff 80%, transparent 100%);
+        margin: 0 auto;
+        border-radius: 2px;
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+    }
     .controls-section {
         padding: 16px 0px 20px 0px;
         background: transparent;
@@ -216,8 +244,12 @@ if len(df_30_days_ago) > 0:
 else:
     price_pct_change = 0
 
-# Controls section without any wrapper
+# Clean title section with white underline
 st.markdown("""
+<div class="title-section">
+    <h1 class="main-title">Kaspa Price</h1>
+    <div class="title-underline"></div>
+</div>
 <div class="controls-section">
 </div>
 """, unsafe_allow_html=True)
