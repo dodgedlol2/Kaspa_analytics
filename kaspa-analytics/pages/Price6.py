@@ -627,7 +627,7 @@ st.markdown("""
 # Controls integrated within the chart section
 with st.container():
     # Create columns for the controls
-    col1, col2, col3, col4, col5 = st.columns([1, 1, 1, 1, 1])
+    col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
     
     with col1:
         st.markdown('<div class="control-group"><div class="control-label">📈 Price Scale</div></div>', unsafe_allow_html=True)
@@ -652,12 +652,6 @@ with st.container():
         power_law_options = ["Hide", "Show"]
         show_power_law = st.selectbox("", power_law_options,
                                     index=1, label_visibility="collapsed", key="price_power_law_select")
-
-    with col5:
-        st.markdown('<div class="control-group"><div class="control-label">🎯 Analysis Mode</div></div>', unsafe_allow_html=True)
-        analysis_modes = ["Standard", "Advanced", "Research"]
-        analysis_mode = st.selectbox("", analysis_modes,
-                                   index=0, label_visibility="collapsed", key="analysis_mode_select")
 
 # Chart content section
 st.markdown("""
@@ -692,25 +686,15 @@ else:
     x_values = filtered_df['Date']
     x_title = "Date"
 
-# Add price trace with enhanced styling based on analysis mode
-if analysis_mode == "Standard":
-    line_color = '#00d4ff'
-    line_width = 3
-elif analysis_mode == "Advanced":
-    line_color = '#ff00a8'
-    line_width = 4
-else:  # Research
-    line_color = '#00ff88'
-    line_width = 2.5
-
+# Add price trace with standard styling
 fig.add_trace(go.Scatter(
     x=x_values,
     y=filtered_df['Price'],
     mode='lines',
     name='Kaspa Price',
     line=dict(
-        color=line_color,
-        width=line_width,
+        color='#00d4ff',
+        width=3,
         shape='spline',
         smoothing=0.3
     ),
@@ -721,10 +705,10 @@ fig.add_trace(go.Scatter(
     text=[d.strftime('%Y-%m-%d') for d in filtered_df['Date']],
     showlegend=True,
     fill='tonexty' if len(fig.data) > 0 else None,
-    fillcolor=f'rgba({",".join(map(str, [int(line_color[1:3], 16), int(line_color[3:5], 16), int(line_color[5:7], 16)]))}, 0.1)'
+    fillcolor='rgba(0, 212, 255, 0.1)'
 ))
 
-# Add power law if enabled with enhanced features
+# Add power law if enabled
 if show_power_law == "Show":
     x_fit = filtered_df['days_from_genesis']
     y_fit = a_price * np.power(x_fit, b_price)
@@ -745,82 +729,33 @@ if show_power_law == "Show":
         customdata=[r2_price] * len(fit_x)
     ))
 
-    # Enhanced deviation bands for different analysis modes
-    if analysis_mode in ["Advanced", "Research"]:
-        # Support levels
-        fig.add_trace(go.Scatter(
-            x=fit_x,
-            y=y_fit * 0.3,
-            mode='lines',
-            name='Strong Support (-70%)',
-            line=dict(color='rgba(0, 255, 136, 0.7)', width=2, dash='dot'),
-            showlegend=True,
-            hoverinfo='skip'
-        ))
-        
-        fig.add_trace(go.Scatter(
-            x=fit_x,
-            y=y_fit * 0.6,
-            mode='lines',
-            name='Support (-40%)',
-            line=dict(color='rgba(0, 255, 136, 0.5)', width=1.5, dash='dash'),
-            showlegend=True,
-            hoverinfo='skip'
-        ))
-        
-        # Resistance levels
-        fig.add_trace(go.Scatter(
-            x=fit_x,
-            y=y_fit * 1.8,
-            mode='lines',
-            name='Resistance (+80%)',
-            line=dict(color='rgba(255, 71, 87, 0.5)', width=1.5, dash='dash'),
-            showlegend=True,
-            hoverinfo='skip'
-        ))
-        
-        fig.add_trace(go.Scatter(
-            x=fit_x,
-            y=y_fit * 3.0,
-            mode='lines',
-            name='Strong Resistance (+200%)',
-            line=dict(color='rgba(255, 71, 87, 0.7)', width=2, dash='dot'),
-            fill='tonexty',
-            fillcolor='rgba(100, 100, 100, 0.05)',
-            showlegend=True,
-            hoverinfo='skip'
-        ))
-    else:
-        # Standard mode - simplified bands
-        fig.add_trace(go.Scatter(
-            x=fit_x,
-            y=y_fit * 0.4,
-            mode='lines',
-            name='Support (-60%)',
-            line=dict(color='rgba(0, 255, 136, 0.6)', width=1.5, dash='dot'),
-            showlegend=True,
-            hoverinfo='skip'
-        ))
-        
-        fig.add_trace(go.Scatter(
-            x=fit_x,
-            y=y_fit * 2.2,
-            mode='lines',
-            name='Resistance (+120%)',
-            line=dict(color='rgba(255, 71, 87, 0.6)', width=1.5, dash='dot'),
-            fill='tonexty',
-            fillcolor='rgba(100, 100, 100, 0.1)',
-            showlegend=True,
-            hoverinfo='skip'
-        ))
+    # Support levels
+    fig.add_trace(go.Scatter(
+        x=fit_x,
+        y=y_fit * 0.4,
+        mode='lines',
+        name='Support (-60%)',
+        line=dict(color='rgba(0, 255, 136, 0.6)', width=1.5, dash='dot'),
+        showlegend=True,
+        hoverinfo='skip'
+    ))
+    
+    # Resistance levels
+    fig.add_trace(go.Scatter(
+        x=fit_x,
+        y=y_fit * 2.2,
+        mode='lines',
+        name='Resistance (+120%)',
+        line=dict(color='rgba(255, 71, 87, 0.6)', width=1.5, dash='dot'),
+        fill='tonexty',
+        fillcolor='rgba(100, 100, 100, 0.1)',
+        showlegend=True,
+        hoverinfo='skip'
+    ))
 
-# Enhanced chart layout with dynamic theming
-chart_bg_color = 'rgba(0,0,0,0)'
-if analysis_mode == "Research":
-    chart_bg_color = 'rgba(15, 20, 25, 0.3)'
-
+# Enhanced chart layout
 fig.update_layout(
-    plot_bgcolor=chart_bg_color,
+    plot_bgcolor='rgba(0,0,0,0)',
     paper_bgcolor='rgba(0,0,0,0)',
     font=dict(family='Inter', color='#e2e8f0'),
     hovermode='x unified',
@@ -873,20 +808,7 @@ fig.update_layout(
         bordercolor='rgba(0, 212, 255, 0.5)',
         font=dict(color='#e2e8f0', size=12),
         align='left'
-    ),
-    annotations=[
-        dict(
-            text=f"Analysis Mode: {analysis_mode}",
-            xref="paper", yref="paper",
-            x=1, y=1.08, xanchor="right", yanchor="bottom",
-            showarrow=False,
-            font=dict(size=11, color='#64748b'),
-            bgcolor='rgba(0, 212, 255, 0.1)',
-            bordercolor='rgba(0, 212, 255, 0.3)',
-            borderwidth=1,
-            borderpad=4
-        )
-    ]
+    )
 )
 
 # Display chart with container
@@ -898,14 +820,14 @@ with st.container():
         'modeBarButtonsToAdd': ['hoverclosest', 'hovercompare'],
         'toImageButtonOptions': {
             'format': 'png',
-            'filename': f'kaspa_analysis_{analysis_mode.lower()}_{datetime.now().strftime("%Y%m%d_%H%M")}',
+            'filename': f'kaspa_analysis_{datetime.now().strftime("%Y%m%d_%H%M")}',
             'height': 700,
             'width': 1400,
             'scale': 2
         }
     })
 
-# Calculate comprehensive metrics with enhanced analysis
+# Calculate comprehensive metrics
 if len(df_30_days_ago) > 0:
     price_30_days_ago_data = price_df[price_df['Date'] <= thirty_days_ago]
     if len(price_30_days_ago_data) > 10:
@@ -1046,7 +968,7 @@ st.markdown(f"""
                 <div style="color: #64748b; font-size: 12px; text-transform: uppercase;">Data Points</div>
             </div>
             <div style="text-align: center;">
-                <div style="color: #ff00a8; font-weight: 700; font-size: 16px;">{analysis_mode}</div>
+                <div style="color: #ff00a8; font-weight: 700; font-size: 16px;">Standard</div>
                 <div style="color: #64748b; font-size: 12px; text-transform: uppercase;">Analysis Mode</div>
             </div>
             <div style="text-align: center;">
@@ -1060,4 +982,4 @@ st.markdown(f"""
         </div>
     </div>
 </div>
-""")
+""", unsafe_allow_html=True)
