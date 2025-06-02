@@ -372,9 +372,10 @@ st.markdown("""
     /* Enhanced Metrics Grid */
     .metrics-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        grid-template-columns: repeat(4, 1fr);
         gap: 28px;
         margin: 40px 40px;
+        width: 100%;
     }
     
     .metric-card {
