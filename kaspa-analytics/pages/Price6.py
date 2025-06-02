@@ -870,7 +870,7 @@ fig.update_layout(
             font=dict(size=14, color='#cbd5e1', weight=600),
             standoff=0
         ),
-        title_side='right',
+        side='right',
         type="log" if y_scale == "Log" else "linear",
         showgrid=True,
         gridwidth=1,
