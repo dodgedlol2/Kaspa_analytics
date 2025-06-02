@@ -163,9 +163,15 @@ def render_custom_css_with_sidebar():
         section[data-testid="stSidebar"] {
             background: rgba(10, 14, 26, 0.95) !important;
             border-right: 1px solid rgba(0, 212, 255, 0.15) !important;
-            margin-top: 80px !important;
+            margin-top: 100px !important; /* Moved down from 80px to 100px */
             backdrop-filter: blur(25px) !important;
             box-shadow: 8px 0 32px rgba(0, 0, 0, 0.4) !important;
+        }
+        
+        /* Move sidebar collapse/expand button down */
+        button[data-testid="collapsedControl"] {
+            top: 100px !important; /* Move down to match sidebar */
+            z-index: 999999998 !important; /* Lower than header */
         }
         
         /* Hide default Streamlit sidebar content */
@@ -212,6 +218,31 @@ def render_custom_css_with_sidebar():
         
         /* Hide selectbox navigation if it exists */
         .stSelectbox {
+            display: none !important;
+        }
+        
+        /* HIDE THE "VIEW MORE/LESS" BUTTON */
+        button[data-testid="baseButton-minimal"]:contains("View") {
+            display: none !important;
+        }
+        
+        /* Hide any buttons with "View" text in sidebar */
+        section[data-testid="stSidebar"] button[data-testid="baseButton-minimal"] {
+            display: none !important;
+        }
+        
+        /* Hide the View more/less button container */
+        .css-1vq4p4l {
+            display: none !important;
+        }
+        
+        /* Hide the page navigation expand/collapse button */
+        section[data-testid="stSidebar"] .css-1rs6os {
+            display: none !important;
+        }
+        
+        /* Hide any minimal buttons in sidebar */
+        section[data-testid="stSidebar"] .stButton button[data-testid="baseButton-minimal"] {
             display: none !important;
         }
         
