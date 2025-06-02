@@ -224,105 +224,43 @@ def render_professional_header(
     
     nav_items = custom_nav_items if custom_nav_items else default_nav_items
     
-    # Build navigation buttons
+    # Build navigation buttons - Fixed HTML escaping
     nav_buttons_html = ""
     for item in nav_items:
         active_class = "active" if item["name"] == current_page else ""
-        nav_buttons_html += f"""
-        <div class="nav-button {active_class}">
-            <i class="{item['icon']}"></i>
-            <span>{item['name']}</span>
-        </div>
-        """
+        nav_buttons_html += f'<div class="nav-button {active_class}"><i class="{item["icon"]}"></i><span>{item["name"]}</span></div>'
     
-    # Build auth section
+    # Build auth section - Fixed HTML
     if user_name:
         # User is logged in - create user menu
         user_initials = "".join([name[0].upper() for name in user_name.split()[:2]])
-        auth_html = f"""
-        <div style="display: flex; align-items: center; gap: 10px; background: rgba(30, 41, 59, 0.6); 
-             border: 1px solid rgba(100, 116, 139, 0.3); border-radius: 12px; padding: 8px 12px;">
-            <div style="width: 32px; height: 32px; border-radius: 8px; 
-                 background: linear-gradient(135deg, #00d4ff 0%, #ff00a8 100%); 
-                 display: flex; align-items: center; justify-content: center; 
-                 color: white; font-weight: 700; font-size: 14px;">
-                {user_initials}
-            </div>
-            <div>
-                <div style="font-size: 13px; font-weight: 600; color: #f1f5f9;">{user_name}</div>
-                <div style="font-size: 11px; color: #64748b;">{user_role or 'Free Plan'}</div>
-            </div>
-        </div>
-        """
+        auth_html = f'<div style="display: flex; align-items: center; gap: 10px; background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(100, 116, 139, 0.3); border-radius: 12px; padding: 8px 12px;"><div style="width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, #00d4ff 0%, #ff00a8 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 14px;">{user_initials}</div><div><div style="font-size: 13px; font-weight: 600; color: #f1f5f9;">{user_name}</div><div style="font-size: 11px; color: #64748b;">{user_role or "Free Plan"}</div></div></div>'
     else:
-        # User not logged in
-        auth_html = """
-        <div class="auth-section">
-            <button class="login-button">
-                <i class="fas fa-sign-in-alt"></i>
-                Login
-            </button>
-            <button class="signup-button">
-                <i class="fas fa-rocket"></i>
-                Get Started
-            </button>
-        </div>
-        """ if show_auth else ""
+        # User not logged in - Fixed HTML on single line
+        auth_html = '<div class="auth-section"><button class="login-button"><i class="fas fa-sign-in-alt"></i> Login</button><button class="signup-button"><i class="fas fa-rocket"></i> Get Started</button></div>' if show_auth else ""
     
-    # Complete header HTML
-    header_html = f"""
+    # Complete header HTML - all on single lines to avoid Streamlit markdown issues
+    header_html = f'''
     <div class="professional-header">
         <div class="header-content">
             <div class="brand-section">
                 <div class="logo-container">
-                    <div class="logo">
-                        <i class="fas fa-gem"></i>
-                    </div>
+                    <div class="logo"><i class="fas fa-gem"></i></div>
                     <div class="brand-text">
                         <h1>KaspaMetrics</h1>
                         <div class="brand-subtitle">Advanced Market Intelligence Platform</div>
                     </div>
                 </div>
             </div>
-            
-            <div class="nav-section">
-                {nav_buttons_html}
-            </div>
-            
+            <div class="nav-section">{nav_buttons_html}</div>
             {auth_html}
         </div>
     </div>
-    """
+    '''
     
     st.markdown(header_html, unsafe_allow_html=True)
 
-def render_page_header(title, subtitle=None, show_breadcrumb=False, breadcrumb_items=None):
-    """Render a page-specific header section"""
-    
-    breadcrumb_html = ""
-    if show_breadcrumb and breadcrumb_items:
-        breadcrumb_parts = []
-        for i, item in enumerate(breadcrumb_items):
-            if i == len(breadcrumb_items) - 1:
-                breadcrumb_parts.append(f'<span style="color: #00d4ff;">{item}</span>')
-            else:
-                breadcrumb_parts.append(f'<span style="color: #64748b;">{item}</span>')
-        
-        breadcrumb_html = f"""
-        <div style="margin-bottom: 16px;">
-            <div style="font-size: 12px; color: #64748b; display: flex; align-items: center; gap: 8px;">
-                {' <i class="fas fa-chevron-right" style="font-size: 10px;"></i> '.join(breadcrumb_parts)}
-            </div>
-        </div>
-        """
-    
-    subtitle_html = f'<p style="color: #94a3b8; font-size: 16px; margin: 8px 0 0 0;">{subtitle}</p>' if subtitle else ""
-    
-    page_header_html = f"""
-    <div style="padding: 0 40px 32px 40px;">
-        {breadcrumb_html}
-        <h1 style="color: #f1f5f9; font-size: 36px; font-weight: 800; margin: 0;">
-            {title}
+       {title}
         </h1>
         {subtitle_html}
     </div>
