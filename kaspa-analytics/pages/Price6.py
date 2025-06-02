@@ -774,7 +774,7 @@ fig.add_trace(go.Scatter(
     x=x_values,
     y=filtered_df['Price'],
     mode='lines',
-    name='Kaspa Price',
+    name='Kaspa Price (USD)',
     line=dict(
         color='#00d4ff',
         width=3,
@@ -865,12 +865,7 @@ fig.update_layout(
         )
     ),
     yaxis=dict(
-        title=dict(
-            text='Price (USD)',
-            font=dict(size=14, color='#cbd5e1', weight=600),
-            standoff=0
-        ),
-        side='right',
+        title=None,
         type="log" if y_scale == "Log" else "linear",
         showgrid=True,
         gridwidth=1,
