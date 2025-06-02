@@ -29,7 +29,7 @@ except Exception as e:
     st.error(f"Failed to calculate price power law: {str(e)}")
     st.stop()
 
-# Enhanced Custom CSS with Modern Design (Header removed)
+# Enhanced Custom CSS with Modern Design
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -46,7 +46,7 @@ st.markdown("""
     }
     
     .main .block-container {
-        padding: 2rem 1rem !important;
+        padding: 0 !important;
         max-width: 100% !important;
     }
     
@@ -71,8 +71,73 @@ st.markdown("""
         50% { opacity: 0.8; transform: translateX(20px) translateY(-20px); }
     }
     
+    .header-container {
+        background: rgba(15, 20, 25, 0.9);
+        backdrop-filter: blur(25px);
+        border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+        padding: 24px 40px;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+    
+    .header-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+    
+    .brand h1 {
+        font-size: 32px;
+        font-weight: 800;
+        background: linear-gradient(135deg, #00d4ff 0%, #ff00a8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin: 0;
+        text-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+    }
+    
+    .brand-subtitle {
+        font-size: 13px;
+        color: #64748b;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        margin-top: 2px;
+    }
+    
+    .header-stats {
+        display: flex;
+        gap: 40px;
+        align-items: center;
+    }
+    
+    .header-stat {
+        text-align: center;
+        position: relative;
+    }
+    
+    .header-stat-value {
+        font-size: 20px;
+        font-weight: 700;
+        color: #00d4ff;
+        display: block;
+        text-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+    }
+    
+    .header-stat-label {
+        font-size: 11px;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin-top: 4px;
+    }
+    
     .chart-section {
-        margin: 0 0 40px 0;
+        margin: 32px 40px 40px 40px;
         background: rgba(15, 20, 25, 0.6);
         backdrop-filter: blur(25px);
         border: 1px solid rgba(255, 255, 255, 0.15);
@@ -260,7 +325,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Calculate current metrics
+# Calculate current metrics for header
 current_price = price_df['Price'].iloc[-1]
 last_date = price_df['Date'].iloc[-1]
 thirty_days_ago = last_date - timedelta(days=30)
@@ -271,6 +336,42 @@ if len(df_30_days_ago) > 0:
     price_pct_change = ((current_price - price_30_days_ago) / price_30_days_ago) * 100
 else:
     price_pct_change = 0
+
+# Header Section
+header_html = f"""
+<div class="header-container">
+    <div class="header-content">
+        <div class="brand">
+            <div>
+                <h1>KaspaMetrics</h1>
+                <div class="brand-subtitle">Advanced Market Intelligence Platform</div>
+            </div>
+        </div>
+        <div class="header-stats">
+            <div class="header-stat">
+                <span class="header-stat-value">${current_price:.4f}</span>
+                <div class="header-stat-label">Current Price</div>
+            </div>
+            <div class="header-stat">
+                <span class="header-stat-value" style="color: {'#00ff88' if price_pct_change >= 0 else '#ff4757'}">{price_pct_change:+.1f}%</span>
+                <div class="header-stat-label">30D Change</div>
+            </div>
+            <div class="header-stat">
+                <span class="header-stat-value">{r2_price:.3f}</span>
+                <div class="header-stat-label">Model Fit</div>
+            </div>
+            <div class="header-stat">
+                <div class="status-badge">
+                    <div class="live-dot"></div>
+                    <span>Live Data</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+"""
+
+st.markdown(header_html, unsafe_allow_html=True)
 
 # Chart Section with title and integrated controls
 st.markdown("""
@@ -315,6 +416,7 @@ with st.container():
 st.markdown('<div class="chart-content"></div>', unsafe_allow_html=True)
 
 # Data filtering based on time range
+last_date = price_df['Date'].iloc[-1]
 if time_range == "1W":
     start_date = last_date - timedelta(days=7)
 elif time_range == "1M":
@@ -353,7 +455,7 @@ fig.add_trace(go.Scatter(
     fillcolor='rgba(0, 212, 255, 0.1)'
 ))
 
-# Add power law if enabled with more interesting colors
+# Add power law if enabled
 if show_power_law == "Show":
     x_fit = filtered_df['days_from_genesis']
     y_fit = a_price * np.power(x_fit, b_price)
@@ -364,37 +466,35 @@ if show_power_law == "Show":
         y=y_fit,
         mode='lines',
         name=f'Power Law Fit (R²={r2_price:.3f})',
-        line=dict(color='#FFD700', width=2.5, dash='solid'),  # Gold color for main power law
+        line=dict(color='#e2e8f0', width=2.5, dash='solid'),
         showlegend=True,
         hovertemplate='<b>Power Law Fit</b><br>R² = %{customdata:.3f}<br>Value: $%{y:.6f}<br><extra></extra>',
         customdata=[r2_price] * len(fit_x)
     ))
 
-    # Support band with vibrant purple
     fig.add_trace(go.Scatter(
         x=fit_x,
         y=y_fit * 0.4,
         mode='lines',
         name='Support (-60%)',
-        line=dict(color='#9333ea', width=2, dash='dot'),  # Vibrant purple
+        line=dict(color='rgba(148, 163, 184, 0.6)', width=1.5, dash='dot'),
         showlegend=True,
         hoverinfo='skip'
     ))
     
-    # Resistance band with vibrant orange/red
     fig.add_trace(go.Scatter(
         x=fit_x,
         y=y_fit * 2.2,
         mode='lines',
         name='Resistance (+120%)',
-        line=dict(color='#f97316', width=2, dash='dot'),  # Vibrant orange
+        line=dict(color='rgba(148, 163, 184, 0.6)', width=1.5, dash='dot'),
         fill='tonexty',
-        fillcolor='rgba(255, 215, 0, 0.08)',  # Light gold fill
+        fillcolor='rgba(100, 116, 139, 0.08)',
         showlegend=True,
         hoverinfo='skip'
     ))
 
-# Enhanced chart layout with properly fixed logarithmic scaling
+# Enhanced chart layout with proper logarithmic scaling
 fig.update_layout(
     plot_bgcolor='rgba(0,0,0,0)',
     paper_bgcolor='rgba(0,0,0,0)',
@@ -404,15 +504,20 @@ fig.update_layout(
     margin=dict(l=40, r=40, t=60, b=0),
     xaxis=dict(
         title=dict(text=x_title, font=dict(size=14, color='#cbd5e1', weight=600), standoff=30),
-        type="log" if x_scale_type == "Log" else "linear",
+        type="log" if x_scale_type == "Log" else None,
         showgrid=True,
         gridwidth=1,
         gridcolor='rgba(255, 255, 255, 0.08)',
         linecolor='rgba(255, 255, 255, 0.2)',
         tickfont=dict(size=12, color='#94a3b8'),
-        showspikes=True,
-        spikecolor='rgba(0, 212, 255, 0.5)',
-        spikethickness=1,
+        # Enhanced logarithmic ticks for x-axis
+        minor=dict(
+            showgrid=True,
+            gridcolor='rgba(255, 255, 255, 0.04)',
+            gridwidth=0.5,
+            dtick=1,
+            tick0=1
+        ) if x_scale_type == "Log" else None,
         rangeslider=dict(
             visible=True,
             thickness=0.08,
@@ -422,20 +527,25 @@ fig.update_layout(
         )
     ),
     yaxis=dict(
-        title=dict(text="Price (USD)", font=dict(size=14, color='#cbd5e1', weight=600), standoff=30),
+        title=None,
         type="log" if y_scale == "Log" else "linear",
         showgrid=True,
         gridwidth=1,
         gridcolor='rgba(255, 255, 255, 0.08)',
         linecolor='rgba(255, 255, 255, 0.2)',
         tickfont=dict(size=12, color='#94a3b8'),
-        tickformat=".6f" if y_scale == "Linear" else ".2e",
-        showspikes=True,
-        spikecolor='rgba(0, 212, 255, 0.5)',
-        spikethickness=1,
-        # Proper log scale configuration
-        autorange=True,
-        exponentformat='power' if y_scale == "Log" else 'none'
+        tickprefix="$",
+        # Enhanced logarithmic ticks for y-axis - this creates the physicist-style log scale
+        minor=dict(
+            showgrid=True,
+            gridcolor='rgba(255, 255, 255, 0.04)',
+            gridwidth=0.5,
+            dtick=1,
+            tick0=0.00001
+        ) if y_scale == "Log" else None,
+        # Set major ticks to powers of 10 for log scale
+        dtick=1 if y_scale == "Log" else None,
+        tick0=0.00001 if y_scale == "Log" else None
     ),
     legend=dict(
         orientation="h",
@@ -515,20 +625,10 @@ with col2:
     st.markdown(metric_html, unsafe_allow_html=True)
 
 with col3:
-    # Fix price display formatting
-    if current_price >= 1:
-        price_display = f"${current_price:.2f}"
-    elif current_price >= 0.01:
-        price_display = f"${current_price:.4f}"
-    elif current_price >= 0.0001:
-        price_display = f"${current_price:.6f}"
-    else:
-        price_display = f"${current_price:.8f}"
-    
     metric_html = f"""
     <div class="metric-card">
         <div class="metric-label">CURRENT PRICE</div>
-        <div class="metric-value">{price_display}</div>
+        <div class="metric-value">${current_price:.6f}</div>
         <div class="metric-delta {'positive' if price_pct_change >= 0 else 'negative'}">{price_pct_change:+.2f}%</div>
     </div>
     """
