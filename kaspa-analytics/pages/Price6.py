@@ -29,7 +29,7 @@ except Exception as e:
     st.error(f"Failed to calculate price power law: {str(e)}")
     st.stop()
 
-# Enhanced Custom CSS with Modern Design and Simplified Title
+# Enhanced Custom CSS with Modern Design - Title Section Removed
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -81,54 +81,6 @@ st.markdown("""
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
         position: relative;
         transition: all 0.3s ease;
-    }
-    
-    /* Simplified Title Section - Clean with subtle glow */
-    .chart-title-section {
-        background: transparent;
-        padding: 24px 28px 20px 28px;
-        position: relative;
-    }
-    
-    .chart-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-    
-    .chart-title {
-        font-size: 28px;
-        font-weight: 700;
-        color: #f1f5f9;
-        margin: 0;
-        letter-spacing: 0.5px;
-        text-shadow: 0 0 30px rgba(241, 245, 249, 0.3);
-        filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.1));
-    }
-    
-    .live-indicator {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 11px;
-        color: #00ff88;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        background: rgba(0, 255, 136, 0.1);
-        border: 1px solid rgba(0, 255, 136, 0.3);
-        border-radius: 20px;
-        padding: 6px 12px;
-        backdrop-filter: blur(10px);
-    }
-    
-    .live-dot {
-        width: 6px;
-        height: 6px;
-        background: #00ff88;
-        border-radius: 50%;
-        animation: pulse 2s infinite;
-        box-shadow: 0 0 8px #00ff88;
     }
     
     /* Enhanced Controls Section */
@@ -245,26 +197,6 @@ st.markdown("""
         background: transparent !important;
     }
     
-    .status-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        background: rgba(0, 255, 136, 0.1);
-        border: 1px solid rgba(0, 255, 136, 0.3);
-        border-radius: 16px;
-        padding: 4px 10px;
-        font-size: 10px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: #00ff88;
-    }
-    
-    @keyframes pulse {
-        0%, 100% { opacity: 1; transform: scale(1); }
-        50% { opacity: 0.7; transform: scale(1.05); }
-    }
-    
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
@@ -284,18 +216,9 @@ if len(df_30_days_ago) > 0:
 else:
     price_pct_change = 0
 
-# Simplified Chart Section with clean title treatment
+# Chart Section with controls only
 st.markdown("""
 <div class="chart-section">
-    <div class="chart-title-section">
-        <div class="chart-header">
-            <h1 class="chart-title">Kaspa Price</h1>
-            <div class="live-indicator">
-                <div class="live-dot"></div>
-                <span>Live Data</span>
-            </div>
-        </div>
-    </div>
     <div class="controls-section">
     </div>
 </div>
