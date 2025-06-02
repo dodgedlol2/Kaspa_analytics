@@ -322,7 +322,9 @@ st.markdown("""
         color: #f1f5f9 !important;
         font-weight: 600 !important;
         font-size: 14px !important;
-        padding: 12px 16px !important;
+        padding: 14px 16px !important;
+        line-height: 1.4 !important;
+        min-height: 20px !important;
     }
     
     /* Selectbox dropdown styling */
@@ -340,6 +342,9 @@ st.markdown("""
         transition: all 0.2s ease !important;
         border-radius: 8px !important;
         margin: 4px !important;
+        padding: 12px 16px !important;
+        line-height: 1.4 !important;
+        min-height: 20px !important;
     }
     
     .stSelectbox [role="option"]:hover {
@@ -614,7 +619,7 @@ st.markdown(f"""
         <div class="brand">
             <div class="brand-icon">💎</div>
             <div>
-                <h1>Kaspa Analytics Pro</h1>
+                <h1>KaspaMetrics</h1>
                 <div class="brand-subtitle">Advanced Market Intelligence Platform</div>
             </div>
         </div>
@@ -667,25 +672,25 @@ with st.container():
     col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
     
     with col1:
-        st.markdown('<div class="control-group"><div class="control-label">📈 Price Scale</div></div>', unsafe_allow_html=True)
+        st.markdown('<div class="control-group"><div class="control-label">Price Scale</div></div>', unsafe_allow_html=True)
         y_scale_options = ["Linear", "Log"]
         y_scale = st.selectbox("", y_scale_options,
                              index=1, label_visibility="collapsed", key="price_y_scale_select")
 
     with col2:
-        st.markdown('<div class="control-group"><div class="control-label">⏱️ Time Scale</div></div>', unsafe_allow_html=True)
+        st.markdown('<div class="control-group"><div class="control-label">Time Scale</div></div>', unsafe_allow_html=True)
         x_scale_options = ["Linear", "Log"]
         x_scale_type = st.selectbox("", x_scale_options,
                                   index=0, label_visibility="collapsed", key="price_x_scale_select")
 
     with col3:
-        st.markdown('<div class="control-group"><div class="control-label">📅 Time Period</div></div>', unsafe_allow_html=True)
+        st.markdown('<div class="control-group"><div class="control-label">Time Period</div></div>', unsafe_allow_html=True)
         time_ranges = ["1W", "1M", "3M", "6M", "1Y", "All"]
         time_range = st.selectbox("", time_ranges,
                                 index=5, label_visibility="collapsed", key="price_time_range_select")
 
     with col4:
-        st.markdown('<div class="control-group"><div class="control-label">📊 Power Law</div></div>', unsafe_allow_html=True)
+        st.markdown('<div class="control-group"><div class="control-label">Power Law</div></div>', unsafe_allow_html=True)
         power_law_options = ["Hide", "Show"]
         show_power_law = st.selectbox("", power_law_options,
                                     index=1, label_visibility="collapsed", key="price_power_law_select")
@@ -936,7 +941,7 @@ st.markdown(f"""
      border-top: 1px solid rgba(255, 255, 255, 0.1);">
     <div style="max-width: 1200px; margin: 0 auto;">
         <h3 style="color: #f1f5f9; margin-bottom: 16px; font-size: 20px; font-weight: 700;">
-            Kaspa Analytics Pro
+            KaspaMetrics
         </h3>
         <p style="color: #64748b; font-size: 14px; margin-bottom: 20px;">
             Professional-grade cryptocurrency market analysis • Real-time data processing • Advanced predictive modeling
