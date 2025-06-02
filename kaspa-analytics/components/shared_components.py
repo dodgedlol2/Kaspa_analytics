@@ -279,6 +279,13 @@ def render_custom_css_with_sidebar():
             align-items: center !important;
             margin: 1px 0 !important;
             height: 20px !important;
+            padding: 2px 4px !important;
+            cursor: pointer !important;
+            transition: all 0.2s ease !important;
+        }
+        
+        .nav-item-row:hover {
+            background: rgba(255, 255, 255, 0.02) !important;
         }
         
         /* File/nav item icons - very small */
@@ -293,6 +300,25 @@ def render_custom_css_with_sidebar():
         
         .nav-item-icon.active {
             color: #00d4ff !important;
+        }
+        
+        /* Navigation item text - clean clickable text */
+        .nav-item-text {
+            font-size: 12px !important;
+            font-weight: 400 !important;
+            color: #94a3b8 !important;
+            cursor: pointer !important;
+            transition: all 0.2s ease !important;
+            user-select: none !important;
+        }
+        
+        .nav-item-text:hover {
+            color: #cbd5e1 !important;
+        }
+        
+        .nav-item-text.active {
+            color: #00d4ff !important;
+            font-weight: 500 !important;
         }
         
         /* Streamlit columns - make them compact */
