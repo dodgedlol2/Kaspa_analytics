@@ -153,7 +153,14 @@ st.markdown("""
         border: none;
     }
     
-    .control-label {
+    .title-underline {
+        width: 100%;
+        height: 1px;
+        background: linear-gradient(90deg, #ffffff 0%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0.1) 100%);
+        margin: 0 0 16px 0;
+        border-radius: 1px;
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+    }
         font-size: 11px;
         font-weight: 600;
         color: #94a3b8;
@@ -279,35 +286,38 @@ if len(df_30_days_ago) > 0:
 else:
     price_pct_change = 0
 
-# Clean title section with reduced spacing and animated title
-st.markdown("""
-<div class="title-section">
-    <h1 class="main-title">Kaspa Price</h1>
-    <div class="title-underline"></div>
-</div>
-<div class="controls-section">
-</div>
-""", unsafe_allow_html=True)
-
-# Controls integrated within the chart section
+# Title and Controls section side by side
 with st.container():
-    col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
+    title_col, controls_col = st.columns([1, 2])
     
-    with col1:
-        st.markdown('<div class="control-label">Price Scale</div>', unsafe_allow_html=True)
-        y_scale = st.selectbox("", ["Linear", "Log"], index=1, label_visibility="collapsed", key="price_y_scale_select")
+    with title_col:
+        st.markdown("""
+        <div class="title-section">
+            <h1 class="main-title">Kaspa Price</h1>
+            <div class="title-underline"></div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with controls_col:
+        st.markdown('<div class="controls-section"></div>', unsafe_allow_html=True)
+        # Controls in horizontal layout
+        col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
+        
+        with col1:
+            st.markdown('<div class="control-label">Price Scale</div>', unsafe_allow_html=True)
+            y_scale = st.selectbox("", ["Linear", "Log"], index=1, label_visibility="collapsed", key="price_y_scale_select")
 
-    with col2:
-        st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
-        x_scale_type = st.selectbox("", ["Linear", "Log"], index=0, label_visibility="collapsed", key="price_x_scale_select")
+        with col2:
+            st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
+            x_scale_type = st.selectbox("", ["Linear", "Log"], index=0, label_visibility="collapsed", key="price_x_scale_select")
 
-    with col3:
-        st.markdown('<div class="control-label">Time Period</div>', unsafe_allow_html=True)
-        time_range = st.selectbox("", ["1W", "1M", "3M", "6M", "1Y", "All"], index=5, label_visibility="collapsed", key="price_time_range_select")
+        with col3:
+            st.markdown('<div class="control-label">Time Period</div>', unsafe_allow_html=True)
+            time_range = st.selectbox("", ["1W", "1M", "3M", "6M", "1Y", "All"], index=5, label_visibility="collapsed", key="price_time_range_select")
 
-    with col4:
-        st.markdown('<div class="control-label">Power Law</div>', unsafe_allow_html=True)
-        show_power_law = st.selectbox("", ["Hide", "Show"], index=1, label_visibility="collapsed", key="price_power_law_select")
+        with col4:
+            st.markdown('<div class="control-label">Power Law</div>', unsafe_allow_html=True)
+            show_power_law = st.selectbox("", ["Hide", "Show"], index=1, label_visibility="collapsed", key="power_law_select")
 
 # Chart content section
 st.markdown('<div class="chart-content"></div>', unsafe_allow_html=True)
