@@ -159,7 +159,7 @@ def render_custom_css_with_sidebar():
             box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4) !important;
         }
         
-        /* Beautiful Sidebar Styling - Clean like Glassnode */
+        /* Beautiful Sidebar Styling - GitHub/File Explorer Style */
         section[data-testid="stSidebar"] {
             background: rgba(10, 14, 26, 0.95) !important;
             border-right: 1px solid rgba(0, 212, 255, 0.15) !important;
@@ -171,107 +171,113 @@ def render_custom_css_with_sidebar():
         /* Hide default Streamlit sidebar content */
         section[data-testid="stSidebar"] > div {
             background: transparent !important;
+            padding: 16px 8px !important;
         }
         
-        /* Remove default Streamlit expander styling */
-        .streamlit-expanderHeader {
-            background: transparent !important;
-            border: none !important;
-            border-radius: 0 !important;
-            padding: 12px 16px !important;
-            font-size: 14px !important;
+        /* Section Headers - Always visible like folder names */
+        .sidebar-section-header {
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+            padding: 8px 12px !important;
+            font-size: 13px !important;
             font-weight: 600 !important;
-            color: #cbd5e1 !important;
+            color: #94a3b8 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+            margin: 16px 0 8px 0 !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+            cursor: pointer !important;
             transition: all 0.3s ease !important;
         }
         
-        .streamlit-expanderHeader:hover {
-            background: rgba(0, 212, 255, 0.05) !important;
-            color: #00d4ff !important;
+        .sidebar-section-header:hover {
+            color: #cbd5e1 !important;
         }
         
-        /* Remove expander borders and styling */
-        .streamlit-expanderContent {
-            background: transparent !important;
-            border: none !important;
-            padding: 0 !important;
+        .section-icon {
+            color: #64748b !important;
+            font-size: 12px !important;
+            width: 14px !important;
+            text-align: center !important;
         }
         
-        /* Clean button styling */
+        .section-chevron {
+            font-size: 10px !important;
+            color: #64748b !important;
+            transition: transform 0.3s ease !important;
+            margin-left: auto !important;
+        }
+        
+        .section-chevron.expanded {
+            transform: rotate(90deg) !important;
+        }
+        
+        /* Navigation Items Container - Like file tree */
+        .nav-items-container {
+            margin-left: 16px !important;
+            border-left: 1px solid rgba(255, 255, 255, 0.05) !important;
+            padding-left: 8px !important;
+        }
+        
+        /* Individual Navigation Items - Like files */
+        .nav-item-row {
+            display: flex !important;
+            align-items: center !important;
+            margin: 2px 0 !important;
+        }
+        
+        /* Remove all button styling to make it look like file explorer */
         .stButton > button {
             background: transparent !important;
             border: none !important;
-            border-radius: 8px !important;
-            padding: 8px 12px !important;
+            border-radius: 6px !important;
+            padding: 6px 8px !important;
             width: 100% !important;
             text-align: left !important;
             font-size: 13px !important;
             font-weight: 500 !important;
             color: #94a3b8 !important;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-            margin: 2px 0 !important;
+            transition: all 0.2s ease !important;
+            margin: 0 !important;
+            box-shadow: none !important;
         }
         
         .stButton > button:hover {
             background: rgba(0, 212, 255, 0.08) !important;
-            color: #00d4ff !important;
-            transform: translateX(4px) !important;
-            box-shadow: 0 2px 8px rgba(0, 212, 255, 0.1) !important;
+            color: #cbd5e1 !important;
+            transform: none !important;
         }
         
         .stButton > button:focus {
-            background: rgba(0, 212, 255, 0.15) !important;
+            background: rgba(0, 212, 255, 0.12) !important;
             color: #00d4ff !important;
-            box-shadow: 0 4px 16px rgba(0, 212, 255, 0.2) !important;
             outline: none !important;
+            box-shadow: none !important;
         }
         
-        /* Active button styling */
-        .active-nav-button > button {
+        /* Active button styling - like selected file */
+        .active-nav-item .stButton > button {
             background: rgba(0, 212, 255, 0.15) !important;
             color: #00d4ff !important;
-            border-left: 3px solid #00d4ff !important;
-            padding-left: 9px !important;
-            box-shadow: 0 4px 16px rgba(0, 212, 255, 0.2) !important;
-        }
-        
-        /* Hide expander icons */
-        .streamlit-expanderHeader svg {
-            display: none !important;
-        }
-        
-        /* Custom section headers */
-        .sidebar-section-header {
-            display: flex !important;
-            align-items: center !important;
-            gap: 10px !important;
-            padding: 12px 16px !important;
-            font-size: 14px !important;
             font-weight: 600 !important;
-            color: #cbd5e1 !important;
-            cursor: pointer !important;
-            transition: all 0.3s ease !important;
-            border-radius: 8px !important;
-            margin: 4px 8px !important;
         }
         
-        .sidebar-section-header:hover {
-            background: rgba(0, 212, 255, 0.05) !important;
-            color: #00d4ff !important;
+        .active-nav-item .stButton > button:hover {
+            background: rgba(0, 212, 255, 0.2) !important;
         }
         
-        .section-icon {
-            color: #00d4ff !important;
-            font-size: 14px !important;
+        /* File/nav item icons */
+        .nav-item-icon {
+            color: #64748b !important;
+            font-size: 11px !important;
             width: 16px !important;
             text-align: center !important;
+            margin-right: 4px !important;
         }
         
-        /* Navigation item container */
-        .nav-item-container {
-            margin-left: 8px !important;
-            padding-left: 24px !important;
-            border-left: 1px solid rgba(255, 255, 255, 0.05) !important;
+        .nav-item-icon.active {
+            color: #00d4ff !important;
         }
         
         /* Main content adjustments */
@@ -334,12 +340,13 @@ def render_clean_header(user_name=None, user_role=None, show_auth=True):
     st.markdown(header_html, unsafe_allow_html=True)
 
 def render_beautiful_sidebar(current_page="Price"):
-    """Render clean sidebar navigation like Glassnode - no panels, no metrics"""
+    """Render clean file explorer/GitHub style sidebar navigation"""
     
     # Define navigation structure
     nav_structure = {
         "Market Metrics": {
             "icon": "chart-area",
+            "expanded": True,  # Market Metrics always expanded by default
             "items": [
                 {"name": "Price", "icon": "dollar-sign", "page": "Price"},
                 {"name": "Market Cap", "icon": "coins", "page": "MarketCap"},
@@ -349,6 +356,7 @@ def render_beautiful_sidebar(current_page="Price"):
         },
         "Mining": {
             "icon": "microchip",
+            "expanded": False,
             "items": [
                 {"name": "Hashrate", "icon": "tachometer-alt", "page": "Hashrate"},
                 {"name": "Difficulty", "icon": "puzzle-piece", "page": "Difficulty"},
@@ -357,6 +365,7 @@ def render_beautiful_sidebar(current_page="Price"):
         },
         "Network": {
             "icon": "network-wired",
+            "expanded": False,
             "items": [
                 {"name": "Transactions", "icon": "exchange-alt", "page": "Transactions"},
                 {"name": "Addresses", "icon": "wallet", "page": "Addresses"},
@@ -365,60 +374,75 @@ def render_beautiful_sidebar(current_page="Price"):
         }
     }
     
-    # Create clean sidebar navigation using Streamlit components
+    # Check which sections should be expanded based on current page
+    for section_name, section_data in nav_structure.items():
+        if any(item["page"] == current_page for item in section_data["items"]):
+            section_data["expanded"] = True
+    
     with st.sidebar:
-        # Add some top spacing
-        st.markdown("<br>", unsafe_allow_html=True)
+        # Add some spacing at the top
+        st.markdown("")
         
-        # Navigation sections
         for section_name, section_data in nav_structure.items():
-            # Check if any item in this section is active
-            section_active = any(item["page"] == current_page for item in section_data["items"])
-            
-            # Custom section header without icons showing in text
+            # Section header - always visible like folder name
+            chevron_direction = "expanded" if section_data["expanded"] else ""
             st.markdown(f'''
-            <div class="sidebar-section-header">
+            <div class="sidebar-section-header" onclick="toggleSection('{section_name.replace(' ', '')}')">
+                <i class="fas fa-chevron-right section-chevron {chevron_direction}" id="chevron-{section_name.replace(' ', '')}"></i>
                 <i class="fas fa-{section_data['icon']} section-icon"></i>
                 <span>{section_name}</span>
             </div>
             ''', unsafe_allow_html=True)
             
-            # Navigation items in a clean container
-            st.markdown('<div class="nav-item-container">', unsafe_allow_html=True)
-            
-            for item in section_data["items"]:
-                # Create columns for icon and button
-                col_icon, col_button = st.columns([1, 5])
+            # Navigation items container - only show if expanded
+            if section_data["expanded"]:
+                st.markdown('<div class="nav-items-container">', unsafe_allow_html=True)
                 
-                with col_icon:
-                    if item["page"] == current_page:
-                        st.markdown(f'<i class="fas fa-{item["icon"]}" style="color: #00d4ff; font-size: 12px; margin-top: 8px;"></i>', unsafe_allow_html=True)
-                    else:
-                        st.markdown(f'<i class="fas fa-{item["icon"]}" style="color: #64748b; font-size: 12px; margin-top: 8px;"></i>', unsafe_allow_html=True)
-                
-                with col_button:
-                    # Apply active styling conditionally
-                    if item["page"] == current_page:
-                        st.markdown('<div class="active-nav-button">', unsafe_allow_html=True)
+                for item in section_data["items"]:
+                    # Create a row for each navigation item
+                    st.markdown('<div class="nav-item-row">', unsafe_allow_html=True)
                     
-                    # Navigation button
-                    if st.button(
-                        item["name"], 
-                        key=f"nav_{item['page']}", 
-                        use_container_width=True,
-                        help=f"Navigate to {item['name']}"
-                    ):
-                        # You can implement actual navigation here
-                        st.write(f"Navigating to {item['name']}...")
-                        # st.switch_page(f"pages/{item['page']}.py")
+                    # Icon + Button in columns
+                    col_icon, col_button = st.columns([1, 6])
                     
-                    if item["page"] == current_page:
+                    with col_icon:
+                        icon_class = "active" if item["page"] == current_page else ""
+                        st.markdown(f'<i class="fas fa-{item["icon"]} nav-item-icon {icon_class}"></i>', unsafe_allow_html=True)
+                    
+                    with col_button:
+                        # Apply active styling if this is the current page
+                        container_class = "active-nav-item" if item["page"] == current_page else ""
+                        st.markdown(f'<div class="{container_class}">', unsafe_allow_html=True)
+                        
+                        if st.button(
+                            item["name"], 
+                            key=f"nav_{item['page']}", 
+                            use_container_width=True
+                        ):
+                            st.write(f"Navigate to {item['name']}")
+                            # st.switch_page(f"pages/{item['page']}.py")
+                        
                         st.markdown('</div>', unsafe_allow_html=True)
-            
-            st.markdown('</div>', unsafe_allow_html=True)
-            
-            # Add spacing between sections
-            st.markdown("<br>", unsafe_allow_html=True)
+                    
+                    st.markdown('</div>', unsafe_allow_html=True)
+                
+                st.markdown('</div>', unsafe_allow_html=True)
+        
+        # JavaScript for section toggle functionality
+        st.markdown('''
+        <script>
+        function toggleSection(sectionId) {
+            const chevron = document.getElementById('chevron-' + sectionId);
+            if (chevron.classList.contains('expanded')) {
+                chevron.classList.remove('expanded');
+            } else {
+                chevron.classList.add('expanded');
+            }
+            // Note: In a real implementation, you'd also toggle the section visibility
+            // For now, sections are controlled by Python logic
+        }
+        </script>
+        ''', unsafe_allow_html=True)
 
 def render_simple_page_header(title, subtitle=None):
     """Simple page header without breadcrumbs"""
