@@ -294,7 +294,7 @@ st.markdown("""
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
         position: relative;
         overflow: hidden;
-        min-height: 45px !important;
+        min-height: 40px !important;
     }
     
     .stSelectbox > div > div::before {
