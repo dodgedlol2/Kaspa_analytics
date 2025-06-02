@@ -71,87 +71,22 @@ st.markdown("""
         50% { opacity: 0.8; transform: translateX(20px) translateY(-20px); }
     }
     
-    .header-container {
-        background: rgba(15, 20, 25, 0.9);
-        backdrop-filter: blur(25px);
-        border-bottom: 1px solid rgba(0, 212, 255, 0.2);
-        padding: 24px 40px;
-        position: sticky;
-        top: 0;
-        z-index: 100;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-    }
-    
-    .header-content {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        max-width: 1400px;
-        margin: 0 auto;
-    }
-    
-    .brand h1 {
-        font-size: 32px;
-        font-weight: 800;
-        background: linear-gradient(135deg, #00d4ff 0%, #ff00a8 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin: 0;
-        text-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
-    }
-    
-    .brand-subtitle {
-        font-size: 13px;
-        color: #64748b;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 1.2px;
-        margin-top: 2px;
-    }
-    
-    .header-stats {
-        display: flex;
-        gap: 40px;
-        align-items: center;
-    }
-    
-    .header-stat {
-        text-align: center;
-        position: relative;
-    }
-    
-    .header-stat-value {
-        font-size: 20px;
-        font-weight: 700;
-        color: #00d4ff;
-        display: block;
-        text-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
-    }
-    
-    .header-stat-label {
-        font-size: 11px;
-        color: #64748b;
-        text-transform: uppercase;
-        letter-spacing: 0.8px;
-        margin-top: 4px;
-    }
-    
     .chart-section {
-        margin: 32px 40px 40px 40px;
+        margin: 40px 40px 32px 40px;
         background: rgba(15, 20, 25, 0.6);
         backdrop-filter: blur(25px);
         border: 1px solid rgba(255, 255, 255, 0.15);
-        border-radius: 24px;
+        border-radius: 20px;
         overflow: hidden;
-        box-shadow: 0 16px 64px rgba(0, 0, 0, 0.4);
+        box-shadow: 0 12px 48px rgba(0, 0, 0, 0.3);
         position: relative;
     }
     
     .chart-title-section {
-        background: rgba(30, 41, 59, 0.4);
+        background: rgba(30, 41, 59, 0.3);
         backdrop-filter: blur(15px);
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 28px 48px 20px 48px;
+        padding: 20px 32px 16px 32px;
         position: relative;
     }
     
@@ -163,8 +98,8 @@ st.markdown("""
     }
     
     .chart-title {
-        font-size: 28px;
-        font-weight: 800;
+        font-size: 22px;
+        font-weight: 700;
         background: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
@@ -174,43 +109,43 @@ st.markdown("""
     .live-indicator {
         display: flex;
         align-items: center;
-        gap: 8px;
-        font-size: 13px;
+        gap: 6px;
+        font-size: 12px;
         color: #00ff88;
         font-weight: 600;
     }
     
     .live-dot {
-        width: 8px;
-        height: 8px;
+        width: 6px;
+        height: 6px;
         background: #00ff88;
         border-radius: 50%;
         animation: pulse 2s infinite;
-        box-shadow: 0 0 10px #00ff88;
+        box-shadow: 0 0 8px #00ff88;
     }
     
     .controls-section {
-        padding: 24px 48px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 20px 32px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
     
     .control-label {
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 600;
         color: #94a3b8;
         text-transform: uppercase;
-        letter-spacing: 1.2px;
+        letter-spacing: 1px;
         margin-bottom: 6px;
     }
     
     .stSelectbox > div > div {
         background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
         border: 2px solid rgba(100, 116, 139, 0.3) !important;
-        border-radius: 16px !important;
+        border-radius: 12px !important;
         backdrop-filter: blur(15px) !important;
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
-        min-height: 40px !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+        min-height: 36px !important;
     }
     
     .stSelectbox > div > div:hover {
@@ -222,55 +157,58 @@ st.markdown("""
     .stSelectbox > div > div > div {
         color: #f1f5f9 !important;
         font-weight: 600 !important;
-        font-size: 14px !important;
-        padding: 8px 16px !important;
+        font-size: 13px !important;
+        padding: 6px 14px !important;
     }
     
     .chart-content {
-        padding: 32px 48px;
+        padding: 24px 32px;
         position: relative;
     }
     
     .metric-card {
-        background: rgba(15, 20, 25, 0.7) !important;
+        background: rgba(30, 41, 59, 0.4) !important;
         backdrop-filter: blur(25px) !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        border-radius: 20px !important;
-        padding: 28px !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        border-radius: 16px !important;
+        padding: 24px !important;
         position: relative !important;
         overflow: hidden !important;
-        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
         cursor: pointer !important;
-        margin-bottom: 20px !important;
+        margin-bottom: 16px !important;
         width: 100% !important;
         box-sizing: border-box !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
     }
     
     .metric-card:hover {
-        transform: translateY(-8px) scale(1.02) !important;
-        box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5) !important;
+        border-color: rgba(0, 212, 255, 0.4) !important;
+        box-shadow: 0 8px 32px rgba(0, 212, 255, 0.15), 0 0 0 1px rgba(0, 212, 255, 0.2) !important;
+        transform: translateY(-3px) !important;
+        background: rgba(30, 41, 59, 0.6) !important;
     }
     
     .metric-label {
         color: #94a3b8 !important;
-        font-size: 13px !important;
+        font-size: 12px !important;
         font-weight: 600 !important;
         text-transform: uppercase !important;
-        letter-spacing: 1.2px !important;
-        margin-bottom: 12px !important;
+        letter-spacing: 1px !important;
+        margin-bottom: 10px !important;
     }
     
     .metric-value {
         color: #f1f5f9 !important;
-        font-size: 36px !important;
+        font-size: 28px !important;
         font-weight: 800 !important;
         line-height: 1.1 !important;
         margin-bottom: 6px !important;
-        text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        text-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
     }
     
     .metric-delta {
-        font-size: 15px !important;
+        font-size: 14px !important;
         font-weight: 700 !important;
         margin-bottom: 8px;
     }
@@ -284,14 +222,14 @@ st.markdown("""
     }
     
     .stPlotlyChart {
-        border-radius: 16px;
+        border-radius: 12px;
         overflow: hidden;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
     }
     
     .stPlotlyChart .modebar {
         background: transparent !important;
-        transform: translateY(15px) !important;
+        transform: translateY(10px) !important;
     }
     
     .stPlotlyChart .modebar-group {
@@ -301,12 +239,12 @@ st.markdown("""
     .status-badge {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
+        gap: 4px;
         background: rgba(0, 255, 136, 0.1);
         border: 1px solid rgba(0, 255, 136, 0.3);
-        border-radius: 20px;
-        padding: 6px 12px;
-        font-size: 11px;
+        border-radius: 16px;
+        padding: 4px 10px;
+        font-size: 10px;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.5px;
@@ -325,7 +263,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Calculate current metrics for header
+# Calculate current metrics for later use
 current_price = price_df['Price'].iloc[-1]
 last_date = price_df['Date'].iloc[-1]
 thirty_days_ago = last_date - timedelta(days=30)
@@ -337,43 +275,7 @@ if len(df_30_days_ago) > 0:
 else:
     price_pct_change = 0
 
-# Header Section
-header_html = f"""
-<div class="header-container">
-    <div class="header-content">
-        <div class="brand">
-            <div>
-                <h1>KaspaMetrics</h1>
-                <div class="brand-subtitle">Advanced Market Intelligence Platform</div>
-            </div>
-        </div>
-        <div class="header-stats">
-            <div class="header-stat">
-                <span class="header-stat-value">${current_price:.4f}</span>
-                <div class="header-stat-label">Current Price</div>
-            </div>
-            <div class="header-stat">
-                <span class="header-stat-value" style="color: {'#00ff88' if price_pct_change >= 0 else '#ff4757'}">{price_pct_change:+.1f}%</span>
-                <div class="header-stat-label">30D Change</div>
-            </div>
-            <div class="header-stat">
-                <span class="header-stat-value">{r2_price:.3f}</span>
-                <div class="header-stat-label">Model Fit</div>
-            </div>
-            <div class="header-stat">
-                <div class="status-badge">
-                    <div class="live-dot"></div>
-                    <span>Live Data</span>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-"""
-
-st.markdown(header_html, unsafe_allow_html=True)
-
-# Chart Section with title and integrated controls
+# Streamlined Chart Section
 st.markdown("""
 <div class="chart-section">
     <div class="chart-title-section">
@@ -455,7 +357,7 @@ fig.add_trace(go.Scatter(
     fillcolor='rgba(0, 212, 255, 0.1)'
 ))
 
-# Add power law if enabled
+# Add power law if enabled - now with orange color and white dotted bands
 if show_power_law == "Show":
     x_fit = filtered_df['days_from_genesis']
     y_fit = a_price * np.power(x_fit, b_price)
@@ -466,7 +368,7 @@ if show_power_law == "Show":
         y=y_fit,
         mode='lines',
         name=f'Power Law Fit (R²={r2_price:.3f})',
-        line=dict(color='#ff00a8', width=3, dash='solid'),
+        line=dict(color='#ff8c00', width=3, dash='solid'),  # Orange color
         showlegend=True,
         hovertemplate='<b>Power Law Fit</b><br>R² = %{customdata:.3f}<br>Value: $%{y:.6f}<br><extra></extra>',
         customdata=[r2_price] * len(fit_x)
@@ -477,7 +379,7 @@ if show_power_law == "Show":
         y=y_fit * 0.4,
         mode='lines',
         name='Support (-60%)',
-        line=dict(color='rgba(0, 255, 136, 0.6)', width=1.5, dash='dot'),
+        line=dict(color='rgba(255, 255, 255, 0.7)', width=1.5, dash='dot'),  # White dotted
         showlegend=True,
         hoverinfo='skip'
     ))
@@ -487,9 +389,9 @@ if show_power_law == "Show":
         y=y_fit * 2.2,
         mode='lines',
         name='Resistance (+120%)',
-        line=dict(color='rgba(255, 71, 87, 0.6)', width=1.5, dash='dot'),
+        line=dict(color='rgba(255, 255, 255, 0.7)', width=1.5, dash='dot'),  # White dotted
         fill='tonexty',
-        fillcolor='rgba(100, 100, 100, 0.1)',
+        fillcolor='rgba(100, 100, 100, 0.05)',
         showlegend=True,
         hoverinfo='skip'
     ))
@@ -500,22 +402,22 @@ fig.update_layout(
     paper_bgcolor='rgba(0,0,0,0)',
     font=dict(family='Inter', color='#e2e8f0'),
     hovermode='x unified',
-    height=700,
-    margin=dict(l=40, r=40, t=60, b=0),
+    height=650,
+    margin=dict(l=40, r=40, t=50, b=0),
     xaxis=dict(
-        title=dict(text=x_title, font=dict(size=14, color='#cbd5e1', weight=600), standoff=30),
+        title=dict(text=x_title, font=dict(size=13, color='#cbd5e1', weight=600), standoff=25),
         type="log" if x_scale_type == "Log" else None,
         showgrid=True,
         gridwidth=1,
-        gridcolor='rgba(255, 255, 255, 0.08)',
-        linecolor='rgba(255, 255, 255, 0.2)',
-        tickfont=dict(size=12, color='#94a3b8'),
+        gridcolor='rgba(255, 255, 255, 0.06)',
+        linecolor='rgba(255, 255, 255, 0.15)',
+        tickfont=dict(size=11, color='#94a3b8'),
         rangeslider=dict(
             visible=True,
-            thickness=0.08,
+            thickness=0.06,
             bgcolor='rgba(15, 20, 25, 0.9)',
             bordercolor="rgba(0, 212, 255, 0.3)",
-            borderwidth=2
+            borderwidth=1
         )
     ),
     yaxis=dict(
@@ -523,9 +425,9 @@ fig.update_layout(
         type="log" if y_scale == "Log" else "linear",
         showgrid=True,
         gridwidth=1,
-        gridcolor='rgba(255, 255, 255, 0.08)',
-        linecolor='rgba(255, 255, 255, 0.2)',
-        tickfont=dict(size=12, color='#94a3b8'),
+        gridcolor='rgba(255, 255, 255, 0.06)',
+        linecolor='rgba(255, 255, 255, 0.15)',
+        tickfont=dict(size=11, color='#94a3b8'),
         tickprefix="$"
     ),
     legend=dict(
@@ -537,12 +439,12 @@ fig.update_layout(
         bgcolor='rgba(0,0,0,0)',
         bordercolor='rgba(0,0,0,0)',
         borderwidth=0,
-        font=dict(size=12)
+        font=dict(size=11)
     ),
     hoverlabel=dict(
         bgcolor='rgba(15, 20, 25, 0.95)',
         bordercolor='rgba(0, 212, 255, 0.5)',
-        font=dict(color='#e2e8f0', size=12),
+        font=dict(color='#e2e8f0', size=11),
         align='left'
     )
 )
@@ -557,7 +459,7 @@ with st.container():
         'toImageButtonOptions': {
             'format': 'png',
             'filename': f'kaspa_analysis_{datetime.now().strftime("%Y%m%d_%H%M")}',
-            'height': 700,
+            'height': 650,
             'width': 1400,
             'scale': 2
         }
@@ -582,7 +484,7 @@ else:
     slope_pct_change = 0
     r2_pct_change = 0
 
-# Enhanced Metrics Section
+# Enhanced Metrics Section with improved styling and hover effects
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
@@ -628,17 +530,14 @@ with col4:
 
 # Footer
 footer_html = """
-<div style="text-align: center; padding: 50px 40px; margin-top: 40px; 
-     background: rgba(15, 20, 25, 0.4); backdrop-filter: blur(20px);
-     border-top: 1px solid rgba(255, 255, 255, 0.1);">
+<div style="text-align: center; padding: 40px 40px; margin-top: 32px; 
+     background: rgba(15, 20, 25, 0.3); backdrop-filter: blur(20px);
+     border-top: 1px solid rgba(255, 255, 255, 0.08);">
     <div style="max-width: 1200px; margin: 0 auto;">
-        <h3 style="color: #f1f5f9; margin-bottom: 16px; font-size: 20px; font-weight: 700;">
-            KaspaMetrics
-        </h3>
-        <p style="color: #64748b; font-size: 14px; margin-bottom: 20px;">
+        <p style="color: #64748b; font-size: 13px; margin-bottom: 16px;">
             Professional-grade cryptocurrency market analysis • Real-time data processing • Advanced predictive modeling
         </p>
-        <div style="color: #475569; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">
+        <div style="color: #475569; font-size: 10px; text-transform: uppercase; letter-spacing: 1px;">
             Last Updated: """ + datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC') + """ • 
             Built for institutional-grade analysis
         </div>
