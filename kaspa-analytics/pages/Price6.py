@@ -509,6 +509,68 @@ st.markdown("""
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     }
     
+    /* Fix Plotly Modebar (toolbar) styling */
+    .stPlotlyChart .modebar {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+    
+    .stPlotlyChart .modebar-group {
+        background: rgba(15, 20, 25, 0.8) !important;
+        backdrop-filter: blur(10px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 8px !important;
+        margin: 0 2px !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+    }
+    
+    .stPlotlyChart .modebar-btn {
+        background: transparent !important;
+        border: none !important;
+        color: #94a3b8 !important;
+        transition: all 0.2s ease !important;
+    }
+    
+    .stPlotlyChart .modebar-btn:hover {
+        background: rgba(0, 212, 255, 0.1) !important;
+        color: #00d4ff !important;
+    }
+    
+    .stPlotlyChart .modebar-btn.active,
+    .stPlotlyChart .modebar-btn--active {
+        background: rgba(0, 212, 255, 0.2) !important;
+        color: #00d4ff !important;
+    }
+    
+    /* Fix Plotly Legend styling */
+    .stPlotlyChart .legendtoggle {
+        background: rgba(15, 20, 25, 0.9) !important;
+        border: 1px solid rgba(0, 212, 255, 0.3) !important;
+        border-radius: 8px !important;
+        backdrop-filter: blur(10px) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+    }
+    
+    .stPlotlyChart .legend {
+        background: rgba(15, 20, 25, 0.9) !important;
+        border: 1px solid rgba(0, 212, 255, 0.3) !important;
+        border-radius: 8px !important;
+        backdrop-filter: blur(10px) !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+    }
+    
+    /* Remove unwanted backgrounds from plotly elements */
+    .stPlotlyChart .bg {
+        fill: transparent !important;
+    }
+    
+    .stPlotlyChart .legend .bg {
+        fill: rgba(15, 20, 25, 0.9) !important;
+        stroke: rgba(0, 212, 255, 0.3) !important;
+        stroke-width: 1 !important;
+    }
+    
     /* Custom scrollbar */
     ::-webkit-scrollbar {
         width: 10px;
@@ -809,8 +871,11 @@ fig.update_layout(
     xaxis=dict(
         title=dict(
             text=x_title,
-            font=dict(size=14, color='#cbd5e1', weight=600)
+            font=dict(size=14, color='#cbd5e1', weight=600),
+            standoff=10
         ),
+        title_standoff=20,
+        side='top',
         type="log" if x_scale_type == "Log" else None,
         showgrid=True,
         gridwidth=1,
@@ -828,8 +893,11 @@ fig.update_layout(
     yaxis=dict(
         title=dict(
             text='Price (USD)',
-            font=dict(size=14, color='#cbd5e1', weight=600)
+            font=dict(size=14, color='#cbd5e1', weight=600),
+            standoff=10
         ),
+        title_standoff=20,
+        side='right',
         type="log" if y_scale == "Log" else "linear",
         showgrid=True,
         gridwidth=1,
@@ -843,9 +911,9 @@ fig.update_layout(
         y=1.02,
         xanchor="left",
         x=0,
-        bgcolor='rgba(15, 20, 25, 0.9)',
-        bordercolor='rgba(0, 212, 255, 0.3)',
-        borderwidth=1,
+        bgcolor='rgba(0,0,0,0)',
+        bordercolor='rgba(0,0,0,0)',
+        borderwidth=0,
         font=dict(size=12)
     ),
     hoverlabel=dict(
@@ -955,4 +1023,4 @@ st.markdown(f"""
         </div>
     </div>
 </div>
-""", unsafe_allow_html=True)
+"""
