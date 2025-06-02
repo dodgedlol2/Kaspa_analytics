@@ -29,7 +29,7 @@ except Exception as e:
     st.error(f"Failed to calculate price power law: {str(e)}")
     st.stop()
 
-# Enhanced Custom CSS with Modern Design
+# Enhanced Custom CSS with Integrated Controls
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -87,7 +87,7 @@ st.markdown("""
         background: rgba(15, 23, 42, 0.2);
         backdrop-filter: blur(15px);
         border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        padding: 16px 28px 12px 28px;
+        padding: 20px 28px;
         position: relative;
     }
     
@@ -95,7 +95,7 @@ st.markdown("""
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 0;
+        margin-bottom: 20px;
     }
     
     .chart-title {
@@ -126,42 +126,67 @@ st.markdown("""
         box-shadow: 0 0 6px #00ff88;
     }
     
-    .controls-section {
-        padding: 16px 28px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-        background: rgba(15, 23, 42, 0.1);
+    .integrated-controls {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-top: 8px;
+    }
+    
+    .control-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
     }
     
     .control-label {
-        font-size: 11px;
+        font-size: 10px;
         font-weight: 600;
         color: #94a3b8;
         text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: 6px;
+        letter-spacing: 0.8px;
+        margin: 0;
+    }
+    
+    /* Enhanced selectbox styling for integration */
+    .stSelectbox {
+        margin-bottom: 0 !important;
     }
     
     .stSelectbox > div > div {
-        background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
-        border: 2px solid rgba(100, 116, 139, 0.3) !important;
-        border-radius: 12px !important;
-        backdrop-filter: blur(15px) !important;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
-        min-height: 36px !important;
+        background: linear-gradient(135deg, rgba(20, 30, 45, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%) !important;
+        border: 1.5px solid rgba(100, 116, 139, 0.25) !important;
+        border-radius: 10px !important;
+        backdrop-filter: blur(12px) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+        min-height: 32px !important;
+        max-height: 32px !important;
     }
     
     .stSelectbox > div > div:hover {
-        border-color: #00d4ff !important;
-        box-shadow: 0 8px 32px rgba(0, 212, 255, 0.2), 0 0 0 1px rgba(0, 212, 255, 0.3) !important;
-        transform: translateY(-2px);
+        border-color: rgba(0, 212, 255, 0.4) !important;
+        box-shadow: 0 4px 16px rgba(0, 212, 255, 0.15), 0 0 0 1px rgba(0, 212, 255, 0.2) !important;
+        transform: translateY(-1px);
+        background: linear-gradient(135deg, rgba(25, 35, 50, 0.95) 0%, rgba(20, 28, 47, 0.95) 100%) !important;
+    }
+    
+    .stSelectbox > div > div:focus-within {
+        border-color: rgba(0, 212, 255, 0.6) !important;
+        box-shadow: 0 6px 20px rgba(0, 212, 255, 0.2), 0 0 0 2px rgba(0, 212, 255, 0.3) !important;
     }
     
     .stSelectbox > div > div > div {
-        color: #f1f5f9 !important;
-        font-weight: 600 !important;
-        font-size: 13px !important;
-        padding: 6px 14px !important;
+        color: #e2e8f0 !important;
+        font-weight: 500 !important;
+        font-size: 12px !important;
+        padding: 4px 12px !important;
+        line-height: 1.3 !important;
+    }
+    
+    /* Dropdown arrow styling */
+    .stSelectbox > div > div::after {
+        border-top-color: #94a3b8 !important;
     }
     
     .chart-content {
@@ -259,6 +284,22 @@ st.markdown("""
         50% { opacity: 0.7; transform: scale(1.05); }
     }
     
+    /* Responsive design for smaller screens */
+    @media (max-width: 768px) {
+        .integrated-controls {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        
+        .chart-section {
+            margin: 16px 20px;
+        }
+        
+        .chart-title-section {
+            padding: 16px 20px;
+        }
+    }
+    
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
@@ -278,7 +319,7 @@ if len(df_30_days_ago) > 0:
 else:
     price_pct_change = 0
 
-# Streamlined Chart Section
+# Integrated Chart Section with Controls
 st.markdown("""
 <div class="chart-section">
     <div class="chart-title-section">
@@ -291,31 +332,35 @@ st.markdown("""
                 <span>LIVE</span>
             </div>
         </div>
-    </div>
-    <div class="controls-section">
+        <div class="integrated-controls">
+        </div>
     </div>
 </div>
 """, unsafe_allow_html=True)
 
-# Controls integrated within the chart section
+# Controls integrated within the chart section - now properly contained
 with st.container():
-    col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
+    # Create a custom container for the controls
+    control_container = st.container()
     
-    with col1:
-        st.markdown('<div class="control-label">Price Scale</div>', unsafe_allow_html=True)
-        y_scale = st.selectbox("", ["Linear", "Log"], index=1, label_visibility="collapsed", key="price_y_scale_select")
+    with control_container:
+        col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
+        
+        with col1:
+            st.markdown('<div class="control-group"><div class="control-label">Price Scale</div></div>', unsafe_allow_html=True)
+            y_scale = st.selectbox("", ["Linear", "Log"], index=1, label_visibility="collapsed", key="price_y_scale_select")
 
-    with col2:
-        st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
-        x_scale_type = st.selectbox("", ["Linear", "Log"], index=0, label_visibility="collapsed", key="price_x_scale_select")
+        with col2:
+            st.markdown('<div class="control-group"><div class="control-label">Time Scale</div></div>', unsafe_allow_html=True)
+            x_scale_type = st.selectbox("", ["Linear", "Log"], index=0, label_visibility="collapsed", key="price_x_scale_select")
 
-    with col3:
-        st.markdown('<div class="control-label">Time Period</div>', unsafe_allow_html=True)
-        time_range = st.selectbox("", ["1W", "1M", "3M", "6M", "1Y", "All"], index=5, label_visibility="collapsed", key="price_time_range_select")
+        with col3:
+            st.markdown('<div class="control-group"><div class="control-label">Time Period</div></div>', unsafe_allow_html=True)
+            time_range = st.selectbox("", ["1W", "1M", "3M", "6M", "1Y", "All"], index=5, label_visibility="collapsed", key="price_time_range_select")
 
-    with col4:
-        st.markdown('<div class="control-label">Power Law</div>', unsafe_allow_html=True)
-        show_power_law = st.selectbox("", ["Hide", "Show"], index=1, label_visibility="collapsed", key="price_power_law_select")
+        with col4:
+            st.markdown('<div class="control-group"><div class="control-label">Power Law</div></div>', unsafe_allow_html=True)
+            show_power_law = st.selectbox("", ["Hide", "Show"], index=1, label_visibility="collapsed", key="price_power_law_select")
 
 # Chart content section
 st.markdown('<div class="chart-content"></div>', unsafe_allow_html=True)
