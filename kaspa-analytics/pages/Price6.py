@@ -208,7 +208,7 @@ st.markdown("""
         background: rgba(30, 41, 59, 0.4);
         backdrop-filter: blur(15px);
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 28px 32px 20px 32px;
+        padding: 28px 48px 20px 48px;
         position: relative;
     }
     
@@ -248,7 +248,7 @@ st.markdown("""
     
     /* Controls Section */
     .controls-section {
-        padding: 24px 32px;
+        padding: 24px 48px;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
     
@@ -363,7 +363,7 @@ st.markdown("""
     
     /* Chart Container */
     .chart-content {
-        padding: 32px;
+        padding: 32px 48px;
         position: relative;
     }
     
