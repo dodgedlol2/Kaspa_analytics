@@ -1,20 +1,35 @@
 import streamlit as st
+from datetime import datetime
 
-def render_aggressive_header_fix():
-    """
-    Ultra-aggressive CSS to force header above everything
-    """
+def render_page_config(page_title="Kaspa Analytics Pro", page_icon="💎"):
+    """Set consistent page config across all pages"""
+    st.set_page_config(
+        page_title=page_title,
+        page_icon=page_icon,
+        layout="wide",
+        initial_sidebar_state="collapsed"
+    )
+
+def render_custom_css():
+    """Render all custom CSS styling for the application"""
     st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
         @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
         
-        /* NUCLEAR OPTION - Override everything */
-        * {
-            box-sizing: border-box;
+        /* Base styles */
+        html, body, .stApp {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+            background: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 50%, #0f1419 100%) !important;
+            color: #e2e8f0 !important;
+            overflow-x: hidden !important;
         }
         
-        /* Force header to be absolutely positioned above everything */
+        .stApp {
+            background-attachment: fixed !important;
+        }
+        
+        /* Force header above everything */
         .professional-header {
             position: fixed !important;
             top: 0 !important;
@@ -28,52 +43,22 @@ def render_aggressive_header_fix():
             padding: 16px 40px !important;
             z-index: 999999999 !important;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6) !important;
-            margin: 0 !important;
             display: flex !important;
             align-items: center !important;
             justify-content: space-between !important;
         }
         
-        /* Override ALL Streamlit sidebar z-indexes */
-        .css-1d391kg,
-        .css-1dp5vir,
-        .css-17eq0hr,
-        .css-1v3fvcr,
-        .css-12w0qpk,
-        .css-163ttbj,
-        .css-1rs6os,
-        .css-1lcbmhc,
-        .css-1y4p8pa,
-        section[data-testid="stSidebar"],
-        .stSidebar,
-        div[data-testid="stSidebar"] {
-            z-index: 999998 !important;
-            margin-top: 80px !important;
-        }
-        
-        /* Force main content below header */
-        .main,
-        .main .block-container,
-        .css-k1vhr4,
-        .css-18e3th9,
-        .css-1d391kg,
-        div[data-testid="stAppViewContainer"] {
+        /* Push main content down */
+        .main .block-container {
             padding-top: 100px !important;
-            margin-top: 0 !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+            max-width: 100% !important;
         }
         
-        /* Base app styles */
-        html, body, .stApp {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
-            background: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 50%, #0f1419 100%) !important;
-            color: #e2e8f0 !important;
-            overflow-x: hidden !important;
-            margin: 0 !important;
-            padding: 0 !important;
-        }
-        
-        .stApp {
-            background-attachment: fixed !important;
+        /* Hide sidebar completely for now */
+        section[data-testid="stSidebar"] {
+            display: none !important;
         }
         
         /* Header content styling */
@@ -84,8 +69,6 @@ def render_aggressive_header_fix():
             width: 100% !important;
             max-width: 1400px !important;
             margin: 0 auto !important;
-            position: relative !important;
-            z-index: 999999999 !important;
         }
         
         .brand-section {
@@ -121,7 +104,6 @@ def render_aggressive_header_fix():
             -webkit-background-clip: text !important;
             -webkit-text-fill-color: transparent !important;
             margin: 0 !important;
-            text-shadow: 0 0 30px rgba(0, 212, 255, 0.3) !important;
             line-height: 1.1 !important;
         }
         
@@ -146,15 +128,13 @@ def render_aggressive_header_fix():
             border-radius: 12px !important;
             padding: 10px 16px !important;
             color: #cbd5e1 !important;
-            text-decoration: none !important;
             font-size: 13px !important;
             font-weight: 600 !important;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-            backdrop-filter: blur(10px) !important;
             display: flex !important;
             align-items: center !important;
             gap: 8px !important;
             cursor: pointer !important;
+            transition: all 0.3s ease !important;
         }
         
         .nav-button:hover {
@@ -162,7 +142,6 @@ def render_aggressive_header_fix():
             border-color: rgba(0, 212, 255, 0.4) !important;
             color: #00d4ff !important;
             transform: translateY(-1px) !important;
-            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.2) !important;
         }
         
         .nav-button.active {
@@ -185,13 +164,7 @@ def render_aggressive_header_fix():
             color: #cbd5e1 !important;
             font-size: 13px !important;
             font-weight: 600 !important;
-            transition: all 0.3s ease !important;
             cursor: pointer !important;
-        }
-        
-        .login-button:hover {
-            border-color: rgba(0, 212, 255, 0.6) !important;
-            color: #00d4ff !important;
         }
         
         .signup-button {
@@ -202,14 +175,8 @@ def render_aggressive_header_fix():
             color: white !important;
             font-size: 13px !important;
             font-weight: 700 !important;
-            transition: all 0.3s ease !important;
             cursor: pointer !important;
             box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3) !important;
-        }
-        
-        .signup-button:hover {
-            transform: translateY(-1px) !important;
-            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4) !important;
         }
         
         /* Hide Streamlit elements */
@@ -217,13 +184,6 @@ def render_aggressive_header_fix():
         footer {visibility: hidden !important;}
         header {visibility: hidden !important;}
         .stDeployButton {display: none !important;}
-        
-        /* Override any remaining z-index issues */
-        div[role="dialog"],
-        .css-1cpxqw2,
-        .css-1y4p8pa {
-            z-index: 999997 !important;
-        }
         
         /* Mobile responsive */
         @media (max-width: 768px) {
@@ -234,23 +194,84 @@ def render_aggressive_header_fix():
             
             .header-content {
                 flex-direction: column !important;
-                gap: 15px !important;
+                gap: 10px !important;
             }
             
             .main .block-container {
                 padding-top: 140px !important;
             }
         }
-        
     </style>
     """, unsafe_allow_html=True)
 
-def render_debug_header():
-    """
-    Simple header with debug info to test z-index
-    """
-    debug_html = """
-    <div class="professional-header" style="background: red !important; z-index: 999999999 !important;">
+def render_professional_header(
+    current_page="Home",
+    user_name=None,
+    user_role=None,
+    show_auth=True,
+    custom_nav_items=None
+):
+    """Render a professional header with navigation and auth"""
+    
+    # Default navigation items
+    default_nav_items = [
+        {"name": "Dashboard", "icon": "fas fa-tachometer-alt"},
+        {"name": "Analytics", "icon": "fas fa-chart-line"},
+        {"name": "Portfolio", "icon": "fas fa-wallet"},
+        {"name": "Research", "icon": "fas fa-microscope"},
+        {"name": "Alerts", "icon": "fas fa-bell"},
+    ]
+    
+    nav_items = custom_nav_items if custom_nav_items else default_nav_items
+    
+    # Build navigation buttons
+    nav_buttons_html = ""
+    for item in nav_items:
+        active_class = "active" if item["name"] == current_page else ""
+        nav_buttons_html += f"""
+        <div class="nav-button {active_class}">
+            <i class="{item['icon']}"></i>
+            <span>{item['name']}</span>
+        </div>
+        """
+    
+    # Build auth section
+    if user_name:
+        # User is logged in - create user menu
+        user_initials = "".join([name[0].upper() for name in user_name.split()[:2]])
+        auth_html = f"""
+        <div style="display: flex; align-items: center; gap: 10px; background: rgba(30, 41, 59, 0.6); 
+             border: 1px solid rgba(100, 116, 139, 0.3); border-radius: 12px; padding: 8px 12px;">
+            <div style="width: 32px; height: 32px; border-radius: 8px; 
+                 background: linear-gradient(135deg, #00d4ff 0%, #ff00a8 100%); 
+                 display: flex; align-items: center; justify-content: center; 
+                 color: white; font-weight: 700; font-size: 14px;">
+                {user_initials}
+            </div>
+            <div>
+                <div style="font-size: 13px; font-weight: 600; color: #f1f5f9;">{user_name}</div>
+                <div style="font-size: 11px; color: #64748b;">{user_role or 'Free Plan'}</div>
+            </div>
+        </div>
+        """
+    else:
+        # User not logged in
+        auth_html = """
+        <div class="auth-section">
+            <button class="login-button">
+                <i class="fas fa-sign-in-alt"></i>
+                Login
+            </button>
+            <button class="signup-button">
+                <i class="fas fa-rocket"></i>
+                Get Started
+            </button>
+        </div>
+        """ if show_auth else ""
+    
+    # Complete header HTML
+    header_html = f"""
+    <div class="professional-header">
         <div class="header-content">
             <div class="brand-section">
                 <div class="logo-container">
@@ -258,94 +279,53 @@ def render_debug_header():
                         <i class="fas fa-gem"></i>
                     </div>
                     <div class="brand-text">
-                        <h1>DEBUG HEADER - Should be on top!</h1>
-                        <div class="brand-subtitle">Z-Index Test</div>
+                        <h1>KaspaMetrics</h1>
+                        <div class="brand-subtitle">Advanced Market Intelligence Platform</div>
                     </div>
                 </div>
             </div>
             
             <div class="nav-section">
-                <div class="nav-button active">
-                    <i class="fas fa-bug"></i>
-                    <span>DEBUG MODE</span>
-                </div>
+                {nav_buttons_html}
             </div>
             
-            <div class="auth-section">
-                <button class="login-button">Test</button>
-            </div>
+            {auth_html}
         </div>
     </div>
     """
     
-    st.markdown(debug_html, unsafe_allow_html=True)
+    st.markdown(header_html, unsafe_allow_html=True)
 
-def render_javascript_fix():
-    """
-    JavaScript solution to force header on top after page loads
-    """
-    js_code = """
-    <script>
-        function forceHeaderOnTop() {
-            // Find the header
-            const header = document.querySelector('.professional-header');
-            
-            // Find all sidebar elements
-            const sidebarElements = document.querySelectorAll(`
-                .css-1d391kg,
-                .css-1dp5vir,
-                .css-17eq0hr,
-                .css-1v3fvcr,
-                section[data-testid="stSidebar"],
-                .stSidebar,
-                div[data-testid="stSidebar"]
-            `);
-            
-            if (header) {
-                // Force header styles
-                header.style.position = 'fixed';
-                header.style.top = '0';
-                header.style.left = '0';
-                header.style.right = '0';
-                header.style.width = '100vw';
-                header.style.zIndex = '999999999';
-                header.style.background = 'rgba(15, 20, 25, 0.98)';
-                header.style.backdropFilter = 'blur(25px)';
-                
-                console.log('Header forced to top with z-index:', header.style.zIndex);
-            }
-            
-            // Lower sidebar z-index
-            sidebarElements.forEach((element, index) => {
-                if (element) {
-                    element.style.zIndex = '999998';
-                    element.style.marginTop = '80px';
-                    console.log(`Sidebar element ${index} z-index lowered`);
-                }
-            });
-            
-            // Push main content down
-            const mainContent = document.querySelector('.main .block-container');
-            if (mainContent) {
-                mainContent.style.paddingTop = '100px';
-                console.log('Main content pushed down');
-            }
-        }
+def render_page_header(title, subtitle=None, show_breadcrumb=False, breadcrumb_items=None):
+    """Render a page-specific header section"""
+    
+    breadcrumb_html = ""
+    if show_breadcrumb and breadcrumb_items:
+        breadcrumb_parts = []
+        for i, item in enumerate(breadcrumb_items):
+            if i == len(breadcrumb_items) - 1:
+                breadcrumb_parts.append(f'<span style="color: #00d4ff;">{item}</span>')
+            else:
+                breadcrumb_parts.append(f'<span style="color: #64748b;">{item}</span>')
         
-        // Run immediately and on various events
-        document.addEventListener('DOMContentLoaded', forceHeaderOnTop);
-        window.addEventListener('load', forceHeaderOnTop);
-        
-        // Keep trying for a few seconds in case Streamlit is still loading
-        setTimeout(forceHeaderOnTop, 100);
-        setTimeout(forceHeaderOnTop, 500);
-        setTimeout(forceHeaderOnTop, 1000);
-        setTimeout(forceHeaderOnTop, 2000);
-        
-        // Watch for sidebar changes
-        const observer = new MutationObserver(forceHeaderOnTop);
-        observer.observe(document.body, { childList: true, subtree: true });
-    </script>
+        breadcrumb_html = f"""
+        <div style="margin-bottom: 16px;">
+            <div style="font-size: 12px; color: #64748b; display: flex; align-items: center; gap: 8px;">
+                {' <i class="fas fa-chevron-right" style="font-size: 10px;"></i> '.join(breadcrumb_parts)}
+            </div>
+        </div>
+        """
+    
+    subtitle_html = f'<p style="color: #94a3b8; font-size: 16px; margin: 8px 0 0 0;">{subtitle}</p>' if subtitle else ""
+    
+    page_header_html = f"""
+    <div style="padding: 0 40px 32px 40px;">
+        {breadcrumb_html}
+        <h1 style="color: #f1f5f9; font-size: 36px; font-weight: 800; margin: 0;">
+            {title}
+        </h1>
+        {subtitle_html}
+    </div>
     """
     
-    st.components.v1.html(js_code, height=0)
+    st.markdown(page_header_html, unsafe_allow_html=True)
