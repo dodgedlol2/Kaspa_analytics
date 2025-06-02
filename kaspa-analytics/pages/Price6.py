@@ -34,13 +34,6 @@ st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
     
-    /* Global Reset and Base Styles */
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-    
     html, body, .stApp {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         background: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 50%, #0f1419 100%);
@@ -52,13 +45,11 @@ st.markdown("""
         background-attachment: fixed;
     }
     
-    /* Remove Streamlit defaults */
     .main .block-container {
         padding: 0 !important;
         max-width: 100% !important;
     }
     
-    /* Animated Background Pattern */
     .stApp::before {
         content: '';
         position: fixed;
@@ -80,7 +71,6 @@ st.markdown("""
         50% { opacity: 0.8; transform: translateX(20px) translateY(-20px); }
     }
     
-    /* Header Section */
     .header-container {
         background: rgba(15, 20, 25, 0.9);
         backdrop-filter: blur(25px);
@@ -98,24 +88,6 @@ st.markdown("""
         justify-content: space-between;
         max-width: 1400px;
         margin: 0 auto;
-    }
-    
-    .brand {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-    }
-    
-    .brand-icon {
-        width: 48px;
-        height: 48px;
-        background: linear-gradient(135deg, #00d4ff 0%, #ff00a8 100%);
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 24px;
-        box-shadow: 0 4px 20px rgba(0, 212, 255, 0.3);
     }
     
     .brand h1 {
@@ -148,22 +120,6 @@ st.markdown("""
         position: relative;
     }
     
-    .header-stat::after {
-        content: '';
-        position: absolute;
-        bottom: -8px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 0;
-        height: 2px;
-        background: linear-gradient(90deg, #00d4ff, #ff00a8);
-        transition: width 0.3s ease;
-    }
-    
-    .header-stat:hover::after {
-        width: 100%;
-    }
-    
     .header-stat-value {
         font-size: 20px;
         font-weight: 700;
@@ -180,7 +136,6 @@ st.markdown("""
         margin-top: 4px;
     }
     
-    /* Chart Section */
     .chart-section {
         margin: 32px 40px 40px 40px;
         background: rgba(15, 20, 25, 0.6);
@@ -192,18 +147,6 @@ st.markdown("""
         position: relative;
     }
     
-    .chart-section::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background: linear-gradient(90deg, transparent, #00d4ff, #ff00a8, transparent);
-        opacity: 0.6;
-    }
-    
-    /* Chart Title Section */
     .chart-title-section {
         background: rgba(30, 41, 59, 0.4);
         backdrop-filter: blur(15px);
@@ -246,24 +189,9 @@ st.markdown("""
         box-shadow: 0 0 10px #00ff88;
     }
     
-    /* Controls Section */
     .controls-section {
         padding: 24px 48px;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    .control-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 32px;
-        align-items: end;
-    }
-    
-    .control-group {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        position: relative;
     }
     
     .control-label {
@@ -273,16 +201,6 @@ st.markdown("""
         text-transform: uppercase;
         letter-spacing: 1.2px;
         margin-bottom: 6px;
-        position: relative;
-    }
-    
-    /* Revolutionary Selectbox Styling */
-    .stSelectbox {
-        position: relative;
-    }
-    
-    .stSelectbox > div {
-        position: relative;
     }
     
     .stSelectbox > div > div {
@@ -292,21 +210,7 @@ st.markdown("""
         backdrop-filter: blur(15px) !important;
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
-        position: relative;
-        overflow: hidden;
         min-height: 40px !important;
-    }
-    
-    .stSelectbox > div > div::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.1), transparent);
-        transition: left 0.5s ease;
-        pointer-events: none;
     }
     
     .stSelectbox > div > div:hover {
@@ -315,59 +219,18 @@ st.markdown("""
         transform: translateY(-2px);
     }
     
-    .stSelectbox > div > div:hover::before {
-        left: 100%;
-    }
-    
     .stSelectbox > div > div > div {
         color: #f1f5f9 !important;
         font-weight: 600 !important;
         font-size: 14px !important;
         padding: 10px 16px !important;
-        display: flex !important;
-        align-items: center !important;
-        height: auto !important;
-        line-height: 1.2 !important;
     }
     
-    /* Selectbox dropdown styling */
-    .stSelectbox [data-baseweb="popover"] {
-        background: rgba(15, 23, 42, 0.95) !important;
-        backdrop-filter: blur(20px) !important;
-        border: 1px solid rgba(0, 212, 255, 0.3) !important;
-        border-radius: 16px !important;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5) !important;
-    }
-    
-    .stSelectbox [role="option"] {
-        background: transparent !important;
-        color: #e2e8f0 !important;
-        transition: all 0.2s ease !important;
-        border-radius: 8px !important;
-        margin: 4px !important;
-        padding: 10px 12px !important;
-        line-height: 1.2 !important;
-        display: flex !important;
-        align-items: center !important;
-    }
-    
-    .stSelectbox [role="option"]:hover {
-        background: rgba(0, 212, 255, 0.15) !important;
-        color: #00d4ff !important;
-    }
-    
-    .stSelectbox [aria-selected="true"] {
-        background: rgba(0, 212, 255, 0.2) !important;
-        color: #00d4ff !important;
-    }
-    
-    /* Chart Container */
     .chart-content {
         padding: 32px 48px;
         position: relative;
     }
     
-    /* Enhanced Metrics Grid */
     .metric-card {
         background: rgba(15, 20, 25, 0.7) !important;
         backdrop-filter: blur(25px) !important;
@@ -383,42 +246,11 @@ st.markdown("""
         box-sizing: border-box !important;
     }
     
-    .metric-card::before {
-        content: '';
-        position: absolute;
-        top: -2px;
-        left: -2px;
-        right: -2px;
-        bottom: -2px;
-        background: linear-gradient(135deg, #00d4ff, #ff00a8, #00ff88, #00d4ff);
-        border-radius: 22px;
-        opacity: 0;
-        z-index: -1;
-        transition: opacity 0.3s ease;
-    }
-    
-    .metric-card::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(15, 20, 25, 0.9);
-        border-radius: 20px;
-        z-index: -1;
-    }
-    
     .metric-card:hover {
         transform: translateY(-8px) scale(1.02) !important;
         box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5) !important;
     }
     
-    .metric-card:hover::before {
-        opacity: 1;
-    }
-    
-    /* Custom Metric Styling */
     .metric-label {
         color: #94a3b8 !important;
         font-size: 13px !important;
@@ -426,8 +258,6 @@ st.markdown("""
         text-transform: uppercase !important;
         letter-spacing: 1.2px !important;
         margin-bottom: 12px !important;
-        position: relative;
-        z-index: 1;
     }
     
     .metric-value {
@@ -437,16 +267,12 @@ st.markdown("""
         line-height: 1.1 !important;
         margin-bottom: 6px !important;
         text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
-        position: relative;
-        z-index: 1;
     }
     
     .metric-delta {
         font-size: 15px !important;
         font-weight: 700 !important;
         margin-bottom: 8px;
-        position: relative;
-        z-index: 1;
     }
     
     .metric-delta.positive {
@@ -457,59 +283,12 @@ st.markdown("""
         color: #ff4757 !important;
     }
     
-    .metric-delta.neutral {
-        color: #64748b !important;
-    }
-    
-    /* Force metric containers to inherit card styling */
-    .metric-card > div {
-        background: transparent !important;
-        border: none !important;
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-    
-    /* Streamlit Metric Overrides */
-    .metric-card div[data-testid="stMetric"] {
-        background: transparent !important;
-        border: none !important;
-        padding: 0 !important;
-        box-shadow: none !important;
-        margin: 0 !important;
-    }
-    
-    .metric-card div[data-testid="stMetric"] label {
-        color: #94a3b8 !important;
-        font-size: 13px !important;
-        font-weight: 600 !important;
-        text-transform: uppercase !important;
-        letter-spacing: 1.2px !important;
-        margin-bottom: 12px !important;
-    }
-    
-    .metric-card div[data-testid="stMetric"] div[data-testid="metric-container"] > div:first-child {
-        color: #f1f5f9 !important;
-        font-size: 36px !important;
-        font-weight: 800 !important;
-        line-height: 1.1 !important;
-        margin-bottom: 6px !important;
-        text-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
-    }
-    
-    .metric-card div[data-testid="stMetric"] div[data-testid="metric-container"] div[data-testid="metric-delta"] {
-        color: #00ff88 !important;
-        font-size: 15px !important;
-        font-weight: 700 !important;
-    }
-    
-    /* Plotly Chart Styling */
     .stPlotlyChart {
         border-radius: 16px;
         overflow: hidden;
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     }
     
-    /* Fix Plotly Modebar (toolbar) styling - remove black background and move down */
     .stPlotlyChart .modebar {
         background: transparent !important;
         transform: translateY(15px) !important;
@@ -519,112 +298,6 @@ st.markdown("""
         background: transparent !important;
     }
     
-    /* Fix Plotly Legend styling */
-    .stPlotlyChart .legendtoggle {
-        background: rgba(15, 20, 25, 0.9) !important;
-        border: 1px solid rgba(0, 212, 255, 0.3) !important;
-        border-radius: 8px !important;
-        backdrop-filter: blur(10px) !important;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
-    }
-    
-    .stPlotlyChart .legend {
-        background: rgba(15, 20, 25, 0.9) !important;
-        border: 1px solid rgba(0, 212, 255, 0.3) !important;
-        border-radius: 8px !important;
-        backdrop-filter: blur(10px) !important;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
-    }
-    
-    /* Remove unwanted backgrounds from plotly elements */
-    .stPlotlyChart .bg {
-        fill: transparent !important;
-    }
-    
-    .stPlotlyChart .legend .bg {
-        fill: rgba(15, 20, 25, 0.9) !important;
-        stroke: rgba(0, 212, 255, 0.3) !important;
-        stroke-width: 1 !important;
-    }
-    
-    /* Custom scrollbar */
-    ::-webkit-scrollbar {
-        width: 10px;
-    }
-    
-    ::-webkit-scrollbar-track {
-        background: rgba(30, 41, 59, 0.4);
-        border-radius: 5px;
-    }
-    
-    ::-webkit-scrollbar-thumb {
-        background: linear-gradient(135deg, #00d4ff, #ff00a8);
-        border-radius: 5px;
-    }
-    
-    ::-webkit-scrollbar-thumb:hover {
-        background: linear-gradient(135deg, #ff00a8, #00d4ff);
-    }
-    
-    /* Responsive Design */
-    @media (max-width: 768px) {
-        .header-container {
-            padding: 20px;
-        }
-        
-        .chart-section {
-            margin: 20px;
-        }
-        
-        .chart-title-section, .controls-section, .chart-content {
-            padding: 24px;
-        }
-        
-        .metrics-grid {
-            margin: 24px 20px;
-            grid-template-columns: 1fr;
-        }
-        
-        .brand h1 {
-            font-size: 28px;
-        }
-        
-        .header-stats {
-            display: none;
-        }
-        
-        .control-grid {
-            grid-template-columns: 1fr;
-            gap: 20px;
-        }
-    }
-    
-    /* Loading Animation */
-    @keyframes pulse {
-        0%, 100% { opacity: 1; transform: scale(1); }
-        50% { opacity: 0.7; transform: scale(1.05); }
-    }
-    
-    .loading {
-        animation: pulse 2s infinite;
-    }
-    
-    /* Success/Error States */
-    .success-indicator {
-        color: #00ff88;
-    }
-    
-    .error-indicator {
-        color: #ff4757;
-    }
-    
-    /* Hide Streamlit Elements */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-    .stDeployButton {display: none;}
-    
-    /* Status Badge */
     .status-badge {
         display: inline-flex;
         align-items: center;
@@ -639,6 +312,16 @@ st.markdown("""
         letter-spacing: 0.5px;
         color: #00ff88;
     }
+    
+    @keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.7; transform: scale(1.05); }
+    }
+    
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    .stDeployButton {display: none;}
 </style>
 """, unsafe_allow_html=True)
 
@@ -655,7 +338,7 @@ else:
     price_pct_change = 0
 
 # Header Section
-st.markdown(f"""
+header_html = f"""
 <div class="header-container">
     <div class="header-content">
         <div class="brand">
@@ -686,7 +369,9 @@ st.markdown(f"""
         </div>
     </div>
 </div>
-""", unsafe_allow_html=True)
+"""
+
+st.markdown(header_html, unsafe_allow_html=True)
 
 # Chart Section with title and integrated controls
 st.markdown("""
@@ -709,38 +394,26 @@ st.markdown("""
 
 # Controls integrated within the chart section
 with st.container():
-    # Create columns for the controls
     col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
     
     with col1:
-        st.markdown('<div class="control-group"><div class="control-label">Price Scale</div></div>', unsafe_allow_html=True)
-        y_scale_options = ["Linear", "Log"]
-        y_scale = st.selectbox("", y_scale_options,
-                             index=1, label_visibility="collapsed", key="price_y_scale_select")
+        st.markdown('<div class="control-label">Price Scale</div>', unsafe_allow_html=True)
+        y_scale = st.selectbox("", ["Linear", "Log"], index=1, label_visibility="collapsed", key="price_y_scale_select")
 
     with col2:
-        st.markdown('<div class="control-group"><div class="control-label">Time Scale</div></div>', unsafe_allow_html=True)
-        x_scale_options = ["Linear", "Log"]
-        x_scale_type = st.selectbox("", x_scale_options,
-                                  index=0, label_visibility="collapsed", key="price_x_scale_select")
+        st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
+        x_scale_type = st.selectbox("", ["Linear", "Log"], index=0, label_visibility="collapsed", key="price_x_scale_select")
 
     with col3:
-        st.markdown('<div class="control-group"><div class="control-label">Time Period</div></div>', unsafe_allow_html=True)
-        time_ranges = ["1W", "1M", "3M", "6M", "1Y", "All"]
-        time_range = st.selectbox("", time_ranges,
-                                index=5, label_visibility="collapsed", key="price_time_range_select")
+        st.markdown('<div class="control-label">Time Period</div>', unsafe_allow_html=True)
+        time_range = st.selectbox("", ["1W", "1M", "3M", "6M", "1Y", "All"], index=5, label_visibility="collapsed", key="price_time_range_select")
 
     with col4:
-        st.markdown('<div class="control-group"><div class="control-label">Power Law</div></div>', unsafe_allow_html=True)
-        power_law_options = ["Hide", "Show"]
-        show_power_law = st.selectbox("", power_law_options,
-                                    index=1, label_visibility="collapsed", key="price_power_law_select")
+        st.markdown('<div class="control-label">Power Law</div>', unsafe_allow_html=True)
+        show_power_law = st.selectbox("", ["Hide", "Show"], index=1, label_visibility="collapsed", key="price_power_law_select")
 
 # Chart content section
-st.markdown("""
-<div class="chart-content">
-</div>
-""", unsafe_allow_html=True)
+st.markdown('<div class="chart-content"></div>', unsafe_allow_html=True)
 
 # Data filtering based on time range
 last_date = price_df['Date'].iloc[-1]
@@ -769,25 +442,16 @@ else:
     x_values = filtered_df['Date']
     x_title = "Date"
 
-# Add price trace with standard styling
+# Add price trace
 fig.add_trace(go.Scatter(
     x=x_values,
     y=filtered_df['Price'],
     mode='lines',
     name='Kaspa Price (USD)',
-    line=dict(
-        color='#00d4ff',
-        width=3,
-        shape='spline',
-        smoothing=0.3
-    ),
-    hovertemplate='<b>%{fullData.name}</b><br>' +
-                  'Date: %{text}<br>' +
-                  'Price: $%{y:.6f}<br>' +
-                  '<extra></extra>',
+    line=dict(color='#00d4ff', width=3, shape='spline', smoothing=0.3),
+    hovertemplate='<b>%{fullData.name}</b><br>Date: %{text}<br>Price: $%{y:.6f}<br><extra></extra>',
     text=[d.strftime('%Y-%m-%d') for d in filtered_df['Date']],
     showlegend=True,
-    fill='tonexty' if len(fig.data) > 0 else None,
     fillcolor='rgba(0, 212, 255, 0.1)'
 ))
 
@@ -797,7 +461,6 @@ if show_power_law == "Show":
     y_fit = a_price * np.power(x_fit, b_price)
     fit_x = x_fit if x_scale_type == "Log" else filtered_df['Date']
 
-    # Main power law line
     fig.add_trace(go.Scatter(
         x=fit_x,
         y=y_fit,
@@ -805,14 +468,10 @@ if show_power_law == "Show":
         name=f'Power Law Fit (R²={r2_price:.3f})',
         line=dict(color='#ff00a8', width=3, dash='solid'),
         showlegend=True,
-        hovertemplate='<b>Power Law Fit</b><br>' +
-                      'R² = %{customdata:.3f}<br>' +
-                      'Value: $%{y:.6f}<br>' +
-                      '<extra></extra>',
+        hovertemplate='<b>Power Law Fit</b><br>R² = %{customdata:.3f}<br>Value: $%{y:.6f}<br><extra></extra>',
         customdata=[r2_price] * len(fit_x)
     ))
 
-    # Support levels
     fig.add_trace(go.Scatter(
         x=fit_x,
         y=y_fit * 0.4,
@@ -823,7 +482,6 @@ if show_power_law == "Show":
         hoverinfo='skip'
     ))
     
-    # Resistance levels
     fig.add_trace(go.Scatter(
         x=fit_x,
         y=y_fit * 2.2,
@@ -845,11 +503,7 @@ fig.update_layout(
     height=700,
     margin=dict(l=40, r=40, t=60, b=0),
     xaxis=dict(
-        title=dict(
-            text=x_title,
-            font=dict(size=14, color='#cbd5e1', weight=600),
-            standoff=30
-        ),
+        title=dict(text=x_title, font=dict(size=14, color='#cbd5e1', weight=600), standoff=30),
         type="log" if x_scale_type == "Log" else None,
         showgrid=True,
         gridwidth=1,
@@ -872,7 +526,7 @@ fig.update_layout(
         gridcolor='rgba(255, 255, 255, 0.08)',
         linecolor='rgba(255, 255, 255, 0.2)',
         tickfont=dict(size=12, color='#94a3b8'),
-        tickprefix='
+        tickprefix="$"
     ),
     legend=dict(
         orientation="h",
@@ -893,7 +547,7 @@ fig.update_layout(
     )
 )
 
-# Display chart with container
+# Display chart
 with st.container():
     st.plotly_chart(fig, use_container_width=True, config={
         'displayModeBar': True,
@@ -928,54 +582,52 @@ else:
     slope_pct_change = 0
     r2_pct_change = 0
 
-# Calculate additional metrics
-volatility_30d = filtered_df['Price'].pct_change().rolling(30).std().iloc[-1] * 100 if len(filtered_df) > 30 else 0
-max_price = filtered_df['Price'].max()
-min_price = filtered_df['Price'].min()
-price_range_pct = ((max_price - min_price) / min_price) * 100
-
 # Enhanced Metrics Section
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    st.markdown(f"""
+    metric_html = f"""
     <div class="metric-card">
         <div class="metric-label">POWER-LAW SLOPE</div>
         <div class="metric-value">{b_price:.4f}</div>
         <div class="metric-delta {'positive' if slope_pct_change >= 0 else 'negative'}">{slope_pct_change:+.2f}%</div>
     </div>
-    """, unsafe_allow_html=True)
+    """
+    st.markdown(metric_html, unsafe_allow_html=True)
 
 with col2:
-    st.markdown(f"""
+    metric_html = f"""
     <div class="metric-card">
         <div class="metric-label">MODEL ACCURACY (R²)</div>
         <div class="metric-value">{r2_price:.4f}</div>
         <div class="metric-delta {'positive' if r2_pct_change >= 0 else 'negative'}">{r2_pct_change:+.2f}%</div>
     </div>
-    """, unsafe_allow_html=True)
+    """
+    st.markdown(metric_html, unsafe_allow_html=True)
 
 with col3:
-    st.markdown(f"""
+    metric_html = f"""
     <div class="metric-card">
         <div class="metric-label">CURRENT PRICE</div>
         <div class="metric-value">${current_price:.6f}</div>
         <div class="metric-delta {'positive' if price_pct_change >= 0 else 'negative'}">{price_pct_change:+.2f}%</div>
     </div>
-    """, unsafe_allow_html=True)
+    """
+    st.markdown(metric_html, unsafe_allow_html=True)
 
 with col4:
     market_cap_estimate = current_price * 24e9
-    st.markdown(f"""
+    metric_html = f"""
     <div class="metric-card">
         <div class="metric-label">EST. MARKET CAP</div>
         <div class="metric-value">${market_cap_estimate/1e9:.2f}B</div>
         <div class="metric-delta {'positive' if price_pct_change >= 0 else 'negative'}">{price_pct_change:+.2f}%</div>
     </div>
-    """, unsafe_allow_html=True)
+    """
+    st.markdown(metric_html, unsafe_allow_html=True)
 
-# Enhanced Footer with additional information
-st.markdown("""
+# Footer
+footer_html = """
 <div style="text-align: center; padding: 50px 40px; margin-top: 40px; 
      background: rgba(15, 20, 25, 0.4); backdrop-filter: blur(20px);
      border-top: 1px solid rgba(255, 255, 255, 0.1);">
@@ -992,4 +644,6 @@ st.markdown("""
         </div>
     </div>
 </div>
-""", unsafe_allow_html=True)
+"""
+
+st.markdown(footer_html, unsafe_allow_html=True)
