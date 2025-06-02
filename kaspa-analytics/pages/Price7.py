@@ -3,24 +3,24 @@ from components.shared_components import (
     render_page_config,
     render_custom_css_with_sidebar,
     render_clean_header,
-    render_sidebar_navigation,
+    render_beautiful_sidebar,  # Updated function name
     render_simple_page_header
 )
 
 # MUST be first Streamlit command
 render_page_config(page_title="Analytics - Kaspa Analytics Pro")
 
-# Apply custom CSS with sidebar support
+# Apply custom CSS with beautiful sidebar support
 render_custom_css_with_sidebar()
 
-# Render clean header (no navigation in header)
+# Render clean header
 render_clean_header(
     user_name=None,  # Try "John Doe" to test user menu
     show_auth=True
 )
 
-# Render sidebar navigation
-render_sidebar_navigation(current_page="Analytics")
+# Render beautiful dropdown sidebar (this replaces the old navigation)
+render_beautiful_sidebar(current_page="Price")  # Change this to test different active states
 
 # Render simple page header
 render_simple_page_header(
@@ -29,7 +29,7 @@ render_simple_page_header(
 )
 
 # Main content
-st.write("## 🚀 Header + Sidebar Working!")
+st.write("## 🚀 Beautiful Dropdown Sidebar!")
 
 # Create some content to test the layout
 col1, col2, col3 = st.columns(3)
@@ -60,10 +60,17 @@ with col3:
 
 st.write("---")
 
+# Test different sidebar states
+st.write("### 🎯 Sidebar Features:")
+st.success("✅ **Dropdown Navigation** - Click 'Market Metrics' to expand")
+st.success("✅ **Glow Effects** - Hover over navigation items")
+st.success("✅ **Live Stats** - Real-time data with pulsing indicator")
+st.success("✅ **Smooth Animations** - Beautiful transitions")
+st.success("✅ **Active States** - Current page highlighting")
+
 # Test the layout with some charts
 st.write("### Sample Chart Area")
 
-# Create a simple chart
 import plotly.graph_objects as go
 import numpy as np
 
@@ -71,7 +78,7 @@ import numpy as np
 x = np.linspace(0, 10, 100)
 y = np.sin(x) + np.random.normal(0, 0.1, 100)
 
-fig = go.Figure(data=go.Scatter(x=x, y=y, mode='lines', name='Sample Data'))
+fig = go.Figure(data=go.Scatter(x=x, y=y, mode='lines', name='Sample Data', line=dict(color='#00d4ff', width=3)))
 fig.update_layout(
     title="Sample Price Chart",
     plot_bgcolor='rgba(0,0,0,0)',
@@ -84,43 +91,47 @@ st.plotly_chart(fig, use_container_width=True)
 
 st.write("---")
 
-st.write("### Layout Test Results:")
-st.success("✅ Clean header with branding and auth")
-st.success("✅ Sidebar navigation with icons") 
-st.success("✅ Proper content spacing")
-st.success("✅ Responsive design")
+# Instructions for testing different pages
+st.write("### 🔧 Testing Different Active States:")
 
-# Instructions
-with st.expander("🔧 Customization Instructions"):
+test_pages = ["Price", "MarketCap", "Volume", "Hashrate", "Difficulty", "Transactions"]
+
+st.write("**Change the `current_page` parameter to test different active states:**")
+
+for page in test_pages:
+    st.code(f'render_beautiful_sidebar(current_page="{page}")')
+
+with st.expander("📋 Navigation Structure"):
     st.write("""
-    **To use this layout in your pages:**
+    **Market Metrics:**
+    - Price Analysis (current)
+    - Market Cap
+    - Trading Volume  
+    - Supply Metrics
     
-    1. **Copy the functions** from the improved shared_components.py
-    2. **Replace your page header calls** with:
-    ```python
-    render_page_config()
-    render_custom_css_with_sidebar()
-    render_clean_header()
-    render_sidebar_navigation(current_page="YourPage")
-    render_simple_page_header("Your Title", "Your subtitle")
-    ```
+    **Mining:**
+    - Hashrate
+    - Difficulty
+    - Mining Revenue
     
-    3. **Customize navigation** by editing the nav_items in render_sidebar_navigation()
-    4. **Add user authentication** by passing user_name to render_clean_header()
+    **Network:**
+    - Transactions
+    - Addresses
+    - Blocks
     
-    **Benefits:**
-    - Clean, professional header
-    - Left sidebar navigation 
-    - Better use of screen space
-    - Mobile responsive
-    - Easy to maintain
+    **Features:**
+    - ✨ Smooth dropdown animations
+    - 🎯 Hover glow effects
+    - 📊 Live stats with pulsing indicator
+    - 🎨 Beautiful glassmorphism design
+    - 📱 Mobile responsive
     """)
 
 st.write("### Next Steps:")
 st.info("""
-1. 🎯 **Update your existing pages** to use this new layout
-2. 🔗 **Add page routing** to make navigation functional  
-3. 👤 **Implement user authentication** system
-4. 📱 **Test on mobile devices**
-5. 🎨 **Customize colors and branding** as needed
+1. 🎯 **Test the dropdowns** - Click on 'Market Metrics' and 'Mining' 
+2. 🖱️ **Hover effects** - Move mouse over navigation items
+3. 📊 **Live stats** - Check the pulsing indicator
+4. 🔄 **Change active page** - Modify `current_page` parameter
+5. 🎨 **Customize** - Add more sections or modify styling
 """)
