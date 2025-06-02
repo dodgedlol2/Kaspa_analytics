@@ -116,17 +116,27 @@ st.markdown("""
         transition: all 0.3s ease;
     }
     
-    /* Reduced spacing and smaller title */
-    .title-section {
+    /* Header section with title and controls side by side */
+    .header-section {
         padding: 20px 40px 8px 40px;
         background: transparent;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+    
+    .title-container {
+        flex: 1;
+        min-width: 200px;
     }
     
     .main-title {
-        font-size: 24px;
+        font-size: 12px;
         font-weight: 700;
         color: #f1f5f9;
-        margin: 0 0 8px 0;
+        margin: 0;
         letter-spacing: 0.5px;
         text-align: left;
         background: linear-gradient(135deg, #f1f5f9 0%, #00d4ff 50%, #cbd5e1 100%);
@@ -134,7 +144,7 @@ st.markdown("""
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
-        animation: shimmer 3s ease-in-out infinite, glow 2s ease-in-out infinite alternate;
+        animation: shimmer 3s ease-in-out infinite, glow 8s ease-in-out infinite alternate;
         position: relative;
     }
     
@@ -142,31 +152,33 @@ st.markdown("""
         width: 100%;
         height: 1px;
         background: linear-gradient(90deg, #ffffff 0%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0.1) 100%);
-        margin: 0 0 16px 0;
+        margin: 8px 0 0 0;
         border-radius: 1px;
         box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
     }
     
-    .controls-section {
-        padding: 8px 0px 16px 0px;
-        background: transparent;
-        border: none;
+    .controls-container {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+        flex-wrap: wrap;
     }
     
-    .title-underline {
-        width: 100%;
-        height: 1px;
-        background: linear-gradient(90deg, #ffffff 0%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0.1) 100%);
-        margin: 0 0 16px 0;
-        border-radius: 1px;
-        box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+    .control-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        min-width: 120px;
     }
+    
+    .control-label {
         font-size: 11px;
         font-weight: 600;
         color: #94a3b8;
         text-transform: uppercase;
         letter-spacing: 1px;
-        margin-bottom: 6px;
+        margin-bottom: 0;
+        white-space: nowrap;
     }
     
     .stSelectbox > div > div {
@@ -271,6 +283,30 @@ st.markdown("""
     footer {visibility: hidden;}
     header {visibility: hidden;}
     .stDeployButton {display: none;}
+    
+    /* Hide the default Streamlit containers for the controls */
+    .controls-section .stSelectbox {
+        margin-bottom: 0 !important;
+    }
+    
+    /* Responsive design for smaller screens */
+    @media (max-width: 768px) {
+        .header-section {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        
+        .controls-container {
+            width: 100%;
+            justify-content: flex-start;
+            gap: 16px;
+        }
+        
+        .control-group {
+            min-width: 100px;
+        }
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -286,38 +322,94 @@ if len(df_30_days_ago) > 0:
 else:
     price_pct_change = 0
 
-# Title and Controls section side by side
+# Header section with title and controls side by side
+st.markdown("""
+<div class="header-section">
+    <div class="title-container">
+        <h1 class="main-title">Kaspa Price</h1>
+        <div class="title-underline"></div>
+    </div>
+    <div class="controls-container" id="controls-placeholder">
+        <!-- Controls will be inserted here -->
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# Create controls in a special container that we'll move with JavaScript
 with st.container():
-    title_col, controls_col = st.columns([1, 2])
+    st.markdown('<div class="controls-section" style="display: none;">', unsafe_allow_html=True)
     
-    with title_col:
-        st.markdown("""
-        <div class="title-section">
-            <h1 class="main-title">Kaspa Price</h1>
-            <div class="title-underline"></div>
-        </div>
-        """, unsafe_allow_html=True)
+    col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
     
-    with controls_col:
-        st.markdown('<div class="controls-section"></div>', unsafe_allow_html=True)
-        # Controls in horizontal layout
-        col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
+    with col1:
+        st.markdown('<div class="control-group"><div class="control-label">Price Scale</div>', unsafe_allow_html=True)
+        y_scale = st.selectbox("", ["Linear", "Log"], index=1, label_visibility="collapsed", key="price_y_scale_select")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    with col2:
+        st.markdown('<div class="control-group"><div class="control-label">Time Scale</div>', unsafe_allow_html=True)
+        x_scale_type = st.selectbox("", ["Linear", "Log"], index=0, label_visibility="collapsed", key="price_x_scale_select")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    with col3:
+        st.markdown('<div class="control-group"><div class="control-label">Time Period</div>', unsafe_allow_html=True)
+        time_range = st.selectbox("", ["1W", "1M", "3M", "6M", "1Y", "All"], index=5, label_visibility="collapsed", key="price_time_range_select")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    with col4:
+        st.markdown('<div class="control-group"><div class="control-label">Power Law</div>', unsafe_allow_html=True)
+        show_power_law = st.selectbox("", ["Hide", "Show"], index=1, label_visibility="collapsed", key="price_power_law_select")
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# JavaScript to move controls to the right side
+st.markdown("""
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    function moveControls() {
+        const controlsSection = document.querySelector('.controls-section');
+        const controlsContainer = document.querySelector('.controls-container');
         
-        with col1:
-            st.markdown('<div class="control-label">Price Scale</div>', unsafe_allow_html=True)
-            y_scale = st.selectbox("", ["Linear", "Log"], index=1, label_visibility="collapsed", key="price_y_scale_select")
-
-        with col2:
-            st.markdown('<div class="control-label">Time Scale</div>', unsafe_allow_html=True)
-            x_scale_type = st.selectbox("", ["Linear", "Log"], index=0, label_visibility="collapsed", key="price_x_scale_select")
-
-        with col3:
-            st.markdown('<div class="control-label">Time Period</div>', unsafe_allow_html=True)
-            time_range = st.selectbox("", ["1W", "1M", "3M", "6M", "1Y", "All"], index=5, label_visibility="collapsed", key="price_time_range_select")
-
-        with col4:
-            st.markdown('<div class="control-label">Power Law</div>', unsafe_allow_html=True)
-            show_power_law = st.selectbox("", ["Hide", "Show"], index=1, label_visibility="collapsed", key="power_law_select")
+        if (controlsSection && controlsContainer) {
+            // Get all control groups
+            const controlGroups = controlsSection.querySelectorAll('.stSelectbox');
+            const labels = controlsSection.querySelectorAll('.control-label');
+            
+            // Clear the controls container
+            controlsContainer.innerHTML = '';
+            
+            // Move each control with its label
+            controlGroups.forEach((control, index) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'control-group';
+                
+                if (labels[index]) {
+                    const labelClone = labels[index].cloneNode(true);
+                    wrapper.appendChild(labelClone);
+                }
+                
+                const controlClone = control.cloneNode(true);
+                wrapper.appendChild(controlClone);
+                
+                controlsContainer.appendChild(wrapper);
+            });
+            
+            // Hide the original controls section
+            controlsSection.style.display = 'none';
+        }
+    }
+    
+    // Try to move controls immediately
+    moveControls();
+    
+    // Also try after a short delay in case elements aren't ready
+    setTimeout(moveControls, 100);
+    setTimeout(moveControls, 500);
+    setTimeout(moveControls, 1000);
+});
+</script>
+""", unsafe_allow_html=True)
 
 # Chart content section
 st.markdown('<div class="chart-content"></div>', unsafe_allow_html=True)
