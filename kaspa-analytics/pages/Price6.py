@@ -85,7 +85,7 @@ st.markdown("""
     
     /* Enhanced Controls Section */
     .controls-section {
-        padding: 16px 28px 20px 28px;
+        padding: 16px 0px 20px 0px;
         background: transparent;
         border: none;
     }
@@ -216,11 +216,9 @@ if len(df_30_days_ago) > 0:
 else:
     price_pct_change = 0
 
-# Chart Section with controls only
+# Controls section without any wrapper
 st.markdown("""
-<div class="chart-section">
-    <div class="controls-section">
-    </div>
+<div class="controls-section">
 </div>
 """, unsafe_allow_html=True)
 
