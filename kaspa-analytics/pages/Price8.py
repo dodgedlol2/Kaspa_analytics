@@ -261,9 +261,10 @@ def create_integrated_chart():
     x_values = filtered_df['Date']
     x_title = "Date"
     
-    # Add price trace
+    # Add price trace - we need both linear and log versions
+    # Linear time version (using dates)
     fig.add_trace(go.Scatter(
-        x=x_values,
+        x=filtered_df['Date'],
         y=filtered_df['Price'],
         mode='lines',
         name='Kaspa Price (USD)',
@@ -271,28 +272,56 @@ def create_integrated_chart():
         hovertemplate='<b>%{fullData.name}</b><br>Date: %{text}<br>Price: $%{y:.6f}<br><extra></extra>',
         text=[d.strftime('%Y-%m-%d') for d in filtered_df['Date']],
         showlegend=True,
-        fillcolor='rgba(0, 212, 255, 0.1)'
+        fillcolor='rgba(0, 212, 255, 0.1)',
+        visible=True
+    ))
+    
+    # Log time version (using days_from_genesis) - initially hidden
+    fig.add_trace(go.Scatter(
+        x=filtered_df['days_from_genesis'],
+        y=filtered_df['Price'],
+        mode='lines',
+        name='Kaspa Price (USD)',
+        line=dict(color='#00d4ff', width=3, shape='spline', smoothing=0.3),
+        hovertemplate='<b>%{fullData.name}</b><br>Days: %{x}<br>Price: $%{y:.6f}<br><extra></extra>',
+        showlegend=False,  # Don't show in legend to avoid duplicates
+        fillcolor='rgba(0, 212, 255, 0.1)',
+        visible=False
     ))
     
     # Add power law traces (default: shown)
-    x_fit = filtered_df['days_from_genesis']
-    y_fit = a_price * np.power(x_fit, b_price)
-    fit_x = filtered_df['Date']  # Default linear time scale
-
+    x_fit_days = filtered_df['days_from_genesis']
+    y_fit = a_price * np.power(x_fit_days, b_price)
+    
+    # Power law for linear time (using dates)
     fig.add_trace(go.Scatter(
-        x=fit_x,
+        x=filtered_df['Date'],
         y=y_fit,
         mode='lines',
         name=f'Power Law Fit (R²={r2_price:.3f})',
         line=dict(color='#ff8c00', width=3, dash='solid'),
         showlegend=True,
         hovertemplate='<b>Power Law Fit</b><br>R² = %{customdata:.3f}<br>Value: $%{y:.6f}<br><extra></extra>',
-        customdata=[r2_price] * len(fit_x),
+        customdata=[r2_price] * len(filtered_df['Date']),
         visible=True
     ))
-
+    
+    # Power law for log time (using days_from_genesis) - initially hidden
     fig.add_trace(go.Scatter(
-        x=fit_x,
+        x=x_fit_days,
+        y=y_fit,
+        mode='lines',
+        name=f'Power Law Fit (R²={r2_price:.3f})',
+        line=dict(color='#ff8c00', width=3, dash='solid'),
+        showlegend=False,
+        hovertemplate='<b>Power Law Fit</b><br>R² = %{customdata:.3f}<br>Value: $%{y:.6f}<br><extra></extra>',
+        customdata=[r2_price] * len(x_fit_days),
+        visible=False
+    ))
+
+    # Support line for linear time
+    fig.add_trace(go.Scatter(
+        x=filtered_df['Date'],
         y=y_fit * 0.4,
         mode='lines',
         name='Support (-60%)',
@@ -302,8 +331,21 @@ def create_integrated_chart():
         visible=True
     ))
     
+    # Support line for log time - initially hidden
     fig.add_trace(go.Scatter(
-        x=fit_x,
+        x=x_fit_days,
+        y=y_fit * 0.4,
+        mode='lines',
+        name='Support (-60%)',
+        line=dict(color='rgba(255, 255, 255, 0.7)', width=1.5, dash='dot'),
+        showlegend=False,
+        hoverinfo='skip',
+        visible=False
+    ))
+    
+    # Resistance line for linear time
+    fig.add_trace(go.Scatter(
+        x=filtered_df['Date'],
         y=y_fit * 2.2,
         mode='lines',
         name='Resistance (+120%)',
@@ -313,6 +355,20 @@ def create_integrated_chart():
         showlegend=True,
         hoverinfo='skip',
         visible=True
+    ))
+    
+    # Resistance line for log time - initially hidden
+    fig.add_trace(go.Scatter(
+        x=x_fit_days,
+        y=y_fit * 2.2,
+        mode='lines',
+        name='Resistance (+120%)',
+        line=dict(color='rgba(255, 255, 255, 0.7)', width=1.5, dash='dot'),
+        fill='tonexty',
+        fillcolor='rgba(100, 100, 100, 0.05)',
+        showlegend=False,
+        hoverinfo='skip',
+        visible=False
     ))
 
     # Custom Y-axis tick formatting function
