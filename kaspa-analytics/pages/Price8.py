@@ -267,17 +267,9 @@ def create_integrated_chart():
     start_date = price_df['Date'].iloc[0]  # All data
     filtered_df = price_df[price_df['Date'] >= start_date]
     
-    # Set x_values and x_title based on default x_scale (Linear)
-    if default_x_scale == "Log":
-        x_values = filtered_df['days_from_genesis']
-        x_title = "Days Since Genesis (Log Scale)"
-    else:
-        x_values = filtered_df['Date']
-        x_title = "Date"
-    
-    # Add price trace with both date and days data
+    # Create LINEAR time traces (using dates) - visible by default
     fig.add_trace(go.Scatter(
-        x=x_values,
+        x=filtered_df['Date'],
         y=filtered_df['Price'],
         mode='lines',
         name='Kaspa Price (USD)',
@@ -285,39 +277,79 @@ def create_integrated_chart():
         hovertemplate='<b>%{fullData.name}</b><br>Date: %{text}<br>Price: $%{y:.6f}<br><extra></extra>',
         text=[d.strftime('%Y-%m-%d') for d in filtered_df['Date']],
         showlegend=True,
-        fillcolor='rgba(0, 212, 255, 0.1)',
-        customdata=list(zip(filtered_df['Date'], filtered_df['days_from_genesis']))  # Store both for switching
+        visible=True
     ))
     
-    # Add power law if default is "Show"
+    # Create LOG time traces (using days_from_genesis) - hidden by default
+    fig.add_trace(go.Scatter(
+        x=filtered_df['days_from_genesis'],
+        y=filtered_df['Price'],
+        mode='lines',
+        name='Kaspa Price (USD)',
+        line=dict(color='#00d4ff', width=3, shape='spline', smoothing=0.3),
+        hovertemplate='<b>%{fullData.name}</b><br>Days: %{x}<br>Price: $%{y:.6f}<br><extra></extra>',
+        showlegend=False,  # Don't duplicate in legend
+        visible=False
+    ))
+    
+    # Add power law traces if default is "Show"
     if default_power_law == "Show":
-        x_fit = filtered_df['days_from_genesis']
-        y_fit = a_price * np.power(x_fit, b_price)
-        fit_x = x_fit if default_x_scale == "Log" else filtered_df['Date']
-
+        x_fit_days = filtered_df['days_from_genesis']
+        y_fit = a_price * np.power(x_fit_days, b_price)
+        
+        # Power law for LINEAR time (using dates) - visible by default
         fig.add_trace(go.Scatter(
-            x=fit_x,
+            x=filtered_df['Date'],
             y=y_fit,
             mode='lines',
             name=f'Power Law Fit (R²={r2_price:.3f})',
             line=dict(color='#ff8c00', width=3, dash='solid'),
             showlegend=True,
             hovertemplate='<b>Power Law Fit</b><br>R² = %{customdata:.3f}<br>Value: $%{y:.6f}<br><extra></extra>',
-            customdata=[r2_price] * len(fit_x)
+            customdata=[r2_price] * len(filtered_df['Date']),
+            visible=True
+        ))
+        
+        # Power law for LOG time (using days_from_genesis) - hidden by default
+        fig.add_trace(go.Scatter(
+            x=x_fit_days,
+            y=y_fit,
+            mode='lines',
+            name=f'Power Law Fit (R²={r2_price:.3f})',
+            line=dict(color='#ff8c00', width=3, dash='solid'),
+            showlegend=False,
+            hovertemplate='<b>Power Law Fit</b><br>R² = %{customdata:.3f}<br>Value: $%{y:.6f}<br><extra></extra>',
+            customdata=[r2_price] * len(x_fit_days),
+            visible=False
         ))
 
+        # Support for LINEAR time - visible by default
         fig.add_trace(go.Scatter(
-            x=fit_x,
+            x=filtered_df['Date'],
             y=y_fit * 0.4,
             mode='lines',
             name='Support (-60%)',
             line=dict(color='rgba(255, 255, 255, 0.7)', width=1.5, dash='dot'),
             showlegend=True,
-            hoverinfo='skip'
+            hoverinfo='skip',
+            visible=True
         ))
         
+        # Support for LOG time - hidden by default
         fig.add_trace(go.Scatter(
-            x=fit_x,
+            x=x_fit_days,
+            y=y_fit * 0.4,
+            mode='lines',
+            name='Support (-60%)',
+            line=dict(color='rgba(255, 255, 255, 0.7)', width=1.5, dash='dot'),
+            showlegend=False,
+            hoverinfo='skip',
+            visible=False
+        ))
+        
+        # Resistance for LINEAR time - visible by default
+        fig.add_trace(go.Scatter(
+            x=filtered_df['Date'],
             y=y_fit * 2.2,
             mode='lines',
             name='Resistance (+120%)',
@@ -325,7 +357,22 @@ def create_integrated_chart():
             fill='tonexty',
             fillcolor='rgba(100, 100, 100, 0.05)',
             showlegend=True,
-            hoverinfo='skip'
+            hoverinfo='skip',
+            visible=True
+        ))
+        
+        # Resistance for LOG time - hidden by default
+        fig.add_trace(go.Scatter(
+            x=x_fit_days,
+            y=y_fit * 2.2,
+            mode='lines',
+            name='Resistance (+120%)',
+            line=dict(color='rgba(255, 255, 255, 0.7)', width=1.5, dash='dot'),
+            fill='tonexty',
+            fillcolor='rgba(100, 100, 100, 0.05)',
+            showlegend=False,
+            hoverinfo='skip',
+            visible=False
         ))
 
     # Custom Y-axis tick formatting function (copied from original)
@@ -390,15 +437,7 @@ def create_integrated_chart():
         y_minor_ticks = []
 
     # Setup X-axis ticks based on default x_scale (Linear)  
-    if default_x_scale == "Log":
-        x_min, x_max = filtered_df['days_from_genesis'].min(), filtered_df['days_from_genesis'].max()
-        x_major_ticks, x_intermediate_ticks, x_minor_ticks = generate_log_ticks(x_min, x_max)
-        x_tick_vals = sorted(x_major_ticks + x_intermediate_ticks)
-        x_tick_text = [f"{int(val)}" for val in x_tick_vals]
-    else:
-        x_tick_vals = None
-        x_tick_text = None
-        x_minor_ticks = []
+    x_title = "Date"  # Default linear uses dates
 
     # Enhanced chart layout with integrated control buttons
     fig.update_layout(
