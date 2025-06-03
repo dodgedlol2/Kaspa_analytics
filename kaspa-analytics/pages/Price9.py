@@ -410,109 +410,128 @@ with title_col:
 with middle_space:
     st.empty()
 
-# Controls column - Use Streamlit buttons for functionality
+# Price chart controls section with beautiful toggle buttons
+st.markdown('<div class="price-header-section">', unsafe_allow_html=True)
+
+# Column structure with spacing controls
+left_space, title_col, middle_space, controls_col = st.columns([0.1, 1, 2, 6])
+
+# Left invisible spacing column
+with left_space:
+    st.empty()
+
+# Title column
+with title_col:
+    st.markdown('<div class="price-title-container"><h1 class="price-main-title">Kaspa Price</h1></div>', unsafe_allow_html=True)
+
+# Middle invisible spacing column
+with middle_space:
+    st.empty()
+
+# Controls column - Use simple buttons without nested columns
 with controls_col:
     st.markdown('<div class="price-controls-container">', unsafe_allow_html=True)
     
-    # Create 4 control groups side by side
-    ctrl_col1, ctrl_col2, ctrl_col3, ctrl_col4 = st.columns(4)
-    
     # Price Scale Control
-    with ctrl_col1:
-        st.markdown('<div class="price-control-group"><div class="price-control-label">Price Scale</div>', unsafe_allow_html=True)
-        if st.button("Linear" if y_scale == "Log" else "Log", key="price_scale_btn", 
-                    help="Toggle between Linear and Log price scale"):
-            if y_scale == "Log":
-                y_scale = "Linear"
-            else:
-                y_scale = "Log"
-        
-        # Show current selection with custom styling
-        current_scale = y_scale
-        st.markdown(f'''
-        <div class="toggle-group">
-            <div class="toggle-button {'active' if current_scale == 'Linear' else ''}">Linear</div>
-            <div class="toggle-button {'active' if current_scale == 'Log' else ''}">Log</div>
-        </div>
-        ''', unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('<div class="price-control-group"><div class="price-control-label">Price Scale</div>', unsafe_allow_html=True)
+    if st.button("Linear" if y_scale == "Log" else "Log", key="price_scale_btn", 
+                help="Toggle between Linear and Log price scale"):
+        if y_scale == "Log":
+            y_scale = "Linear"
+        else:
+            y_scale = "Log"
     
-    # Time Scale Control
-    with ctrl_col2:
-        st.markdown('<div class="price-control-group"><div class="price-control-label">Time Scale</div>', unsafe_allow_html=True)
-        if st.button("Linear" if x_scale_type == "Log" else "Log", key="time_scale_btn",
-                    help="Toggle between Linear and Log time scale"):
-            if x_scale_type == "Log":
-                x_scale_type = "Linear"
-            else:
-                x_scale_type = "Log"
-        
-        st.markdown(f'''
-        <div class="toggle-group">
-            <div class="toggle-button {'active' if x_scale_type == 'Linear' else ''}">Linear</div>
-            <div class="toggle-button {'active' if x_scale_type == 'Log' else ''}">Log</div>
-        </div>
-        ''', unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-    
-    # Time Period Control
-    with ctrl_col3:
-        st.markdown('<div class="price-control-group"><div class="price-control-label">Time Period</div>', unsafe_allow_html=True)
-        
-        # Create time period buttons in a sub-grid
-        time_periods = ["1W", "1M", "3M", "6M", "1Y", "All"]
-        
-        # Create 2 rows of 3 buttons each
-        t1, t2, t3 = st.columns(3)
-        with t1:
-            if st.button("1W", key="1w_btn", help="1 Week"):
-                time_range = "1W"
-            if st.button("6M", key="6m_btn", help="6 Months"):
-                time_range = "6M"
-        with t2:
-            if st.button("1M", key="1m_btn", help="1 Month"):
-                time_range = "1M"
-            if st.button("1Y", key="1y_btn", help="1 Year"):
-                time_range = "1Y"
-        with t3:
-            if st.button("3M", key="3m_btn", help="3 Months"):
-                time_range = "3M"
-            if st.button("All", key="all_btn", help="All Time"):
-                time_range = "All"
-        
-        # Show current selection
-        st.markdown(f'''
-        <div class="toggle-group time-period-group">
-            <div class="toggle-button {'active' if time_range == '1W' else ''}">1W</div>
-            <div class="toggle-button {'active' if time_range == '1M' else ''}">1M</div>
-            <div class="toggle-button {'active' if time_range == '3M' else ''}">3M</div>
-            <div class="toggle-button {'active' if time_range == '6M' else ''}">6M</div>
-            <div class="toggle-button {'active' if time_range == '1Y' else ''}">1Y</div>
-            <div class="toggle-button {'active' if time_range == 'All' else ''}">All</div>
-        </div>
-        ''', unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-    
-    # Power Law Control
-    with ctrl_col4:
-        st.markdown('<div class="price-control-group"><div class="price-control-label">Power Law</div>', unsafe_allow_html=True)
-        if st.button("Hide" if show_power_law == "Show" else "Show", key="power_law_btn",
-                    help="Toggle Power Law display"):
-            if show_power_law == "Show":
-                show_power_law = "Hide"
-            else:
-                show_power_law = "Show"
-        
-        # Show current selection with toggle switch styling
-        st.markdown(f'''
-        <div class="power-law-toggle {'active' if show_power_law == 'Show' else ''}">
-            <div class="power-law-switch {'active' if show_power_law == 'Show' else ''}"></div>
-            <div class="power-law-label">{'ON' if show_power_law == 'Show' else 'OFF'}</div>
-        </div>
-        ''', unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+    # Show current selection with custom styling
+    current_scale = y_scale
+    st.markdown(f'''
+    <div class="toggle-group">
+        <div class="toggle-button {'active' if current_scale == 'Linear' else ''}">Linear</div>
+        <div class="toggle-button {'active' if current_scale == 'Log' else ''}">Log</div>
+    </div>
+    </div>
+    ''', unsafe_allow_html=True)
     
     st.markdown('</div>', unsafe_allow_html=True)
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+# Separate controls section to avoid nested columns
+st.markdown('<div style="padding: 0 40px; margin-bottom: 20px;">', unsafe_allow_html=True)
+
+# Create separate rows for controls
+col1, col2, col3, col4 = st.columns(4)
+
+# Time Scale Control
+with col1:
+    st.markdown('<div class="price-control-group"><div class="price-control-label">Time Scale</div>', unsafe_allow_html=True)
+    if st.button("Linear" if x_scale_type == "Log" else "Log", key="time_scale_btn",
+                help="Toggle between Linear and Log time scale"):
+        if x_scale_type == "Log":
+            x_scale_type = "Linear"
+        else:
+            x_scale_type = "Log"
+    
+    st.markdown(f'''
+    <div class="toggle-group">
+        <div class="toggle-button {'active' if x_scale_type == 'Linear' else ''}">Linear</div>
+        <div class="toggle-button {'active' if x_scale_type == 'Log' else ''}">Log</div>
+    </div>
+    </div>
+    ''', unsafe_allow_html=True)
+
+# Time Period Control
+with col2:
+    st.markdown('<div class="price-control-group"><div class="price-control-label">Time Period</div>', unsafe_allow_html=True)
+    
+    # Create time period buttons without nested columns
+    if st.button("1W", key="1w_btn", help="1 Week"):
+        time_range = "1W"
+    if st.button("1M", key="1m_btn", help="1 Month"):
+        time_range = "1M"
+    if st.button("3M", key="3m_btn", help="3 Months"):
+        time_range = "3M"
+    if st.button("6M", key="6m_btn", help="6 Months"):
+        time_range = "6M"
+    if st.button("1Y", key="1y_btn", help="1 Year"):
+        time_range = "1Y"
+    if st.button("All", key="all_btn", help="All Time"):
+        time_range = "All"
+    
+    # Show current selection
+    st.markdown(f'''
+    <div class="toggle-group time-period-group">
+        <div class="toggle-button {'active' if time_range == '1W' else ''}">1W</div>
+        <div class="toggle-button {'active' if time_range == '1M' else ''}">1M</div>
+        <div class="toggle-button {'active' if time_range == '3M' else ''}">3M</div>
+        <div class="toggle-button {'active' if time_range == '6M' else ''}">6M</div>
+        <div class="toggle-button {'active' if time_range == '1Y' else ''}">1Y</div>
+        <div class="toggle-button {'active' if time_range == 'All' else ''}">All</div>
+    </div>
+    </div>
+    ''', unsafe_allow_html=True)
+
+# Power Law Control
+with col3:
+    st.markdown('<div class="price-control-group"><div class="price-control-label">Power Law</div>', unsafe_allow_html=True)
+    if st.button("Hide" if show_power_law == "Show" else "Show", key="power_law_btn",
+                help="Toggle Power Law display"):
+        if show_power_law == "Show":
+            show_power_law = "Hide"
+        else:
+            show_power_law = "Show"
+    
+    # Show current selection with toggle switch styling
+    st.markdown(f'''
+    <div class="power-law-toggle {'active' if show_power_law == 'Show' else ''}">
+        <div class="power-law-switch {'active' if show_power_law == 'Show' else ''}"></div>
+        <div class="power-law-label">{'ON' if show_power_law == 'Show' else 'OFF'}</div>
+    </div>
+    </div>
+    ''', unsafe_allow_html=True)
+
+# Empty column for spacing
+with col4:
+    st.empty()
 
 st.markdown('</div>', unsafe_allow_html=True)
 
