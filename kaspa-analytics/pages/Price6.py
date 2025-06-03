@@ -336,38 +336,41 @@ else:
 # Header section with title and controls on the same line
 st.markdown('<div class="header-section">', unsafe_allow_html=True)
 
-# Create two columns: one for title, one for controls
-title_col, controls_col = st.columns([1, 3])
+# Column structure with spacing controls:
+# [Left Space] [Title] [Middle Space] [Controls: Price Scale | Time Scale | Time Period | Power Law]
+left_space, title_col, middle_space, ctrl_col1, ctrl_col2, ctrl_col3, ctrl_col4 = st.columns([0.5, 1, 1, 1, 1, 1, 1])
 
+# Left invisible spacing column
+with left_space:
+    st.empty()  # Creates invisible space to the left of title
+
+# Title column
 with title_col:
     st.markdown('<div class="title-container"><h1 class="main-title">Kaspa Price</h1></div>', unsafe_allow_html=True)
 
-with controls_col:
-    st.markdown('<div class="controls-container">', unsafe_allow_html=True)
-    
-    # Create inline controls
-    ctrl_col1, ctrl_col2, ctrl_col3, ctrl_col4 = st.columns([1, 1, 1, 1])
-    
-    with ctrl_col1:
-        st.markdown('<div class="control-group"><div class="control-label">Price Scale</div>', unsafe_allow_html=True)
-        y_scale = st.selectbox("", ["Linear", "Log"], index=1, label_visibility="collapsed", key="price_y_scale_select")
-        st.markdown('</div>', unsafe_allow_html=True)
+# Middle invisible spacing column
+with middle_space:
+    st.empty()  # Creates invisible space between title and controls
 
-    with ctrl_col2:
-        st.markdown('<div class="control-group"><div class="control-label">Time Scale</div>', unsafe_allow_html=True)
-        x_scale_type = st.selectbox("", ["Linear", "Log"], index=0, label_visibility="collapsed", key="price_x_scale_select")
-        st.markdown('</div>', unsafe_allow_html=True)
+# Control columns
+with ctrl_col1:
+    st.markdown('<div class="control-group"><div class="control-label">Price Scale</div>', unsafe_allow_html=True)
+    y_scale = st.selectbox("", ["Linear", "Log"], index=1, label_visibility="collapsed", key="price_y_scale_select")
+    st.markdown('</div>', unsafe_allow_html=True)
 
-    with ctrl_col3:
-        st.markdown('<div class="control-group"><div class="control-label">Time Period</div>', unsafe_allow_html=True)
-        time_range = st.selectbox("", ["1W", "1M", "3M", "6M", "1Y", "All"], index=5, label_visibility="collapsed", key="price_time_range_select")
-        st.markdown('</div>', unsafe_allow_html=True)
+with ctrl_col2:
+    st.markdown('<div class="control-group"><div class="control-label">Time Scale</div>', unsafe_allow_html=True)
+    x_scale_type = st.selectbox("", ["Linear", "Log"], index=0, label_visibility="collapsed", key="price_x_scale_select")
+    st.markdown('</div>', unsafe_allow_html=True)
 
-    with ctrl_col4:
-        st.markdown('<div class="control-group"><div class="control-label">Power Law</div>', unsafe_allow_html=True)
-        show_power_law = st.selectbox("", ["Hide", "Show"], index=1, label_visibility="collapsed", key="price_power_law_select")
-        st.markdown('</div>', unsafe_allow_html=True)
-    
+with ctrl_col3:
+    st.markdown('<div class="control-group"><div class="control-label">Time Period</div>', unsafe_allow_html=True)
+    time_range = st.selectbox("", ["1W", "1M", "3M", "6M", "1Y", "All"], index=5, label_visibility="collapsed", key="price_time_range_select")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+with ctrl_col4:
+    st.markdown('<div class="control-group"><div class="control-label">Power Law</div>', unsafe_allow_html=True)
+    show_power_law = st.selectbox("", ["Hide", "Show"], index=1, label_visibility="collapsed", key="price_power_law_select")
     st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown('</div>', unsafe_allow_html=True)
