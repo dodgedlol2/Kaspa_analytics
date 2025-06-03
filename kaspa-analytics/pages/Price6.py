@@ -142,7 +142,7 @@ st.markdown("""
         text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
         position: relative;
         white-space: nowrap;
-        line-height: 1.1;  /* Tighter line height */
+        line-height: 0.1;  /* Tighter line height */
     }
     
     .title-underline-container {
