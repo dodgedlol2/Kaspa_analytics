@@ -380,7 +380,7 @@ for i, trace in enumerate(all_traces):
     trace.visible = False
     fig.add_trace(trace)
 
-# Set default configuration and get proper layout settings
+# Set default configuration (All time, Log x-scale, Log y-scale, Show power law)
 default_config_idx = None
 for i, config in enumerate(trace_configs):
     if (config['time_range'] == 'All' and 
@@ -394,20 +394,6 @@ if default_config_idx is not None:
     default_config = trace_configs[default_config_idx]
     for idx in default_config['trace_indices']:
         fig.data[idx].visible = True
-    
-    # Get the default layout settings
-    default_filtered_df = default_config['filtered_df']
-    default_y_min, default_y_max = default_filtered_df['Price'].min(), default_filtered_df['Price'].max()
-    default_x_min, default_x_max = default_filtered_df['days_from_genesis'].min(), default_filtered_df['days_from_genesis'].max()
-    
-    # Generate default log ticks
-    default_y_major, default_y_intermediate, default_y_minor = generate_log_ticks(default_y_min, default_y_max)
-    default_y_tick_vals = sorted(default_y_major + default_y_intermediate)
-    default_y_tick_text = [format_currency(val) for val in default_y_tick_vals]
-    
-    default_x_major, default_x_intermediate, default_x_minor = generate_log_ticks(default_x_min, default_x_max)
-    default_x_tick_vals = sorted(default_x_major + default_x_intermediate)
-    default_x_tick_text = [f"{int(val)}" for val in default_x_tick_vals]
 
 # Create dropdown menu configurations
 def create_visibility_array(target_config_idx):
@@ -659,42 +645,20 @@ fig.update_layout(
     xaxis=dict(
         title=dict(text="Days Since Genesis (Log Scale)", font=dict(size=13, color='#cbd5e1', weight=600), standoff=35),
         type="log",
-        range=[default_x_min * 0.95, default_x_max * 1.05],
         showgrid=True,
         gridwidth=1.2,
         gridcolor='rgba(255, 255, 255, 0.12)',
         linecolor='rgba(255, 255, 255, 0.15)',
-        tickfont=dict(size=11, color='#94a3b8'),
-        tickmode='array',
-        tickvals=default_x_tick_vals,
-        ticktext=default_x_tick_text,
-        minor=dict(
-            showgrid=True,
-            gridwidth=0.5,
-            gridcolor='rgba(255, 255, 255, 0.04)',
-            tickmode='array',
-            tickvals=default_x_minor
-        )
+        tickfont=dict(size=11, color='#94a3b8')
     ),
     yaxis=dict(
         title=None,
         type="log",
-        range=[default_y_min * 0.8, default_y_max * 1.2],
         showgrid=True,
         gridwidth=1.2,
         gridcolor='rgba(255, 255, 255, 0.12)',
         linecolor='rgba(255, 255, 255, 0.15)',
-        tickfont=dict(size=11, color='#94a3b8'),
-        tickmode='array',
-        tickvals=default_y_tick_vals,
-        ticktext=default_y_tick_text,
-        minor=dict(
-            showgrid=True,
-            gridwidth=0.5,
-            gridcolor='rgba(255, 255, 255, 0.04)',
-            tickmode='array',
-            tickvals=default_y_minor
-        )
+        tickfont=dict(size=11, color='#94a3b8')
     ),
     legend=dict(
         orientation="h",
