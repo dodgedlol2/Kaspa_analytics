@@ -321,12 +321,12 @@ if len(df_30_days_ago) > 0:
 else:
     price_pct_change = 0
 
-# Header section with title and controls on the same line (removed Price Scale)
+# Header section with title and controls on the same line
 st.markdown('<div class="header-section">', unsafe_allow_html=True)
 
 # Column structure with spacing controls:
-# [Left Space] [Title] [Middle Space] [Controls: Time Scale | Time Period | Power Law]
-left_space, title_col, middle_space, ctrl_col1, ctrl_col2, ctrl_col3 = st.columns([0.1, 1, 5, 1, 1, 1])
+# [Left Space] [Title] [Middle Space] [Controls: Price Scale | Time Scale | Time Period | Power Law]
+left_space, title_col, middle_space, ctrl_col1, ctrl_col2, ctrl_col3, ctrl_col4 = st.columns([0.1, 1, 5, 1, 1, 1, 1])
 
 # Left invisible spacing column
 with left_space:
@@ -340,18 +340,23 @@ with title_col:
 with middle_space:
     st.empty()  # Creates invisible space between title and controls
 
-# Control columns (removed Price Scale)
+# Control columns
 with ctrl_col1:
+    st.markdown('<div class="control-group"><div class="control-label">Price Scale</div>', unsafe_allow_html=True)
+    y_scale = st.selectbox("", ["Linear", "Log"], index=1, label_visibility="collapsed", key="price_y_scale_select")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+with ctrl_col2:
     st.markdown('<div class="control-group"><div class="control-label">Time Scale</div>', unsafe_allow_html=True)
     x_scale_type = st.selectbox("", ["Linear", "Log"], index=0, label_visibility="collapsed", key="price_x_scale_select")
     st.markdown('</div>', unsafe_allow_html=True)
 
-with ctrl_col2:
+with ctrl_col3:
     st.markdown('<div class="control-group"><div class="control-label">Time Period</div>', unsafe_allow_html=True)
     time_range = st.selectbox("", ["1W", "1M", "3M", "6M", "1Y", "All"], index=5, label_visibility="collapsed", key="price_time_range_select")
     st.markdown('</div>', unsafe_allow_html=True)
 
-with ctrl_col3:
+with ctrl_col4:
     st.markdown('<div class="control-group"><div class="control-label">Power Law</div>', unsafe_allow_html=True)
     show_power_law = st.selectbox("", ["Hide", "Show"], index=1, label_visibility="collapsed", key="price_power_law_select")
     st.markdown('</div>', unsafe_allow_html=True)
@@ -493,8 +498,19 @@ if show_power_law == "Show":
         hoverinfo='skip'
     ))
 
-# Enhanced chart layout with integrated scale controls
+# Enhanced chart layout with custom tick formatting
 y_min, y_max = filtered_df['Price'].min(), filtered_df['Price'].max()
+
+# Generate custom ticks for Y-axis if log scale
+if y_scale == "Log":
+    y_major_ticks, y_intermediate_ticks, y_minor_ticks = generate_log_ticks(y_min, y_max)
+    # Combine major and intermediate ticks for display
+    y_tick_vals = sorted(y_major_ticks + y_intermediate_ticks)
+    y_tick_text = [format_currency(val) for val in y_tick_vals]
+else:
+    y_tick_vals = None
+    y_tick_text = None
+    y_minor_ticks = []
 
 # Generate custom ticks for X-axis if log scale
 if x_scale_type == "Log":
@@ -534,16 +550,27 @@ fig.update_layout(
             tickmode='array',
             tickvals=x_minor_ticks if x_scale_type == "Log" else []
         ) if x_scale_type == "Log" else dict()
+        # Removed rangeslider configuration
     ),
     yaxis=dict(
         title=None,
-        type="linear",  # Start with linear scale
+        type="log" if y_scale == "Log" else "linear",
         showgrid=True,
         gridwidth=1.2,
-        gridcolor='rgba(255, 255, 255, 0.08)',
+        gridcolor='rgba(255, 255, 255, 0.12)' if y_scale == "Log" else 'rgba(255, 255, 255, 0.08)',
         linecolor='rgba(255, 255, 255, 0.15)',
         tickfont=dict(size=11, color='#94a3b8'),
-        tickformat='$,.6f'
+        # Physics-style log ticks with 1, 2, 5 pattern and custom formatting
+        tickmode='array' if y_scale == "Log" else 'auto',
+        tickvals=y_tick_vals,
+        ticktext=y_tick_text,
+        minor=dict(
+            showgrid=True,
+            gridwidth=0.5,
+            gridcolor='rgba(255, 255, 255, 0.04)',
+            tickmode='array',
+            tickvals=y_minor_ticks if y_scale == "Log" else []
+        ) if y_scale == "Log" else dict()
     ),
     legend=dict(
         orientation="h",
@@ -561,61 +588,7 @@ fig.update_layout(
         bordercolor='rgba(0, 212, 255, 0.5)',
         font=dict(color='#e2e8f0', size=11),
         align='left'
-    ),
-    # Add custom buttons for scale switching with clickable text style
-    updatemenus=[
-        dict(
-            type="buttons",
-            direction="left",
-            buttons=list([
-                dict(
-                    args=[{"yaxis.type": "linear"}],
-                    label="Linear",
-                    method="relayout"
-                ),
-                dict(
-                    args=[{"yaxis.type": "log"}],
-                    label="Log",
-                    method="relayout"
-                )
-            ]),
-            pad={"r": 10, "t": 10},
-            showactive=True,
-            x=0.01,
-            xanchor="left",
-            y=1.02,
-            yanchor="top",
-            bgcolor='rgba(0,0,0,0)',
-            bordercolor='rgba(0,0,0,0)',
-            borderwidth=0,
-            font=dict(
-                family='Inter',
-                size=11,
-                color='#94a3b8'
-            ),
-            active=0,
-            # Style active button
-            activecolor='#00d4ff'
-        ),
-    ],
-    # Add annotation for the scale selector
-    annotations=[
-        dict(
-            text="Price Scale:",
-            showarrow=False,
-            x=0.01,
-            y=1.08,
-            xref="paper",
-            yref="paper",
-            xanchor="left",
-            yanchor="bottom",
-            font=dict(
-                family='Inter',
-                size=10,
-                color='#64748b'
-            )
-        )
-    ]
+    )
 )
 
 # Display chart
