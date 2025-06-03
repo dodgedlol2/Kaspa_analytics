@@ -492,7 +492,7 @@ fig.update_layout(
         ) if y_scale == "Log" else dict(),
         tickmode='auto',
         exponentformat='none',  # Keep normal dollar format, no scientific notation
-        tickformat='.6f' if y_scale == "Log" else None  # Show full decimal places for small values
+        tickformat='.4g' if y_scale == "Log" else None  # Show max 4 significant digits
     ),
     legend=dict(
         orientation="h",
