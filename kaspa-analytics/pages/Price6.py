@@ -445,7 +445,7 @@ st.markdown("""
         line-height: 1;
     }
     
-    /* FORCE CHART SELECTBOXES TO BE VISIBLE WITH BEAUTIFUL STYLING */
+    /* FORCE CHART SELECTBOXES TO BE VISIBLE WITH BEAUTIFUL STYLING - ULTRA SPECIFIC */
     .chart-section .stSelectbox {
         display: block !important;
         visibility: visible !important;
@@ -458,15 +458,18 @@ st.markdown("""
         opacity: 1 !important;
     }
     
-    .chart-section .stSelectbox > div > div {
+    .chart-section .stSelectbox > div > div,
+    .chart-section div[data-testid="stSelectbox"] > div > div,
+    .chart-section .stSelectbox .st-emotion-cache-1s6koen,
+    .chart-section .stSelectbox .st-emotion-cache-1mfa4h5 {
         background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
         border: 2px solid rgba(100, 116, 139, 0.3) !important;
         border-radius: 12px !important;
         backdrop-filter: blur(15px) !important;
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
         box-shadow: 
-            0 4px 16px rgba(0, 0, 0, 0.2),
-            0 0 20px rgba(0, 212, 255, 0.1),
+            0 4px 16px rgba(0, 0, 0, 0.2) !important,
+            0 0 20px rgba(0, 212, 255, 0.1) !important,
             inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
         min-height: 26px !important;
         width: 150px !important;
@@ -478,36 +481,22 @@ st.markdown("""
         position: relative !important;
     }
     
-    .chart-section .stSelectbox > div > div::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        border-radius: 12px;
-        background: linear-gradient(45deg, transparent, rgba(0, 212, 255, 0.05), transparent);
-        opacity: 0;
-        transition: opacity 0.3s ease;
-        pointer-events: none;
-    }
-    
-    .chart-section .stSelectbox > div > div:hover {
+    .chart-section .stSelectbox > div > div:hover,
+    .chart-section div[data-testid="stSelectbox"] > div > div:hover,
+    .chart-section .stSelectbox .st-emotion-cache-1s6koen:hover,
+    .chart-section .stSelectbox .st-emotion-cache-1mfa4h5:hover {
         border-color: #00d4ff !important;
         box-shadow: 
-            0 8px 32px rgba(0, 212, 255, 0.2), 
-            0 0 0 1px rgba(0, 212, 255, 0.3),
-            0 0 40px rgba(0, 212, 255, 0.15),
+            0 8px 32px rgba(0, 212, 255, 0.2) !important, 
+            0 0 0 1px rgba(0, 212, 255, 0.3) !important,
+            0 0 40px rgba(0, 212, 255, 0.15) !important,
             inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
         transform: translateY(-2px) !important;
         background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%) !important;
     }
     
-    .chart-section .stSelectbox > div > div:hover::before {
-        opacity: 1;
-    }
-    
-    .chart-section .stSelectbox > div > div > div {
+    .chart-section .stSelectbox > div > div > div,
+    .chart-section div[data-testid="stSelectbox"] > div > div > div {
         color: #f1f5f9 !important;
         font-weight: 600 !important;
         font-size: 13px !important;
@@ -517,24 +506,43 @@ st.markdown("""
         z-index: 2 !important;
     }
     
-    /* Enhanced focus state for better interaction */
-    .chart-section .stSelectbox > div > div:focus-within {
-        border-color: #00d4ff !important;
+    /* Additional override for any emotion cache classes */
+    .chart-section [class*="st-emotion-cache"] {
+        background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
+        border: 2px solid rgba(100, 116, 139, 0.3) !important;
+        border-radius: 12px !important;
+        backdrop-filter: blur(15px) !important;
         box-shadow: 
-            0 8px 32px rgba(0, 212, 255, 0.3), 
-            0 0 0 2px rgba(0, 212, 255, 0.4),
-            0 0 50px rgba(0, 212, 255, 0.2) !important;
-        transform: translateY(-1px) !important;
+            0 4px 16px rgba(0, 0, 0, 0.2) !important,
+            0 0 20px rgba(0, 212, 255, 0.1) !important,
+            inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
     }
     
-    /* Dropdown arrow styling */
-    .chart-section .stSelectbox > div > div svg {
+    .chart-section [class*="st-emotion-cache"]:hover {
+        border-color: #00d4ff !important;
+        box-shadow: 
+            0 8px 32px rgba(0, 212, 255, 0.2) !important, 
+            0 0 0 1px rgba(0, 212, 255, 0.3) !important,
+            0 0 40px rgba(0, 212, 255, 0.15) !important,
+            inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+        transform: translateY(-2px) !important;
+    }
+    
+    /* Force override any shared component styles */
+    .chart-section .stSelectbox * {
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+    
+    /* Dropdown arrow styling with more specificity */
+    .chart-section .stSelectbox svg,
+    .chart-section div[data-testid="stSelectbox"] svg {
         color: #94a3b8 !important;
         transition: all 0.3s ease !important;
         filter: drop-shadow(0 0 5px rgba(0, 212, 255, 0.3)) !important;
     }
     
-    .chart-section .stSelectbox > div > div:hover svg {
+    .chart-section .stSelectbox:hover svg,
+    .chart-section div[data-testid="stSelectbox"]:hover svg {
         color: #00d4ff !important;
         filter: drop-shadow(0 0 8px rgba(0, 212, 255, 0.5)) !important;
     }
