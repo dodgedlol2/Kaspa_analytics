@@ -29,7 +29,7 @@ except Exception as e:
     st.error(f"Failed to calculate price power law: {str(e)}")
     st.stop()
 
-# Enhanced Custom CSS with Modern Design and Animated Title
+# Enhanced Custom CSS with Modern Design and Text-based Controls
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -71,39 +71,6 @@ st.markdown("""
         50% { opacity: 0.8; transform: translateX(20px) translateY(-20px); }
     }
     
-    @keyframes shimmer {
-        0% {
-            background-position: -200% center;
-            text-shadow: 0 0 10px rgba(241, 245, 249, 0.3);
-        }
-        50% {
-            text-shadow: 
-                0 0 20px rgba(0, 212, 255, 0.6),
-                0 0 30px rgba(0, 212, 255, 0.4),
-                0 0 40px rgba(0, 212, 255, 0.2);
-        }
-        100% {
-            background-position: 200% center;
-            text-shadow: 0 0 10px rgba(241, 245, 249, 0.3);
-        }
-    }
-    
-    @keyframes glow {
-        0%, 100% {
-            text-shadow: 
-                0 0 10px rgba(241, 245, 249, 0.3),
-                0 0 20px rgba(0, 212, 255, 0.2),
-                0 0 30px rgba(0, 212, 255, 0.1);
-        }
-        50% {
-            text-shadow: 
-                0 0 20px rgba(241, 245, 249, 0.5),
-                0 0 30px rgba(0, 212, 255, 0.4),
-                0 0 40px rgba(0, 212, 255, 0.3),
-                0 0 50px rgba(0, 212, 255, 0.2);
-        }
-    }
-    
     .chart-section {
         margin: 12px 40px 28px 40px;
         background: rgba(30, 41, 59, 0.4);
@@ -116,7 +83,6 @@ st.markdown("""
         transition: all 0.3s ease;
     }
     
-    /* Simplified header section with just title */
     .header-section {
         padding: 20px 40px 20px 40px;
         background: transparent;
@@ -237,7 +203,7 @@ if len(df_30_days_ago) > 0:
 else:
     price_pct_change = 0
 
-# Simplified header section with just title
+# Header section
 st.markdown('<div class="header-section">', unsafe_allow_html=True)
 st.markdown('<div class="title-container"><h1 class="main-title">Kaspa Price</h1></div>', unsafe_allow_html=True)
 st.markdown('</div>', unsafe_allow_html=True)
@@ -245,111 +211,90 @@ st.markdown('</div>', unsafe_allow_html=True)
 # Chart content section
 st.markdown('<div class="chart-content"></div>', unsafe_allow_html=True)
 
-# Initialize default values
-default_y_scale = "Log"
-default_x_scale = "Linear"
-default_time_range = "All"
-default_power_law = "Show"
-
-# Function to create chart with all controls integrated
-def create_integrated_chart():
-    # Create the enhanced chart with integrated controls
+# Function to create chart with proper trace management
+def create_chart(y_scale="Log", x_scale="Linear", time_range="All", show_power_law=True):
     fig = go.Figure()
     
-    # Default settings (matching original dropdown defaults)
-    default_y_scale = "Log"
-    default_x_scale = "Linear" 
-    default_time_range = "All"
-    default_power_law = "Show"
-    
-    # Data filtering based on default time range (All)
+    # Data filtering based on time range
     last_date = price_df['Date'].iloc[-1]
-    start_date = price_df['Date'].iloc[0]  # All data
-    filtered_df = price_df[price_df['Date'] >= start_date]
+    if time_range == "1W":
+        start_date = last_date - timedelta(days=7)
+    elif time_range == "1M":
+        start_date = last_date - timedelta(days=30)
+    elif time_range == "3M":
+        start_date = last_date - timedelta(days=90)
+    elif time_range == "6M":
+        start_date = last_date - timedelta(days=180)
+    elif time_range == "1Y":
+        start_date = last_date - timedelta(days=365)
+    else:  # All
+        start_date = price_df['Date'].iloc[0]
     
-    # Create LINEAR time traces (using dates) - visible by default
-    fig.add_trace(go.Scatter(
-        x=filtered_df['Date'],
-        y=filtered_df['Price'],
-        mode='lines',
-        name='Kaspa Price (USD)',
-        line=dict(color='#00d4ff', width=3, shape='spline', smoothing=0.3),
-        hovertemplate='<b>%{fullData.name}</b><br>Date: %{text}<br>Price: $%{y:.6f}<br><extra></extra>',
-        text=[d.strftime('%Y-%m-%d') for d in filtered_df['Date']],
-        showlegend=True,
-        visible=True
-    ))
+    filtered_df = price_df[price_df['Date'] >= start_date].copy()
     
-    # Create LOG time traces (using days_from_genesis) - hidden by default
-    fig.add_trace(go.Scatter(
-        x=filtered_df['days_from_genesis'],
-        y=filtered_df['Price'],
-        mode='lines',
-        name='Kaspa Price (USD)',
-        line=dict(color='#00d4ff', width=3, shape='spline', smoothing=0.3),
-        hovertemplate='<b>%{fullData.name}</b><br>Days: %{x}<br>Price: $%{y:.6f}<br><extra></extra>',
-        showlegend=False,  # Don't duplicate in legend
-        visible=False
-    ))
+    # Choose x-axis data based on scale
+    if x_scale == "Log":
+        x_data = filtered_df['days_from_genesis']
+        x_title = "Days from Genesis (Log Scale)"
+        hover_x_format = 'Days: %{x}'
+    else:
+        x_data = filtered_df['Date']
+        x_title = "Date"
+        hover_x_format = 'Date: %{text}'
     
-    # Add power law traces if default is "Show"
-    if default_power_law == "Show":
+    # Add main price trace
+    if x_scale == "Linear":
+        fig.add_trace(go.Scatter(
+            x=x_data,
+            y=filtered_df['Price'],
+            mode='lines',
+            name='Kaspa Price (USD)',
+            line=dict(color='#00d4ff', width=3, shape='spline', smoothing=0.3),
+            hovertemplate=f'<b>Kaspa Price (USD)</b><br>{hover_x_format}<br>Price: $%{{y:.6f}}<br><extra></extra>',
+            text=[d.strftime('%Y-%m-%d') for d in filtered_df['Date']],
+            showlegend=True
+        ))
+    else:
+        fig.add_trace(go.Scatter(
+            x=x_data,
+            y=filtered_df['Price'],
+            mode='lines',
+            name='Kaspa Price (USD)',
+            line=dict(color='#00d4ff', width=3, shape='spline', smoothing=0.3),
+            hovertemplate=f'<b>Kaspa Price (USD)</b><br>{hover_x_format}<br>Price: $%{{y:.6f}}<br><extra></extra>',
+            showlegend=True
+        ))
+    
+    # Add power law traces if enabled
+    if show_power_law:
         x_fit_days = filtered_df['days_from_genesis']
         y_fit = a_price * np.power(x_fit_days, b_price)
         
-        # Power law for LINEAR time (using dates) - visible by default
         fig.add_trace(go.Scatter(
-            x=filtered_df['Date'],
+            x=x_data,
             y=y_fit,
             mode='lines',
             name=f'Power Law Fit (R²={r2_price:.3f})',
             line=dict(color='#ff8c00', width=3, dash='solid'),
             showlegend=True,
             hovertemplate='<b>Power Law Fit</b><br>R² = %{customdata:.3f}<br>Value: $%{y:.6f}<br><extra></extra>',
-            customdata=[r2_price] * len(filtered_df['Date']),
-            visible=True
+            customdata=[r2_price] * len(x_data)
         ))
         
-        # Power law for LOG time (using days_from_genesis) - hidden by default
+        # Support level
         fig.add_trace(go.Scatter(
-            x=x_fit_days,
-            y=y_fit,
-            mode='lines',
-            name=f'Power Law Fit (R²={r2_price:.3f})',
-            line=dict(color='#ff8c00', width=3, dash='solid'),
-            showlegend=False,
-            hovertemplate='<b>Power Law Fit</b><br>R² = %{customdata:.3f}<br>Value: $%{y:.6f}<br><extra></extra>',
-            customdata=[r2_price] * len(x_fit_days),
-            visible=False
-        ))
-
-        # Support for LINEAR time - visible by default
-        fig.add_trace(go.Scatter(
-            x=filtered_df['Date'],
+            x=x_data,
             y=y_fit * 0.4,
             mode='lines',
             name='Support (-60%)',
             line=dict(color='rgba(255, 255, 255, 0.7)', width=1.5, dash='dot'),
             showlegend=True,
-            hoverinfo='skip',
-            visible=True
+            hoverinfo='skip'
         ))
         
-        # Support for LOG time - hidden by default
+        # Resistance level
         fig.add_trace(go.Scatter(
-            x=x_fit_days,
-            y=y_fit * 0.4,
-            mode='lines',
-            name='Support (-60%)',
-            line=dict(color='rgba(255, 255, 255, 0.7)', width=1.5, dash='dot'),
-            showlegend=False,
-            hoverinfo='skip',
-            visible=False
-        ))
-        
-        # Resistance for LINEAR time - visible by default
-        fig.add_trace(go.Scatter(
-            x=filtered_df['Date'],
+            x=x_data,
             y=y_fit * 2.2,
             mode='lines',
             name='Resistance (+120%)',
@@ -357,27 +302,11 @@ def create_integrated_chart():
             fill='tonexty',
             fillcolor='rgba(100, 100, 100, 0.05)',
             showlegend=True,
-            hoverinfo='skip',
-            visible=True
-        ))
-        
-        # Resistance for LOG time - hidden by default
-        fig.add_trace(go.Scatter(
-            x=x_fit_days,
-            y=y_fit * 2.2,
-            mode='lines',
-            name='Resistance (+120%)',
-            line=dict(color='rgba(255, 255, 255, 0.7)', width=1.5, dash='dot'),
-            fill='tonexty',
-            fillcolor='rgba(100, 100, 100, 0.05)',
-            showlegend=False,
-            hoverinfo='skip',
-            visible=False
+            hoverinfo='skip'
         ))
 
-    # Custom Y-axis tick formatting function (copied from original)
+    # Custom Y-axis tick formatting function
     def format_currency(value):
-        """Format currency values for clean display"""
         if value >= 1:
             if value >= 1000:
                 return f"${value/1000:.1f}k"
@@ -396,9 +325,8 @@ def create_integrated_chart():
         else:
             return f"${value:.1e}"
 
-    # Generate custom tick values for log scale Y-axis (copied from original)
+    # Generate custom tick values for log scale Y-axis
     def generate_log_ticks(data_min, data_max):
-        """Generate physics-style log tick marks with 1, 2, 5 pattern"""
         import math
         log_min = math.floor(math.log10(data_min))
         log_max = math.ceil(math.log10(data_max))
@@ -425,31 +353,30 @@ def create_integrated_chart():
         
         return major_ticks, intermediate_ticks, minor_ticks
 
-    # Setup Y-axis ticks based on default y_scale (Log)
+    # Setup Y-axis ticks based on scale
     y_min, y_max = filtered_df['Price'].min(), filtered_df['Price'].max()
-    if default_y_scale == "Log":
+    if y_scale == "Log":
         y_major_ticks, y_intermediate_ticks, y_minor_ticks = generate_log_ticks(y_min, y_max)
         y_tick_vals = sorted(y_major_ticks + y_intermediate_ticks)
         y_tick_text = [format_currency(val) for val in y_tick_vals]
+        y_type = "log"
     else:
         y_tick_vals = None
         y_tick_text = None
         y_minor_ticks = []
+        y_type = "linear"
 
-    # Setup X-axis ticks based on default x_scale (Linear)  
-    x_title = "Date"  # Default linear uses dates
-
-    # Enhanced chart layout with integrated control buttons
+    # Update layout
     fig.update_layout(
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
         font=dict(family='Inter', color='#e2e8f0'),
         hovermode='x unified',
-        height=700,  # Increased height to accommodate controls
-        margin=dict(l=30, r=30, t=80, b=10),  # Increased top margin for buttons
+        height=600,
+        margin=dict(l=30, r=30, t=50, b=10),
         xaxis=dict(
             title=dict(text=x_title, font=dict(size=13, color='#cbd5e1', weight=600), standoff=35),
-            type=None,  # Default linear
+            type="log" if x_scale == "Log" else None,
             showgrid=True,
             gridwidth=1.2,
             gridcolor='rgba(255, 255, 255, 0.08)',
@@ -458,13 +385,13 @@ def create_integrated_chart():
         ),
         yaxis=dict(
             title=None,
-            type="log",  # Default log scale
+            type=y_type,
             showgrid=True,
             gridwidth=1.2,
             gridcolor='rgba(255, 255, 255, 0.12)',
             linecolor='rgba(255, 255, 255, 0.15)',
             tickfont=dict(size=11, color='#94a3b8'),
-            tickmode='array',
+            tickmode='array' if y_scale == "Log" else None,
             tickvals=y_tick_vals,
             ticktext=y_tick_text,
             minor=dict(
@@ -473,7 +400,7 @@ def create_integrated_chart():
                 gridcolor='rgba(255, 255, 255, 0.04)',
                 tickmode='array',
                 tickvals=y_minor_ticks
-            )
+            ) if y_scale == "Log" else None
         ),
         legend=dict(
             orientation="h",
@@ -491,199 +418,37 @@ def create_integrated_chart():
             bordercolor='rgba(0, 212, 255, 0.5)',
             font=dict(color='#e2e8f0', size=11),
             align='left'
-        ),
-        # Add integrated control buttons
-        updatemenus=[
-            # Price Scale Toggle
-            dict(
-                type="buttons",
-                direction="left",
-                buttons=list([
-                    dict(
-                        args=[{"yaxis.type": "linear"}],
-                        label="Linear",
-                        method="relayout"
-                    ),
-                    dict(
-                        args=[{"yaxis.type": "log"}],
-                        label="Log",
-                        method="relayout"
-                    )
-                ]),
-                pad={"r": 10, "t": 10},
-                showactive=True,
-                x=0.02,
-                xanchor="left",
-                y=0.98,
-                yanchor="top",
-                bgcolor="rgba(30, 41, 59, 0.8)",
-                bordercolor="rgba(100, 116, 139, 0.3)",
-                borderwidth=1,
-                font=dict(color="#f1f5f9", size=11),
-                active=1  # Log is default active
-            ),
-            # Time Scale Toggle
-            dict(
-                type="buttons",
-                direction="left",
-                buttons=list([
-                    dict(
-                        args=[{"xaxis.type": None}],
-                        label="Linear",
-                        method="relayout"
-                    ),
-                    dict(
-                        args=[{"xaxis.type": "log"}],
-                        label="Log",
-                        method="relayout"
-                    )
-                ]),
-                pad={"r": 10, "t": 10},
-                showactive=True,
-                x=0.18,
-                xanchor="left",
-                y=0.98,
-                yanchor="top",
-                bgcolor="rgba(30, 41, 59, 0.8)",
-                bordercolor="rgba(100, 116, 139, 0.3)",
-                borderwidth=1,
-                font=dict(color="#f1f5f9", size=11),
-                active=0  # Linear is default active
-            ),
-            # Time Period Selector
-            dict(
-                type="buttons",
-                direction="left",
-                buttons=list([
-                    dict(
-                        args=[{"xaxis.range": [filtered_df['Date'].iloc[-7], filtered_df['Date'].iloc[-1]]}],
-                        label="1W",
-                        method="relayout"
-                    ),
-                    dict(
-                        args=[{"xaxis.range": [filtered_df['Date'].iloc[-30], filtered_df['Date'].iloc[-1]]}],
-                        label="1M",
-                        method="relayout"
-                    ),
-                    dict(
-                        args=[{"xaxis.range": [filtered_df['Date'].iloc[-90], filtered_df['Date'].iloc[-1]]}],
-                        label="3M",
-                        method="relayout"
-                    ),
-                    dict(
-                        args=[{"xaxis.range": [filtered_df['Date'].iloc[-180], filtered_df['Date'].iloc[-1]]}],
-                        label="6M",
-                        method="relayout"
-                    ),
-                    dict(
-                        args=[{"xaxis.range": [filtered_df['Date'].iloc[-365], filtered_df['Date'].iloc[-1]]}],
-                        label="1Y",
-                        method="relayout"
-                    ),
-                    dict(
-                        args=[{"xaxis.range": [filtered_df['Date'].iloc[0], filtered_df['Date'].iloc[-1]]}],
-                        label="All",
-                        method="relayout"
-                    )
-                ]),
-                pad={"r": 10, "t": 10},
-                showactive=True,
-                x=0.34,
-                xanchor="left",
-                y=0.98,
-                yanchor="top",
-                bgcolor="rgba(30, 41, 59, 0.8)",
-                bordercolor="rgba(100, 116, 139, 0.3)",
-                borderwidth=1,
-                font=dict(color="#f1f5f9", size=11),
-                active=5  # "All" is default active
-            ),
-            # Power Law Toggle
-            dict(
-                type="buttons",
-                direction="left",
-                buttons=list([
-                    dict(
-                        args=[{
-                            "visible": [True, False, False, False]
-                        }],
-                        label="Hide",
-                        method="restyle"
-                    ),
-                    dict(
-                        args=[{
-                            "visible": [True, True, True, True]
-                        }],
-                        label="Show",
-                        method="restyle"
-                    )
-                ]),
-                pad={"r": 10, "t": 10},
-                showactive=True,
-                x=0.65,
-                xanchor="left",
-                y=0.98,
-                yanchor="top",
-                bgcolor="rgba(30, 41, 59, 0.8)",
-                bordercolor="rgba(100, 116, 139, 0.3)",
-                borderwidth=1,
-                font=dict(color="#f1f5f9", size=11),
-                active=1  # "Show" is default active
-            )
-        ],
-        # Add annotations for button group labels
-        annotations=[
-            dict(
-                text="<b>Price Scale</b>",
-                showarrow=False,
-                x=0.02,
-                y=1.01,
-                xref="paper",
-                yref="paper",
-                xanchor="left",
-                yanchor="bottom",
-                font=dict(size=10, color="#94a3b8"),
-            ),
-            dict(
-                text="<b>Time Scale</b>",
-                showarrow=False,
-                x=0.18,
-                y=1.01,
-                xref="paper",
-                yref="paper",
-                xanchor="left",
-                yanchor="bottom",
-                font=dict(size=10, color="#94a3b8"),
-            ),
-            dict(
-                text="<b>Time Period</b>",
-                showarrow=False,
-                x=0.34,
-                y=1.01,
-                xref="paper",
-                yref="paper",
-                xanchor="left",
-                yanchor="bottom",
-                font=dict(size=10, color="#94a3b8"),
-            ),
-            dict(
-                text="<b>Power Law</b>",
-                showarrow=False,
-                x=0.65,
-                y=1.01,
-                xref="paper",
-                yref="paper",
-                xanchor="left",
-                yanchor="bottom",
-                font=dict(size=10, color="#94a3b8"),
-            )
-        ]
+        )
     )
     
     return fig
 
-# Create and display the integrated chart
-fig = create_integrated_chart()
+# Text-based controls above the chart
+st.markdown("""
+<div style="padding: 0 40px; margin-bottom: 20px;">
+    <div style="display: flex; gap: 40px; align-items: center; font-size: 13px;">
+        <div style="color: #94a3b8; font-weight: 600;">CHART CONTROLS:</div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# Create control columns
+ctrl_col1, ctrl_col2, ctrl_col3, ctrl_col4 = st.columns([1, 1, 2, 1])
+
+with ctrl_col1:
+    y_scale = st.selectbox("Price Scale", ["Linear", "Log"], index=1, key="y_scale")
+
+with ctrl_col2:
+    x_scale = st.selectbox("Time Scale", ["Linear", "Log"], index=0, key="x_scale")
+
+with ctrl_col3:
+    time_range = st.selectbox("Time Period", ["1W", "1M", "3M", "6M", "1Y", "All"], index=5, key="time_range")
+
+with ctrl_col4:
+    show_power_law = st.selectbox("Power Law", ["Hide", "Show"], index=1, key="power_law") == "Show"
+
+# Create and display the chart
+fig = create_chart(y_scale, x_scale, time_range, show_power_law)
 
 # Display chart
 with st.container():
@@ -701,7 +466,7 @@ with st.container():
         }
     })
 
-# Calculate comprehensive metrics
+# Calculate comprehensive metrics (same as before)
 if len(df_30_days_ago) > 0:
     price_30_days_ago_data = price_df[price_df['Date'] <= thirty_days_ago]
     if len(price_30_days_ago_data) > 10:
@@ -720,7 +485,7 @@ else:
     slope_pct_change = 0
     r2_pct_change = 0
 
-# Enhanced Metrics Section with improved styling and hover effects
+# Enhanced Metrics Section
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
