@@ -393,6 +393,49 @@ else:
     x_values = filtered_df['Date']
     x_title = "Date"
 
+# Custom Y-axis tick formatting function
+def format_currency(value):
+    """Format currency values for clean display"""
+    if value >= 1:
+        if value >= 1000:
+            return f"${value/1000:.1f}k"
+        elif value >= 100:
+            return f"${value:.0f}"
+        elif value >= 10:
+            return f"${value:.1f}"
+        else:
+            return f"${value:.2f}"
+    elif value >= 0.01:
+        return f"${value:.3f}"
+    elif value >= 0.001:
+        return f"${value:.4f}"
+    elif value >= 0.0001:
+        return f"${value:.5f}"
+    else:
+        return f"${value:.1e}"
+
+# Generate custom tick values for log scale Y-axis
+def generate_log_ticks(data_min, data_max):
+    """Generate physics-style log tick marks"""
+    import math
+    log_min = math.floor(math.log10(data_min))
+    log_max = math.ceil(math.log10(data_max))
+    
+    major_ticks = []
+    minor_ticks = []
+    
+    for i in range(log_min, log_max + 1):
+        base = 10**i
+        major_ticks.append(base)
+        
+        # Add minor ticks at 2, 3, 4, 5, 6, 7, 8, 9 * 10^i
+        for j in [2, 3, 4, 5, 6, 7, 8, 9]:
+            minor_val = j * base
+            if data_min <= minor_val <= data_max:
+                minor_ticks.append(minor_val)
+    
+    return major_ticks, minor_ticks
+
 # Add price trace
 fig.add_trace(go.Scatter(
     x=x_values,
@@ -445,7 +488,28 @@ if show_power_law == "Show":
         hoverinfo='skip'
     ))
 
-# Enhanced chart layout
+# Enhanced chart layout with custom tick formatting
+y_min, y_max = filtered_df['Price'].min(), filtered_df['Price'].max()
+
+# Generate custom ticks for Y-axis if log scale
+if y_scale == "Log":
+    y_major_ticks, y_minor_ticks = generate_log_ticks(y_min, y_max)
+    y_tick_vals = y_major_ticks
+    y_tick_text = [format_currency(val) for val in y_major_ticks]
+else:
+    y_tick_vals = None
+    y_tick_text = None
+
+# Generate custom ticks for X-axis if log scale
+if x_scale_type == "Log":
+    x_min, x_max = filtered_df['days_from_genesis'].min(), filtered_df['days_from_genesis'].max()
+    x_major_ticks, x_minor_ticks = generate_log_ticks(x_min, x_max)
+    x_tick_vals = x_major_ticks
+    x_tick_text = [f"{int(val)}" for val in x_major_ticks]
+else:
+    x_tick_vals = None
+    x_tick_text = None
+
 fig.update_layout(
     plot_bgcolor='rgba(0,0,0,0)',
     paper_bgcolor='rgba(0,0,0,0)',
@@ -457,42 +521,42 @@ fig.update_layout(
         title=dict(text=x_title, font=dict(size=13, color='#cbd5e1', weight=600), standoff=35),
         type="log" if x_scale_type == "Log" else None,
         showgrid=True,
-        gridwidth=1 if x_scale_type == "Log" else 1,
-        gridcolor='rgba(255, 255, 255, 0.08)' if x_scale_type == "Log" else 'rgba(255, 255, 255, 0.06)',
+        gridwidth=1,
+        gridcolor='rgba(255, 255, 255, 0.08)',
         linecolor='rgba(255, 255, 255, 0.15)',
         tickfont=dict(size=11, color='#94a3b8'),
-        # Enhanced log scale settings
-        dtick=1 if x_scale_type == "Log" else None,  # Major ticks at every power of 10
+        # Physics-style log ticks
+        tickmode='array' if x_scale_type == "Log" else 'auto',
+        tickvals=x_tick_vals,
+        ticktext=x_tick_text,
         minor=dict(
             showgrid=True,
-            gridwidth=0.5,
-            gridcolor='rgba(255, 255, 255, 0.03)',
-            dtick=0.30103  # Minor ticks at 2, 3, 4, 5, 6, 7, 8, 9 (log10(2) ≈ 0.30103)
-        ) if x_scale_type == "Log" else dict(),
-        tickmode='auto',
-        exponentformat='power' if x_scale_type == "Log" else None
+            gridwidth=0.3,
+            gridcolor='rgba(255, 255, 255, 0.02)',
+            tickmode='array',
+            tickvals=x_minor_ticks if x_scale_type == "Log" else []
+        ) if x_scale_type == "Log" else dict()
         # Removed rangeslider configuration
     ),
     yaxis=dict(
         title=None,
         type="log" if y_scale == "Log" else "linear",
         showgrid=True,
-        gridwidth=1 if y_scale == "Log" else 1,
-        gridcolor='rgba(255, 255, 255, 0.08)' if y_scale == "Log" else 'rgba(255, 255, 255, 0.06)',
+        gridwidth=1,
+        gridcolor='rgba(255, 255, 255, 0.08)',
         linecolor='rgba(255, 255, 255, 0.15)',
         tickfont=dict(size=11, color='#94a3b8'),
-        tickprefix="$",
-        # Enhanced log scale settings - keeping dollar format readable
-        dtick=1 if y_scale == "Log" else None,  # Major ticks at every power of 10
+        # Physics-style log ticks with custom formatting
+        tickmode='array' if y_scale == "Log" else 'auto',
+        tickvals=y_tick_vals,
+        ticktext=y_tick_text,
         minor=dict(
             showgrid=True,
-            gridwidth=0.5,
-            gridcolor='rgba(255, 255, 255, 0.03)',
-            dtick=0.30103  # Minor ticks at 2, 3, 4, 5, 6, 7, 8, 9
-        ) if y_scale == "Log" else dict(),
-        tickmode='auto',
-        exponentformat='none',  # Keep normal dollar format, no scientific notation
-        tickformat='.4g' if y_scale == "Log" else None  # Show max 4 significant digits
+            gridwidth=0.3,
+            gridcolor='rgba(255, 255, 255, 0.02)',
+            tickmode='array',
+            tickvals=y_minor_ticks if y_scale == "Log" else []
+        ) if y_scale == "Log" else dict()
     ),
     legend=dict(
         orientation="h",
