@@ -35,11 +35,8 @@ render_clean_header(
 # Render beautiful dropdown sidebar
 render_beautiful_sidebar(current_page="Price")
 
-# Render simple page header
-render_simple_page_header(
-    title="Price Analysis",
-    subtitle="Real-time Kaspa price tracking with advanced technical analysis"
-)
+# Skip page header to avoid interference with dropdown menus
+# render_simple_page_header() removed to prevent CSS conflicts
 
 # Data loading and processing
 if 'price_df' not in st.session_state or 'price_genesis_date' not in st.session_state:
@@ -58,10 +55,54 @@ except Exception as e:
     st.error(f"Failed to calculate price power law: {str(e)}")
     st.stop()
 
-# Additional CSS for price-specific styling
+# Additional CSS for price-specific styling (avoiding conflicts with shared components)
 st.markdown("""
 <style>
-    /* Price-specific styling that extends the shared components */
+    /* Price-specific styling that EXTENDS (not overrides) shared components */
+    
+    /* Ensure selectbox dropdowns are visible and functional */
+    .stSelectbox {
+        z-index: 1000 !important;
+    }
+    
+    .stSelectbox > div > div[data-baseweb="select"] {
+        z-index: 1001 !important;
+    }
+    
+    .stSelectbox > div > div[data-baseweb="select"] > div {
+        z-index: 1002 !important;
+    }
+    
+    /* Fix dropdown menu visibility */
+    .stSelectbox [data-baseweb="popover"] {
+        z-index: 9999 !important;
+        background: rgba(15, 23, 42, 0.95) !important;
+        backdrop-filter: blur(20px) !important;
+        border: 1px solid rgba(100, 116, 139, 0.3) !important;
+        border-radius: 12px !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+    }
+    
+    /* Style dropdown options */
+    .stSelectbox [data-baseweb="select"] [role="option"] {
+        background: transparent !important;
+        color: #f1f5f9 !important;
+        padding: 12px 16px !important;
+        border-radius: 8px !important;
+        margin: 4px 8px !important;
+        font-weight: 600 !important;
+        transition: all 0.2s ease !important;
+    }
+    
+    .stSelectbox [data-baseweb="select"] [role="option"]:hover {
+        background: rgba(0, 212, 255, 0.1) !important;
+        color: #00d4ff !important;
+    }
+    
+    .stSelectbox [data-baseweb="select"] [aria-selected="true"] {
+        background: rgba(0, 212, 255, 0.2) !important;
+        color: #00d4ff !important;
+    }
     
     @keyframes shimmer {
         0% {
@@ -106,6 +147,7 @@ st.markdown("""
         flex-wrap: wrap;
         gap: 15px;
         margin-bottom: 20px;
+        margin-top: 20px; /* Add space at top since no page header */
     }
     
     .price-title-container {
@@ -139,6 +181,8 @@ st.markdown("""
         flex-direction: column;
         gap: 3px;
         min-width: 120px;
+        position: relative;
+        z-index: 100; /* Ensure controls are above other elements */
     }
     
     .price-control-label {
@@ -152,7 +196,7 @@ st.markdown("""
         line-height: 1;
     }
     
-    /* Enhanced selectbox styling */
+    /* Enhanced selectbox styling with better z-index management */
     .stSelectbox > div > div {
         background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
         border: 2px solid rgba(100, 116, 139, 0.3) !important;
@@ -164,12 +208,15 @@ st.markdown("""
         width: 150px !important;
         max-width: 250px !important;
         min-width: 100px !important;
+        position: relative !important;
+        z-index: 100 !important;
     }
     
     .stSelectbox > div > div:hover {
         border-color: #00d4ff !important;
         box-shadow: 0 8px 32px rgba(0, 212, 255, 0.2), 0 0 0 1px rgba(0, 212, 255, 0.3) !important;
         transform: translateY(-2px);
+        z-index: 101 !important;
     }
     
     .stSelectbox > div > div > div {
@@ -194,6 +241,7 @@ st.markdown("""
         width: 100% !important;
         box-sizing: border-box !important;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+        z-index: 1 !important; /* Lower z-index than controls */
     }
     
     .metric-card:hover {
@@ -240,6 +288,7 @@ st.markdown("""
         border-radius: 12px;
         overflow: hidden;
         box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+        z-index: 1 !important; /* Lower than controls */
     }
     
     .stPlotlyChart .modebar {
