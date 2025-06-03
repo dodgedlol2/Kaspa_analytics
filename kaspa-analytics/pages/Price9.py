@@ -1,4 +1,13 @@
 import streamlit as st
+
+# Configure page FIRST - before any other Streamlit commands
+st.set_page_config(
+    page_title="Kaspa Analytics Pro - Price Analysis",
+    page_icon="💎",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
 import plotly.graph_objects as go
 import numpy as np
 import pandas as pd
@@ -10,7 +19,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 try:
-    from shared_components import render_page_config, render_custom_css_with_sidebar, render_clean_header, render_beautiful_sidebar, render_simple_page_header
+    from shared_components import render_custom_css_with_sidebar, render_clean_header, render_beautiful_sidebar, render_simple_page_header
     SHARED_COMPONENTS_AVAILABLE = True
 except ImportError:
     SHARED_COMPONENTS_AVAILABLE = False
@@ -22,20 +31,11 @@ except ImportError:
     st.error("Utils module not found. Please ensure utils.py is available.")
     st.stop()
 
-# Configure page and render shared components if available
+# Render shared components if available
 if SHARED_COMPONENTS_AVAILABLE:
-    render_page_config(page_title="Kaspa Analytics Pro - Price Analysis", page_icon="💎")
     render_custom_css_with_sidebar()
     render_clean_header(user_name=None, user_role=None, show_auth=True)
     render_beautiful_sidebar(current_page="Price")
-else:
-    # Fallback page config
-    st.set_page_config(
-        page_title="Kaspa Analytics Pro - Price Analysis",
-        page_icon="💎",
-        layout="wide",
-        initial_sidebar_state="collapsed"
-    )
 
 # Data loading and processing
 if 'price_df' not in st.session_state or 'price_genesis_date' not in st.session_state:
