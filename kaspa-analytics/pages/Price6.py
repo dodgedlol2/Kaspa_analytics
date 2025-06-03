@@ -464,7 +464,10 @@ st.markdown("""
         border-radius: 12px !important;
         backdrop-filter: blur(15px) !important;
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+        box-shadow: 
+            0 4px 16px rgba(0, 0, 0, 0.2),
+            0 0 20px rgba(0, 212, 255, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
         min-height: 26px !important;
         width: 150px !important;
         max-width: 250px !important;
@@ -472,12 +475,36 @@ st.markdown("""
         display: block !important;
         visibility: visible !important;
         opacity: 1 !important;
+        position: relative !important;
+    }
+    
+    .chart-section .stSelectbox > div > div::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border-radius: 12px;
+        background: linear-gradient(45deg, transparent, rgba(0, 212, 255, 0.05), transparent);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
     }
     
     .chart-section .stSelectbox > div > div:hover {
         border-color: #00d4ff !important;
-        box-shadow: 0 8px 32px rgba(0, 212, 255, 0.2), 0 0 0 1px rgba(0, 212, 255, 0.3) !important;
-        transform: translateY(-2px);
+        box-shadow: 
+            0 8px 32px rgba(0, 212, 255, 0.2), 
+            0 0 0 1px rgba(0, 212, 255, 0.3),
+            0 0 40px rgba(0, 212, 255, 0.15),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+        transform: translateY(-2px) !important;
+        background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%) !important;
+    }
+    
+    .chart-section .stSelectbox > div > div:hover::before {
+        opacity: 1;
     }
     
     .chart-section .stSelectbox > div > div > div {
@@ -485,6 +512,31 @@ st.markdown("""
         font-weight: 600 !important;
         font-size: 13px !important;
         padding: 8px 16px !important;
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.1) !important;
+        position: relative !important;
+        z-index: 2 !important;
+    }
+    
+    /* Enhanced focus state for better interaction */
+    .chart-section .stSelectbox > div > div:focus-within {
+        border-color: #00d4ff !important;
+        box-shadow: 
+            0 8px 32px rgba(0, 212, 255, 0.3), 
+            0 0 0 2px rgba(0, 212, 255, 0.4),
+            0 0 50px rgba(0, 212, 255, 0.2) !important;
+        transform: translateY(-1px) !important;
+    }
+    
+    /* Dropdown arrow styling */
+    .chart-section .stSelectbox > div > div svg {
+        color: #94a3b8 !important;
+        transition: all 0.3s ease !important;
+        filter: drop-shadow(0 0 5px rgba(0, 212, 255, 0.3)) !important;
+    }
+    
+    .chart-section .stSelectbox > div > div:hover svg {
+        color: #00d4ff !important;
+        filter: drop-shadow(0 0 8px rgba(0, 212, 255, 0.5)) !important;
     }
     
     .chart-content {
