@@ -116,16 +116,16 @@ st.markdown("""
         transition: all 0.3s ease;
     }
     
-    /* Updated header section with controls on same line as title */
+    /* Tightened header section with minimal vertical spacing */
     .header-section {
-        padding: 20px 40px 0px 40px;
+        padding: 15px 40px 5px 40px;  /* Reduced top/bottom padding */
         background: transparent;
         display: flex;
         align-items: center;
         justify-content: space-between;
         flex-wrap: wrap;
-        gap: 20px;
-        margin-bottom: 8px;
+        gap: 15px;  /* Reduced gap */
+        margin-bottom: 3px;  /* Reduced margin */
     }
     
     .title-container {
@@ -142,10 +142,11 @@ st.markdown("""
         text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
         position: relative;
         white-space: nowrap;
+        line-height: 1.1;  /* Tighter line height */
     }
     
     .title-underline-container {
-        padding: 0px 40px 8px 40px;
+        padding: 2px 40px 8px 40px;  /* Minimal top padding */
         background: transparent;
     }
     
@@ -170,7 +171,7 @@ st.markdown("""
     .control-group {
         display: flex;
         flex-direction: column;
-        gap: 6px;
+        gap: 3px;  /* Reduced gap between label and dropdown */
         min-width: 120px;
     }
     
@@ -182,6 +183,7 @@ st.markdown("""
         letter-spacing: 1px;
         margin-bottom: 0;
         white-space: nowrap;
+        line-height: 1;  /* Tight line height */
     }
     
     .stSelectbox > div > div {
@@ -211,7 +213,7 @@ st.markdown("""
     }
     
     .chart-content {
-        padding: 16px 28px;
+        padding: 8px 28px;  /* Reduced top padding */
         position: relative;
     }
     
@@ -338,7 +340,7 @@ st.markdown('<div class="header-section">', unsafe_allow_html=True)
 
 # Column structure with spacing controls:
 # [Left Space] [Title] [Middle Space] [Controls: Price Scale | Time Scale | Time Period | Power Law]
-left_space, title_col, middle_space, ctrl_col1, ctrl_col2, ctrl_col3, ctrl_col4 = st.columns([0.1, 1, 5, 1, 1, 1, 1])
+left_space, title_col, middle_space, ctrl_col1, ctrl_col2, ctrl_col3, ctrl_col4 = st.columns([0.5, 1, 1, 1, 1, 1, 1])
 
 # Left invisible spacing column
 with left_space:
