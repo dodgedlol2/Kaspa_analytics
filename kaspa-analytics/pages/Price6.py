@@ -116,25 +116,20 @@ st.markdown("""
         transition: all 0.3s ease;
     }
     
-    /* Header section with title and controls side by side */
+    /* Updated header section with controls on same line as title */
     .header-section {
-        padding: 20px 40px 8px 40px;
+        padding: 20px 40px 0px 40px;
         background: transparent;
         display: flex;
         align-items: center;
         justify-content: space-between;
         flex-wrap: wrap;
-        gap: 16px;
+        gap: 20px;
+        margin-bottom: 8px;
     }
     
     .title-container {
-        flex: 1;
-        min-width: 200px;
-        order: 2;
-    }
-    
-    .controls-container {
-        order: 1;
+        flex: 0 0 auto;
     }
     
     .main-title {
@@ -146,13 +141,19 @@ st.markdown("""
         text-align: left;
         text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
         position: relative;
+        white-space: nowrap;
+    }
+    
+    .title-underline-container {
+        padding: 0px 40px 8px 40px;
+        background: transparent;
     }
     
     .title-underline {
         width: 100%;
         height: 1px;
         background: linear-gradient(90deg, #ffffff 0%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0.1) 100%);
-        margin: 8px 0 0 0;
+        margin: 0;
         border-radius: 1px;
         box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
     }
@@ -162,7 +163,8 @@ st.markdown("""
         gap: 20px;
         align-items: center;
         flex-wrap: wrap;
-        order: 1;
+        flex: 1;
+        justify-content: flex-end;
     }
     
     .control-group {
@@ -189,10 +191,10 @@ st.markdown("""
         backdrop-filter: blur(15px) !important;
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
-        min-height: 36px !important;
-        width: 40px !important;
-        max-width: 40px !important;
-        min-width: 40px !important;
+        min-height: 26px !important;
+        width: 150px !important;
+        max-width: 250px !important;
+        min-width: 100px !important;
     }
     
     .stSelectbox > div > div:hover {
@@ -205,7 +207,7 @@ st.markdown("""
         color: #f1f5f9 !important;
         font-weight: 600 !important;
         font-size: 13px !important;
-        padding: 6px 14px !important;
+        padding: 8px 16px !important;
     }
     
     .chart-content {
@@ -288,13 +290,8 @@ st.markdown("""
     header {visibility: hidden;}
     .stDeployButton {display: none;}
     
-    /* Hide the default Streamlit containers for the controls */
-    .controls-section .stSelectbox {
-        margin-bottom: 0 !important;
-    }
-    
     /* Responsive design for smaller screens */
-    @media (max-width: 768px) {
+    @media (max-width: 1200px) {
         .header-section {
             flex-direction: column;
             align-items: flex-start;
@@ -309,6 +306,16 @@ st.markdown("""
         
         .control-group {
             min-width: 100px;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .controls-container {
+            gap: 12px;
+        }
+        
+        .control-group {
+            min-width: 90px;
         }
     }
 </style>
@@ -326,93 +333,50 @@ if len(df_30_days_ago) > 0:
 else:
     price_pct_change = 0
 
-# Header section with title and controls side by side
-st.markdown("""
-<div class="header-section">
-    <div class="title-container">
-        <h1 class="main-title">Kaspa Price</h1>
-        <div class="title-underline"></div>
-    </div>
-    <div class="controls-container" id="controls-placeholder">
-        <!-- Controls will be inserted here -->
-    </div>
-</div>
-""", unsafe_allow_html=True)
+# Header section with title and controls on the same line
+st.markdown('<div class="header-section">', unsafe_allow_html=True)
 
-# Create controls in a special container that we'll move with JavaScript
-with st.container():
-    st.markdown('<div class="controls-section" style="display: none;">', unsafe_allow_html=True)
+# Create two columns: one for title, one for controls
+title_col, controls_col = st.columns([1, 3])
+
+with title_col:
+    st.markdown('<div class="title-container"><h1 class="main-title">Kaspa Price</h1></div>', unsafe_allow_html=True)
+
+with controls_col:
+    st.markdown('<div class="controls-container">', unsafe_allow_html=True)
     
-    col1, col2, col3, col4 = st.columns([1, 1, 1, 1])
+    # Create inline controls
+    ctrl_col1, ctrl_col2, ctrl_col3, ctrl_col4 = st.columns([1, 1, 1, 1])
     
-    with col1:
+    with ctrl_col1:
         st.markdown('<div class="control-group"><div class="control-label">Price Scale</div>', unsafe_allow_html=True)
         y_scale = st.selectbox("", ["Linear", "Log"], index=1, label_visibility="collapsed", key="price_y_scale_select")
         st.markdown('</div>', unsafe_allow_html=True)
 
-    with col2:
+    with ctrl_col2:
         st.markdown('<div class="control-group"><div class="control-label">Time Scale</div>', unsafe_allow_html=True)
         x_scale_type = st.selectbox("", ["Linear", "Log"], index=0, label_visibility="collapsed", key="price_x_scale_select")
         st.markdown('</div>', unsafe_allow_html=True)
 
-    with col3:
+    with ctrl_col3:
         st.markdown('<div class="control-group"><div class="control-label">Time Period</div>', unsafe_allow_html=True)
         time_range = st.selectbox("", ["1W", "1M", "3M", "6M", "1Y", "All"], index=5, label_visibility="collapsed", key="price_time_range_select")
         st.markdown('</div>', unsafe_allow_html=True)
 
-    with col4:
+    with ctrl_col4:
         st.markdown('<div class="control-group"><div class="control-label">Power Law</div>', unsafe_allow_html=True)
         show_power_law = st.selectbox("", ["Hide", "Show"], index=1, label_visibility="collapsed", key="price_power_law_select")
         st.markdown('</div>', unsafe_allow_html=True)
     
     st.markdown('</div>', unsafe_allow_html=True)
 
-# JavaScript to move controls to the right side
+st.markdown('</div>', unsafe_allow_html=True)
+
+# Add the title underline as a separate section
 st.markdown("""
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    function moveControls() {
-        const controlsSection = document.querySelector('.controls-section');
-        const controlsContainer = document.querySelector('.controls-container');
-        
-        if (controlsSection && controlsContainer) {
-            // Get all control groups
-            const controlGroups = controlsSection.querySelectorAll('.stSelectbox');
-            const labels = controlsSection.querySelectorAll('.control-label');
-            
-            // Clear the controls container
-            controlsContainer.innerHTML = '';
-            
-            // Move each control with its label
-            controlGroups.forEach((control, index) => {
-                const wrapper = document.createElement('div');
-                wrapper.className = 'control-group';
-                
-                if (labels[index]) {
-                    const labelClone = labels[index].cloneNode(true);
-                    wrapper.appendChild(labelClone);
-                }
-                
-                const controlClone = control.cloneNode(true);
-                wrapper.appendChild(controlClone);
-                
-                controlsContainer.appendChild(wrapper);
-            });
-            
-            // Hide the original controls section
-            controlsSection.style.display = 'none';
-        }
-    }
-    
-    // Try to move controls immediately
-    moveControls();
-    
-    // Also try after a short delay in case elements aren't ready
-    setTimeout(moveControls, 100);
-    setTimeout(moveControls, 500);
-    setTimeout(moveControls, 1000);
-});
-</script>
+<div class="title-underline-container">
+    <div class="title-underline"></div>
+</div>
 """, unsafe_allow_html=True)
 
 # Chart content section
