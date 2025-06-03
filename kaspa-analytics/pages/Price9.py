@@ -1,4 +1,127 @@
-import streamlit as st
+# Price chart controls section with beautiful toggle buttons
+st.markdown('<div class="price-header-section">', unsafe_allow_html=True)
+
+# Column structure with spacing controls
+left_space, title_col, middle_space, controls_col = st.columns([0.1, 1, 2, 6])
+
+# Left invisible spacing column
+with left_space:
+    st.empty()
+
+# Title column
+with title_col:
+    st.markdown('<div class="price-title-container"><h1 class="price-main-title">Kaspa Price</h1></div>', unsafe_allow_html=True)
+
+# Middle invisible spacing column
+with middle_space:
+    st.empty()
+
+# Controls column - Use Streamlit buttons instead of HTML for better state management
+with controls_col:
+    st.markdown('<div class="price-controls-container">', unsafe_allow_html=True)
+    
+    # Create 4 control groups side by side
+    ctrl_col1, ctrl_col2, ctrl_col3, ctrl_col4 = st.columns(4)
+    
+    # Price Scale Control
+    with ctrl_col1:
+        st.markdown('<div class="price-control-group"><div class="price-control-label">Price Scale</div>', unsafe_allow_html=True)
+        if st.button("Linear" if y_scale == "Log" else "Log", key="price_scale_btn", 
+                    help="Toggle between Linear and Log price scale"):
+            if y_scale == "Log":
+                y_scale = "Linear"
+            else:
+                y_scale = "Log"
+        
+        # Show current selection with custom styling
+        current_scale = y_scale
+        st.markdown(f'''
+        <div class="toggle-group">
+            <div class="toggle-button {'active' if current_scale == 'Linear' else ''}">Linear</div>
+            <div class="toggle-button {'active' if current_scale == 'Log' else ''}">Log</div>
+        </div>
+        ''', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Time Scale Control
+    with ctrl_col2:
+        st.markdown('<div class="price-control-group"><div class="price-control-label">Time Scale</div>', unsafe_allow_html=True)
+        if st.button("Linear" if x_scale_type == "Log" else "Log", key="time_scale_btn",
+                    help="Toggle between Linear and Log time scale"):
+            if x_scale_type == "Log":
+                x_scale_type = "Linear"
+            else:
+                x_scale_type = "Log"
+        
+        st.markdown(f'''
+        <div class="toggle-group">
+            <div class="toggle-button {'active' if x_scale_type == 'Linear' else ''}">Linear</div>
+            <div class="toggle-button {'active' if x_scale_type == 'Log' else ''}">Log</div>
+        </div>
+        ''', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Time Period Control
+    with ctrl_col3:
+        st.markdown('<div class="price-control-group"><div class="price-control-label">Time Period</div>', unsafe_allow_html=True)
+        
+        # Create time period buttons in a sub-grid
+        time_periods = ["1W", "1M", "3M", "6M", "1Y", "All"]
+        current_time_idx = time_periods.index(time_range) if time_range in time_periods else 5
+        
+        # Create 2 rows of 3 buttons each
+        t1, t2, t3 = st.columns(3)
+        with t1:
+            if st.button("1W", key="1w_btn", help="1 Week"):
+                time_range = "1W"
+            if st.button("6M", key="6m_btn", help="6 Months"):
+                time_range = "6M"
+        with t2:
+            if st.button("1M", key="1m_btn", help="1 Month"):
+                time_range = "1M"
+            if st.button("1Y", key="1y_btn", help="1 Year"):
+                time_range = "1Y"
+        with t3:
+            if st.button("3M", key="3m_btn", help="3 Months"):
+                time_range = "3M"
+            if st.button("All", key="all_btn", help="All Time"):
+                time_range = "All"
+        
+        # Show current selection
+        st.markdown(f'''
+        <div class="toggle-group time-period-group">
+            <div class="toggle-button {'active' if time_range == '1W' else ''}">1W</div>
+            <div class="toggle-button {'active' if time_range == '1M' else ''}">1M</div>
+            <div class="toggle-button {'active' if time_range == '3M' else ''}">3M</div>
+            <div class="toggle-button {'active' if time_range == '6M' else ''}">6M</div>
+            <div class="toggle-button {'active' if time_range == '1Y' else ''}">1Y</div>
+            <div class="toggle-button {'active' if time_range == 'All' else ''}">All</div>
+        </div>
+        ''', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Power Law Control
+    with ctrl_col4:
+        st.markdown('<div class="price-control-group"><div class="price-control-label">Power Law</div>', unsafe_allow_html=True)
+        if st.button("Hide" if show_power_law == "Show" else "Show", key="power_law_btn",
+                    help="Toggle Power Law display"):
+            if show_power_law == "Show":
+                show_power_law = "Hide"
+            else:
+                show_power_law = "Show"
+        
+        # Show current selection with toggle switch styling
+        st.markdown(f'''
+        <div class="power-law-toggle {'active' if show_power_law == 'Show' else ''}">
+            <div class="power-law-switch {'active' if show_power_law == 'Show' else ''}"></div>
+            <div class="power-law-label">{'ON' if show_power_law == 'Show' else 'OFF'}</div>
+        </div>
+        ''', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+
+st.markdown('</div>', unsafe_allow_html=True)import streamlit as st
 from components.shared_components import (
     render_page_config,
     render_custom_css_with_sidebar,
@@ -55,54 +178,10 @@ except Exception as e:
     st.error(f"Failed to calculate price power law: {str(e)}")
     st.stop()
 
-# Additional CSS for price-specific styling (avoiding conflicts with shared components)
+# Additional CSS for price-specific styling with beautiful toggle buttons
 st.markdown("""
 <style>
-    /* Price-specific styling that EXTENDS (not overrides) shared components */
-    
-    /* Ensure selectbox dropdowns are visible and functional */
-    .stSelectbox {
-        z-index: 1000 !important;
-    }
-    
-    .stSelectbox > div > div[data-baseweb="select"] {
-        z-index: 1001 !important;
-    }
-    
-    .stSelectbox > div > div[data-baseweb="select"] > div {
-        z-index: 1002 !important;
-    }
-    
-    /* Fix dropdown menu visibility */
-    .stSelectbox [data-baseweb="popover"] {
-        z-index: 9999 !important;
-        background: rgba(15, 23, 42, 0.95) !important;
-        backdrop-filter: blur(20px) !important;
-        border: 1px solid rgba(100, 116, 139, 0.3) !important;
-        border-radius: 12px !important;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
-    }
-    
-    /* Style dropdown options */
-    .stSelectbox [data-baseweb="select"] [role="option"] {
-        background: transparent !important;
-        color: #f1f5f9 !important;
-        padding: 12px 16px !important;
-        border-radius: 8px !important;
-        margin: 4px 8px !important;
-        font-weight: 600 !important;
-        transition: all 0.2s ease !important;
-    }
-    
-    .stSelectbox [data-baseweb="select"] [role="option"]:hover {
-        background: rgba(0, 212, 255, 0.1) !important;
-        color: #00d4ff !important;
-    }
-    
-    .stSelectbox [data-baseweb="select"] [aria-selected="true"] {
-        background: rgba(0, 212, 255, 0.2) !important;
-        color: #00d4ff !important;
-    }
+    /* Price-specific styling with custom toggle buttons */
     
     @keyframes shimmer {
         0% {
@@ -179,10 +258,9 @@ st.markdown("""
     .price-control-group {
         display: flex;
         flex-direction: column;
-        gap: 3px;
+        gap: 6px;
         min-width: 120px;
         position: relative;
-        z-index: 100; /* Ensure controls are above other elements */
     }
     
     .price-control-label {
@@ -194,36 +272,135 @@ st.markdown("""
         margin-bottom: 0;
         white-space: nowrap;
         line-height: 1;
+        text-align: center;
     }
     
-    /* Enhanced selectbox styling with better z-index management */
-    .stSelectbox > div > div {
-        background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
-        border: 2px solid rgba(100, 116, 139, 0.3) !important;
-        border-radius: 12px !important;
-        backdrop-filter: blur(15px) !important;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
-        min-height: 26px !important;
-        width: 150px !important;
-        max-width: 250px !important;
-        min-width: 100px !important;
-        position: relative !important;
-        z-index: 100 !important;
+    /* Beautiful toggle button groups */
+    .toggle-group {
+        display: flex;
+        background: rgba(15, 23, 42, 0.8);
+        border-radius: 12px;
+        padding: 4px;
+        border: 1px solid rgba(100, 116, 139, 0.2);
+        backdrop-filter: blur(15px);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
     }
     
-    .stSelectbox > div > div:hover {
-        border-color: #00d4ff !important;
-        box-shadow: 0 8px 32px rgba(0, 212, 255, 0.2), 0 0 0 1px rgba(0, 212, 255, 0.3) !important;
-        transform: translateY(-2px);
-        z-index: 101 !important;
+    .toggle-group:hover {
+        border-color: rgba(0, 212, 255, 0.3);
+        box-shadow: 0 6px 20px rgba(0, 212, 255, 0.1);
     }
     
-    .stSelectbox > div > div > div {
-        color: #f1f5f9 !important;
-        font-weight: 600 !important;
-        font-size: 13px !important;
-        padding: 8px 16px !important;
+    .toggle-button {
+        background: transparent;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 8px;
+        color: #94a3b8;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        flex: 1;
+        text-align: center;
+        white-space: nowrap;
+    }
+    
+    .toggle-button:hover {
+        color: #cbd5e1;
+        background: rgba(100, 116, 139, 0.1);
+    }
+    
+    .toggle-button.active {
+        background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+        color: white;
+        font-weight: 700;
+        box-shadow: 0 2px 8px rgba(0, 212, 255, 0.3);
+        transform: translateY(-1px);
+    }
+    
+    .toggle-button.active::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 100%);
+        border-radius: 8px;
+        pointer-events: none;
+    }
+    
+    /* Special styling for time period buttons */
+    .time-period-group .toggle-button {
+        padding: 8px 12px;
+        min-width: 32px;
+    }
+    
+    /* Power law toggle switch */
+    .power-law-toggle {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(15, 23, 42, 0.8);
+        border-radius: 12px;
+        padding: 8px 12px;
+        border: 1px solid rgba(100, 116, 139, 0.2);
+        backdrop-filter: blur(15px);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .power-law-toggle:hover {
+        border-color: rgba(0, 212, 255, 0.3);
+        box-shadow: 0 6px 20px rgba(0, 212, 255, 0.1);
+    }
+    
+    .power-law-switch {
+        width: 44px;
+        height: 24px;
+        background: rgba(100, 116, 139, 0.3);
+        border-radius: 12px;
+        position: relative;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .power-law-switch.active {
+        background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+        box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+    }
+    
+    .power-law-switch::before {
+        content: '';
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 20px;
+        height: 20px;
+        background: white;
+        border-radius: 10px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+    
+    .power-law-switch.active::before {
+        transform: translateX(20px);
+    }
+    
+    .power-law-label {
+        color: #94a3b8;
+        font-size: 12px;
+        font-weight: 600;
+        transition: color 0.3s ease;
+    }
+    
+    .power-law-toggle.active .power-law-label {
+        color: #00d4ff;
     }
     
     /* Enhanced metric cards */
@@ -241,7 +418,6 @@ st.markdown("""
         width: 100% !important;
         box-sizing: border-box !important;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
-        z-index: 1 !important; /* Lower z-index than controls */
     }
     
     .metric-card:hover {
@@ -288,7 +464,6 @@ st.markdown("""
         border-radius: 12px;
         overflow: hidden;
         box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
-        z-index: 1 !important; /* Lower than controls */
     }
     
     .stPlotlyChart .modebar {
@@ -300,12 +475,17 @@ st.markdown("""
         background: transparent !important;
     }
     
+    /* Hide Streamlit components that we're replacing */
+    .stSelectbox {
+        display: none !important;
+    }
+    
     /* Responsive design */
     @media (max-width: 1200px) {
         .price-header-section {
             flex-direction: column;
             align-items: flex-start;
-            gap: 12px;
+            gap: 16px;
         }
         
         .price-controls-container {
@@ -317,15 +497,31 @@ st.markdown("""
         .price-control-group {
             min-width: 100px;
         }
+        
+        .toggle-button {
+            padding: 6px 12px;
+            font-size: 11px;
+        }
     }
     
     @media (max-width: 768px) {
         .price-controls-container {
             gap: 12px;
+            flex-direction: column;
+            align-items: stretch;
         }
         
         .price-control-group {
-            min-width: 90px;
+            min-width: auto;
+            width: 100%;
+        }
+        
+        .toggle-group {
+            width: 100%;
+        }
+        
+        .toggle-button {
+            padding: 10px 8px;
         }
     }
 </style>
