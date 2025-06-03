@@ -4,14 +4,23 @@ import numpy as np
 import pandas as pd
 from utils import fit_power_law, load_price_data
 from datetime import datetime, timedelta
+from components.shared_components import (
+    render_page_config,
+    render_clean_header,
+    render_beautiful_sidebar
+)
 
 # MUST be first Streamlit command
-st.set_page_config(
-    page_title="Kaspa Analytics Pro",
-    page_icon="💎",
-    layout="wide",
-    initial_sidebar_state="collapsed"
+render_page_config(page_title="Price Analysis - Kaspa Analytics Pro")
+
+# Render clean header FIRST
+render_clean_header(
+    user_name=None,  # Set to user name if logged in
+    show_auth=True
 )
+
+# Render beautiful dropdown sidebar FIRST
+render_beautiful_sidebar(current_page="Price")
 
 # Data loading and processing
 if 'price_df' not in st.session_state or 'price_genesis_date' not in st.session_state:
@@ -30,79 +39,18 @@ except Exception as e:
     st.error(f"Failed to calculate price power law: {str(e)}")
     st.stop()
 
-# Enhanced Custom CSS with Modern Design and Animated Title
+# Enhanced Custom CSS with Modern Design and Animated Title - MODIFIED to not conflict with shared components
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
     
-    html, body, .stApp {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        background: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 50%, #0f1419 100%);
-        color: #e2e8f0;
-        overflow-x: hidden;
-    }
-    
-    .stApp {
-        background-attachment: fixed;
-    }
-    
+    /* Override main content padding to account for header */
     .main .block-container {
-        padding: 0 !important;
+        padding-top: 120px !important;
+        padding-left: 20px !important;
+        padding-right: 20px !important;
         max-width: 100% !important;
-    }
-    
-    .stApp::before {
-        content: '';
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-image: 
-            radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.15) 0%, transparent 50%),
-            radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
-            radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.15) 0%, transparent 50%);
-        pointer-events: none;
-        z-index: -1;
-        animation: backgroundShift 20s ease-in-out infinite;
-    }
-    
-    @keyframes backgroundShift {
-        0%, 100% { opacity: 1; transform: translateX(0px) translateY(0px); }
-        50% { opacity: 0.8; transform: translateX(20px) translateY(-20px); }
-    }
-    
-    @keyframes shimmer {
-        0% {
-            background-position: -200% center;
-            text-shadow: 0 0 10px rgba(241, 245, 249, 0.3);
-        }
-        50% {
-            text-shadow: 
-                0 0 20px rgba(0, 212, 255, 0.6),
-                0 0 30px rgba(0, 212, 255, 0.4),
-                0 0 40px rgba(0, 212, 255, 0.2);
-        }
-        100% {
-            background-position: 200% center;
-            text-shadow: 0 0 10px rgba(241, 245, 249, 0.3);
-        }
-    }
-    
-    @keyframes glow {
-        0%, 100% {
-            text-shadow: 
-                0 0 10px rgba(241, 245, 249, 0.3),
-                0 0 20px rgba(0, 212, 255, 0.2),
-                0 0 30px rgba(0, 212, 255, 0.1);
-        }
-        50% {
-            text-shadow: 
-                0 0 20px rgba(241, 245, 249, 0.5),
-                0 0 30px rgba(0, 212, 255, 0.4),
-                0 0 40px rgba(0, 212, 255, 0.3),
-                0 0 50px rgba(0, 212, 255, 0.2);
-        }
     }
     
     .chart-section {
@@ -175,11 +123,12 @@ st.markdown("""
         line-height: 1;
     }
     
-    /* Force selectbox visibility and styling */
+    /* Force selectbox visibility and styling ONLY in chart section */
     .chart-section .stSelectbox {
         display: block !important;
         visibility: visible !important;
         opacity: 1 !important;
+        z-index: 999 !important;
     }
     
     .chart-section .stSelectbox > div {
@@ -294,11 +243,6 @@ st.markdown("""
     .stPlotlyChart .modebar-group {
         background: transparent !important;
     }
-    
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-    .stDeployButton {display: none;}
     
     /* Responsive design for smaller screens */
     @media (max-width: 1200px) {
@@ -632,25 +576,6 @@ with st.container():
 
 st.markdown('</div>', unsafe_allow_html=True)
 st.markdown('</div>', unsafe_allow_html=True)
-
-# Now add the shared components for header and sidebar
-from components.shared_components import (
-    render_custom_css_with_sidebar,
-    render_clean_header,
-    render_beautiful_sidebar
-)
-
-# Apply shared components CSS (after chart controls are rendered)
-render_custom_css_with_sidebar()
-
-# Render clean header
-render_clean_header(
-    user_name=None,  # Set to user name if logged in
-    show_auth=True
-)
-
-# Render beautiful dropdown sidebar
-render_beautiful_sidebar(current_page="Price")
 
 # Calculate comprehensive metrics
 if len(df_30_days_ago) > 0:
