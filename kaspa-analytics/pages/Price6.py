@@ -133,7 +133,7 @@ st.markdown("""
     }
     
     .main-title {
-        font-size: 18px;
+        font-size: 16px;
         font-weight: 700;
         color: #ffffff;
         margin: 0;
@@ -146,7 +146,7 @@ st.markdown("""
     }
     
     .title-underline-container {
-        padding: 2px 40px 8px 40px;  /* Minimal top padding */
+        padding: 2px 20px 8px 40px;  /* Minimal top padding */
         background: transparent;
     }
     
