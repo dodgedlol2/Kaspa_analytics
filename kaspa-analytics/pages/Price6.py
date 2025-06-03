@@ -133,18 +133,13 @@ st.markdown("""
     }
     
     .main-title {
-        font-size: 12px;
+        font-size: 18px;
         font-weight: 700;
-        color: #f1f5f9;
+        color: #ffffff;
         margin: 0;
         letter-spacing: 0.5px;
         text-align: left;
-        background: linear-gradient(135deg, #f1f5f9 0%, #00d4ff 50%, #cbd5e1 100%);
-        background-size: 200% auto;
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        animation: shimmer 3s ease-in-out infinite, glow 8s ease-in-out infinite alternate;
+        text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
         position: relative;
     }
     
