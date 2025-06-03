@@ -180,7 +180,7 @@ st.markdown("""
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
         min-height: 26px !important;
-        width: 140px !important;
+        width: 150px !important;
         max-width: 250px !important;
         min-width: 100px !important;
     }
@@ -452,9 +452,9 @@ fig.update_layout(
     font=dict(family='Inter', color='#e2e8f0'),
     hovermode='x unified',
     height=600,
-    margin=dict(l=30, r=30, t=40, b=0),
+    margin=dict(l=30, r=30, t=40, b=10),
     xaxis=dict(
-        title=dict(text=x_title, font=dict(size=13, color='#cbd5e1', weight=600), standoff=25),
+        title=dict(text=x_title, font=dict(size=13, color='#cbd5e1', weight=600), standoff=35),
         type="log" if x_scale_type == "Log" else None,
         showgrid=True,
         gridwidth=1,
