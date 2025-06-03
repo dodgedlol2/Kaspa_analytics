@@ -457,16 +457,16 @@ fig.update_layout(
         title=dict(text=x_title, font=dict(size=13, color='#cbd5e1', weight=600), standoff=35),
         type="log" if x_scale_type == "Log" else None,
         showgrid=True,
-        gridwidth=1.5 if x_scale_type == "Log" else 1,
-        gridcolor='rgba(255, 255, 255, 0.12)' if x_scale_type == "Log" else 'rgba(255, 255, 255, 0.06)',
+        gridwidth=1 if x_scale_type == "Log" else 1,
+        gridcolor='rgba(255, 255, 255, 0.08)' if x_scale_type == "Log" else 'rgba(255, 255, 255, 0.06)',
         linecolor='rgba(255, 255, 255, 0.15)',
         tickfont=dict(size=11, color='#94a3b8'),
         # Enhanced log scale settings
         dtick=1 if x_scale_type == "Log" else None,  # Major ticks at every power of 10
         minor=dict(
             showgrid=True,
-            gridwidth=0.8,
-            gridcolor='rgba(255, 255, 255, 0.04)',
+            gridwidth=0.5,
+            gridcolor='rgba(255, 255, 255, 0.03)',
             dtick=0.30103  # Minor ticks at 2, 3, 4, 5, 6, 7, 8, 9 (log10(2) ≈ 0.30103)
         ) if x_scale_type == "Log" else dict(),
         tickmode='auto',
@@ -477,21 +477,22 @@ fig.update_layout(
         title=None,
         type="log" if y_scale == "Log" else "linear",
         showgrid=True,
-        gridwidth=1.5 if y_scale == "Log" else 1,
-        gridcolor='rgba(255, 255, 255, 0.12)' if y_scale == "Log" else 'rgba(255, 255, 255, 0.06)',
+        gridwidth=1 if y_scale == "Log" else 1,
+        gridcolor='rgba(255, 255, 255, 0.08)' if y_scale == "Log" else 'rgba(255, 255, 255, 0.06)',
         linecolor='rgba(255, 255, 255, 0.15)',
         tickfont=dict(size=11, color='#94a3b8'),
         tickprefix="$",
-        # Enhanced log scale settings
+        # Enhanced log scale settings - keeping dollar format readable
         dtick=1 if y_scale == "Log" else None,  # Major ticks at every power of 10
         minor=dict(
             showgrid=True,
-            gridwidth=0.8,
-            gridcolor='rgba(255, 255, 255, 0.04)',
+            gridwidth=0.5,
+            gridcolor='rgba(255, 255, 255, 0.03)',
             dtick=0.30103  # Minor ticks at 2, 3, 4, 5, 6, 7, 8, 9
         ) if y_scale == "Log" else dict(),
         tickmode='auto',
-        exponentformat='power' if y_scale == "Log" else None
+        exponentformat='none',  # Keep normal dollar format, no scientific notation
+        tickformat='.6f' if y_scale == "Log" else None  # Show full decimal places for small values
     ),
     legend=dict(
         orientation="h",
