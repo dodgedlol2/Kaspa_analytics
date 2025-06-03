@@ -337,6 +337,7 @@ else:
     price_pct_change = 0
 
 # Header section with title and controls on the same line
+st.markdown('<div class="chart-section">', unsafe_allow_html=True)
 st.markdown('<div class="header-section">', unsafe_allow_html=True)
 
 # Column structure with spacing controls:
@@ -379,7 +380,7 @@ with ctrl_col4:
 st.markdown('</div>', unsafe_allow_html=True)
 
 # Chart content section
-st.markdown('<div class="chart-content"></div>', unsafe_allow_html=True)
+st.markdown('<div class="chart-content">', unsafe_allow_html=True)
 
 # Data filtering based on time range
 last_date = price_df['Date'].iloc[-1]
@@ -621,6 +622,9 @@ with st.container():
             'scale': 2
         }
     })
+
+st.markdown('</div>', unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
 
 # Calculate comprehensive metrics
 if len(df_30_days_ago) > 0:
