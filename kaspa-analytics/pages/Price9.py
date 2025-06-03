@@ -642,7 +642,7 @@ with col2:
         <div class="metric-delta {'positive' if r2_pct_change >= 0 else 'negative'}">{r2_pct_change:+.2f}%</div>
     </div>
     """
-    st.markdown(metric_html, unsafe_render_html=True)
+    st.markdown(metric_html, unsafe_allow_html=True)
 
 with col3:
     metric_html = f"""
