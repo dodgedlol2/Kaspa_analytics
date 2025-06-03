@@ -380,7 +380,7 @@ for i, trace in enumerate(all_traces):
     trace.visible = False
     fig.add_trace(trace)
 
-# Set default configuration (All time, Log x-scale, Log y-scale, Show power law)
+# Set default configuration and get proper layout settings
 default_config_idx = None
 for i, config in enumerate(trace_configs):
     if (config['time_range'] == 'All' and 
@@ -394,6 +394,20 @@ if default_config_idx is not None:
     default_config = trace_configs[default_config_idx]
     for idx in default_config['trace_indices']:
         fig.data[idx].visible = True
+    
+    # Get the default layout settings
+    default_filtered_df = default_config['filtered_df']
+    default_y_min, default_y_max = default_filtered_df['Price'].min(), default_filtered_df['Price'].max()
+    default_x_min, default_x_max = default_filtered_df['days_from_genesis'].min(), default_filtered_df['days_from_genesis'].max()
+    
+    # Generate default log ticks
+    default_y_major, default_y_intermediate, default_y_minor = generate_log_ticks(default_y_min, default_y_max)
+    default_y_tick_vals = sorted(default_y_major + default_y_intermediate)
+    default_y_tick_text = [format_currency(val) for val in default_y_tick_vals]
+    
+    default_x_major, default_x_intermediate, default_x_minor = generate_log_ticks(default_x_min, default_x_max)
+    default_x_tick_vals = sorted(default_x_major + default_x_intermediate)
+    default_x_tick_text = [f"{int(val)}" for val in default_x_tick_vals]
 
 # Create dropdown menu configurations
 def create_visibility_array(target_config_idx):
@@ -404,6 +418,94 @@ def create_visibility_array(target_config_idx):
         visibility[idx] = True
     return visibility
 
+def create_update_args(target_config_idx):
+    """Create complete update arguments including layout changes"""
+    target_config = trace_configs[target_config_idx]
+    filtered_df = target_config['filtered_df']
+    
+    # Calculate axis ranges for better view
+    y_min, y_max = filtered_df['Price'].min(), filtered_df['Price'].max()
+    y_padding = 0.1 * (y_max - y_min) if target_config['y_scale'] == 'Linear' else 0
+    
+    if target_config['x_scale'] == 'Log':
+        x_min, x_max = filtered_df['days_from_genesis'].min(), filtered_df['days_from_genesis'].max()
+        x_padding = 0.05 * (x_max - x_min)
+        x_range = [x_min - x_padding, x_max + x_padding]
+        x_title = "Days Since Genesis (Log Scale)"
+        x_type = "log"
+    else:
+        x_min, x_max = filtered_df['Date'].min(), filtered_df['Date'].max()
+        x_padding = timedelta(days=max(1, int((x_max - x_min).days * 0.02)))
+        x_range = [x_min - x_padding, x_max + x_padding]
+        x_title = "Date" 
+        x_type = "date"
+    
+    if target_config['y_scale'] == 'Log':
+        y_range = [y_min * 0.8, y_max * 1.2]
+        y_type = "log"
+        # Generate custom log ticks
+        y_major_ticks, y_intermediate_ticks, y_minor_ticks = generate_log_ticks(y_min, y_max)
+        y_tick_vals = sorted(y_major_ticks + y_intermediate_ticks)
+        y_tick_text = [format_currency(val) for val in y_tick_vals]
+        y_minor_dict = dict(
+            showgrid=True,
+            gridwidth=0.5,
+            gridcolor='rgba(255, 255, 255, 0.04)',
+            tickmode='array',
+            tickvals=y_minor_ticks
+        )
+        y_tickmode = 'array'
+        y_gridcolor = 'rgba(255, 255, 255, 0.12)'
+    else:
+        y_range = [y_min - y_padding, y_max + y_padding]
+        y_type = "linear"
+        y_tick_vals = None
+        y_tick_text = None
+        y_minor_dict = dict()
+        y_tickmode = 'auto'
+        y_gridcolor = 'rgba(255, 255, 255, 0.08)'
+    
+    # Generate X-axis ticks for log scale
+    if target_config['x_scale'] == 'Log':
+        x_major_ticks, x_intermediate_ticks, x_minor_ticks = generate_log_ticks(x_min, x_max)
+        x_tick_vals = sorted(x_major_ticks + x_intermediate_ticks)
+        x_tick_text = [f"{int(val)}" for val in x_tick_vals]
+        x_minor_dict = dict(
+            showgrid=True,
+            gridwidth=0.5,
+            gridcolor='rgba(255, 255, 255, 0.04)',
+            tickmode='array',
+            tickvals=x_minor_ticks
+        )
+        x_tickmode = 'array'
+        x_gridcolor = 'rgba(255, 255, 255, 0.12)'
+    else:
+        x_tick_vals = None
+        x_tick_text = None
+        x_minor_dict = dict()
+        x_tickmode = 'auto'
+        x_gridcolor = 'rgba(255, 255, 255, 0.08)'
+    
+    return {
+        'visible': create_visibility_array(target_config_idx),
+    }, {
+        'xaxis.type': x_type,
+        'xaxis.range': x_range,
+        'xaxis.title.text': x_title,
+        'xaxis.tickmode': x_tickmode,
+        'xaxis.tickvals': x_tick_vals,
+        'xaxis.ticktext': x_tick_text,
+        'xaxis.minor': x_minor_dict,
+        'xaxis.gridcolor': x_gridcolor,
+        'yaxis.type': y_type,
+        'yaxis.range': y_range,
+        'yaxis.tickmode': y_tickmode,
+        'yaxis.tickvals': y_tick_vals,
+        'yaxis.ticktext': y_tick_text,
+        'yaxis.minor': y_minor_dict,
+        'yaxis.gridcolor': y_gridcolor
+    }
+
 # Time Range Dropdown
 time_range_buttons = []
 for time_range in time_ranges:
@@ -413,10 +515,11 @@ for time_range in time_ranges:
             config['x_scale'] == 'Log' and  # Default to Log
             config['y_scale'] == 'Log' and  # Default to Log  
             config['power_law'] == 'Show'):  # Default to Show
+            trace_args, layout_args = create_update_args(i)
             time_range_buttons.append({
                 'label': time_range,
                 'method': 'update',
-                'args': [{'visible': create_visibility_array(i)}]
+                'args': [trace_args, layout_args]
             })
             break
 
@@ -428,10 +531,11 @@ for x_scale in x_scales:
             config['x_scale'] == x_scale and
             config['y_scale'] == 'Log' and    # Default to Log
             config['power_law'] == 'Show'):   # Default to Show
+            trace_args, layout_args = create_update_args(i)
             x_scale_buttons.append({
                 'label': x_scale,
                 'method': 'update', 
-                'args': [{'visible': create_visibility_array(i)}]
+                'args': [trace_args, layout_args]
             })
             break
 
@@ -443,10 +547,11 @@ for y_scale in y_scales:
             config['x_scale'] == 'Log' and    # Default to Log
             config['y_scale'] == y_scale and
             config['power_law'] == 'Show'):   # Default to Show
+            trace_args, layout_args = create_update_args(i)
             y_scale_buttons.append({
                 'label': y_scale,
                 'method': 'update',
-                'args': [{'visible': create_visibility_array(i)}]
+                'args': [trace_args, layout_args]
             })
             break
 
@@ -458,10 +563,11 @@ for power_law in power_law_options:
             config['x_scale'] == 'Log' and    # Default to Log
             config['y_scale'] == 'Log' and    # Default to Log
             config['power_law'] == power_law):
+            trace_args, layout_args = create_update_args(i)
             power_law_buttons.append({
                 'label': power_law,
                 'method': 'update',
-                'args': [{'visible': create_visibility_array(i)}]
+                'args': [trace_args, layout_args]
             })
             break
 
@@ -551,21 +657,44 @@ fig.update_layout(
     ],
     
     xaxis=dict(
-        title=dict(text="Date", font=dict(size=13, color='#cbd5e1', weight=600), standoff=35),
-        showgrid=True,
-        gridwidth=1.2,
-        gridcolor='rgba(255, 255, 255, 0.08)',
-        linecolor='rgba(255, 255, 255, 0.15)',
-        tickfont=dict(size=11, color='#94a3b8')
-    ),
-    yaxis=dict(
-        title=None,
+        title=dict(text="Days Since Genesis (Log Scale)", font=dict(size=13, color='#cbd5e1', weight=600), standoff=35),
         type="log",
+        range=[default_x_min * 0.95, default_x_max * 1.05],
         showgrid=True,
         gridwidth=1.2,
         gridcolor='rgba(255, 255, 255, 0.12)',
         linecolor='rgba(255, 255, 255, 0.15)',
-        tickfont=dict(size=11, color='#94a3b8')
+        tickfont=dict(size=11, color='#94a3b8'),
+        tickmode='array',
+        tickvals=default_x_tick_vals,
+        ticktext=default_x_tick_text,
+        minor=dict(
+            showgrid=True,
+            gridwidth=0.5,
+            gridcolor='rgba(255, 255, 255, 0.04)',
+            tickmode='array',
+            tickvals=default_x_minor
+        )
+    ),
+    yaxis=dict(
+        title=None,
+        type="log",
+        range=[default_y_min * 0.8, default_y_max * 1.2],
+        showgrid=True,
+        gridwidth=1.2,
+        gridcolor='rgba(255, 255, 255, 0.12)',
+        linecolor='rgba(255, 255, 255, 0.15)',
+        tickfont=dict(size=11, color='#94a3b8'),
+        tickmode='array',
+        tickvals=default_y_tick_vals,
+        ticktext=default_y_tick_text,
+        minor=dict(
+            showgrid=True,
+            gridwidth=0.5,
+            gridcolor='rgba(255, 255, 255, 0.04)',
+            tickmode='array',
+            tickvals=default_y_minor
+        )
     ),
     legend=dict(
         orientation="h",
