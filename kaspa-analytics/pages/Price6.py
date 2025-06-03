@@ -86,6 +86,16 @@ if len(df_30_days_ago) > 0:
     price_pct_change = ((current_price - price_30_days_ago) / price_30_days_ago) * 100
 else:
     price_pct_change = 0
+current_price = price_df['Price'].iloc[-1]
+last_date = price_df['Date'].iloc[-1]
+thirty_days_ago = last_date - timedelta(days=30)
+df_30_days_ago = price_df[price_df['Date'] >= thirty_days_ago]
+
+if len(df_30_days_ago) > 0:
+    price_30_days_ago = df_30_days_ago['Price'].iloc[0]
+    price_pct_change = ((current_price - price_30_days_ago) / price_30_days_ago) * 100
+else:
+    price_pct_change = 0
 
 # Header section with title and controls on the same line
 st.markdown('<div class="chart-section">', unsafe_allow_html=True)
