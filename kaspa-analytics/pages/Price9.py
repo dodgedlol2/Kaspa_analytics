@@ -1,41 +1,45 @@
 import streamlit as st
-
-# Configure page FIRST - before any other Streamlit commands
-st.set_page_config(
-    page_title="Kaspa Analytics Pro - Price Analysis",
-    page_icon="💎",
-    layout="wide",
-    initial_sidebar_state="expanded"
+from components.shared_components import (
+    render_page_config,
+    render_custom_css_with_sidebar,
+    render_clean_header,
+    render_beautiful_sidebar,
+    render_simple_page_header
 )
-
 import plotly.graph_objects as go
 import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
-import sys
-import os
 
-# Add parent directory to path to find shared_components
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-try:
-    from shared_components import render_custom_css_with_sidebar, render_clean_header, render_beautiful_sidebar, render_simple_page_header
-    SHARED_COMPONENTS_AVAILABLE = True
-except ImportError:
-    SHARED_COMPONENTS_AVAILABLE = False
-    st.warning("Shared components not found. Running in standalone mode.")
-
+# Try to import utils - handle gracefully if not available
 try:
     from utils import fit_power_law, load_price_data
+    UTILS_AVAILABLE = True
 except ImportError:
-    st.error("Utils module not found. Please ensure utils.py is available.")
+    UTILS_AVAILABLE = False
+    st.error("Utils module not found. Please ensure utils.py is available with fit_power_law and load_price_data functions.")
     st.stop()
 
-# Render shared components if available
-if SHARED_COMPONENTS_AVAILABLE:
-    render_custom_css_with_sidebar()
-    render_clean_header(user_name=None, user_role=None, show_auth=True)
-    render_beautiful_sidebar(current_page="Price")
+# MUST be first Streamlit command
+render_page_config(page_title="Price Analysis - Kaspa Analytics Pro")
+
+# Apply custom CSS with beautiful sidebar support
+render_custom_css_with_sidebar()
+
+# Render clean header
+render_clean_header(
+    user_name=None,  # Try "John Doe" to test user menu
+    show_auth=True
+)
+
+# Render beautiful dropdown sidebar
+render_beautiful_sidebar(current_page="Price")
+
+# Render simple page header
+render_simple_page_header(
+    title="Price Analysis",
+    subtitle="Real-time Kaspa price tracking with advanced technical analysis"
+)
 
 # Data loading and processing
 if 'price_df' not in st.session_state or 'price_genesis_date' not in st.session_state:
@@ -54,62 +58,11 @@ except Exception as e:
     st.error(f"Failed to calculate price power law: {str(e)}")
     st.stop()
 
-# Additional CSS for the price-specific styling (merging with shared styles)
-css_styles = """
+# Additional CSS for price-specific styling
+st.markdown("""
 <style>
     /* Price-specific styling that extends the shared components */
     
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-    
-    /* Base styles if shared components not available */
-"""
-
-if not SHARED_COMPONENTS_AVAILABLE:
-    css_styles += """
-    html, body, .stApp {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        background: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 50%, #0f1419 100%);
-        color: #e2e8f0;
-        overflow-x: hidden;
-    }
-    
-    .stApp {
-        background-attachment: fixed;
-    }
-    
-    .main .block-container {
-        padding: 0 !important;
-        max-width: 100% !important;
-    }
-    
-    .stApp::before {
-        content: '';
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-image: 
-            radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.15) 0%, transparent 50%),
-            radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
-            radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.15) 0%, transparent 50%);
-        pointer-events: none;
-        z-index: -1;
-        animation: backgroundShift 20s ease-in-out infinite;
-    }
-    
-    @keyframes backgroundShift {
-        0%, 100% { opacity: 1; transform: translateX(0px) translateY(0px); }
-        50% { opacity: 0.8; transform: translateX(20px) translateY(-20px); }
-    }
-    
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-    .stDeployButton {display: none;}
-"""
-
-css_styles += """
     @keyframes shimmer {
         0% {
             background-position: -200% center;
@@ -143,28 +96,16 @@ css_styles += """
         }
     }
     
-    .chart-section {
-        margin: 12px 40px 28px 40px;
-        background: rgba(30, 41, 59, 0.4);
-        backdrop-filter: blur(25px);
-        border: none;
-        border-radius: 16px;
-        overflow: hidden;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
-        position: relative;
-        transition: all 0.3s ease;
-    }
-    
-    /* Tightened header section with minimal vertical spacing */
+    /* Price chart controls section */
     .price-header-section {
-        padding: 15px 40px 15px 40px;  /* Consistent padding top/bottom */
+        padding: 15px 40px 15px 40px;
         background: transparent;
         display: flex;
         align-items: center;
         justify-content: space-between;
         flex-wrap: wrap;
         gap: 15px;
-        margin-bottom: 20px;  /* Added some margin for spacing */
+        margin-bottom: 20px;
     }
     
     .price-title-container {
@@ -211,6 +152,7 @@ css_styles += """
         line-height: 1;
     }
     
+    /* Enhanced selectbox styling */
     .stSelectbox > div > div {
         background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
         border: 2px solid rgba(100, 116, 139, 0.3) !important;
@@ -237,11 +179,7 @@ css_styles += """
         padding: 8px 16px !important;
     }
     
-    .chart-content {
-        padding: 8px 28px;
-        position: relative;
-    }
-    
+    /* Enhanced metric cards */
     .metric-card {
         background: rgba(30, 41, 59, 0.4) !important;
         backdrop-filter: blur(25px) !important;
@@ -297,6 +235,7 @@ css_styles += """
         color: #ff4757 !important;
     }
     
+    /* Chart styling */
     .stPlotlyChart {
         border-radius: 12px;
         overflow: hidden;
@@ -312,7 +251,7 @@ css_styles += """
         background: transparent !important;
     }
     
-    /* Responsive design for smaller screens */
+    /* Responsive design */
     @media (max-width: 1200px) {
         .price-header-section {
             flex-direction: column;
@@ -341,21 +280,7 @@ css_styles += """
         }
     }
 </style>
-"""
-
-st.markdown(css_styles, unsafe_allow_html=True)
-
-# Render simple page header (from shared components) if available
-if SHARED_COMPONENTS_AVAILABLE:
-    render_simple_page_header("Price Analysis", "Real-time Kaspa price tracking with advanced technical analysis")
-else:
-    # Fallback page header
-    st.markdown("""
-    <div style="padding: 0 0 32px 0;">
-        <h1 style="color: #f1f5f9; font-size: 36px; font-weight: 800; margin: 0;">Price Analysis</h1>
-        <p style="color: #94a3b8; font-size: 16px; margin: 8px 0 0 0;">Real-time Kaspa price tracking with advanced technical analysis</p>
-    </div>
-    """, unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
 # Calculate current metrics for later use
 current_price = price_df['Price'].iloc[-1]
@@ -372,13 +297,12 @@ else:
 # Price chart controls section
 st.markdown('<div class="price-header-section">', unsafe_allow_html=True)
 
-# Column structure with spacing controls:
-# [Left Space] [Title] [Middle Space] [Controls: Price Scale | Time Scale | Time Period | Power Law]
+# Column structure with spacing controls
 left_space, title_col, middle_space, ctrl_col1, ctrl_col2, ctrl_col3, ctrl_col4 = st.columns([0.1, 1, 5, 1, 1, 1, 1])
 
 # Left invisible spacing column
 with left_space:
-    st.empty()  # Creates invisible space to the left of title
+    st.empty()
 
 # Title column
 with title_col:
@@ -386,7 +310,7 @@ with title_col:
 
 # Middle invisible spacing column
 with middle_space:
-    st.empty()  # Creates invisible space between title and controls
+    st.empty()
 
 # Control columns
 with ctrl_col1:
@@ -410,9 +334,6 @@ with ctrl_col4:
     st.markdown('</div>', unsafe_allow_html=True)
 
 st.markdown('</div>', unsafe_allow_html=True)
-
-# Chart content section
-st.markdown('<div class="chart-content"></div>', unsafe_allow_html=True)
 
 # Data filtering based on time range
 last_date = price_df['Date'].iloc[-1]
@@ -507,7 +428,7 @@ fig.add_trace(go.Scatter(
     fillcolor='rgba(0, 212, 255, 0.1)'
 ))
 
-# Add power law if enabled - now with orange color and white dotted bands
+# Add power law if enabled - with orange color and white dotted bands
 if show_power_law == "Show":
     x_fit = filtered_df['days_from_genesis']
     y_fit = a_price * np.power(x_fit, b_price)
