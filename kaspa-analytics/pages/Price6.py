@@ -4,28 +4,14 @@ import numpy as np
 import pandas as pd
 from utils import fit_power_law, load_price_data
 from datetime import datetime, timedelta
-from components.shared_components import (
-    render_page_config,
-    render_custom_css_with_sidebar,
-    render_clean_header,
-    render_beautiful_sidebar,
-    render_simple_page_header
-)
 
 # MUST be first Streamlit command
-render_page_config(page_title="Price Analysis - Kaspa Analytics Pro")
-
-# Apply custom CSS with beautiful sidebar support
-render_custom_css_with_sidebar()
-
-# Render clean header
-render_clean_header(
-    user_name=None,  # Set to user name if logged in
-    show_auth=True
+st.set_page_config(
+    page_title="Kaspa Analytics Pro",
+    page_icon="💎",
+    layout="wide",
+    initial_sidebar_state="collapsed"
 )
-
-# Render beautiful dropdown sidebar
-render_beautiful_sidebar(current_page="Price")
 
 # Data loading and processing
 if 'price_df' not in st.session_state or 'price_genesis_date' not in st.session_state:
@@ -646,6 +632,25 @@ with st.container():
 
 st.markdown('</div>', unsafe_allow_html=True)
 st.markdown('</div>', unsafe_allow_html=True)
+
+# Now add the shared components for header and sidebar
+from components.shared_components import (
+    render_custom_css_with_sidebar,
+    render_clean_header,
+    render_beautiful_sidebar
+)
+
+# Apply shared components CSS (after chart controls are rendered)
+render_custom_css_with_sidebar()
+
+# Render clean header
+render_clean_header(
+    user_name=None,  # Set to user name if logged in
+    show_auth=True
+)
+
+# Render beautiful dropdown sidebar
+render_beautiful_sidebar(current_page="Price")
 
 # Calculate comprehensive metrics
 if len(df_30_days_ago) > 0:
