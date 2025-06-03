@@ -180,7 +180,7 @@ st.markdown("""
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
         min-height: 26px !important;
-        width: 150px !important;
+        width: 140px !important;
         max-width: 250px !important;
         min-width: 100px !important;
     }
