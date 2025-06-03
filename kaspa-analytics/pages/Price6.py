@@ -4,12 +4,33 @@ import numpy as np
 import pandas as pd
 from utils import fit_power_law, load_price_data
 from datetime import datetime, timedelta
+from components.shared_components import (
+    render_page_config,
+    render_custom_css_with_sidebar,
+    render_clean_header,
+    render_beautiful_sidebar,
+    render_simple_page_header
+)
 
-st.set_page_config(
-    page_title="Kaspa Analytics Pro",
-    page_icon="💎",
-    layout="wide",
-    initial_sidebar_state="collapsed"
+# MUST be first Streamlit command
+render_page_config(page_title="Price Analysis - Kaspa Analytics Pro")
+
+# Apply custom CSS with beautiful sidebar support
+render_custom_css_with_sidebar()
+
+# Render clean header
+render_clean_header(
+    user_name=None,  # Set to user name if logged in
+    show_auth=True
+)
+
+# Render beautiful dropdown sidebar
+render_beautiful_sidebar(current_page="Price")
+
+# Render simple page header
+render_simple_page_header(
+    title="Price Analysis",
+    subtitle="Advanced cryptocurrency market analysis with power law modeling"
 )
 
 # Data loading and processing
@@ -29,83 +50,12 @@ except Exception as e:
     st.error(f"Failed to calculate price power law: {str(e)}")
     st.stop()
 
-# Enhanced Custom CSS with Modern Design and Animated Title
+# Additional CSS for chart-specific styling
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-    
-    html, body, .stApp {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        background: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 50%, #0f1419 100%);
-        color: #e2e8f0;
-        overflow-x: hidden;
-    }
-    
-    .stApp {
-        background-attachment: fixed;
-    }
-    
-    .main .block-container {
-        padding: 0 !important;
-        max-width: 100% !important;
-    }
-    
-    .stApp::before {
-        content: '';
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-image: 
-            radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.15) 0%, transparent 50%),
-            radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
-            radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.15) 0%, transparent 50%);
-        pointer-events: none;
-        z-index: -1;
-        animation: backgroundShift 20s ease-in-out infinite;
-    }
-    
-    @keyframes backgroundShift {
-        0%, 100% { opacity: 1; transform: translateX(0px) translateY(0px); }
-        50% { opacity: 0.8; transform: translateX(20px) translateY(-20px); }
-    }
-    
-    @keyframes shimmer {
-        0% {
-            background-position: -200% center;
-            text-shadow: 0 0 10px rgba(241, 245, 249, 0.3);
-        }
-        50% {
-            text-shadow: 
-                0 0 20px rgba(0, 212, 255, 0.6),
-                0 0 30px rgba(0, 212, 255, 0.4),
-                0 0 40px rgba(0, 212, 255, 0.2);
-        }
-        100% {
-            background-position: 200% center;
-            text-shadow: 0 0 10px rgba(241, 245, 249, 0.3);
-        }
-    }
-    
-    @keyframes glow {
-        0%, 100% {
-            text-shadow: 
-                0 0 10px rgba(241, 245, 249, 0.3),
-                0 0 20px rgba(0, 212, 255, 0.2),
-                0 0 30px rgba(0, 212, 255, 0.1);
-        }
-        50% {
-            text-shadow: 
-                0 0 20px rgba(241, 245, 249, 0.5),
-                0 0 30px rgba(0, 212, 255, 0.4),
-                0 0 40px rgba(0, 212, 255, 0.3),
-                0 0 50px rgba(0, 212, 255, 0.2);
-        }
-    }
-    
+    /* Chart-specific styles that complement shared components */
     .chart-section {
-        margin: 12px 40px 28px 40px;
+        margin: 12px 0 28px 0;
         background: rgba(30, 41, 59, 0.4);
         backdrop-filter: blur(25px);
         border: none;
@@ -116,16 +66,15 @@ st.markdown("""
         transition: all 0.3s ease;
     }
     
-    /* Tightened header section with minimal vertical spacing */
     .header-section {
-        padding: 15px 40px 15px 40px;  /* Consistent padding top/bottom */
+        padding: 15px 40px 15px 40px;
         background: transparent;
         display: flex;
         align-items: center;
         justify-content: space-between;
         flex-wrap: wrap;
         gap: 15px;
-        margin-bottom: 20px;  /* Added some margin for spacing */
+        margin-bottom: 20px;
     }
     
     .title-container {
@@ -264,20 +213,6 @@ st.markdown("""
         box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
     }
     
-    .stPlotlyChart .modebar {
-        background: transparent !important;
-        transform: translateY(10px) !important;
-    }
-    
-    .stPlotlyChart .modebar-group {
-        background: transparent !important;
-    }
-    
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-    .stDeployButton {display: none;}
-    
     /* Responsive design for smaller screens */
     @media (max-width: 1200px) {
         .header-section {
@@ -321,7 +256,8 @@ if len(df_30_days_ago) > 0:
 else:
     price_pct_change = 0
 
-# Header section with title and controls on the same line
+# Chart controls section
+st.markdown('<div class="chart-section">', unsafe_allow_html=True)
 st.markdown('<div class="header-section">', unsafe_allow_html=True)
 
 # Column structure with spacing controls:
@@ -330,15 +266,15 @@ left_space, title_col, middle_space, ctrl_col1, ctrl_col2, ctrl_col3, ctrl_col4 
 
 # Left invisible spacing column
 with left_space:
-    st.empty()  # Creates invisible space to the left of title
+    st.empty()
 
 # Title column
 with title_col:
-    st.markdown('<div class="title-container"><h1 class="main-title">Kaspa Price</h1></div>', unsafe_allow_html=True)
+    st.markdown('<div class="title-container"><h1 class="main-title">Chart Controls</h1></div>', unsafe_allow_html=True)
 
 # Middle invisible spacing column
 with middle_space:
-    st.empty()  # Creates invisible space between title and controls
+    st.empty()
 
 # Control columns
 with ctrl_col1:
@@ -364,7 +300,7 @@ with ctrl_col4:
 st.markdown('</div>', unsafe_allow_html=True)
 
 # Chart content section
-st.markdown('<div class="chart-content"></div>', unsafe_allow_html=True)
+st.markdown('<div class="chart-content">', unsafe_allow_html=True)
 
 # Data filtering based on time range
 last_date = price_df['Date'].iloc[-1]
@@ -382,16 +318,6 @@ else:
     start_date = price_df['Date'].iloc[0]
 
 filtered_df = price_df[price_df['Date'] >= start_date]
-
-# Create the enhanced chart
-fig = go.Figure()
-
-if x_scale_type == "Log":
-    x_values = filtered_df['days_from_genesis']
-    x_title = "Days Since Genesis (Log Scale)"
-else:
-    x_values = filtered_df['Date']
-    x_title = "Date"
 
 # Custom Y-axis tick formatting function
 def format_currency(value):
@@ -414,7 +340,7 @@ def format_currency(value):
     else:
         return f"${value:.1e}"
 
-# Generate custom tick values for log scale Y-axis
+# Generate custom tick values for log scale
 def generate_log_ticks(data_min, data_max):
     """Generate physics-style log tick marks with 1, 2, 5 pattern"""
     import math
@@ -446,6 +372,16 @@ def generate_log_ticks(data_min, data_max):
     
     return major_ticks, intermediate_ticks, minor_ticks
 
+# Create the enhanced chart
+fig = go.Figure()
+
+if x_scale_type == "Log":
+    x_values = filtered_df['days_from_genesis']
+    x_title = "Days Since Genesis (Log Scale)"
+else:
+    x_values = filtered_df['Date']
+    x_title = "Date"
+
 # Add price trace
 fig.add_trace(go.Scatter(
     x=x_values,
@@ -459,7 +395,7 @@ fig.add_trace(go.Scatter(
     fillcolor='rgba(0, 212, 255, 0.1)'
 ))
 
-# Add power law if enabled - now with orange color and white dotted bands
+# Add power law if enabled
 if show_power_law == "Show":
     x_fit = filtered_df['days_from_genesis']
     y_fit = a_price * np.power(x_fit, b_price)
@@ -470,7 +406,7 @@ if show_power_law == "Show":
         y=y_fit,
         mode='lines',
         name=f'Power Law Fit (R²={r2_price:.3f})',
-        line=dict(color='#ff8c00', width=3, dash='solid'),  # Orange color
+        line=dict(color='#ff8c00', width=3, dash='solid'),
         showlegend=True,
         hovertemplate='<b>Power Law Fit</b><br>R² = %{customdata:.3f}<br>Value: $%{y:.6f}<br><extra></extra>',
         customdata=[r2_price] * len(fit_x)
@@ -481,7 +417,7 @@ if show_power_law == "Show":
         y=y_fit * 0.4,
         mode='lines',
         name='Support (-60%)',
-        line=dict(color='rgba(255, 255, 255, 0.7)', width=1.5, dash='dot'),  # White dotted
+        line=dict(color='rgba(255, 255, 255, 0.7)', width=1.5, dash='dot'),
         showlegend=True,
         hoverinfo='skip'
     ))
@@ -491,7 +427,7 @@ if show_power_law == "Show":
         y=y_fit * 2.2,
         mode='lines',
         name='Resistance (+120%)',
-        line=dict(color='rgba(255, 255, 255, 0.7)', width=1.5, dash='dot'),  # White dotted
+        line=dict(color='rgba(255, 255, 255, 0.7)', width=1.5, dash='dot'),
         fill='tonexty',
         fillcolor='rgba(100, 100, 100, 0.05)',
         showlegend=True,
@@ -504,7 +440,6 @@ y_min, y_max = filtered_df['Price'].min(), filtered_df['Price'].max()
 # Generate custom ticks for Y-axis if log scale
 if y_scale == "Log":
     y_major_ticks, y_intermediate_ticks, y_minor_ticks = generate_log_ticks(y_min, y_max)
-    # Combine major and intermediate ticks for display
     y_tick_vals = sorted(y_major_ticks + y_intermediate_ticks)
     y_tick_text = [format_currency(val) for val in y_tick_vals]
 else:
@@ -516,7 +451,6 @@ else:
 if x_scale_type == "Log":
     x_min, x_max = filtered_df['days_from_genesis'].min(), filtered_df['days_from_genesis'].max()
     x_major_ticks, x_intermediate_ticks, x_minor_ticks = generate_log_ticks(x_min, x_max)
-    # Combine major and intermediate ticks for display
     x_tick_vals = sorted(x_major_ticks + x_intermediate_ticks)
     x_tick_text = [f"{int(val)}" for val in x_tick_vals]
 else:
@@ -539,7 +473,6 @@ fig.update_layout(
         gridcolor='rgba(255, 255, 255, 0.12)' if x_scale_type == "Log" else 'rgba(255, 255, 255, 0.08)',
         linecolor='rgba(255, 255, 255, 0.15)',
         tickfont=dict(size=11, color='#94a3b8'),
-        # Physics-style log ticks with 1, 2, 5 pattern
         tickmode='array' if x_scale_type == "Log" else 'auto',
         tickvals=x_tick_vals,
         ticktext=x_tick_text,
@@ -550,7 +483,6 @@ fig.update_layout(
             tickmode='array',
             tickvals=x_minor_ticks if x_scale_type == "Log" else []
         ) if x_scale_type == "Log" else dict()
-        # Removed rangeslider configuration
     ),
     yaxis=dict(
         title=None,
@@ -560,7 +492,6 @@ fig.update_layout(
         gridcolor='rgba(255, 255, 255, 0.12)' if y_scale == "Log" else 'rgba(255, 255, 255, 0.08)',
         linecolor='rgba(255, 255, 255, 0.15)',
         tickfont=dict(size=11, color='#94a3b8'),
-        # Physics-style log ticks with 1, 2, 5 pattern and custom formatting
         tickmode='array' if y_scale == "Log" else 'auto',
         tickvals=y_tick_vals,
         ticktext=y_tick_text,
@@ -592,20 +523,22 @@ fig.update_layout(
 )
 
 # Display chart
-with st.container():
-    st.plotly_chart(fig, use_container_width=True, config={
-        'displayModeBar': True,
-        'displaylogo': False,
-        'modeBarButtonsToRemove': ['lasso2d', 'select2d'],
-        'modeBarButtonsToAdd': ['hoverclosest', 'hovercompare'],
-        'toImageButtonOptions': {
-            'format': 'png',
-            'filename': f'kaspa_analysis_{datetime.now().strftime("%Y%m%d_%H%M")}',
-            'height': 650,
-            'width': 1400,
-            'scale': 2
-        }
-    })
+st.plotly_chart(fig, use_container_width=True, config={
+    'displayModeBar': True,
+    'displaylogo': False,
+    'modeBarButtonsToRemove': ['lasso2d', 'select2d'],
+    'modeBarButtonsToAdd': ['hoverclosest', 'hovercompare'],
+    'toImageButtonOptions': {
+        'format': 'png',
+        'filename': f'kaspa_analysis_{datetime.now().strftime("%Y%m%d_%H%M")}',
+        'height': 650,
+        'width': 1400,
+        'scale': 2
+    }
+})
+
+st.markdown('</div>', unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
 
 # Calculate comprehensive metrics
 if len(df_30_days_ago) > 0:
@@ -626,7 +559,9 @@ else:
     slope_pct_change = 0
     r2_pct_change = 0
 
-# Enhanced Metrics Section with improved styling and hover effects
+# Enhanced Metrics Section
+st.markdown("## Key Metrics")
+
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
