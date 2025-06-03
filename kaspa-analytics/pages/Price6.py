@@ -170,10 +170,12 @@ st.markdown("""
     }
     
     .control-group {
-        display: flex;
-        flex-direction: column;
-        gap: 3px;
-        min-width: 120px;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 3px !important;
+        min-width: 120px !important;
+        visibility: visible !important;
+        opacity: 1 !important;
     }
     
     .control-label {
@@ -187,7 +189,20 @@ st.markdown("""
         line-height: 1;
     }
     
-    .stSelectbox > div > div {
+    /* Force selectbox visibility and styling */
+    .chart-section .stSelectbox {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    .chart-section .stSelectbox > div {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    .chart-section .stSelectbox > div > div {
         background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
         border: 2px solid rgba(100, 116, 139, 0.3) !important;
         border-radius: 12px !important;
@@ -198,19 +213,25 @@ st.markdown("""
         width: 150px !important;
         max-width: 250px !important;
         min-width: 100px !important;
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
     }
     
-    .stSelectbox > div > div:hover {
+    .chart-section .stSelectbox > div > div:hover {
         border-color: #00d4ff !important;
         box-shadow: 0 8px 32px rgba(0, 212, 255, 0.2), 0 0 0 1px rgba(0, 212, 255, 0.3) !important;
         transform: translateY(-2px);
     }
     
-    .stSelectbox > div > div > div {
+    .chart-section .stSelectbox > div > div > div {
         color: #f1f5f9 !important;
         font-weight: 600 !important;
         font-size: 13px !important;
         padding: 8px 16px !important;
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
     }
     
     .chart-content {
