@@ -29,7 +29,7 @@ except Exception as e:
     st.error(f"Failed to calculate price power law: {str(e)}")
     st.stop()
 
-# Enhanced Custom CSS - Cleaner without dropdown controls
+# Enhanced Custom CSS - Ultra clean design
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -71,26 +71,14 @@ st.markdown("""
         50% { opacity: 0.8; transform: translateX(20px) translateY(-20px); }
     }
     
-    .chart-section {
-        margin: 20px 40px 28px 40px;
-        background: rgba(30, 41, 59, 0.4);
-        backdrop-filter: blur(25px);
-        border: none;
-        border-radius: 16px;
-        overflow: hidden;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
-        position: relative;
-        transition: all 0.3s ease;
-    }
-    
     .header-section {
-        padding: 24px 40px 16px 40px;
+        padding: 32px 40px 24px 40px;
         background: transparent;
         text-align: center;
     }
     
     .main-title {
-        font-size: 32px;
+        font-size: 36px;
         font-weight: 800;
         color: #ffffff;
         margin: 0;
@@ -102,8 +90,19 @@ st.markdown("""
         background-clip: text;
     }
     
+    .chart-section {
+        margin: 0 40px 28px 40px;
+        background: rgba(30, 41, 59, 0.4);
+        backdrop-filter: blur(25px);
+        border: none;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+        position: relative;
+    }
+    
     .chart-content {
-        padding: 8px 28px 24px 28px;
+        padding: 24px 28px;
         position: relative;
     }
     
@@ -175,7 +174,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Calculate current metrics for later use
+# Calculate current metrics
 current_price = price_df['Price'].iloc[-1]
 last_date = price_df['Date'].iloc[-1]
 thirty_days_ago = last_date - timedelta(days=30)
@@ -187,13 +186,10 @@ if len(df_30_days_ago) > 0:
 else:
     price_pct_change = 0
 
-# Clean header section - just the title
+# Header section
 st.markdown('<div class="header-section">', unsafe_allow_html=True)
 st.markdown('<h1 class="main-title">Kaspa Price Analytics</h1>', unsafe_allow_html=True)
 st.markdown('</div>', unsafe_allow_html=True)
-
-# Chart content section
-st.markdown('<div class="chart-content">', unsafe_allow_html=True)
 
 # Prepare data for different time ranges
 def get_filtered_data(time_range):
@@ -213,79 +209,29 @@ def get_filtered_data(time_range):
     
     return price_df[price_df['Date'] >= start_date]
 
-# Custom Y-axis tick formatting function
-def format_currency(value):
-    if value >= 1:
-        if value >= 1000:
-            return f"${value/1000:.1f}k"
-        elif value >= 100:
-            return f"${value:.0f}"
-        elif value >= 10:
-            return f"${value:.1f}"
-        else:
-            return f"${value:.2f}"
-    elif value >= 0.01:
-        return f"${value:.3f}"
-    elif value >= 0.001:
-        return f"${value:.4f}"
-    elif value >= 0.0001:
-        return f"${value:.5f}"
-    else:
-        return f"${value:.1e}"
+# Create chart section
+st.markdown('<div class="chart-section">', unsafe_allow_html=True)
+st.markdown('<div class="chart-content">', unsafe_allow_html=True)
 
-def generate_log_ticks(data_min, data_max):
-    import math
-    log_min = math.floor(math.log10(data_min))
-    log_max = math.ceil(math.log10(data_max))
-    
-    major_ticks = []
-    intermediate_ticks = []
-    minor_ticks = []
-    
-    for i in range(log_min, log_max + 1):
-        base = 10**i
-        
-        if data_min <= base <= data_max:
-            major_ticks.append(base)
-        
-        for factor in [2, 5]:
-            intermediate_val = factor * base
-            if data_min <= intermediate_val <= data_max:
-                intermediate_ticks.append(intermediate_val)
-        
-        for j in [3, 4, 6, 7, 8, 9]:
-            minor_val = j * base
-            if data_min <= minor_val <= data_max:
-                minor_ticks.append(minor_val)
-    
-    return major_ticks, intermediate_ticks, minor_ticks
-
-# Create the enhanced chart with Plotly controls
+# Create the main chart with all time periods and toggle functionality
 fig = go.Figure()
 
-# Create data for all time ranges
+# Get all time range data
 time_ranges = ["1W", "1M", "3M", "6M", "1Y", "All"]
-all_data = {}
-for tr in time_ranges:
-    all_data[tr] = get_filtered_data(tr)
+current_data = get_filtered_data("All")  # Start with all data
 
-# Start with "All" data
-current_data = all_data["All"]
-
-# Add main price trace
+# Add main price line
 fig.add_trace(go.Scatter(
     x=current_data['Date'],
     y=current_data['Price'],
     mode='lines',
-    name='Kaspa Price (USD)',
+    name='Kaspa Price',
     line=dict(color='#00d4ff', width=3, shape='spline', smoothing=0.3),
-    hovertemplate='<b>%{fullData.name}</b><br>Date: %{text}<br>Price: $%{y:.6f}<br><extra></extra>',
-    text=[d.strftime('%Y-%m-%d') for d in current_data['Date']],
-    showlegend=True,
-    visible=True
+    hovertemplate='<b>Kaspa Price</b><br>Date: %{x}<br>Price: $%{y:.6f}<extra></extra>',
+    showlegend=True
 ))
 
-# Add power law traces (initially visible)
+# Add power law fit
 x_fit = current_data['days_from_genesis']
 y_fit = a_price * np.power(x_fit, b_price)
 
@@ -293,23 +239,21 @@ fig.add_trace(go.Scatter(
     x=current_data['Date'],
     y=y_fit,
     mode='lines',
-    name=f'Power Law Fit (R²={r2_price:.3f})',
-    line=dict(color='#ff8c00', width=3, dash='solid'),
-    showlegend=True,
-    hovertemplate='<b>Power Law Fit</b><br>R² = %{customdata:.3f}<br>Value: $%{y:.6f}<br><extra></extra>',
-    customdata=[r2_price] * len(x_fit),
-    visible=True
+    name=f'Power Law (R²={r2_price:.3f})',
+    line=dict(color='#ff8c00', width=2, dash='solid'),
+    hovertemplate='<b>Power Law</b><br>Date: %{x}<br>Value: $%{y:.6f}<extra></extra>',
+    showlegend=True
 ))
 
+# Add support and resistance bands
 fig.add_trace(go.Scatter(
     x=current_data['Date'],
     y=y_fit * 0.4,
     mode='lines',
     name='Support (-60%)',
-    line=dict(color='rgba(255, 255, 255, 0.7)', width=1.5, dash='dot'),
-    showlegend=True,
+    line=dict(color='rgba(255, 255, 255, 0.5)', width=1, dash='dot'),
     hoverinfo='skip',
-    visible=True
+    showlegend=False
 ))
 
 fig.add_trace(go.Scatter(
@@ -317,28 +261,26 @@ fig.add_trace(go.Scatter(
     y=y_fit * 2.2,
     mode='lines',
     name='Resistance (+120%)',
-    line=dict(color='rgba(255, 255, 255, 0.7)', width=1.5, dash='dot'),
+    line=dict(color='rgba(255, 255, 255, 0.5)', width=1, dash='dot'),
     fill='tonexty',
-    fillcolor='rgba(100, 100, 100, 0.05)',
-    showlegend=True,
+    fillcolor='rgba(100, 100, 100, 0.03)',
     hoverinfo='skip',
-    visible=True
+    showlegend=False
 ))
 
-# Enhanced chart layout with Plotly controls
+# Enhanced layout with proper controls
 fig.update_layout(
     plot_bgcolor='rgba(0,0,0,0)',
     paper_bgcolor='rgba(0,0,0,0)',
     font=dict(family='Inter', color='#e2e8f0'),
     hovermode='x unified',
-    height=700,
-    margin=dict(l=30, r=30, t=80, b=40),
+    height=650,
+    margin=dict(l=20, r=20, t=60, b=40),
     
-    # Add range selector buttons for time periods
     xaxis=dict(
-        title=dict(text="Date", font=dict(size=13, color='#cbd5e1', weight=600), standoff=25),
+        title=None,
         showgrid=True,
-        gridwidth=1.2,
+        gridwidth=1,
         gridcolor='rgba(255, 255, 255, 0.08)',
         linecolor='rgba(255, 255, 255, 0.15)',
         tickfont=dict(size=11, color='#94a3b8'),
@@ -351,13 +293,13 @@ fig.update_layout(
                 dict(count=365, label="1Y", step="day", stepmode="backward"),
                 dict(step="all", label="All")
             ]),
-            bgcolor='rgba(30, 41, 59, 0.8)',
+            bgcolor='rgba(30, 41, 59, 0.9)',
             bordercolor='rgba(255, 255, 255, 0.2)',
             borderwidth=1,
-            font=dict(color='#e2e8f0', size=11),
-            activecolor='rgba(0, 212, 255, 0.3)',
-            x=0,
-            y=1.12,
+            font=dict(color='#e2e8f0', size=10),
+            activecolor='rgba(0, 212, 255, 0.4)',
+            x=0.02,
+            y=0.98,
             xanchor='left',
             yanchor='top'
         ),
@@ -367,65 +309,54 @@ fig.update_layout(
     yaxis=dict(
         title=None,
         showgrid=True,
-        gridwidth=1.2,
+        gridwidth=1,
         gridcolor='rgba(255, 255, 255, 0.08)',
         linecolor='rgba(255, 255, 255, 0.15)',
         tickfont=dict(size=11, color='#94a3b8'),
-        type="linear"
+        tickformat='$,.6f'
     ),
     
-    # Add update menus for scale controls
+    # Add toggle buttons
     updatemenus=[
-        # Y-axis scale toggle
+        # Y-axis scale
         dict(
             type="buttons",
-            direction="right",
-            x=0,
-            y=1.08,
-            xanchor='left',
+            direction="left",
+            x=0.98,
+            y=0.98,
+            xanchor='right',
             yanchor='top',
-            bgcolor='rgba(30, 41, 59, 0.8)',
+            bgcolor='rgba(30, 41, 59, 0.9)',
             bordercolor='rgba(255, 255, 255, 0.2)',
             borderwidth=1,
-            font=dict(color='#e2e8f0', size=11),
+            font=dict(color='#e2e8f0', size=10),
             buttons=list([
-                dict(label="Linear", method="relayout", args=[{"yaxis.type": "linear"}]),
-                dict(label="Log", method="relayout", args=[{"yaxis.type": "log"}]),
+                dict(
+                    label="Linear",
+                    method="relayout",
+                    args=[{"yaxis.type": "linear"}]
+                ),
+                dict(
+                    label="Log",
+                    method="relayout",
+                    args=[{"yaxis.type": "log"}]
+                )
             ]),
             showactive=True,
-            active=0,
+            active=0
         ),
-        # X-axis scale toggle
+        # Power law toggle
         dict(
             type="buttons",
-            direction="right",
-            x=0.15,
-            y=1.08,
-            xanchor='left',
+            direction="left",
+            x=0.98,
+            y=0.88,
+            xanchor='right',
             yanchor='top',
-            bgcolor='rgba(30, 41, 59, 0.8)',
+            bgcolor='rgba(30, 41, 59, 0.9)',
             bordercolor='rgba(255, 255, 255, 0.2)',
             borderwidth=1,
-            font=dict(color='#e2e8f0', size=11),
-            buttons=list([
-                dict(label="Date", method="relayout", args=[{"xaxis.title.text": "Date"}]),
-                dict(label="Log Days", method="relayout", args=[{"xaxis.title.text": "Days Since Genesis (Log)", "xaxis.type": "log"}]),
-            ]),
-            showactive=True,
-            active=0,
-        ),
-        # Power Law toggle
-        dict(
-            type="buttons",
-            direction="right",
-            x=0.35,
-            y=1.08,
-            xanchor='left',
-            yanchor='top',
-            bgcolor='rgba(30, 41, 59, 0.8)',
-            bordercolor='rgba(255, 255, 255, 0.2)',
-            borderwidth=1,
-            font=dict(color='#e2e8f0', size=11),
+            font=dict(color='#e2e8f0', size=10),
             buttons=list([
                 dict(
                     label="Show Power Law",
@@ -436,32 +367,47 @@ fig.update_layout(
                     label="Hide Power Law",
                     method="restyle",
                     args=[{"visible": [True, False, False, False]}]
-                ),
+                )
             ]),
             showactive=True,
-            active=0,
-        ),
+            active=0
+        )
     ],
     
     # Add annotations for button labels
     annotations=[
-        dict(text="Y-Scale:", x=0, y=1.14, xref="paper", yref="paper", 
-             showarrow=False, font=dict(size=11, color='#94a3b8'), xanchor='left'),
-        dict(text="X-Scale:", x=0.15, y=1.14, xref="paper", yref="paper", 
-             showarrow=False, font=dict(size=11, color='#94a3b8'), xanchor='left'),
-        dict(text="Power Law:", x=0.35, y=1.14, xref="paper", yref="paper", 
-             showarrow=False, font=dict(size=11, color='#94a3b8'), xanchor='left'),
+        dict(
+            text="Scale:",
+            x=0.86,
+            y=0.98,
+            xref="paper",
+            yref="paper",
+            showarrow=False,
+            font=dict(size=10, color='#94a3b8'),
+            xanchor='right',
+            yanchor='top'
+        ),
+        dict(
+            text="Power Law:",
+            x=0.86,
+            y=0.88,
+            xref="paper",
+            yref="paper",
+            showarrow=False,
+            font=dict(size=10, color='#94a3b8'),
+            xanchor='right',
+            yanchor='top'
+        )
     ],
     
     legend=dict(
         orientation="h",
         yanchor="bottom",
         y=1.02,
-        xanchor="right",
-        x=1,
+        xanchor="center",
+        x=0.5,
         bgcolor='rgba(0,0,0,0)',
         bordercolor='rgba(0,0,0,0)',
-        borderwidth=0,
         font=dict(size=11)
     ),
     
@@ -473,25 +419,24 @@ fig.update_layout(
     )
 )
 
-# Display chart
-with st.container():
-    st.plotly_chart(fig, use_container_width=True, config={
-        'displayModeBar': True,
-        'displaylogo': False,
-        'modeBarButtonsToRemove': ['lasso2d', 'select2d'],
-        'modeBarButtonsToAdd': ['hoverclosest', 'hovercompare'],
-        'toImageButtonOptions': {
-            'format': 'png',
-            'filename': f'kaspa_analysis_{datetime.now().strftime("%Y%m%d_%H%M")}',
-            'height': 750,
-            'width': 1400,
-            'scale': 2
-        }
-    })
+# Display the chart
+st.plotly_chart(fig, use_container_width=True, config={
+    'displayModeBar': True,
+    'displaylogo': False,
+    'modeBarButtonsToRemove': ['lasso2d', 'select2d', 'autoScale2d'],
+    'toImageButtonOptions': {
+        'format': 'png',
+        'filename': f'kaspa_analysis_{datetime.now().strftime("%Y%m%d_%H%M")}',
+        'height': 700,
+        'width': 1400,
+        'scale': 2
+    }
+})
 
 st.markdown('</div>', unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
 
-# Calculate comprehensive metrics
+# Calculate comprehensive metrics for cards
 if len(df_30_days_ago) > 0:
     price_30_days_ago_data = price_df[price_df['Date'] <= thirty_days_ago]
     if len(price_30_days_ago_data) > 10:
@@ -510,7 +455,7 @@ else:
     slope_pct_change = 0
     r2_pct_change = 0
 
-# Enhanced Metrics Section
+# Metrics Section
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
