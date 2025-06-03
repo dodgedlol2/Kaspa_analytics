@@ -416,25 +416,35 @@ def format_currency(value):
 
 # Generate custom tick values for log scale Y-axis
 def generate_log_ticks(data_min, data_max):
-    """Generate physics-style log tick marks"""
+    """Generate physics-style log tick marks with 1, 2, 5 pattern"""
     import math
     log_min = math.floor(math.log10(data_min))
     log_max = math.ceil(math.log10(data_max))
     
     major_ticks = []
+    intermediate_ticks = []  # For 2 and 5
     minor_ticks = []
     
     for i in range(log_min, log_max + 1):
         base = 10**i
-        major_ticks.append(base)
         
-        # Add minor ticks at 2, 3, 4, 5, 6, 7, 8, 9 * 10^i
-        for j in [2, 3, 4, 5, 6, 7, 8, 9]:
+        # Major tick at 1 * 10^i
+        if data_min <= base <= data_max:
+            major_ticks.append(base)
+        
+        # Intermediate ticks at 2 and 5 * 10^i
+        for factor in [2, 5]:
+            intermediate_val = factor * base
+            if data_min <= intermediate_val <= data_max:
+                intermediate_ticks.append(intermediate_val)
+        
+        # Minor ticks at 3, 4, 6, 7, 8, 9 * 10^i
+        for j in [3, 4, 6, 7, 8, 9]:
             minor_val = j * base
             if data_min <= minor_val <= data_max:
                 minor_ticks.append(minor_val)
     
-    return major_ticks, minor_ticks
+    return major_ticks, intermediate_ticks, minor_ticks
 
 # Add price trace
 fig.add_trace(go.Scatter(
@@ -493,22 +503,26 @@ y_min, y_max = filtered_df['Price'].min(), filtered_df['Price'].max()
 
 # Generate custom ticks for Y-axis if log scale
 if y_scale == "Log":
-    y_major_ticks, y_minor_ticks = generate_log_ticks(y_min, y_max)
-    y_tick_vals = y_major_ticks
-    y_tick_text = [format_currency(val) for val in y_major_ticks]
+    y_major_ticks, y_intermediate_ticks, y_minor_ticks = generate_log_ticks(y_min, y_max)
+    # Combine major and intermediate ticks for display
+    y_tick_vals = sorted(y_major_ticks + y_intermediate_ticks)
+    y_tick_text = [format_currency(val) for val in y_tick_vals]
 else:
     y_tick_vals = None
     y_tick_text = None
+    y_minor_ticks = []
 
 # Generate custom ticks for X-axis if log scale
 if x_scale_type == "Log":
     x_min, x_max = filtered_df['days_from_genesis'].min(), filtered_df['days_from_genesis'].max()
-    x_major_ticks, x_minor_ticks = generate_log_ticks(x_min, x_max)
-    x_tick_vals = x_major_ticks
-    x_tick_text = [f"{int(val)}" for val in x_major_ticks]
+    x_major_ticks, x_intermediate_ticks, x_minor_ticks = generate_log_ticks(x_min, x_max)
+    # Combine major and intermediate ticks for display
+    x_tick_vals = sorted(x_major_ticks + x_intermediate_ticks)
+    x_tick_text = [f"{int(val)}" for val in x_tick_vals]
 else:
     x_tick_vals = None
     x_tick_text = None
+    x_minor_ticks = []
 
 fig.update_layout(
     plot_bgcolor='rgba(0,0,0,0)',
@@ -521,18 +535,18 @@ fig.update_layout(
         title=dict(text=x_title, font=dict(size=13, color='#cbd5e1', weight=600), standoff=35),
         type="log" if x_scale_type == "Log" else None,
         showgrid=True,
-        gridwidth=1,
-        gridcolor='rgba(255, 255, 255, 0.08)',
+        gridwidth=1.2,
+        gridcolor='rgba(255, 255, 255, 0.12)' if x_scale_type == "Log" else 'rgba(255, 255, 255, 0.08)',
         linecolor='rgba(255, 255, 255, 0.15)',
         tickfont=dict(size=11, color='#94a3b8'),
-        # Physics-style log ticks
+        # Physics-style log ticks with 1, 2, 5 pattern
         tickmode='array' if x_scale_type == "Log" else 'auto',
         tickvals=x_tick_vals,
         ticktext=x_tick_text,
         minor=dict(
             showgrid=True,
-            gridwidth=0.3,
-            gridcolor='rgba(255, 255, 255, 0.02)',
+            gridwidth=0.5,
+            gridcolor='rgba(255, 255, 255, 0.04)',
             tickmode='array',
             tickvals=x_minor_ticks if x_scale_type == "Log" else []
         ) if x_scale_type == "Log" else dict()
@@ -542,18 +556,18 @@ fig.update_layout(
         title=None,
         type="log" if y_scale == "Log" else "linear",
         showgrid=True,
-        gridwidth=1,
-        gridcolor='rgba(255, 255, 255, 0.08)',
+        gridwidth=1.2,
+        gridcolor='rgba(255, 255, 255, 0.12)' if y_scale == "Log" else 'rgba(255, 255, 255, 0.08)',
         linecolor='rgba(255, 255, 255, 0.15)',
         tickfont=dict(size=11, color='#94a3b8'),
-        # Physics-style log ticks with custom formatting
+        # Physics-style log ticks with 1, 2, 5 pattern and custom formatting
         tickmode='array' if y_scale == "Log" else 'auto',
         tickvals=y_tick_vals,
         ticktext=y_tick_text,
         minor=dict(
             showgrid=True,
-            gridwidth=0.3,
-            gridcolor='rgba(255, 255, 255, 0.02)',
+            gridwidth=0.5,
+            gridcolor='rgba(255, 255, 255, 0.04)',
             tickmode='array',
             tickvals=y_minor_ticks if y_scale == "Log" else []
         ) if y_scale == "Log" else dict()
