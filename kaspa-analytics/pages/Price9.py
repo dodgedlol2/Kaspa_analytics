@@ -2,21 +2,40 @@ import streamlit as st
 import plotly.graph_objects as go
 import numpy as np
 import pandas as pd
-from utils import fit_power_law, load_price_data
 from datetime import datetime, timedelta
-from shared_components import render_page_config, render_custom_css_with_sidebar, render_clean_header, render_beautiful_sidebar, render_simple_page_header
+import sys
+import os
 
-# Configure page
-render_page_config(page_title="Kaspa Analytics Pro - Price Analysis", page_icon="💎")
+# Add parent directory to path to find shared_components
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Apply shared CSS
-render_custom_css_with_sidebar()
+try:
+    from shared_components import render_page_config, render_custom_css_with_sidebar, render_clean_header, render_beautiful_sidebar, render_simple_page_header
+    SHARED_COMPONENTS_AVAILABLE = True
+except ImportError:
+    SHARED_COMPONENTS_AVAILABLE = False
+    st.warning("Shared components not found. Running in standalone mode.")
 
-# Render shared header
-render_clean_header(user_name=None, user_role=None, show_auth=True)
+try:
+    from utils import fit_power_law, load_price_data
+except ImportError:
+    st.error("Utils module not found. Please ensure utils.py is available.")
+    st.stop()
 
-# Render shared sidebar
-render_beautiful_sidebar(current_page="Price")
+# Configure page and render shared components if available
+if SHARED_COMPONENTS_AVAILABLE:
+    render_page_config(page_title="Kaspa Analytics Pro - Price Analysis", page_icon="💎")
+    render_custom_css_with_sidebar()
+    render_clean_header(user_name=None, user_role=None, show_auth=True)
+    render_beautiful_sidebar(current_page="Price")
+else:
+    # Fallback page config
+    st.set_page_config(
+        page_title="Kaspa Analytics Pro - Price Analysis",
+        page_icon="💎",
+        layout="wide",
+        initial_sidebar_state="collapsed"
+    )
 
 # Data loading and processing
 if 'price_df' not in st.session_state or 'price_genesis_date' not in st.session_state:
@@ -36,10 +55,61 @@ except Exception as e:
     st.stop()
 
 # Additional CSS for the price-specific styling (merging with shared styles)
-st.markdown("""
+css_styles = """
 <style>
     /* Price-specific styling that extends the shared components */
     
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    
+    /* Base styles if shared components not available */
+"""
+
+if not SHARED_COMPONENTS_AVAILABLE:
+    css_styles += """
+    html, body, .stApp {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        background: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 50%, #0f1419 100%);
+        color: #e2e8f0;
+        overflow-x: hidden;
+    }
+    
+    .stApp {
+        background-attachment: fixed;
+    }
+    
+    .main .block-container {
+        padding: 0 !important;
+        max-width: 100% !important;
+    }
+    
+    .stApp::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+            radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.15) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
+            radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.15) 0%, transparent 50%);
+        pointer-events: none;
+        z-index: -1;
+        animation: backgroundShift 20s ease-in-out infinite;
+    }
+    
+    @keyframes backgroundShift {
+        0%, 100% { opacity: 1; transform: translateX(0px) translateY(0px); }
+        50% { opacity: 0.8; transform: translateX(20px) translateY(-20px); }
+    }
+    
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    .stDeployButton {display: none;}
+"""
+
+css_styles += """
     @keyframes shimmer {
         0% {
             background-position: -200% center;
@@ -271,10 +341,21 @@ st.markdown("""
         }
     }
 </style>
-""", unsafe_allow_html=True)
+"""
 
-# Render simple page header (from shared components)
-render_simple_page_header("Price Analysis", "Real-time Kaspa price tracking with advanced technical analysis")
+st.markdown(css_styles, unsafe_allow_html=True)
+
+# Render simple page header (from shared components) if available
+if SHARED_COMPONENTS_AVAILABLE:
+    render_simple_page_header("Price Analysis", "Real-time Kaspa price tracking with advanced technical analysis")
+else:
+    # Fallback page header
+    st.markdown("""
+    <div style="padding: 0 0 32px 0;">
+        <h1 style="color: #f1f5f9; font-size: 36px; font-weight: 800; margin: 0;">Price Analysis</h1>
+        <p style="color: #94a3b8; font-size: 16px; margin: 8px 0 0 0;">Real-time Kaspa price tracking with advanced technical analysis</p>
+    </div>
+    """, unsafe_allow_html=True)
 
 # Calculate current metrics for later use
 current_price = price_df['Price'].iloc[-1]
