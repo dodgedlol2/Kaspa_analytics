@@ -130,6 +130,11 @@ st.markdown("""
     .title-container {
         flex: 1;
         min-width: 200px;
+        order: 2;
+    }
+    
+    .controls-container {
+        order: 1;
     }
     
     .main-title {
@@ -157,6 +162,7 @@ st.markdown("""
         gap: 20px;
         align-items: center;
         flex-wrap: wrap;
+        order: 1;
     }
     
     .control-group {
@@ -183,10 +189,10 @@ st.markdown("""
         backdrop-filter: blur(15px) !important;
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
-        min-height: 26px !important;
-        width: 150px !important;
-        max-width: 250px !important;
-        min-width: 100px !important;
+        min-height: 36px !important;
+        width: 40px !important;
+        max-width: 40px !important;
+        min-width: 40px !important;
     }
     
     .stSelectbox > div > div:hover {
@@ -199,7 +205,7 @@ st.markdown("""
         color: #f1f5f9 !important;
         font-weight: 600 !important;
         font-size: 13px !important;
-        padding: 8px 16px !important;
+        padding: 6px 14px !important;
     }
     
     .chart-content {
