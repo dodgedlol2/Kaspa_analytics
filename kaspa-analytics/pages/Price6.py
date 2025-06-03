@@ -41,51 +41,9 @@ try:
     a_price, b_price, r2_price = fit_power_law(price_df, y_col='Price')
 except Exception as e:
     st.error(f"Failed to calculate price power law: {str(e)}")
-    st.stop()(0.4, 0, 0.2, 1) !important;
-        box-shadow: 
-            0 4px 16px rgba(0, 0, 0, 0.2) !important,
-            0 0 20px rgba(0, 212, 255, 0.1) !important,
-            inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
-        min-height: 26px !important;
-        width: 150px !important;
-        max-width: 250px !important;
-        min-width: 100px !important;
-    }
-    
-    .chart-section .stSelectbox > div > div:hover,
-    .chart-section div[data-testid="stSelectbox"] > div > div:hover,
-    .chart-section [class*="selectbox"] > div > div:hover {
-        border-color: #00d4ff !important;
-        box-shadow: 
-            0 8px 32px rgba(0, 212, 255, 0.2) !important, 
-            0 0 0 1px rgba(0, 212, 255, 0.3) !important,
-            0 0 40px rgba(0, 212, 255, 0.15) !important,
-            inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
-        transform: translateY(-2px) !important;
-        background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%) !important;
-    }
-    
-    .chart-section .stSelectbox > div > div > div {
-        color: #f1f5f9 !important;
-        font-weight: 600 !important;
-        font-size: 13px !important;
-        padding: 8px 16px !important;
-        text-shadow: 0 0 10px rgba(255, 255, 255, 0.1) !important;
-    }
-</style>
-""", unsafe_allow_html=True)
+    st.stop()
 
 # Calculate current metrics for later use
-current_price = price_df['Price'].iloc[-1]
-last_date = price_df['Date'].iloc[-1]
-thirty_days_ago = last_date - timedelta(days=30)
-df_30_days_ago = price_df[price_df['Date'] >= thirty_days_ago]
-
-if len(df_30_days_ago) > 0:
-    price_30_days_ago = df_30_days_ago['Price'].iloc[0]
-    price_pct_change = ((current_price - price_30_days_ago) / price_30_days_ago) * 100
-else:
-    price_pct_change = 0
 current_price = price_df['Price'].iloc[-1]
 last_date = price_df['Date'].iloc[-1]
 thirty_days_ago = last_date - timedelta(days=30)
