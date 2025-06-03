@@ -13,46 +13,380 @@ from components.shared_components import (
 # MUST be first Streamlit command
 render_page_config(page_title="Price Analysis - Kaspa Analytics Pro")
 
-# Render clean header FIRST
+# Render clean header
 render_clean_header(
     user_name=None,  # Set to user name if logged in
     show_auth=True
 )
 
-# Render beautiful dropdown sidebar FIRST
+# Render beautiful dropdown sidebar
 render_beautiful_sidebar(current_page="Price")
 
-# Data loading and processing
-if 'price_df' not in st.session_state or 'price_genesis_date' not in st.session_state:
-    try:
-        st.session_state.price_df, st.session_state.price_genesis_date = load_price_data()
-    except Exception as e:
-        st.error(f"Failed to load price data: {str(e)}")
-        st.stop()
-
-price_df = st.session_state.price_df
-genesis_date = st.session_state.price_genesis_date
-
-try:
-    a_price, b_price, r2_price = fit_power_law(price_df, y_col='Price')
-except Exception as e:
-    st.error(f"Failed to calculate price power law: {str(e)}")
-    st.stop()
-
-# Enhanced Custom CSS with Modern Design and Animated Title - MODIFIED to not conflict with shared components
+# Custom CSS that works WITH shared components but fixes selectbox visibility
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
     @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
     
-    /* Override main content padding to account for header */
+    /* Base styles with background effects */
+    html, body, .stApp {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+        background: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 50%, #0f1419 100%) !important;
+        color: #e2e8f0 !important;
+        overflow-x: hidden !important;
+    }
+    
+    .stApp {
+        background-attachment: fixed !important;
+    }
+    
+    /* Background gradient effects */
+    .stApp::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+            radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.15) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
+            radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.15) 0%, transparent 50%);
+        pointer-events: none;
+        z-index: -1;
+        animation: backgroundShift 20s ease-in-out infinite;
+    }
+    
+    @keyframes backgroundShift {
+        0%, 100% { opacity: 1; transform: translateX(0px) translateY(0px); }
+        50% { opacity: 0.8; transform: translateX(20px) translateY(-20px); }
+    }
+    
+    @keyframes shimmer {
+        0% {
+            background-position: -200% center;
+            text-shadow: 0 0 10px rgba(241, 245, 249, 0.3);
+        }
+        50% {
+            text-shadow: 
+                0 0 20px rgba(0, 212, 255, 0.6),
+                0 0 30px rgba(0, 212, 255, 0.4),
+                0 0 40px rgba(0, 212, 255, 0.2);
+        }
+        100% {
+            background-position: 200% center;
+            text-shadow: 0 0 10px rgba(241, 245, 249, 0.3);
+        }
+    }
+    
+    @keyframes glow {
+        0%, 100% {
+            text-shadow: 
+                0 0 10px rgba(241, 245, 249, 0.3),
+                0 0 20px rgba(0, 212, 255, 0.2),
+                0 0 30px rgba(0, 212, 255, 0.1);
+        }
+        50% {
+            text-shadow: 
+                0 0 20px rgba(241, 245, 249, 0.5),
+                0 0 30px rgba(0, 212, 255, 0.4),
+                0 0 40px rgba(0, 212, 255, 0.3),
+                0 0 50px rgba(0, 212, 255, 0.2);
+        }
+    }
+    
+    /* Professional Header */
+    .professional-header {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100vw !important;
+        height: 80px !important;
+        background: rgba(15, 20, 25, 0.98) !important;
+        backdrop-filter: blur(25px) !important;
+        border-bottom: 1px solid rgba(0, 212, 255, 0.2) !important;
+        padding: 0 40px !important;
+        z-index: 999999999 !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+    }
+    
+    .header-content {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        width: 100% !important;
+        max-width: 1400px !important;
+        margin: 0 auto !important;
+    }
+    
+    .brand-section {
+        display: flex !important;
+        align-items: center !important;
+        gap: 15px !important;
+    }
+    
+    .logo {
+        width: 45px !important;
+        height: 45px !important;
+        background: linear-gradient(135deg, #00d4ff 0%, #ff00a8 100%) !important;
+        border-radius: 12px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 24px !important;
+        color: white !important;
+        font-weight: 800 !important;
+        box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3) !important;
+    }
+    
+    .brand-text h1 {
+        font-size: 26px !important;
+        font-weight: 800 !important;
+        background: linear-gradient(135deg, #00d4ff 0%, #ff00a8 100%) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        margin: 0 !important;
+        line-height: 1.1 !important;
+    }
+    
+    .brand-subtitle {
+        font-size: 11px !important;
+        color: #64748b !important;
+        font-weight: 500 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 1px !important;
+        margin-top: 2px !important;
+    }
+    
+    .auth-section {
+        display: flex !important;
+        align-items: center !important;
+        gap: 12px !important;
+    }
+    
+    .login-button {
+        background: transparent !important;
+        border: 1px solid rgba(100, 116, 139, 0.4) !important;
+        border-radius: 10px !important;
+        padding: 8px 16px !important;
+        color: #cbd5e1 !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        cursor: pointer !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .login-button:hover {
+        border-color: rgba(0, 212, 255, 0.6) !important;
+        color: #00d4ff !important;
+    }
+    
+    .signup-button {
+        background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%) !important;
+        border: none !important;
+        border-radius: 10px !important;
+        padding: 10px 20px !important;
+        color: white !important;
+        font-size: 13px !important;
+        font-weight: 700 !important;
+        cursor: pointer !important;
+        box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3) !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .signup-button:hover {
+        transform: translateY(-1px) !important;
+        box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4) !important;
+    }
+    
+    /* Ultra-simple clean text sidebar */
+    section[data-testid="stSidebar"] {
+        background: rgba(10, 14, 26, 0.95) !important;
+        border-right: 1px solid rgba(0, 212, 255, 0.15) !important;
+        margin-top: 100px !important;
+        backdrop-filter: blur(25px) !important;
+        box-shadow: 8px 0 32px rgba(0, 0, 0, 0.4) !important;
+    }
+    
+    /* Fix sidebar collapse/expand button positioning */
+    button[data-testid="collapsedControl"] {
+        top: 110px !important;
+        left: 8px !important;
+        z-index: 999999998 !important;
+        background: rgba(15, 20, 25, 0.9) !important;
+        border: 1px solid rgba(0, 212, 255, 0.3) !important;
+        border-radius: 8px !important;
+        width: 32px !important;
+        height: 32px !important;
+    }
+    
+    /* Ensure collapse button is always visible */
+    .css-1rs6os {
+        top: 110px !important;
+        left: 8px !important;
+        z-index: 999999998 !important;
+    }
+    
+    /* Hide default Streamlit sidebar content */
+    section[data-testid="stSidebar"] > div {
+        background: transparent !important;
+        padding: 16px 12px !important;
+    }
+    
+    /* AGGRESSIVE HIDING OF VIEW MORE/LESS BUTTONS */
+    section[data-testid="stSidebar"] button[data-testid="baseButton-minimal"] {
+        display: none !important;
+    }
+    
+    section[data-testid="stSidebar"] button:contains("View") {
+        display: none !important;
+    }
+    
+    section[data-testid="stSidebar"] .css-1vq4p4l {
+        display: none !important;
+    }
+    
+    section[data-testid="stSidebar"] .css-1rs6os.edgvbvh3 {
+        display: none !important;
+    }
+    
+    section[data-testid="stSidebar"] button[title*="View"] {
+        display: none !important;
+    }
+    
+    section[data-testid="stSidebar"] button[aria-label*="View"] {
+        display: none !important;
+    }
+    
+    /* Nuclear option - hide ALL buttons except collapse button */
+    section[data-testid="stSidebar"] button:not([data-testid="collapsedControl"]) {
+        display: none !important;
+    }
+    
+    /* But make sure collapse button stays visible */
+    button[data-testid="collapsedControl"] {
+        display: block !important;
+    }
+    
+    /* HIDE ALL STREAMLIT DEFAULT NAVIGATION */
+    .css-1d391kg .css-1v3fvcr {
+        display: none !important;
+    }
+    
+    .css-1d391kg .css-17eq0hr {
+        display: none !important;
+    }
+    
+    nav[data-testid="stSidebarNav"] {
+        display: none !important;
+    }
+    
+    .css-1dp5vir {
+        display: none !important;
+    }
+    
+    section[data-testid="stSidebar"] nav {
+        display: none !important;
+    }
+    
+    section[data-testid="stSidebar"] ul {
+        display: none !important;
+    }
+    
+    section[data-testid="stSidebar"] .css-17eq0hr {
+        display: none !important;
+    }
+    
+    .stRadio {
+        display: none !important;
+    }
+    
+    /* Head metrics styling */
+    .head-metric {
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        color: #94a3b8 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+        margin: 16px 0 8px 0 !important;
+        cursor: pointer !important;
+        transition: color 0.2s ease !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+    }
+    
+    .head-metric:hover {
+        color: #cbd5e1 !important;
+    }
+    
+    .head-metric:first-child {
+        margin-top: 8px !important;
+    }
+    
+    .head-metric i {
+        color: #94a3b8 !important;
+        font-size: 12px !important;
+        width: 16px !important;
+        text-align: center !important;
+        transition: color 0.2s ease !important;
+    }
+    
+    .head-metric:hover i {
+        color: #cbd5e1 !important;
+    }
+    
+    .sub-metric {
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        color: #64748b !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+        margin: 4px 0 4px 16px !important;
+        cursor: pointer !important;
+        transition: color 0.2s ease !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+    }
+    
+    .sub-metric:hover {
+        color: #94a3b8 !important;
+    }
+    
+    .sub-metric.active {
+        color: #00d4ff !important;
+    }
+    
+    .sub-metric i {
+        color: #64748b !important;
+        font-size: 12px !important;
+        width: 16px !important;
+        text-align: center !important;
+        transition: color 0.2s ease !important;
+    }
+    
+    .sub-metric:hover i {
+        color: #94a3b8 !important;
+    }
+    
+    .sub-metric.active i {
+        color: #00d4ff !important;
+    }
+    
+    /* Main content adjustments */
     .main .block-container {
-        padding-top: 120px !important;
+        padding-top: 100px !important;
         padding-left: 20px !important;
         padding-right: 20px !important;
         max-width: 100% !important;
     }
     
+    /* Chart section styling */
     .chart-section {
         margin: 12px 40px 28px 40px;
         background: rgba(30, 41, 59, 0.4);
@@ -65,16 +399,15 @@ st.markdown("""
         transition: all 0.3s ease;
     }
     
-    /* Tightened header section with minimal vertical spacing */
     .header-section {
-        padding: 15px 40px 15px 40px;  /* Consistent padding top/bottom */
+        padding: 15px 40px 15px 40px;
         background: transparent;
         display: flex;
         align-items: center;
         justify-content: space-between;
         flex-wrap: wrap;
         gap: 15px;
-        margin-bottom: 20px;  /* Added some margin for spacing */
+        margin-bottom: 20px;
     }
     
     .title-container {
@@ -94,22 +427,11 @@ st.markdown("""
         line-height: 1.2;
     }
     
-    .controls-container {
-        display: flex;
-        gap: 20px;
-        align-items: center;
-        flex-wrap: wrap;
-        flex: 1;
-        justify-content: flex-end;
-    }
-    
     .control-group {
         display: flex !important;
         flex-direction: column !important;
         gap: 3px !important;
         min-width: 120px !important;
-        visibility: visible !important;
-        opacity: 1 !important;
     }
     
     .control-label {
@@ -123,12 +445,11 @@ st.markdown("""
         line-height: 1;
     }
     
-    /* Force selectbox visibility and styling ONLY in chart section */
+    /* FORCE CHART SELECTBOXES TO BE VISIBLE WITH BEAUTIFUL STYLING */
     .chart-section .stSelectbox {
         display: block !important;
         visibility: visible !important;
         opacity: 1 !important;
-        z-index: 999 !important;
     }
     
     .chart-section .stSelectbox > div {
@@ -164,9 +485,6 @@ st.markdown("""
         font-weight: 600 !important;
         font-size: 13px !important;
         padding: 8px 16px !important;
-        display: block !important;
-        visibility: visible !important;
-        opacity: 1 !important;
     }
     
     .chart-content {
@@ -244,6 +562,12 @@ st.markdown("""
         background: transparent !important;
     }
     
+    /* Hide Streamlit elements */
+    #MainMenu {visibility: hidden !important;}
+    footer {visibility: hidden !important;}
+    header {visibility: hidden !important;}
+    .stDeployButton {display: none !important;}
+    
     /* Responsive design for smaller screens */
     @media (max-width: 1200px) {
         .header-section {
@@ -271,9 +595,39 @@ st.markdown("""
         .control-group {
             min-width: 90px;
         }
+        
+        .professional-header {
+            height: 70px !important;
+            padding: 0 20px !important;
+        }
+        
+        .brand-text h1 {
+            font-size: 22px !important;
+        }
+        
+        .main .block-container {
+            padding-top: 90px !important;
+        }
     }
 </style>
 """, unsafe_allow_html=True)
+
+# Data loading and processing
+if 'price_df' not in st.session_state or 'price_genesis_date' not in st.session_state:
+    try:
+        st.session_state.price_df, st.session_state.price_genesis_date = load_price_data()
+    except Exception as e:
+        st.error(f"Failed to load price data: {str(e)}")
+        st.stop()
+
+price_df = st.session_state.price_df
+genesis_date = st.session_state.price_genesis_date
+
+try:
+    a_price, b_price, r2_price = fit_power_law(price_df, y_col='Price')
+except Exception as e:
+    st.error(f"Failed to calculate price power law: {str(e)}")
+    st.stop()
 
 # Calculate current metrics for later use
 current_price = price_df['Price'].iloc[-1]
