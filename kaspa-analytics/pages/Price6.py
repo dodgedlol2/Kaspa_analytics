@@ -118,14 +118,14 @@ st.markdown("""
     
     /* Tightened header section with minimal vertical spacing */
     .header-section {
-        padding: 15px 40px 5px 40px;  /* Reduced top/bottom padding */
+        padding: 15px 40px 15px 40px;  /* Consistent padding top/bottom */
         background: transparent;
         display: flex;
         align-items: center;
         justify-content: space-between;
         flex-wrap: wrap;
-        gap: 15px;  /* Reduced gap */
-        margin-bottom: 3px;  /* Reduced margin */
+        gap: 15px;
+        margin-bottom: 20px;  /* Added some margin for spacing */
     }
     
     .title-container {
@@ -142,21 +142,7 @@ st.markdown("""
         text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
         position: relative;
         white-space: nowrap;
-        line-height: 0.1;  /* Tighter line height */
-    }
-    
-    .title-underline-container {
-        padding: 2px 20px 8px 40px;  /* Minimal top padding */
-        background: transparent;
-    }
-    
-    .title-underline {
-        width: 100%;
-        height: 1px;
-        background: linear-gradient(90deg, #ffffff 0%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0.1) 100%);
-        margin: 0;
-        border-radius: 1px;
-        box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+        line-height: 1.2;
     }
     
     .controls-container {
@@ -171,7 +157,7 @@ st.markdown("""
     .control-group {
         display: flex;
         flex-direction: column;
-        gap: 3px;  /* Reduced gap between label and dropdown */
+        gap: 3px;
         min-width: 120px;
     }
     
@@ -183,7 +169,7 @@ st.markdown("""
         letter-spacing: 1px;
         margin-bottom: 0;
         white-space: nowrap;
-        line-height: 1;  /* Tight line height */
+        line-height: 1;
     }
     
     .stSelectbox > div > div {
@@ -213,7 +199,7 @@ st.markdown("""
     }
     
     .chart-content {
-        padding: 8px 28px;  /* Reduced top padding */
+        padding: 8px 28px;
         position: relative;
     }
     
@@ -377,13 +363,6 @@ with ctrl_col4:
 
 st.markdown('</div>', unsafe_allow_html=True)
 
-# Add the title underline as a separate section
-st.markdown("""
-<div class="title-underline-container">
-    <div class="title-underline"></div>
-</div>
-""", unsafe_allow_html=True)
-
 # Chart content section
 st.markdown('<div class="chart-content"></div>', unsafe_allow_html=True)
 
@@ -481,14 +460,8 @@ fig.update_layout(
         gridwidth=1,
         gridcolor='rgba(255, 255, 255, 0.06)',
         linecolor='rgba(255, 255, 255, 0.15)',
-        tickfont=dict(size=11, color='#94a3b8'),
-        rangeslider=dict(
-            visible=True,
-            thickness=0.06,
-            bgcolor='rgba(15, 20, 25, 0.9)',
-            bordercolor="rgba(0, 212, 255, 0.3)",
-            borderwidth=1
-        )
+        tickfont=dict(size=11, color='#94a3b8')
+        # Removed rangeslider configuration
     ),
     yaxis=dict(
         title=None,
