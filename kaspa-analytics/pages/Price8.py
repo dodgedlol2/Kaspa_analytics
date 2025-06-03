@@ -275,7 +275,7 @@ def create_integrated_chart():
         x_values = filtered_df['Date']
         x_title = "Date"
     
-    # Add price trace
+    # Add price trace with both date and days data
     fig.add_trace(go.Scatter(
         x=x_values,
         y=filtered_df['Price'],
@@ -285,7 +285,8 @@ def create_integrated_chart():
         hovertemplate='<b>%{fullData.name}</b><br>Date: %{text}<br>Price: $%{y:.6f}<br><extra></extra>',
         text=[d.strftime('%Y-%m-%d') for d in filtered_df['Date']],
         showlegend=True,
-        fillcolor='rgba(0, 212, 255, 0.1)'
+        fillcolor='rgba(0, 212, 255, 0.1)',
+        customdata=list(zip(filtered_df['Date'], filtered_df['days_from_genesis']))  # Store both for switching
     ))
     
     # Add power law if default is "Show"
