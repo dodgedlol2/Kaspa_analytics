@@ -340,7 +340,7 @@ st.markdown('<div class="header-section">', unsafe_allow_html=True)
 
 # Column structure with spacing controls:
 # [Left Space] [Title] [Middle Space] [Controls: Price Scale | Time Scale | Time Period | Power Law]
-left_space, title_col, middle_space, ctrl_col1, ctrl_col2, ctrl_col3, ctrl_col4 = st.columns([0.5, 1, 1, 1, 1, 1, 1])
+left_space, title_col, middle_space, ctrl_col1, ctrl_col2, ctrl_col3, ctrl_col4 = st.columns([0.1, 1, 5, 1, 1, 1, 1])
 
 # Left invisible spacing column
 with left_space:
