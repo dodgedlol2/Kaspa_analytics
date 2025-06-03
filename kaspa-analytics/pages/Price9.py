@@ -35,9 +35,6 @@ render_clean_header(
 # Render beautiful dropdown sidebar
 render_beautiful_sidebar(current_page="Price")
 
-# Skip page header to avoid interference with dropdown menus
-# render_simple_page_header() removed to prevent CSS conflicts
-
 # Data loading and processing
 if 'price_df' not in st.session_state or 'price_genesis_date' not in st.session_state:
     try:
@@ -55,54 +52,10 @@ except Exception as e:
     st.error(f"Failed to calculate price power law: {str(e)}")
     st.stop()
 
-# Additional CSS for price-specific styling (avoiding conflicts with shared components)
+# Simplified CSS without dropdown styling conflicts
 st.markdown("""
 <style>
-    /* Price-specific styling that EXTENDS (not overrides) shared components */
-    
-    /* Ensure selectbox dropdowns are visible and functional */
-    .stSelectbox {
-        z-index: 1000 !important;
-    }
-    
-    .stSelectbox > div > div[data-baseweb="select"] {
-        z-index: 1001 !important;
-    }
-    
-    .stSelectbox > div > div[data-baseweb="select"] > div {
-        z-index: 1002 !important;
-    }
-    
-    /* Fix dropdown menu visibility */
-    .stSelectbox [data-baseweb="popover"] {
-        z-index: 9999 !important;
-        background: rgba(15, 23, 42, 0.95) !important;
-        backdrop-filter: blur(20px) !important;
-        border: 1px solid rgba(100, 116, 139, 0.3) !important;
-        border-radius: 12px !important;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
-    }
-    
-    /* Style dropdown options */
-    .stSelectbox [data-baseweb="select"] [role="option"] {
-        background: transparent !important;
-        color: #f1f5f9 !important;
-        padding: 12px 16px !important;
-        border-radius: 8px !important;
-        margin: 4px 8px !important;
-        font-weight: 600 !important;
-        transition: all 0.2s ease !important;
-    }
-    
-    .stSelectbox [data-baseweb="select"] [role="option"]:hover {
-        background: rgba(0, 212, 255, 0.1) !important;
-        color: #00d4ff !important;
-    }
-    
-    .stSelectbox [data-baseweb="select"] [aria-selected="true"] {
-        background: rgba(0, 212, 255, 0.2) !important;
-        color: #00d4ff !important;
-    }
+    /* Price-specific styling that EXTENDS shared components */
     
     @keyframes shimmer {
         0% {
@@ -137,93 +90,29 @@ st.markdown("""
         }
     }
     
-    /* Price chart controls section */
+    /* Simple header section */
     .price-header-section {
-        padding: 15px 40px 15px 40px;
+        padding: 20px 40px 15px 40px;
         background: transparent;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 15px;
-        margin-bottom: 20px;
-        margin-top: 20px; /* Add space at top since no page header */
-    }
-    
-    .price-title-container {
-        flex: 0 0 auto;
+        text-align: center;
+        margin-bottom: 10px;
+        margin-top: 20px;
     }
     
     .price-main-title {
-        font-size: 16px;
+        font-size: 28px;
         font-weight: 700;
         color: #ffffff;
         margin: 0;
         letter-spacing: 0.5px;
-        text-align: left;
         text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
-        position: relative;
-        white-space: nowrap;
+        background: linear-gradient(135deg, #f1f5f9 0%, #00d4ff 50%, #f1f5f9 100%);
+        background-size: 200% 100%;
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: shimmer 3s ease-in-out infinite;
         line-height: 1.2;
-    }
-    
-    .price-controls-container {
-        display: flex;
-        gap: 20px;
-        align-items: center;
-        flex-wrap: wrap;
-        flex: 1;
-        justify-content: flex-end;
-    }
-    
-    .price-control-group {
-        display: flex;
-        flex-direction: column;
-        gap: 3px;
-        min-width: 120px;
-        position: relative;
-        z-index: 100; /* Ensure controls are above other elements */
-    }
-    
-    .price-control-label {
-        font-size: 11px;
-        font-weight: 600;
-        color: #94a3b8;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: 0;
-        white-space: nowrap;
-        line-height: 1;
-    }
-    
-    /* Enhanced selectbox styling with better z-index management */
-    .stSelectbox > div > div {
-        background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
-        border: 2px solid rgba(100, 116, 139, 0.3) !important;
-        border-radius: 12px !important;
-        backdrop-filter: blur(15px) !important;
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
-        min-height: 26px !important;
-        width: 150px !important;
-        max-width: 250px !important;
-        min-width: 100px !important;
-        position: relative !important;
-        z-index: 100 !important;
-    }
-    
-    .stSelectbox > div > div:hover {
-        border-color: #00d4ff !important;
-        box-shadow: 0 8px 32px rgba(0, 212, 255, 0.2), 0 0 0 1px rgba(0, 212, 255, 0.3) !important;
-        transform: translateY(-2px);
-        z-index: 101 !important;
-    }
-    
-    .stSelectbox > div > div > div {
-        color: #f1f5f9 !important;
-        font-weight: 600 !important;
-        font-size: 13px !important;
-        padding: 8px 16px !important;
     }
     
     /* Enhanced metric cards */
@@ -241,7 +130,6 @@ st.markdown("""
         width: 100% !important;
         box-sizing: border-box !important;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
-        z-index: 1 !important; /* Lower z-index than controls */
     }
     
     .metric-card:hover {
@@ -288,7 +176,6 @@ st.markdown("""
         border-radius: 12px;
         overflow: hidden;
         box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
-        z-index: 1 !important; /* Lower than controls */
     }
     
     .stPlotlyChart .modebar {
@@ -299,36 +186,14 @@ st.markdown("""
     .stPlotlyChart .modebar-group {
         background: transparent !important;
     }
-    
-    /* Responsive design */
-    @media (max-width: 1200px) {
-        .price-header-section {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 12px;
-        }
-        
-        .price-controls-container {
-            width: 100%;
-            justify-content: flex-start;
-            gap: 16px;
-        }
-        
-        .price-control-group {
-            min-width: 100px;
-        }
-    }
-    
-    @media (max-width: 768px) {
-        .price-controls-container {
-            gap: 12px;
-        }
-        
-        .price-control-group {
-            min-width: 90px;
-        }
-    }
 </style>
+""", unsafe_allow_html=True)
+
+# Simple header section
+st.markdown("""
+<div class="price-header-section">
+    <h1 class="price-main-title">Kaspa Price Analysis</h1>
+</div>
 """, unsafe_allow_html=True)
 
 # Calculate current metrics for later use
@@ -343,75 +208,7 @@ if len(df_30_days_ago) > 0:
 else:
     price_pct_change = 0
 
-# Price chart controls section
-st.markdown('<div class="price-header-section">', unsafe_allow_html=True)
-
-# Column structure with spacing controls
-left_space, title_col, middle_space, ctrl_col1, ctrl_col2, ctrl_col3, ctrl_col4 = st.columns([0.1, 1, 5, 1, 1, 1, 1])
-
-# Left invisible spacing column
-with left_space:
-    st.empty()
-
-# Title column
-with title_col:
-    st.markdown('<div class="price-title-container"><h1 class="price-main-title">Kaspa Price</h1></div>', unsafe_allow_html=True)
-
-# Middle invisible spacing column
-with middle_space:
-    st.empty()
-
-# Control columns
-with ctrl_col1:
-    st.markdown('<div class="price-control-group"><div class="price-control-label">Price Scale</div>', unsafe_allow_html=True)
-    y_scale = st.selectbox("", ["Linear", "Log"], index=1, label_visibility="collapsed", key="price_y_scale_select")
-    st.markdown('</div>', unsafe_allow_html=True)
-
-with ctrl_col2:
-    st.markdown('<div class="price-control-group"><div class="price-control-label">Time Scale</div>', unsafe_allow_html=True)
-    x_scale_type = st.selectbox("", ["Linear", "Log"], index=0, label_visibility="collapsed", key="price_x_scale_select")
-    st.markdown('</div>', unsafe_allow_html=True)
-
-with ctrl_col3:
-    st.markdown('<div class="price-control-group"><div class="price-control-label">Time Period</div>', unsafe_allow_html=True)
-    time_range = st.selectbox("", ["1W", "1M", "3M", "6M", "1Y", "All"], index=5, label_visibility="collapsed", key="price_time_range_select")
-    st.markdown('</div>', unsafe_allow_html=True)
-
-with ctrl_col4:
-    st.markdown('<div class="price-control-group"><div class="price-control-label">Power Law</div>', unsafe_allow_html=True)
-    show_power_law = st.selectbox("", ["Hide", "Show"], index=1, label_visibility="collapsed", key="price_power_law_select")
-    st.markdown('</div>', unsafe_allow_html=True)
-
-st.markdown('</div>', unsafe_allow_html=True)
-
-# Data filtering based on time range
-last_date = price_df['Date'].iloc[-1]
-if time_range == "1W":
-    start_date = last_date - timedelta(days=7)
-elif time_range == "1M":
-    start_date = last_date - timedelta(days=30)
-elif time_range == "3M":
-    start_date = last_date - timedelta(days=90)
-elif time_range == "6M":
-    start_date = last_date - timedelta(days=180)
-elif time_range == "1Y":
-    start_date = last_date - timedelta(days=365)
-else:
-    start_date = price_df['Date'].iloc[0]
-
-filtered_df = price_df[price_df['Date'] >= start_date]
-
-# Create the enhanced chart
-fig = go.Figure()
-
-if x_scale_type == "Log":
-    x_values = filtered_df['days_from_genesis']
-    x_title = "Days Since Genesis (Log Scale)"
-else:
-    x_values = filtered_df['Date']
-    x_title = "Date"
-
-# Custom Y-axis tick formatting function
+# Helper functions for chart
 def format_currency(value):
     """Format currency values for clean display"""
     if value >= 1:
@@ -432,7 +229,6 @@ def format_currency(value):
     else:
         return f"${value:.1e}"
 
-# Generate custom tick values for log scale Y-axis
 def generate_log_ticks(data_min, data_max):
     """Generate physics-style log tick marks with 1, 2, 5 pattern"""
     import math
@@ -440,23 +236,20 @@ def generate_log_ticks(data_min, data_max):
     log_max = math.ceil(math.log10(data_max))
     
     major_ticks = []
-    intermediate_ticks = []  # For 2 and 5
+    intermediate_ticks = []
     minor_ticks = []
     
     for i in range(log_min, log_max + 1):
         base = 10**i
         
-        # Major tick at 1 * 10^i
         if data_min <= base <= data_max:
             major_ticks.append(base)
         
-        # Intermediate ticks at 2 and 5 * 10^i
         for factor in [2, 5]:
             intermediate_val = factor * base
             if data_min <= intermediate_val <= data_max:
                 intermediate_ticks.append(intermediate_val)
         
-        # Minor ticks at 3, 4, 6, 7, 8, 9 * 10^i
         for j in [3, 4, 6, 7, 8, 9]:
             minor_val = j * base
             if data_min <= minor_val <= data_max:
@@ -464,137 +257,322 @@ def generate_log_ticks(data_min, data_max):
     
     return major_ticks, intermediate_ticks, minor_ticks
 
-# Add price trace
-fig.add_trace(go.Scatter(
-    x=x_values,
-    y=filtered_df['Price'],
-    mode='lines',
-    name='Kaspa Price (USD)',
-    line=dict(color='#00d4ff', width=3, shape='spline', smoothing=0.3),
-    hovertemplate='<b>%{fullData.name}</b><br>Date: %{text}<br>Price: $%{y:.6f}<br><extra></extra>',
-    text=[d.strftime('%Y-%m-%d') for d in filtered_df['Date']],
-    showlegend=True,
-    fillcolor='rgba(0, 212, 255, 0.1)'
-))
+def create_chart_data(time_range, x_scale_type, y_scale, show_power_law):
+    """Create chart data based on parameters"""
+    # Data filtering based on time range
+    last_date_val = price_df['Date'].iloc[-1]
+    if time_range == "1W":
+        start_date = last_date_val - timedelta(days=7)
+    elif time_range == "1M":
+        start_date = last_date_val - timedelta(days=30)
+    elif time_range == "3M":
+        start_date = last_date_val - timedelta(days=90)
+    elif time_range == "6M":
+        start_date = last_date_val - timedelta(days=180)
+    elif time_range == "1Y":
+        start_date = last_date_val - timedelta(days=365)
+    else:
+        start_date = price_df['Date'].iloc[0]
 
-# Add power law if enabled - with orange color and white dotted bands
-if show_power_law == "Show":
-    x_fit = filtered_df['days_from_genesis']
-    y_fit = a_price * np.power(x_fit, b_price)
-    fit_x = x_fit if x_scale_type == "Log" else filtered_df['Date']
-
-    fig.add_trace(go.Scatter(
-        x=fit_x,
-        y=y_fit,
+    filtered_df = price_df[price_df['Date'] >= start_date]
+    
+    if x_scale_type == "Log":
+        x_values = filtered_df['days_from_genesis']
+        x_title = "Days Since Genesis (Log Scale)"
+    else:
+        x_values = filtered_df['Date']
+        x_title = "Date"
+    
+    traces = []
+    
+    # Main price trace
+    traces.append(go.Scatter(
+        x=x_values,
+        y=filtered_df['Price'],
         mode='lines',
-        name=f'Power Law Fit (R²={r2_price:.3f})',
-        line=dict(color='#ff8c00', width=3, dash='solid'),  # Orange color
+        name='Kaspa Price (USD)',
+        line=dict(color='#00d4ff', width=3, shape='spline', smoothing=0.3),
+        hovertemplate='<b>%{fullData.name}</b><br>Date: %{text}<br>Price: $%{y:.6f}<br><extra></extra>',
+        text=[d.strftime('%Y-%m-%d') for d in filtered_df['Date']],
         showlegend=True,
-        hovertemplate='<b>Power Law Fit</b><br>R² = %{customdata:.3f}<br>Value: $%{y:.6f}<br><extra></extra>',
-        customdata=[r2_price] * len(fit_x)
-    ))
-
-    fig.add_trace(go.Scatter(
-        x=fit_x,
-        y=y_fit * 0.4,
-        mode='lines',
-        name='Support (-60%)',
-        line=dict(color='rgba(255, 255, 255, 0.7)', width=1.5, dash='dot'),  # White dotted
-        showlegend=True,
-        hoverinfo='skip'
+        visible=True
     ))
     
-    fig.add_trace(go.Scatter(
-        x=fit_x,
-        y=y_fit * 2.2,
-        mode='lines',
-        name='Resistance (+120%)',
-        line=dict(color='rgba(255, 255, 255, 0.7)', width=1.5, dash='dot'),  # White dotted
-        fill='tonexty',
-        fillcolor='rgba(100, 100, 100, 0.05)',
-        showlegend=True,
-        hoverinfo='skip'
-    ))
+    # Power law traces
+    if show_power_law == "Show":
+        x_fit = filtered_df['days_from_genesis']
+        y_fit = a_price * np.power(x_fit, b_price)
+        fit_x = x_fit if x_scale_type == "Log" else filtered_df['Date']
 
-# Enhanced chart layout with custom tick formatting
-y_min, y_max = filtered_df['Price'].min(), filtered_df['Price'].max()
+        traces.append(go.Scatter(
+            x=fit_x,
+            y=y_fit,
+            mode='lines',
+            name=f'Power Law Fit (R²={r2_price:.3f})',
+            line=dict(color='#ff8c00', width=3, dash='solid'),
+            showlegend=True,
+            hovertemplate='<b>Power Law Fit</b><br>R² = %{customdata:.3f}<br>Value: $%{y:.6f}<br><extra></extra>',
+            customdata=[r2_price] * len(fit_x),
+            visible=True
+        ))
 
-# Generate custom ticks for Y-axis if log scale
-if y_scale == "Log":
-    y_major_ticks, y_intermediate_ticks, y_minor_ticks = generate_log_ticks(y_min, y_max)
-    # Combine major and intermediate ticks for display
-    y_tick_vals = sorted(y_major_ticks + y_intermediate_ticks)
-    y_tick_text = [format_currency(val) for val in y_tick_vals]
-else:
-    y_tick_vals = None
-    y_tick_text = None
-    y_minor_ticks = []
+        traces.append(go.Scatter(
+            x=fit_x,
+            y=y_fit * 0.4,
+            mode='lines',
+            name='Support (-60%)',
+            line=dict(color='rgba(255, 255, 255, 0.7)', width=1.5, dash='dot'),
+            showlegend=True,
+            hoverinfo='skip',
+            visible=True
+        ))
+        
+        traces.append(go.Scatter(
+            x=fit_x,
+            y=y_fit * 2.2,
+            mode='lines',
+            name='Resistance (+120%)',
+            line=dict(color='rgba(255, 255, 255, 0.7)', width=1.5, dash='dot'),
+            fill='tonexty',
+            fillcolor='rgba(100, 100, 100, 0.05)',
+            showlegend=True,
+            hoverinfo='skip',
+            visible=True
+        ))
+    
+    return traces, filtered_df, x_title
 
-# Generate custom ticks for X-axis if log scale
-if x_scale_type == "Log":
-    x_min, x_max = filtered_df['days_from_genesis'].min(), filtered_df['days_from_genesis'].max()
-    x_major_ticks, x_intermediate_ticks, x_minor_ticks = generate_log_ticks(x_min, x_max)
-    # Combine major and intermediate ticks for display
-    x_tick_vals = sorted(x_major_ticks + x_intermediate_ticks)
-    x_tick_text = [f"{int(val)}" for val in x_tick_vals]
-else:
-    x_tick_vals = None
-    x_tick_text = None
-    x_minor_ticks = []
+# Create all possible chart configurations
+time_ranges = ["1W", "1M", "3M", "6M", "1Y", "All"]
+x_scales = ["Linear", "Log"] 
+y_scales = ["Linear", "Log"]
+power_law_options = ["Hide", "Show"]
 
+# Create the main figure with all traces
+fig = go.Figure()
+
+# We'll create traces for each combination and control visibility with buttons
+all_traces = []
+trace_configs = []
+
+base_trace_count = 0
+for time_range in time_ranges:
+    for x_scale in x_scales:
+        for y_scale in y_scales:
+            for power_law in power_law_options:
+                traces, filtered_df, x_title = create_chart_data(time_range, x_scale, y_scale, power_law)
+                
+                config = {
+                    'time_range': time_range,
+                    'x_scale': x_scale, 
+                    'y_scale': y_scale,
+                    'power_law': power_law,
+                    'trace_indices': list(range(base_trace_count, base_trace_count + len(traces))),
+                    'filtered_df': filtered_df,
+                    'x_title': x_title
+                }
+                trace_configs.append(config)
+                all_traces.extend(traces)
+                base_trace_count += len(traces)
+
+# Add all traces to figure (initially hidden)
+for i, trace in enumerate(all_traces):
+    trace.visible = False
+    fig.add_trace(trace)
+
+# Set default configuration (All time, Log x-scale, Log y-scale, Show power law)
+default_config_idx = None
+for i, config in enumerate(trace_configs):
+    if (config['time_range'] == 'All' and 
+        config['x_scale'] == 'Log' and 
+        config['y_scale'] == 'Log' and 
+        config['power_law'] == 'Show'):
+        default_config_idx = i
+        break
+
+if default_config_idx is not None:
+    default_config = trace_configs[default_config_idx]
+    for idx in default_config['trace_indices']:
+        fig.data[idx].visible = True
+
+# Create dropdown menu configurations
+def create_visibility_array(target_config_idx):
+    """Create visibility array for specific configuration"""
+    visibility = [False] * len(all_traces)
+    target_config = trace_configs[target_config_idx]
+    for idx in target_config['trace_indices']:
+        visibility[idx] = True
+    return visibility
+
+# Time Range Dropdown
+time_range_buttons = []
+for time_range in time_ranges:
+    # Find config that matches current settings with this time range
+    for i, config in enumerate(trace_configs):
+        if (config['time_range'] == time_range and
+            config['x_scale'] == 'Log' and  # Default to Log
+            config['y_scale'] == 'Log' and  # Default to Log  
+            config['power_law'] == 'Show'):  # Default to Show
+            time_range_buttons.append({
+                'label': time_range,
+                'method': 'update',
+                'args': [{'visible': create_visibility_array(i)}]
+            })
+            break
+
+# X-Scale Dropdown
+x_scale_buttons = []
+for x_scale in x_scales:
+    for i, config in enumerate(trace_configs):
+        if (config['time_range'] == 'All' and  # Default to All
+            config['x_scale'] == x_scale and
+            config['y_scale'] == 'Log' and    # Default to Log
+            config['power_law'] == 'Show'):   # Default to Show
+            x_scale_buttons.append({
+                'label': x_scale,
+                'method': 'update', 
+                'args': [{'visible': create_visibility_array(i)}]
+            })
+            break
+
+# Y-Scale Dropdown
+y_scale_buttons = []
+for y_scale in y_scales:
+    for i, config in enumerate(trace_configs):
+        if (config['time_range'] == 'All' and  # Default to All
+            config['x_scale'] == 'Log' and    # Default to Log
+            config['y_scale'] == y_scale and
+            config['power_law'] == 'Show'):   # Default to Show
+            y_scale_buttons.append({
+                'label': y_scale,
+                'method': 'update',
+                'args': [{'visible': create_visibility_array(i)}]
+            })
+            break
+
+# Power Law Dropdown
+power_law_buttons = []
+for power_law in power_law_options:
+    for i, config in enumerate(trace_configs):
+        if (config['time_range'] == 'All' and  # Default to All
+            config['x_scale'] == 'Log' and    # Default to Log
+            config['y_scale'] == 'Log' and    # Default to Log
+            config['power_law'] == power_law):
+            power_law_buttons.append({
+                'label': power_law,
+                'method': 'update',
+                'args': [{'visible': create_visibility_array(i)}]
+            })
+            break
+
+# Update layout with dropdowns
 fig.update_layout(
     plot_bgcolor='rgba(0,0,0,0)',
     paper_bgcolor='rgba(0,0,0,0)',
     font=dict(family='Inter', color='#e2e8f0'),
     hovermode='x unified',
-    height=600,
-    margin=dict(l=30, r=30, t=40, b=10),
+    height=700,
+    margin=dict(l=30, r=30, t=120, b=10),
+    
+    # Add dropdown menus
+    updatemenus=[
+        # Time Range Dropdown
+        dict(
+            buttons=time_range_buttons,
+            direction="down",
+            pad={"r": 10, "t": 10},
+            showactive=True,
+            x=0.02,
+            xanchor="left",
+            y=1.12,
+            yanchor="top",
+            bgcolor='rgba(30, 41, 59, 0.9)',
+            bordercolor='rgba(100, 116, 139, 0.3)',
+            borderwidth=1,
+            font=dict(color='#f1f5f9', size=12)
+        ),
+        # X-Scale Dropdown  
+        dict(
+            buttons=x_scale_buttons,
+            direction="down",
+            pad={"r": 10, "t": 10},
+            showactive=True,
+            x=0.25,
+            xanchor="left", 
+            y=1.12,
+            yanchor="top",
+            bgcolor='rgba(30, 41, 59, 0.9)',
+            bordercolor='rgba(100, 116, 139, 0.3)',
+            borderwidth=1,
+            font=dict(color='#f1f5f9', size=12)
+        ),
+        # Y-Scale Dropdown
+        dict(
+            buttons=y_scale_buttons,
+            direction="down",
+            pad={"r": 10, "t": 10},
+            showactive=True,
+            x=0.48,
+            xanchor="left",
+            y=1.12, 
+            yanchor="top",
+            bgcolor='rgba(30, 41, 59, 0.9)',
+            bordercolor='rgba(100, 116, 139, 0.3)',
+            borderwidth=1,
+            font=dict(color='#f1f5f9', size=12)
+        ),
+        # Power Law Dropdown
+        dict(
+            buttons=power_law_buttons,
+            direction="down", 
+            pad={"r": 10, "t": 10},
+            showactive=True,
+            x=0.71,
+            xanchor="left",
+            y=1.12,
+            yanchor="top",
+            bgcolor='rgba(30, 41, 59, 0.9)',
+            bordercolor='rgba(100, 116, 139, 0.3)', 
+            borderwidth=1,
+            font=dict(color='#f1f5f9', size=12)
+        )
+    ],
+    
+    # Add annotations for dropdown labels
+    annotations=[
+        dict(text="Time Period", x=0.02, y=1.15, xanchor='left', yanchor='bottom',
+             font=dict(size=11, color='#94a3b8', family='Inter'), showarrow=False),
+        dict(text="Time Scale", x=0.25, y=1.15, xanchor='left', yanchor='bottom', 
+             font=dict(size=11, color='#94a3b8', family='Inter'), showarrow=False),
+        dict(text="Price Scale", x=0.48, y=1.15, xanchor='left', yanchor='bottom',
+             font=dict(size=11, color='#94a3b8', family='Inter'), showarrow=False), 
+        dict(text="Power Law", x=0.71, y=1.15, xanchor='left', yanchor='bottom',
+             font=dict(size=11, color='#94a3b8', family='Inter'), showarrow=False)
+    ],
+    
     xaxis=dict(
-        title=dict(text=x_title, font=dict(size=13, color='#cbd5e1', weight=600), standoff=35),
-        type="log" if x_scale_type == "Log" else None,
+        title=dict(text="Date", font=dict(size=13, color='#cbd5e1', weight=600), standoff=35),
         showgrid=True,
         gridwidth=1.2,
-        gridcolor='rgba(255, 255, 255, 0.12)' if x_scale_type == "Log" else 'rgba(255, 255, 255, 0.08)',
+        gridcolor='rgba(255, 255, 255, 0.08)',
         linecolor='rgba(255, 255, 255, 0.15)',
-        tickfont=dict(size=11, color='#94a3b8'),
-        # Physics-style log ticks with 1, 2, 5 pattern
-        tickmode='array' if x_scale_type == "Log" else 'auto',
-        tickvals=x_tick_vals,
-        ticktext=x_tick_text,
-        minor=dict(
-            showgrid=True,
-            gridwidth=0.5,
-            gridcolor='rgba(255, 255, 255, 0.04)',
-            tickmode='array',
-            tickvals=x_minor_ticks if x_scale_type == "Log" else []
-        ) if x_scale_type == "Log" else dict()
+        tickfont=dict(size=11, color='#94a3b8')
     ),
     yaxis=dict(
         title=None,
-        type="log" if y_scale == "Log" else "linear",
+        type="log",
         showgrid=True,
         gridwidth=1.2,
-        gridcolor='rgba(255, 255, 255, 0.12)' if y_scale == "Log" else 'rgba(255, 255, 255, 0.08)',
+        gridcolor='rgba(255, 255, 255, 0.12)',
         linecolor='rgba(255, 255, 255, 0.15)',
-        tickfont=dict(size=11, color='#94a3b8'),
-        # Physics-style log ticks with 1, 2, 5 pattern and custom formatting
-        tickmode='array' if y_scale == "Log" else 'auto',
-        tickvals=y_tick_vals,
-        ticktext=y_tick_text,
-        minor=dict(
-            showgrid=True,
-            gridwidth=0.5,
-            gridcolor='rgba(255, 255, 255, 0.04)',
-            tickmode='array',
-            tickvals=y_minor_ticks if y_scale == "Log" else []
-        ) if y_scale == "Log" else dict()
+        tickfont=dict(size=11, color='#94a3b8')
     ),
     legend=dict(
         orientation="h",
         yanchor="bottom",
         y=1.02,
-        xanchor="left",
-        x=0,
+        xanchor="right",
+        x=1,
         bgcolor='rgba(0,0,0,0)',
         bordercolor='rgba(0,0,0,0)',
         borderwidth=0,
@@ -618,7 +596,7 @@ with st.container():
         'toImageButtonOptions': {
             'format': 'png',
             'filename': f'kaspa_analysis_{datetime.now().strftime("%Y%m%d_%H%M")}',
-            'height': 650,
+            'height': 700,
             'width': 1400,
             'scale': 2
         }
@@ -643,7 +621,7 @@ else:
     slope_pct_change = 0
     r2_pct_change = 0
 
-# Enhanced Metrics Section with improved styling and hover effects
+# Enhanced Metrics Section
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
@@ -664,7 +642,7 @@ with col2:
         <div class="metric-delta {'positive' if r2_pct_change >= 0 else 'negative'}">{r2_pct_change:+.2f}%</div>
     </div>
     """
-    st.markdown(metric_html, unsafe_allow_html=True)
+    st.markdown(metric_html, unsafe_render_html=True)
 
 with col3:
     metric_html = f"""
