@@ -84,7 +84,7 @@ def render_custom_css_with_sidebar():
             }
         }
         
-        /* Professional Header */
+        /* Professional Header - Updated to match price page styling */
         .professional-header {
             position: fixed !important;
             top: 0 !important;
@@ -92,12 +92,12 @@ def render_custom_css_with_sidebar():
             right: 0 !important;
             width: 100vw !important;
             height: 80px !important;
-            background: rgba(15, 20, 25, 0.98) !important;
+            background: rgba(10, 14, 26, 0.95) !important;
             backdrop-filter: blur(25px) !important;
-            border-bottom: 1px solid rgba(0, 212, 255, 0.2) !important;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.15) !important;
             padding: 0 40px !important;
             z-index: 999999999 !important;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6) !important;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
             display: flex !important;
             align-items: center !important;
             justify-content: space-between !important;
@@ -118,10 +118,11 @@ def render_custom_css_with_sidebar():
             gap: 15px !important;
         }
         
+        /* Updated logo with blue/cyan theme only */
         .logo {
             width: 45px !important;
             height: 45px !important;
-            background: linear-gradient(135deg, #00d4ff 0%, #ff00a8 100%) !important;
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 50%, #006699 100%) !important;
             border-radius: 12px !important;
             display: flex !important;
             align-items: center !important;
@@ -130,16 +131,33 @@ def render_custom_css_with_sidebar():
             color: white !important;
             font-weight: 800 !important;
             box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3) !important;
+            position: relative !important;
+            overflow: hidden !important;
         }
         
+        /* Add a subtle inner glow to the logo */
+        .logo::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2) 0%, transparent 60%);
+            border-radius: 12px;
+            pointer-events: none;
+        }
+        
+        /* Updated brand text with matching colors */
         .brand-text h1 {
             font-size: 26px !important;
             font-weight: 800 !important;
-            background: linear-gradient(135deg, #00d4ff 0%, #ff00a8 100%) !important;
+            background: linear-gradient(135deg, #00d4ff 0%, #94a3b8 50%, #e2e8f0 100%) !important;
             -webkit-background-clip: text !important;
             -webkit-text-fill-color: transparent !important;
             margin: 0 !important;
             line-height: 1.1 !important;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.1) !important;
         }
         
         .brand-subtitle {
@@ -157,6 +175,7 @@ def render_custom_css_with_sidebar():
             gap: 12px !important;
         }
         
+        /* Updated login button to match theme */
         .login-button {
             background: transparent !important;
             border: 1px solid rgba(100, 116, 139, 0.4) !important;
@@ -172,8 +191,10 @@ def render_custom_css_with_sidebar():
         .login-button:hover {
             border-color: rgba(0, 212, 255, 0.6) !important;
             color: #00d4ff !important;
+            background: rgba(0, 212, 255, 0.05) !important;
         }
         
+        /* Updated signup button with blue theme only */
         .signup-button {
             background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%) !important;
             border: none !important;
@@ -190,6 +211,7 @@ def render_custom_css_with_sidebar():
         .signup-button:hover {
             transform: translateY(-1px) !important;
             box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4) !important;
+            background: linear-gradient(135deg, #00d4ff 0%, #00aadd 100%) !important;
         }
         
         /* Ultra-simple clean text sidebar */
