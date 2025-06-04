@@ -435,17 +435,43 @@ def render_custom_css_with_sidebar():
             height: 16px !important;
         }
         
-        /* Style the dropdown menu when opened */
-        div[data-baseweb="popover"] {
+        /* Style the dropdown menu when opened - FIXED scrollbar issue */
+        div[data-baseweb="popover"],
+        div[data-baseweb="popover"] > div,
+        div[data-baseweb="menu"],
+        ul[role="listbox"] {
             background: rgba(15, 20, 25, 0.98) !important;
             backdrop-filter: blur(25px) !important;
             border: 1px solid rgba(0, 212, 255, 0.3) !important;
             border-radius: 12px !important;
             box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4) !important;
             margin-top: 4px !important;
+            max-height: none !important;
+            height: auto !important;
+            overflow: visible !important;
+            overflow-x: hidden !important;
+            overflow-y: hidden !important;
         }
         
-        /* Style dropdown options */
+        /* Specifically target the scrollable container inside popover */
+        div[data-baseweb="popover"] div[role="presentation"],
+        div[data-baseweb="menu"] div[role="presentation"] {
+            max-height: none !important;
+            overflow: visible !important;
+            overflow-y: visible !important;
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+        }
+        
+        /* Hide any scrollbars that might appear */
+        div[data-baseweb="popover"] ::-webkit-scrollbar,
+        div[data-baseweb="menu"] ::-webkit-scrollbar {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+        }
+        
+        /* Style dropdown options - ensure they don't cause overflow */
         li[role="option"],
         div[role="option"] {
             background: transparent !important;
@@ -456,6 +482,8 @@ def render_custom_css_with_sidebar():
             transition: all 0.2s ease !important;
             border-radius: 8px !important;
             margin: 2px 4px !important;
+            white-space: nowrap !important;
+            flex-shrink: 0 !important;
         }
         
         li[role="option"]:hover,
