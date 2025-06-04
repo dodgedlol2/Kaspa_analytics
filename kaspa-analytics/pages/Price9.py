@@ -2,9 +2,24 @@ import streamlit as st
 import plotly.graph_objects as go
 import numpy as np
 import pandas as pd
-from utils import fit_power_law, load_price_data
 from datetime import datetime, timedelta
-from shared_components import render_page_config, render_custom_css_with_sidebar, render_clean_header, render_beautiful_sidebar
+import sys
+import os
+
+# Add the parent directory to the Python path to find shared_components
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+try:
+    from shared_components import render_page_config, render_custom_css_with_sidebar, render_clean_header, render_beautiful_sidebar
+except ImportError:
+    st.error("Cannot import shared_components. Please ensure shared_components.py is in the root directory.")
+    st.stop()
+
+try:
+    from utils import fit_power_law, load_price_data
+except ImportError:
+    st.error("Cannot import utils. Please ensure utils.py is available.")
+    st.stop()
 
 # Set page config
 render_page_config(
