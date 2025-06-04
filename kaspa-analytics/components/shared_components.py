@@ -1,5 +1,6 @@
 import streamlit as st
 from datetime import datetime
+import os
 
 # Try to import the hover tabs component
 try:
@@ -17,12 +18,74 @@ def render_page_config(page_title="Kaspa Analytics Pro", page_icon="💎"):
         initial_sidebar_state="expanded"
     )
 
+def load_css_safely():
+    """Load CSS for hover tabs component safely"""
+    try:
+        # Try to find style.css in the current directory
+        css_path = './style.css'
+        if os.path.exists(css_path):
+            with open(css_path, 'r') as f:
+                css_content = f.read()
+            st.markdown(f'<style>{css_content}</style>', unsafe_allow_html=True)
+        else:
+            # Provide inline CSS as fallback
+            st.markdown("""
+            <style>
+            @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+            
+            .css-1d391kg {
+                background-color: #1e293b !important;
+            }
+            
+            .stSidebar {
+                background-color: #1e293b !important;
+            }
+            
+            .material-icons {
+                font-family: 'Material Icons';
+                font-weight: normal;
+                font-style: normal;
+                font-size: 18px;
+                line-height: 1;
+                letter-spacing: normal;
+                text-transform: none;
+                display: inline-block;
+                white-space: nowrap;
+                word-wrap: normal;
+                direction: ltr;
+                -webkit-font-feature-settings: 'liga';
+                -webkit-font-smoothing: antialiased;
+            }
+            
+            .on-hover-tab {
+                transition: all 0.3s ease;
+                padding: 12px 16px;
+                border-radius: 8px;
+                margin: 4px 0;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+            
+            .on-hover-tab:hover {
+                background-color: rgba(0, 212, 255, 0.1);
+                color: #00d4ff;
+                cursor: pointer;
+            }
+            </style>
+            """, unsafe_allow_html=True)
+    except Exception as e:
+        st.error(f"CSS loading error: {e}")
+
 def render_hover_tabs_sidebar():
     """Render navigation using hover tabs component if available"""
     
+    # Load CSS first
+    load_css_safely()
+    
     if not HOVER_TABS_AVAILABLE:
-        st.sidebar.error("streamlit-on-Hover-tabs not installed. Add 'streamlit-on-Hover-tabs==0.0.2' to requirements.txt")
-        return "Home"  # Default fallback
+        st.sidebar.error("streamlit-on-Hover-tabs not installed properly.")
+        return render_fallback_sidebar()
     
     # Define your pages to match your actual page files
     tab_names = [
@@ -62,52 +125,56 @@ def render_hover_tabs_sidebar():
         st.markdown("### 🔍 Navigation")
         st.markdown("---")
         
-        selected_tab = on_hover_tabs(
-            tabName=tab_names,
-            iconName=icon_names,
-            styles={
-                'navtab': {
-                    'background-color': 'transparent',
-                    'color': '#ffffff',
-                    'font-size': '14px',
-                    'transition': '.3s',
-                    'white-space': 'nowrap',
-                    'font-weight': '500',
-                    'padding': '10px 0'
-                },
-                'tabStyle': {
-                    ':hover': {
-                        'color': '#00d4ff',
-                        'cursor': 'pointer',
-                        'background-color': 'rgba(0, 212, 255, 0.1)'
+        try:
+            selected_tab = on_hover_tabs(
+                tabName=tab_names,
+                iconName=icon_names,
+                styles={
+                    'navtab': {
+                        'background-color': 'transparent',
+                        'color': '#ffffff',
+                        'font-size': '14px',
+                        'transition': '.3s',
+                        'white-space': 'nowrap',
+                        'font-weight': '500',
+                        'padding': '10px 0'
+                    },
+                    'tabStyle': {
+                        ':hover': {
+                            'color': '#00d4ff',
+                            'cursor': 'pointer',
+                            'background-color': 'rgba(0, 212, 255, 0.1)'
+                        }
+                    },
+                    'tabStyle': {
+                        'list-style-type': 'none',
+                        'margin-bottom': '8px',
+                        'padding': '12px 16px',
+                        'border-radius': '8px',
+                        'transition': 'all 0.3s ease',
+                        'display': 'flex',
+                        'align-items': 'center'
+                    },
+                    'iconStyle': {
+                        'position': 'relative',
+                        'left': '0px',
+                        'text-align': 'left',
+                        'color': 'inherit',
+                        'margin-right': '12px',
+                        'font-size': '18px'
+                    },
+                    'labelName': {
+                        'color': 'inherit',
+                        'font-size': '14px',
+                        'font-weight': '500'
                     }
                 },
-                'tabStyle': {
-                    'list-style-type': 'none',
-                    'margin-bottom': '8px',
-                    'padding': '12px 16px',
-                    'border-radius': '8px',
-                    'transition': 'all 0.3s ease',
-                    'display': 'flex',
-                    'align-items': 'center'
-                },
-                'iconStyle': {
-                    'position': 'relative',
-                    'left': '0px',
-                    'text-align': 'left',
-                    'color': 'inherit',
-                    'margin-right': '12px',
-                    'font-size': '18px'
-                },
-                'labelName': {
-                    'color': 'inherit',
-                    'font-size': '14px',
-                    'font-weight': '500'
-                }
-            },
-            default_choice=0,
-            key="main_navigation"
-        )
+                default_choice=0,
+                key="main_navigation"
+            )
+        except Exception as e:
+            st.sidebar.error(f"Hover tabs error: {e}")
+            return render_fallback_sidebar()
         
         # Add some info at the bottom
         st.markdown("---")
@@ -116,13 +183,13 @@ def render_hover_tabs_sidebar():
     
     return selected_tab
 
-def render_basic_sidebar_fallback():
-    """Basic fallback sidebar if hover tabs not available"""
+def render_fallback_sidebar():
+    """Fallback sidebar if hover tabs not available"""
     with st.sidebar:
         st.markdown("### 🔍 Navigation")
         st.markdown("---")
         
-        # Simple radio buttons as fallback
+        # Simple selectbox as fallback
         pages = [
             'Home',
             'Price', 
@@ -137,11 +204,11 @@ def render_basic_sidebar_fallback():
             'Wallet Tracker'
         ]
         
-        selected = st.radio("Select Page:", pages, index=0)
+        selected = st.selectbox("Select Page:", pages, index=0)
         
         st.markdown("---")
         st.markdown("**Kaspa Analytics**")
-        st.markdown("Basic navigation fallback")
+        st.markdown("Fallback navigation")
         
         return selected
 
@@ -154,9 +221,8 @@ def render_simple_page_header(title, subtitle=None):
     
     st.markdown(page_header_html, unsafe_allow_html=True)
 
-# Basic CSS for minimal styling
 def render_basic_css():
-    """Basic CSS for the hover tabs"""
+    """Basic CSS for the application"""
     st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
@@ -172,14 +238,29 @@ def render_basic_css():
             color: inherit !important;
         }
         
-        /* Basic hover effects for tabs */
-        .on-hover-tab {
+        /* Basic hover effects */
+        .hover-element {
             transition: all 0.3s ease !important;
         }
         
-        .on-hover-tab:hover {
-            background-color: rgba(0, 212, 255, 0.1) !important;
-            color: #00d4ff !important;
+        .hover-element:hover {
+            transform: translateY(-2px) !important;
         }
     </style>
     """, unsafe_allow_html=True)
+
+# Keep your existing functions from the original file
+def render_custom_css_with_sidebar():
+    """Your existing CSS function"""
+    # Keep all your existing CSS here
+    pass
+
+def render_clean_header(user_name=None, user_role=None, show_auth=True):
+    """Your existing header function"""
+    # Keep your existing header code here
+    pass
+
+def render_beautiful_sidebar(current_page="Price"):
+    """Your existing sidebar function"""
+    # Keep your existing sidebar code here
+    pass
