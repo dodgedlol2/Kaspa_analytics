@@ -102,52 +102,65 @@ with middle_space:
 with ctrl_col1:
     st.markdown('<div class="control-group"><div class="control-label">Price Scale</div>', unsafe_allow_html=True)
     y_scale = st.selectbox("", ["Linear", "Log"], index=1, label_visibility="collapsed", key="price_y_scale_select")
-    # Add diagnostic script to identify spacing issues
+    # Enhanced diagnostic script to check dropdown spacing specifically
 st.markdown("""
 <script>
 setTimeout(function() {
-    console.log('=== SPACING DIAGNOSTIC ===');
+    console.log('=== DROPDOWN SPACING DIAGNOSTIC ===');
     
-    // Check header position
-    const header = document.querySelector('.professional-header');
-    if (header) {
-        console.log('Header height:', header.offsetHeight);
-        console.log('Header top:', header.offsetTop);
-        console.log('Header computed style:', window.getComputedStyle(header).top);
-    }
-    
-    // Check main container
-    const main = document.querySelector('.main');
-    if (main) {
-        console.log('Main padding-top:', window.getComputedStyle(main).paddingTop);
-        console.log('Main margin-top:', window.getComputedStyle(main).marginTop);
-    }
-    
-    // Check block container
-    const blockContainer = document.querySelector('.main .block-container');
-    if (blockContainer) {
-        console.log('Block container padding-top:', window.getComputedStyle(blockContainer).paddingTop);
-        console.log('Block container margin-top:', window.getComputedStyle(blockContainer).marginTop);
-        console.log('Block container offset top:', blockContainer.offsetTop);
-    }
-    
-    // Check first content element
-    const firstContent = document.querySelector('.main .block-container > div:first-child');
-    if (firstContent) {
-        console.log('First content margin-top:', window.getComputedStyle(firstContent).marginTop);
-        console.log('First content padding-top:', window.getComputedStyle(firstContent).paddingTop);
-        console.log('First content offset top:', firstContent.offsetTop);
-    }
-    
-    // Check header section
+    // Check if the header section itself has spacing issues
     const headerSection = document.querySelector('.header-section');
     if (headerSection) {
-        console.log('Header section margin-top:', window.getComputedStyle(headerSection).marginTop);
-        console.log('Header section padding-top:', window.getComputedStyle(headerSection).paddingTop);
-        console.log('Header section offset top:', headerSection.offsetTop);
+        console.log('Header section:');
+        console.log('- margin-top:', window.getComputedStyle(headerSection).marginTop);
+        console.log('- margin-bottom:', window.getComputedStyle(headerSection).marginBottom);
+        console.log('- padding-top:', window.getComputedStyle(headerSection).paddingTop);
+        console.log('- padding-bottom:', window.getComputedStyle(headerSection).paddingBottom);
+        console.log('- offset top:', headerSection.offsetTop);
+        console.log('- offset height:', headerSection.offsetHeight);
     }
     
-    console.log('=== END DIAGNOSTIC ===');
+    // Check all selectboxes for spacing
+    const selectboxes = document.querySelectorAll('.stSelectbox');
+    console.log('Found', selectboxes.length, 'selectboxes');
+    
+    selectboxes.forEach((selectbox, index) => {
+        console.log('Selectbox', index + 1, ':');
+        console.log('- margin-top:', window.getComputedStyle(selectbox).marginTop);
+        console.log('- margin-bottom:', window.getComputedStyle(selectbox).marginBottom);
+        console.log('- padding-top:', window.getComputedStyle(selectbox).paddingTop);
+        console.log('- padding-bottom:', window.getComputedStyle(selectbox).paddingBottom);
+        console.log('- offset top:', selectbox.offsetTop);
+        console.log('- offset height:', selectbox.offsetHeight);
+    });
+    
+    // Check the columns containing selectboxes
+    const columns = document.querySelectorAll('[data-testid="column"]');
+    console.log('Found', columns.length, 'columns');
+    
+    columns.forEach((column, index) => {
+        if (column.querySelector('.stSelectbox')) {
+            console.log('Column', index + 1, '(contains selectbox):');
+            console.log('- margin-top:', window.getComputedStyle(column).marginTop);
+            console.log('- margin-bottom:', window.getComputedStyle(column).marginBottom);
+            console.log('- padding-top:', window.getComputedStyle(column).paddingTop);
+            console.log('- padding-bottom:', window.getComputedStyle(column).paddingBottom);
+        }
+    });
+    
+    // Check for any containers around selectboxes
+    const controlGroups = document.querySelectorAll('.control-group');
+    console.log('Found', controlGroups.length, 'control groups');
+    
+    controlGroups.forEach((group, index) => {
+        console.log('Control group', index + 1, ':');
+        console.log('- margin-top:', window.getComputedStyle(group).marginTop);
+        console.log('- margin-bottom:', window.getComputedStyle(group).marginBottom);
+        console.log('- padding-top:', window.getComputedStyle(group).paddingTop);
+        console.log('- padding-bottom:', window.getComputedStyle(group).paddingBottom);
+    });
+    
+    console.log('=== END DROPDOWN DIAGNOSTIC ===');
 }, 1000);
 </script>
 """, unsafe_allow_html=True)
