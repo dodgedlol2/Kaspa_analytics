@@ -423,8 +423,10 @@ fig.update_layout(
             bgcolor="rgba(30, 41, 59, 0.9)",
             bordercolor="rgba(100, 116, 139, 0.3)",
             borderwidth=1,
-            font=dict(color="#f1f5f9", size=11),
-            active=1  # Start with Log selected
+            font=dict(color="#cbd5e1", size=11),
+            active=1,  # Start with Log selected
+            activecolor="rgba(0, 212, 255, 0.2)",
+            activebordercolor="rgba(0, 212, 255, 0.5)"
         ),
     ]
 )
