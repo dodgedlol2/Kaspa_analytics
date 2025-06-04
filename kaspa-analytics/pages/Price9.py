@@ -424,9 +424,7 @@ fig.update_layout(
             bordercolor="rgba(100, 116, 139, 0.3)",
             borderwidth=1,
             font=dict(color="#cbd5e1", size=11),
-            active=1,  # Start with Log selected
-            activecolor="rgba(0, 212, 255, 0.2)",
-            activebordercolor="rgba(0, 212, 255, 0.5)"
+            active=1  # Start with Log selected
         ),
     ]
 )
