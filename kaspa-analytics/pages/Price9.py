@@ -6,14 +6,30 @@ from datetime import datetime, timedelta
 import sys
 import os
 
-# Add the parent directory to the Python path to find shared_components
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Add the parent directory to the Python path to find components folder
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+components_dir = os.path.join(parent_dir, 'components')
+sys.path.append(parent_dir)
+sys.path.append(components_dir)
 
 try:
-    from shared_components import render_page_config, render_custom_css_with_sidebar, render_clean_header, render_beautiful_sidebar
+    from components.shared_components import render_page_config, render_custom_css_with_sidebar, render_clean_header, render_beautiful_sidebar
 except ImportError:
-    st.error("Cannot import shared_components. Please ensure shared_components.py is in the root directory.")
-    st.stop()
+    try:
+        # Alternative import if the above doesn't work
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("shared_components", os.path.join(components_dir, "shared_components.py"))
+        shared_components = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(shared_components)
+        render_page_config = shared_components.render_page_config
+        render_custom_css_with_sidebar = shared_components.render_custom_css_with_sidebar
+        render_clean_header = shared_components.render_clean_header
+        render_beautiful_sidebar = shared_components.render_beautiful_sidebar
+    except Exception as e:
+        st.error(f"Cannot import shared_components from components folder. Error: {str(e)}")
+        st.error(f"Looking in: {components_dir}")
+        st.stop()
 
 try:
     from utils import fit_power_law, load_price_data
