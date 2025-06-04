@@ -1,4 +1,11 @@
 import streamlit as st
+import sys
+import os
+
+# Add the components directory to the path
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'components'))
+
+from shared_components import render_hover_tabs_sidebar
 from utils import load_data
 from datetime import datetime
 import plotly.graph_objects as go
@@ -19,6 +26,7 @@ if 'dark_mode' not in st.session_state:
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
     
     /* Global Reset and Base Styles */
     * {
@@ -276,7 +284,7 @@ st.markdown("""
         font-weight: bold;
     }
     
-    /* Sidebar Styling */
+    /* Sidebar Styling - Minimal for now */
     .css-1d391kg {
         background: rgba(15, 20, 25, 0.95) !important;
         backdrop-filter: blur(20px) !important;
@@ -398,184 +406,194 @@ except Exception as e:
     data_loaded = False
     st.error(f"Failed to load data: {str(e)}")
 
-# Sidebar navigation with enhanced styling
-st.sidebar.markdown("""
-<div style="text-align: center; padding: 20px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 20px;">
-    <h2 style="color: #00d4ff; font-weight: 800; margin: 0; font-size: 24px;">🔍 Navigation</h2>
-    <p style="color: #64748b; font-size: 12px; margin: 8px 0 0 0; text-transform: uppercase; letter-spacing: 1px;">Analytics Suite</p>
-</div>
-""", unsafe_allow_html=True)
+# Use the hover tabs sidebar navigation
+selected_page = render_hover_tabs_sidebar()
 
-st.sidebar.markdown("""
-<div style="color: #94a3b8; font-size: 14px; line-height: 1.6; margin-bottom: 20px;">
-    Navigate through different analytics pages to explore comprehensive Kaspa network metrics and insights.
-</div>
-""", unsafe_allow_html=True)
+# Route to different pages based on selection
+if selected_page and selected_page != "Home":
+    # If a page is selected from the sidebar, navigate to it
+    st.switch_page(f"pages/{selected_page}.py")
+else:
+    # Show the main landing page content
+    
+    # Sidebar navigation with enhanced styling
+    st.sidebar.markdown("""
+    <div style="text-align: center; padding: 20px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.1); margin-bottom: 20px;">
+        <h2 style="color: #00d4ff; font-weight: 800; margin: 0; font-size: 24px;">🔍 Navigation</h2>
+        <p style="color: #64748b; font-size: 12px; margin: 8px 0 0 0; text-transform: uppercase; letter-spacing: 1px;">Analytics Suite</p>
+    </div>
+    """, unsafe_allow_html=True)
 
-# Hero Section
-if data_loaded:
-    current_price = df['Price'].iloc[-1] if 'Price' in df.columns else 0.0
-    total_data_points = len(df)
-    # Fix datetime subtraction issue
-    if genesis_date:
-        try:
-            # Convert genesis_date to datetime if it's a pandas Timestamp
-            if hasattr(genesis_date, 'to_pydatetime'):
-                genesis_dt = genesis_date.to_pydatetime()
-            else:
-                genesis_dt = genesis_date
-            days_since_genesis = (datetime.now() - genesis_dt).days
-        except Exception:
+    st.sidebar.markdown("""
+    <div style="color: #94a3b8; font-size: 14px; line-height: 1.6; margin-bottom: 20px;">
+        Navigate through different analytics pages to explore comprehensive Kaspa network metrics and insights.
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Hero Section
+    if data_loaded:
+        current_price = df['Price'].iloc[-1] if 'Price' in df.columns else 0.0
+        total_data_points = len(df)
+        # Fix datetime subtraction issue
+        if genesis_date:
+            try:
+                # Convert genesis_date to datetime if it's a pandas Timestamp
+                if hasattr(genesis_date, 'to_pydatetime'):
+                    genesis_dt = genesis_date.to_pydatetime()
+                else:
+                    genesis_dt = genesis_date
+                days_since_genesis = (datetime.now() - genesis_dt).days
+            except Exception:
+                days_since_genesis = 0
+        else:
             days_since_genesis = 0
     else:
+        current_price = 0.0
+        total_data_points = 0
         days_since_genesis = 0
-else:
-    current_price = 0.0
-    total_data_points = 0
-    days_since_genesis = 0
 
-st.markdown(f"""
-<div class="hero-container">
-    <h1 class="hero-title">Kaspa Network Analytics</h1>
-    <h2 class="hero-subtitle">Advanced Blockchain Intelligence Platform</h2>
-    <p class="hero-description">
-        Comprehensive real-time analytics for the Kaspa network featuring advanced power-law modeling, 
-        market analysis, and network metrics. Built for researchers, traders, and blockchain enthusiasts.
-    </p>
-    <div class="hero-stats">
-        <div class="hero-stat">
-            <span class="hero-stat-value">${current_price:.6f}</span>
-            <div class="hero-stat-label">Current Price</div>
-        </div>
-        <div class="hero-stat">
-            <span class="hero-stat-value">{total_data_points:,}</span>
-            <div class="hero-stat-label">Data Points</div>
-        </div>
-        <div class="hero-stat">
-            <span class="hero-stat-value">{days_since_genesis:,}</span>
-            <div class="hero-stat-label">Days Active</div>
+    st.markdown(f"""
+    <div class="hero-container">
+        <h1 class="hero-title">Kaspa Network Analytics</h1>
+        <h2 class="hero-subtitle">Advanced Blockchain Intelligence Platform</h2>
+        <p class="hero-description">
+            Comprehensive real-time analytics for the Kaspa network featuring advanced power-law modeling, 
+            market analysis, and network metrics. Built for researchers, traders, and blockchain enthusiasts.
+        </p>
+        <div class="hero-stats">
+            <div class="hero-stat">
+                <span class="hero-stat-value">${current_price:.6f}</span>
+                <div class="hero-stat-label">Current Price</div>
+            </div>
+            <div class="hero-stat">
+                <span class="hero-stat-value">{total_data_points:,}</span>
+                <div class="hero-stat-label">Data Points</div>
+            </div>
+            <div class="hero-stat">
+                <span class="hero-stat-value">{days_since_genesis:,}</span>
+                <div class="hero-stat-label">Days Active</div>
+            </div>
         </div>
     </div>
-</div>
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
-# Navigation Cards Section
-st.markdown("""
-<div class="nav-grid">
-    <div class="nav-card">
-        <span class="nav-card-icon">💎</span>
-        <h3 class="nav-card-title">Price Analysis</h3>
-        <p class="nav-card-description">
-            Advanced price analytics with power-law modeling, trend analysis, and predictive insights for Kaspa's market performance.
-        </p>
-        <ul class="nav-card-features">
-            <li>Real-time price tracking</li>
-            <li>Power-law regression modeling</li>
-            <li>Support & resistance levels</li>
-            <li>Historical trend analysis</li>
-        </ul>
+    # Navigation Cards Section
+    st.markdown("""
+    <div class="nav-grid">
+        <div class="nav-card">
+            <span class="nav-card-icon">💎</span>
+            <h3 class="nav-card-title">Price Analysis</h3>
+            <p class="nav-card-description">
+                Advanced price analytics with power-law modeling, trend analysis, and predictive insights for Kaspa's market performance.
+            </p>
+            <ul class="nav-card-features">
+                <li>Real-time price tracking</li>
+                <li>Power-law regression modeling</li>
+                <li>Support & resistance levels</li>
+                <li>Historical trend analysis</li>
+            </ul>
+        </div>
+        
+        <div class="nav-card">
+            <span class="nav-card-icon">⚡</span>
+            <h3 class="nav-card-title">Hashrate Analysis</h3>
+            <p class="nav-card-description">
+                Comprehensive network security metrics including hashrate trends, mining difficulty, and network strength indicators.
+            </p>
+            <ul class="nav-card-features">
+                <li>Network hashrate monitoring</li>
+                <li>Mining difficulty tracking</li>
+                <li>Security trend analysis</li>
+                <li>Miner distribution metrics</li>
+            </ul>
+        </div>
+        
+        <div class="nav-card">
+            <span class="nav-card-icon">📊</span>
+            <h3 class="nav-card-title">Market Metrics</h3>
+            <p class="nav-card-description">
+                Market capitalization analysis, trading volume insights, and comprehensive market health indicators.
+            </p>
+            <ul class="nav-card-features">
+                <li>Market cap calculations</li>
+                <li>Volume analysis</li>
+                <li>Liquidity metrics</li>
+                <li>Market dominance tracking</li>
+            </ul>
+        </div>
+        
+        <div class="nav-card">
+            <span class="nav-card-icon">📈</span>
+            <h3 class="nav-card-title">Trading Volume</h3>
+            <p class="nav-card-description">
+                Detailed trading activity analysis including volume patterns, market momentum, and liquidity assessments.
+            </p>
+            <ul class="nav-card-features">
+                <li>Volume trend analysis</li>
+                <li>Market momentum indicators</li>
+                <li>Liquidity depth analysis</li>
+                <li>Trading pattern recognition</li>
+            </ul>
+        </div>
+        
+        <div class="nav-card">
+            <span class="nav-card-icon">🔄</span>
+            <h3 class="nav-card-title">Cross Correlations</h3>
+            <p class="nav-card-description">
+                Advanced correlation analysis between price, hashrate, and other network metrics to identify market relationships.
+            </p>
+            <ul class="nav-card-features">
+                <li>Price-hashrate correlation</li>
+                <li>Network metric relationships</li>
+                <li>Predictive correlation modeling</li>
+                <li>Multi-variate analysis</li>
+            </ul>
+        </div>
+        
+        <div class="nav-card">
+            <span class="nav-card-icon">🔬</span>
+            <h3 class="nav-card-title">Advanced Research</h3>
+            <p class="nav-card-description">
+                Cutting-edge analytics including power-law residuals, statistical modeling, and experimental features for deep insights.
+            </p>
+            <ul class="nav-card-features">
+                <li>Power-law residual analysis</li>
+                <li>Statistical modeling</li>
+                <li>Experimental features</li>
+                <li>Research-grade metrics</li>
+            </ul>
+        </div>
     </div>
-    
-    <div class="nav-card">
-        <span class="nav-card-icon">⚡</span>
-        <h3 class="nav-card-title">Hashrate Analysis</h3>
-        <p class="nav-card-description">
-            Comprehensive network security metrics including hashrate trends, mining difficulty, and network strength indicators.
-        </p>
-        <ul class="nav-card-features">
-            <li>Network hashrate monitoring</li>
-            <li>Mining difficulty tracking</li>
-            <li>Security trend analysis</li>
-            <li>Miner distribution metrics</li>
-        </ul>
-    </div>
-    
-    <div class="nav-card">
-        <span class="nav-card-icon">📊</span>
-        <h3 class="nav-card-title">Market Metrics</h3>
-        <p class="nav-card-description">
-            Market capitalization analysis, trading volume insights, and comprehensive market health indicators.
-        </p>
-        <ul class="nav-card-features">
-            <li>Market cap calculations</li>
-            <li>Volume analysis</li>
-            <li>Liquidity metrics</li>
-            <li>Market dominance tracking</li>
-        </ul>
-    </div>
-    
-    <div class="nav-card">
-        <span class="nav-card-icon">📈</span>
-        <h3 class="nav-card-title">Trading Volume</h3>
-        <p class="nav-card-description">
-            Detailed trading activity analysis including volume patterns, market momentum, and liquidity assessments.
-        </p>
-        <ul class="nav-card-features">
-            <li>Volume trend analysis</li>
-            <li>Market momentum indicators</li>
-            <li>Liquidity depth analysis</li>
-            <li>Trading pattern recognition</li>
-        </ul>
-    </div>
-    
-    <div class="nav-card">
-        <span class="nav-card-icon">🔄</span>
-        <h3 class="nav-card-title">Cross Correlations</h3>
-        <p class="nav-card-description">
-            Advanced correlation analysis between price, hashrate, and other network metrics to identify market relationships.
-        </p>
-        <ul class="nav-card-features">
-            <li>Price-hashrate correlation</li>
-            <li>Network metric relationships</li>
-            <li>Predictive correlation modeling</li>
-            <li>Multi-variate analysis</li>
-        </ul>
-    </div>
-    
-    <div class="nav-card">
-        <span class="nav-card-icon">🔬</span>
-        <h3 class="nav-card-title">Advanced Research</h3>
-        <p class="nav-card-description">
-            Cutting-edge analytics including power-law residuals, statistical modeling, and experimental features for deep insights.
-        </p>
-        <ul class="nav-card-features">
-            <li>Power-law residual analysis</li>
-            <li>Statistical modeling</li>
-            <li>Experimental features</li>
-            <li>Research-grade metrics</li>
-        </ul>
-    </div>
-</div>
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
-# Status Section
-st.markdown(f"""
-<div class="status-section">
-    <h3 class="status-title">System Status</h3>
-    <div class="status-indicator">
-        <div class="status-dot"></div>
-        <span>All Systems Operational</span>
+    # Status Section
+    st.markdown(f"""
+    <div class="status-section">
+        <h3 class="status-title">System Status</h3>
+        <div class="status-indicator">
+            <div class="status-dot"></div>
+            <span>All Systems Operational</span>
+        </div>
+        <p style="color: #64748b; font-size: 14px; margin: 0;">
+            Data updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')} • 
+            Analytics engine running optimally
+        </p>
     </div>
-    <p style="color: #64748b; font-size: 14px; margin: 0;">
-        Data updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')} • 
-        Analytics engine running optimally
-    </p>
-</div>
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
-# Footer
-st.markdown(f"""
-<div style="text-align: center; padding: 40px 20px; margin-top: 60px; 
-     background: rgba(15, 20, 25, 0.4); backdrop-filter: blur(20px);
-     border-top: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px;">
-    <h3 style="color: #f1f5f9; margin-bottom: 16px; font-size: 18px; font-weight: 700;">
-        Kaspa Network Analytics
-    </h3>
-    <p style="color: #64748b; font-size: 14px; margin-bottom: 20px;">
-        Professional-grade blockchain analytics • Real-time data processing • Advanced statistical modeling
-    </p>
-    <div style="color: #475569; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">
-        Powered by advanced analytics • Built for the Kaspa community
+    # Footer
+    st.markdown(f"""
+    <div style="text-align: center; padding: 40px 20px; margin-top: 60px; 
+         background: rgba(15, 20, 25, 0.4); backdrop-filter: blur(20px);
+         border-top: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px;">
+        <h3 style="color: #f1f5f9; margin-bottom: 16px; font-size: 18px; font-weight: 700;">
+            Kaspa Network Analytics
+        </h3>
+        <p style="color: #64748b; font-size: 14px; margin-bottom: 20px;">
+            Professional-grade blockchain analytics • Real-time data processing • Advanced statistical modeling
+        </p>
+        <div style="color: #475569; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;">
+            Powered by advanced analytics • Built for the Kaspa community
+        </div>
     </div>
-</div>
-""", unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
