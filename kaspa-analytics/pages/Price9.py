@@ -5,7 +5,6 @@ import pandas as pd
 from datetime import datetime, timedelta
 import sys
 import os
-from components.shared_components import render_page_config, render_custom_css_with_sidebar, render_clean_header, render_beautiful_sidebar
 
 # Add the parent directory to the Python path to find components folder
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -104,6 +103,58 @@ with ctrl_col1:
     st.markdown('<div class="control-group"><div class="control-label">Price Scale</div>', unsafe_allow_html=True)
     y_scale = st.selectbox("", ["Linear", "Log"], index=1, label_visibility="collapsed", key="price_y_scale_select")
     st.markdown('</div>', unsafe_allow_html=True)
+
+# Add JavaScript to force selectbox styling after Streamlit renders
+st.markdown("""
+<script>
+setTimeout(function() {
+    // Target all selectbox containers
+    const selectboxes = document.querySelectorAll('.stSelectbox, [data-baseweb="select"]');
+    
+    selectboxes.forEach(selectbox => {
+        // Apply styling to the selectbox and its children
+        const applyStyles = (element) => {
+            if (element && element.style) {
+                element.style.background = 'linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%)';
+                element.style.border = '2px solid rgba(100, 116, 139, 0.3)';
+                element.style.borderRadius = '12px';
+                element.style.backdropFilter = 'blur(15px)';
+                element.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.2)';
+                element.style.color = '#f1f5f9';
+                element.style.fontWeight = '600';
+                element.style.fontSize = '13px';
+                element.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+                element.style.minHeight = '40px';
+            }
+        };
+        
+        // Apply to the selectbox itself
+        applyStyles(selectbox);
+        
+        // Apply to child elements
+        const children = selectbox.querySelectorAll('div, button, span');
+        children.forEach(child => {
+            if (child.getAttribute('role') === 'button' || child.closest('[role="button"]')) {
+                applyStyles(child);
+            }
+        });
+        
+        // Add hover effects
+        selectbox.addEventListener('mouseenter', () => {
+            selectbox.style.borderColor = '#00d4ff';
+            selectbox.style.boxShadow = '0 8px 32px rgba(0, 212, 255, 0.2), 0 0 0 1px rgba(0, 212, 255, 0.3)';
+            selectbox.style.transform = 'translateY(-2px)';
+        });
+        
+        selectbox.addEventListener('mouseleave', () => {
+            selectbox.style.borderColor = 'rgba(100, 116, 139, 0.3)';
+            selectbox.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.2)';
+            selectbox.style.transform = 'translateY(0)';
+        });
+    });
+}, 500);
+</script>
+""", unsafe_allow_html=True)
 
 with ctrl_col2:
     st.markdown('<div class="control-group"><div class="control-label">Time Scale</div>', unsafe_allow_html=True)
