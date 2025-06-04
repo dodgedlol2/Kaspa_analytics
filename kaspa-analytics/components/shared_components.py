@@ -641,4 +641,33 @@ def render_beautiful_sidebar(current_page="Price"):
             "head": '<i class="fas fa-network-wired"></i> NETWORK',
             "items": [
                 '<i class="fas fa-exchange-alt"></i> TRANSACTIONS',
-                '<i class="fas fa-wallet
+                '<i class="fas fa-wallet"></i> ADDRESSES',
+                '<i class="fas fa-cube"></i> BLOCKS'
+            ]
+        }
+    ]
+    
+    # Build simple HTML
+    sidebar_html = ""
+    
+    for section in navigation:
+        # Head metric
+        sidebar_html += f'<div class="head-metric">{section["head"]}</div>'
+        
+        # Sub metrics
+        for item in section["items"]:
+            active_class = "active" if "PRICE" in item and current_page == "Price" else ""
+            sidebar_html += f'<div class="sub-metric {active_class}">{item}</div>'
+    
+    # Render in sidebar
+    with st.sidebar:
+        st.markdown(sidebar_html, unsafe_allow_html=True)
+
+def render_simple_page_header(title, subtitle=None):
+    """Simple page header without breadcrumbs"""
+    
+    subtitle_html = f'<p style="color: #94a3b8; font-size: 16px; margin: 8px 0 0 0;">{subtitle}</p>' if subtitle else ""
+    
+    page_header_html = f'<div style="padding: 0 0 32px 0;"><h1 style="color: #f1f5f9; font-size: 36px; font-weight: 800; margin: 0;">{title}</h1>{subtitle_html}</div>'
+    
+    st.markdown(page_header_html, unsafe_allow_html=True)
