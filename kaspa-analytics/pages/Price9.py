@@ -102,66 +102,99 @@ with middle_space:
 with ctrl_col1:
     st.markdown('<div class="control-group"><div class="control-label">Price Scale</div>', unsafe_allow_html=True)
     y_scale = st.selectbox("", ["Linear", "Log"], index=1, label_visibility="collapsed", key="price_y_scale_select")
-    # Enhanced diagnostic script to check dropdown spacing specifically
+    # COMPREHENSIVE spacing fix with JavaScript
 st.markdown("""
 <script>
 setTimeout(function() {
-    console.log('=== DROPDOWN SPACING DIAGNOSTIC ===');
+    console.log('=== COMPREHENSIVE SPACING FIX ===');
     
-    // Check if the header section itself has spacing issues
-    const headerSection = document.querySelector('.header-section');
-    if (headerSection) {
-        console.log('Header section:');
-        console.log('- margin-top:', window.getComputedStyle(headerSection).marginTop);
-        console.log('- margin-bottom:', window.getComputedStyle(headerSection).marginBottom);
-        console.log('- padding-top:', window.getComputedStyle(headerSection).paddingTop);
-        console.log('- padding-bottom:', window.getComputedStyle(headerSection).paddingBottom);
-        console.log('- offset top:', headerSection.offsetTop);
-        console.log('- offset height:', headerSection.offsetHeight);
+    // Function to remove all spacing from an element
+    function removeSpacing(element) {
+        if (element && element.style) {
+            element.style.margin = '0';
+            element.style.padding = '0';
+            element.style.marginTop = '0';
+            element.style.marginBottom = '0';
+            element.style.paddingTop = '0';
+            element.style.paddingBottom = '0';
+        }
     }
     
-    // Check all selectboxes for spacing
-    const selectboxes = document.querySelectorAll('.stSelectbox');
-    console.log('Found', selectboxes.length, 'selectboxes');
+    // Remove spacing from ALL possible containers
+    const spacingTargets = [
+        '.main .block-container > div',
+        '.main .block-container > div > div',
+        '.element-container',
+        '.stMarkdown',
+        '.stSelectbox',
+        '.stSelectbox > div',
+        '.stSelectbox > div > div',
+        'div[data-testid="column"]',
+        '.control-group',
+        '.stPlotlyChart'
+    ];
     
-    selectboxes.forEach((selectbox, index) => {
-        console.log('Selectbox', index + 1, ':');
-        console.log('- margin-top:', window.getComputedStyle(selectbox).marginTop);
-        console.log('- margin-bottom:', window.getComputedStyle(selectbox).marginBottom);
-        console.log('- padding-top:', window.getComputedStyle(selectbox).paddingTop);
-        console.log('- padding-bottom:', window.getComputedStyle(selectbox).paddingBottom);
-        console.log('- offset top:', selectbox.offsetTop);
-        console.log('- offset height:', selectbox.offsetHeight);
+    spacingTargets.forEach(selector => {
+        const elements = document.querySelectorAll(selector);
+        elements.forEach(removeSpacing);
+        console.log('Removed spacing from', elements.length, selector, 'elements');
     });
     
-    // Check the columns containing selectboxes
-    const columns = document.querySelectorAll('[data-testid="column"]');
-    console.log('Found', columns.length, 'columns');
+    // Specifically target the header section
+    const headerSection = document.querySelector('.header-section');
+    if (headerSection) {
+        headerSection.style.margin = '0';
+        headerSection.style.marginTop = '0';
+        headerSection.style.marginBottom = '0';
+        headerSection.style.paddingTop = '5px';
+        headerSection.style.paddingBottom = '5px';
+        console.log('Fixed header section spacing');
+    }
     
-    columns.forEach((column, index) => {
-        if (column.querySelector('.stSelectbox')) {
-            console.log('Column', index + 1, '(contains selectbox):');
-            console.log('- margin-top:', window.getComputedStyle(column).marginTop);
-            console.log('- margin-bottom:', window.getComputedStyle(column).marginBottom);
-            console.log('- padding-top:', window.getComputedStyle(column).paddingTop);
-            console.log('- padding-bottom:', window.getComputedStyle(column).paddingBottom);
+    // Target the chart content area
+    const chartContent = document.querySelector('.chart-content');
+    if (chartContent) {
+        chartContent.style.paddingTop = '0';
+        chartContent.style.marginTop = '0';
+        console.log('Fixed chart content spacing');
+    }
+    
+    // Target chart section
+    const chartSection = document.querySelector('.chart-section');
+    if (chartSection) {
+        chartSection.style.marginTop = '5px';
+        console.log('Fixed chart section spacing');
+    }
+    
+    // Remove spacing from any container that might have it
+    const allDivs = document.querySelectorAll('.main div');
+    let spacingRemoved = 0;
+    allDivs.forEach(div => {
+        const computedStyle = window.getComputedStyle(div);
+        if (parseFloat(computedStyle.marginTop) > 10 || parseFloat(computedStyle.paddingTop) > 10) {
+            div.style.marginTop = '0';
+            div.style.paddingTop = '0';
+            spacingRemoved++;
         }
     });
+    console.log('Removed extra spacing from', spacingRemoved, 'additional elements');
     
-    // Check for any containers around selectboxes
-    const controlGroups = document.querySelectorAll('.control-group');
-    console.log('Found', controlGroups.length, 'control groups');
+    console.log('=== SPACING FIX COMPLETE ===');
+}, 500);
+
+// Run the fix multiple times to catch dynamic content
+setTimeout(() => {
+    const headerSection = document.querySelector('.header-section');
+    const chartContent = document.querySelector('.chart-content');
     
-    controlGroups.forEach((group, index) => {
-        console.log('Control group', index + 1, ':');
-        console.log('- margin-top:', window.getComputedStyle(group).marginTop);
-        console.log('- margin-bottom:', window.getComputedStyle(group).marginBottom);
-        console.log('- padding-top:', window.getComputedStyle(group).paddingTop);
-        console.log('- padding-bottom:', window.getComputedStyle(group).paddingBottom);
-    });
-    
-    console.log('=== END DROPDOWN DIAGNOSTIC ===');
-}, 1000);
+    if (headerSection) {
+        headerSection.style.marginBottom = '0';
+    }
+    if (chartContent) {
+        chartContent.style.paddingTop = '0';
+        chartContent.style.marginTop = '0';
+    }
+}, 1500);
 </script>
 """, unsafe_allow_html=True)
 
