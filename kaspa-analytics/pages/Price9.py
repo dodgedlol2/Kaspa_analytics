@@ -188,6 +188,30 @@ st.markdown("""
     .stPlotlyChart .modebar-group {
         background: transparent !important;
     }
+    
+    /* Custom styling for Plotly updatemenus buttons */
+    .js-plotly-plot .updatemenu-button {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border: 1px solid rgba(100, 116, 139, 0.3) !important;
+        color: #cbd5e1 !important;
+        transition: all 0.2s ease !important;
+    }
+    
+    .js-plotly-plot .updatemenu-button:hover {
+        background: rgba(51, 65, 85, 0.9) !important;
+        border-color: rgba(148, 163, 184, 0.5) !important;
+    }
+    
+    .js-plotly-plot .updatemenu-button.active {
+        background: rgba(51, 65, 85, 0.95) !important;
+        border-color: rgba(148, 163, 184, 0.6) !important;
+        color: #e2e8f0 !important;
+        box-shadow: 0 0 0 1px rgba(148, 163, 184, 0.3) !important;
+    }
+    
+    .js-plotly-plot .updatemenu-container {
+        position: fixed !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
