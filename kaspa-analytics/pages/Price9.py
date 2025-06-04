@@ -151,25 +151,60 @@ setTimeout(function() {
         }
     });
     
-    // Fix dropdown menus to prevent scrollbars
+    // Fix dropdown menus to prevent scrollbars and nested styling
     const fixDropdownScrollbars = () => {
-        const popovers = document.querySelectorAll('[data-baseweb="popover"], [data-baseweb="menu"]');
-        popovers.forEach(popover => {
-            // Remove any height restrictions that cause scrollbars
-            popover.style.maxHeight = 'none';
-            popover.style.height = 'auto';
-            popover.style.overflow = 'visible';
-            popover.style.overflowY = 'visible';
-            
-            // Find any nested scrollable containers
-            const scrollableContainers = popover.querySelectorAll('[role="presentation"], div');
-            scrollableContainers.forEach(container => {
-                container.style.maxHeight = 'none';
-                container.style.overflow = 'visible';
-                container.style.overflowY = 'visible';
-                container.style.scrollbarWidth = 'none';
-                container.style.msOverflowStyle = 'none';
-            });
+        // Target only outermost popovers
+        const outerPopovers = document.querySelectorAll('div[data-baseweb="popover"]:not(div[data-baseweb="popover"] div[data-baseweb="popover"])');
+        outerPopovers.forEach(popover => {
+            // Style only the outermost popover
+            if (!popover.hasAttribute('data-dropdown-styled')) {
+                popover.style.background = 'rgba(15, 20, 25, 0.98)';
+                popover.style.backdropFilter = 'blur(25px)';
+                popover.style.border = '1px solid rgba(0, 212, 255, 0.3)';
+                popover.style.borderRadius = '12px';
+                popover.style.boxShadow = '0 12px 40px rgba(0, 0, 0, 0.4)';
+                popover.style.marginTop = '4px';
+                popover.style.maxHeight = 'none';
+                popover.style.height = 'auto';
+                popover.style.overflow = 'visible';
+                popover.style.overflowY = 'visible';
+                popover.setAttribute('data-dropdown-styled', 'true');
+                
+                // Reset all nested elements to prevent double styling
+                const nestedElements = popover.querySelectorAll('div, ul');
+                nestedElements.forEach(element => {
+                    if (element !== popover) { // Don't reset the outermost element
+                        element.style.background = 'transparent';
+                        element.style.border = 'none';
+                        element.style.boxShadow = 'none';
+                        element.style.backdropFilter = 'none';
+                        element.style.borderRadius = '0';
+                        element.style.maxHeight = 'none';
+                        element.style.overflow = 'visible';
+                        element.style.overflowY = 'visible';
+                    }
+                });
+            }
+        });
+        
+        // Also fix any menu elements
+        const menus = document.querySelectorAll('[data-baseweb="menu"]');
+        menus.forEach(menu => {
+            menu.style.background = 'transparent';
+            menu.style.border = 'none';
+            menu.style.boxShadow = 'none';
+            menu.style.backdropFilter = 'none';
+        });
+        
+        // Fix list containers
+        const listboxes = document.querySelectorAll('ul[role="listbox"]');
+        listboxes.forEach(listbox => {
+            listbox.style.background = 'transparent';
+            listbox.style.border = 'none';
+            listbox.style.boxShadow = 'none';
+            listbox.style.backdropFilter = 'none';
+            listbox.style.padding = '4px';
+            listbox.style.margin = '0';
         });
     };
     
