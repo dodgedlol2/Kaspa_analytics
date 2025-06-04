@@ -11,7 +11,7 @@ def render_page_config(page_title="Kaspa Analytics Pro", page_icon="💎"):
     )
 
 def render_custom_css_with_sidebar():
-    """Enhanced CSS with working auto-collapsing sidebar functionality using JavaScript"""
+    """Enhanced CSS with beautiful sidebar dropdowns and glow effects - SIMPLIFIED VERSION"""
     st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -51,7 +51,40 @@ def render_custom_css_with_sidebar():
             50% { opacity: 0.8; transform: translateX(20px) translateY(-20px); }
         }
         
-        /* Professional Header */
+        @keyframes shimmer {
+            0% {
+                background-position: -200% center;
+                text-shadow: 0 0 10px rgba(241, 245, 249, 0.3);
+            }
+            50% {
+                text-shadow: 
+                    0 0 20px rgba(0, 212, 255, 0.6),
+                    0 0 30px rgba(0, 212, 255, 0.4),
+                    0 0 40px rgba(0, 212, 255, 0.2);
+            }
+            100% {
+                background-position: 200% center;
+                text-shadow: 0 0 10px rgba(241, 245, 249, 0.3);
+            }
+        }
+        
+        @keyframes glow {
+            0%, 100% {
+                text-shadow: 
+                    0 0 10px rgba(241, 245, 249, 0.3),
+                    0 0 20px rgba(0, 212, 255, 0.2),
+                    0 0 30px rgba(0, 212, 255, 0.1);
+            }
+            50% {
+                text-shadow: 
+                    0 0 20px rgba(241, 245, 249, 0.5),
+                    0 0 30px rgba(0, 212, 255, 0.4),
+                    0 0 40px rgba(0, 212, 255, 0.3),
+                    0 0 50px rgba(0, 212, 255, 0.2);
+            }
+        }
+        
+        /* Professional Header - Improved layout and gradient */
         .professional-header {
             position: fixed !important;
             top: 0 !important;
@@ -78,6 +111,7 @@ def render_custom_css_with_sidebar():
             max-width: none !important;
         }
         
+        /* Brand section - moved more to the left */
         .brand-section {
             display: flex !important;
             align-items: center !important;
@@ -85,6 +119,7 @@ def render_custom_css_with_sidebar():
             flex: 0 0 auto !important;
         }
         
+        /* Updated logo with blue/cyan theme only */
         .logo {
             width: 45px !important;
             height: 45px !important;
@@ -101,6 +136,7 @@ def render_custom_css_with_sidebar():
             overflow: hidden !important;
         }
         
+        /* Add a subtle inner glow to the logo */
         .logo::before {
             content: '';
             position: absolute;
@@ -113,6 +149,7 @@ def render_custom_css_with_sidebar():
             pointer-events: none;
         }
         
+        /* Simplified brand text - removed subtitle */
         .brand-text {
             display: flex !important;
             flex-direction: column !important;
@@ -129,6 +166,7 @@ def render_custom_css_with_sidebar():
             text-shadow: 0 0 20px rgba(0, 212, 255, 0.1) !important;
         }
         
+        /* Auth section - moved more to the right */
         .auth-section {
             display: flex !important;
             align-items: center !important;
@@ -137,6 +175,7 @@ def render_custom_css_with_sidebar():
             margin-left: auto !important;
         }
         
+        /* Updated login button to match theme */
         .login-button {
             background: transparent !important;
             border: 1px solid rgba(100, 116, 139, 0.4) !important;
@@ -155,6 +194,7 @@ def render_custom_css_with_sidebar():
             background: rgba(0, 212, 255, 0.05) !important;
         }
         
+        /* Updated signup button with blue theme only */
         .signup-button {
             background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%) !important;
             border: none !important;
@@ -174,7 +214,7 @@ def render_custom_css_with_sidebar():
             background: linear-gradient(135deg, #00d4ff 0%, #00aadd 100%) !important;
         }
         
-        /* AUTO-COLLAPSING SIDEBAR - Base styles */
+        /* Ultra-professional sidebar with matching gradient - FIXED gap */
         section[data-testid="stSidebar"] {
             background: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 50%, #0f1419 100%) !important;
             border-right: 1px solid rgba(100, 116, 139, 0.2) !important;
@@ -182,78 +222,66 @@ def render_custom_css_with_sidebar():
             backdrop-filter: blur(25px) !important;
             box-shadow: 8px 0 32px rgba(0, 0, 0, 0.4) !important;
             position: relative !important;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-            overflow: hidden !important;
         }
         
-        /* Collapsed state - set by JavaScript */
-        section[data-testid="stSidebar"].collapsed {
-            width: 60px !important;
-            min-width: 60px !important;
+        /* Add subtle gradient overlay for extra depth */
+        section[data-testid="stSidebar"]::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, rgba(0, 212, 255, 0.02) 0%, transparent 30%, transparent 70%, rgba(0, 212, 255, 0.02) 100%);
+            pointer-events: none;
+            z-index: 1;
         }
         
-        /* Expanded state - set by JavaScript */
-        section[data-testid="stSidebar"].expanded {
-            width: 280px !important;
-            min-width: 280px !important;
+        /* Fix sidebar collapse/expand button positioning */
+        button[data-testid="collapsedControl"] {
+            top: 90px !important;
+            left: 8px !important;
+            z-index: 999999998 !important;
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
+            border: 1px solid rgba(100, 116, 139, 0.3) !important;
+            border-radius: 8px !important;
+            width: 32px !important;
+            height: 32px !important;
+            backdrop-filter: blur(15px) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
         }
         
-        /* Sidebar content container */
+        /* Ensure sidebar content is above the overlay */
         section[data-testid="stSidebar"] > div {
             background: transparent !important;
             padding: 16px 12px !important;
             position: relative !important;
             z-index: 2 !important;
-            transition: opacity 0.3s ease !important;
         }
         
-        /* Content hidden when collapsed */
-        section[data-testid="stSidebar"].collapsed > div {
-            opacity: 0 !important;
-            pointer-events: none !important;
-        }
-        
-        /* Content visible when expanded */
-        section[data-testid="stSidebar"].expanded > div {
-            opacity: 1 !important;
-            pointer-events: auto !important;
-        }
-        
-        /* Collapse indicator overlay */
-        .sidebar-collapse-indicator {
-            position: absolute !important;
-            top: 20px !important;
-            left: 50% !important;
-            transform: translateX(-50%) !important;
-            font-size: 18px !important;
-            line-height: 50px !important;
-            z-index: 4 !important;
-            opacity: 1 !important;
-            transition: opacity 0.3s ease !important;
-            text-align: center !important;
-            pointer-events: none !important;
-            white-space: pre !important;
-        }
-        
-        /* Hide indicator when expanded */
-        section[data-testid="stSidebar"].expanded .sidebar-collapse-indicator {
-            opacity: 0 !important;
-        }
-        
-        /* Hide Streamlit's default elements */
+        /* Hide Streamlit's default navigation */
         nav[data-testid="stSidebarNav"] {
             display: none !important;
         }
         
+        /* Hide radio buttons for navigation */
         section[data-testid="stSidebar"] .stRadio {
             display: none !important;
         }
         
-        button[data-testid="collapsedControl"] {
-            display: none !important;
+        /* CRITICAL: Preserve selectbox dropdown buttons in main content */
+        .main .stSelectbox button {
+            display: block !important;
+            visibility: visible !important;
         }
         
-        /* Navigation styles */
+        /* Ensure dropdown arrows are visible */
+        .main .stSelectbox svg {
+            display: block !important;
+            visibility: visible !important;
+        }
+        
+        /* Head metrics styling */
         .head-metric {
             font-size: 12px !important;
             font-weight: 600 !important;
@@ -266,7 +294,6 @@ def render_custom_css_with_sidebar():
             display: flex !important;
             align-items: center !important;
             gap: 8px !important;
-            white-space: nowrap !important;
         }
         
         .head-metric:hover {
@@ -283,13 +310,13 @@ def render_custom_css_with_sidebar():
             width: 16px !important;
             text-align: center !important;
             transition: color 0.2s ease !important;
-            flex-shrink: 0 !important;
         }
         
         .head-metric:hover i {
             color: #cbd5e1 !important;
         }
         
+        /* Sub metrics styling */
         .sub-metric {
             font-size: 12px !important;
             font-weight: 600 !important;
@@ -302,7 +329,6 @@ def render_custom_css_with_sidebar():
             display: flex !important;
             align-items: center !important;
             gap: 8px !important;
-            white-space: nowrap !important;
         }
         
         .sub-metric:hover {
@@ -319,7 +345,6 @@ def render_custom_css_with_sidebar():
             width: 16px !important;
             text-align: center !important;
             transition: color 0.2s ease !important;
-            flex-shrink: 0 !important;
         }
         
         .sub-metric:hover i {
@@ -330,21 +355,20 @@ def render_custom_css_with_sidebar():
             color: #00d4ff !important;
         }
         
-        /* Main content adjustments */
-        .main .block-container {
-            padding-top: 100px !important;
-            padding-left: 80px !important;
-            padding-right: 20px !important;
-            max-width: 100% !important;
-            transition: padding-left 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        /* Chart section styling */
+        .chart-section {
+            margin: 12px 40px 28px 40px;
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(25px);
+            border: none;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+            position: relative;
+            transition: all 0.3s ease;
         }
         
-        /* Adjusted main content when sidebar expanded */
-        .main-content-expanded {
-            padding-left: 300px !important;
-        }
-        
-        /* Rest of your existing styles */
+        /* Header section with controls */
         .header-section {
             padding: 15px 40px 15px 40px;
             background: transparent;
@@ -373,6 +397,15 @@ def render_custom_css_with_sidebar():
             line-height: 1.2;
         }
         
+        .controls-container {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+            flex: 1;
+            justify-content: flex-end;
+        }
+        
         .control-group {
             display: flex;
             flex-direction: column;
@@ -391,7 +424,8 @@ def render_custom_css_with_sidebar():
             line-height: 1;
         }
         
-        /* Selectbox styling */
+        /* EXACT ORIGINAL: Match your exact original dropdown styling */
+        
         .stSelectbox > div > div {
             background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
             border: 2px solid rgba(100, 116, 139, 0.3) !important;
@@ -419,7 +453,121 @@ def render_custom_css_with_sidebar():
             background: transparent !important;
         }
         
-        /* Metric cards */
+        /* Reset any deeper nested elements to prevent conflicts */
+        .stSelectbox > div > div > div > div,
+        .stSelectbox > div > div > div > div > div {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            backdrop-filter: none !important;
+            transform: none !important;
+        }
+        
+        /* Ensure dropdown arrow is visible and styled */
+        .stSelectbox button,
+        .stSelectbox svg {
+            display: block !important;
+            visibility: visible !important;
+            background: transparent !important;
+            border: none !important;
+            color: #94a3b8 !important;
+            width: 16px !important;
+            height: 16px !important;
+        }
+        
+        /* Style the dropdown menu when opened - FIXED nested panels */
+        
+        /* Target only the outermost popover container */
+        div[data-baseweb="popover"]:not(div[data-baseweb="popover"] div[data-baseweb="popover"]) {
+            background: rgba(15, 20, 25, 0.98) !important;
+            backdrop-filter: blur(25px) !important;
+            border: 1px solid rgba(0, 212, 255, 0.3) !important;
+            border-radius: 12px !important;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4) !important;
+            margin-top: 4px !important;
+            max-height: none !important;
+            height: auto !important;
+            overflow: visible !important;
+            overflow-x: hidden !important;
+            overflow-y: hidden !important;
+        }
+        
+        /* Reset all nested elements inside popover to prevent double styling */
+        div[data-baseweb="popover"] div[data-baseweb="popover"],
+        div[data-baseweb="popover"] > div,
+        div[data-baseweb="popover"] > div > div,
+        div[data-baseweb="menu"],
+        div[data-baseweb="menu"] > div {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            backdrop-filter: none !important;
+            border-radius: 0 !important;
+        }
+        
+        /* Target the list container specifically */
+        ul[role="listbox"] {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            backdrop-filter: none !important;
+            padding: 4px !important;
+            margin: 0 !important;
+            max-height: none !important;
+            overflow: visible !important;
+        }
+        
+        /* Specifically target the scrollable container inside popover */
+        div[data-baseweb="popover"] div[role="presentation"],
+        div[data-baseweb="menu"] div[role="presentation"] {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            backdrop-filter: none !important;
+            max-height: none !important;
+            overflow: visible !important;
+            overflow-y: visible !important;
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+        }
+        
+        /* Hide any scrollbars that might appear */
+        div[data-baseweb="popover"] ::-webkit-scrollbar,
+        div[data-baseweb="menu"] ::-webkit-scrollbar {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+        }
+        
+        /* Style dropdown options - ensure they don't cause overflow */
+        li[role="option"],
+        div[role="option"] {
+            background: transparent !important;
+            color: #e2e8f0 !important;
+            padding: 12px 16px !important;
+            font-weight: 500 !important;
+            font-size: 13px !important;
+            transition: all 0.2s ease !important;
+            border-radius: 8px !important;
+            margin: 2px 4px !important;
+            white-space: nowrap !important;
+            flex-shrink: 0 !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+        
+        li[role="option"]:hover,
+        div[role="option"]:hover {
+            background: rgba(0, 212, 255, 0.1) !important;
+            color: #00d4ff !important;
+        }
+        
+        .chart-content {
+            padding: 8px 28px;
+            position: relative;
+        }
+        
+        /* Metric cards styling */
         .metric-card {
             background: rgba(30, 41, 59, 0.4) !important;
             backdrop-filter: blur(25px) !important;
@@ -475,80 +623,77 @@ def render_custom_css_with_sidebar():
             color: #ff4757 !important;
         }
         
+        .stPlotlyChart {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+        }
+        
+        .stPlotlyChart .modebar {
+            background: transparent !important;
+            transform: translateY(10px) !important;
+        }
+        
+        .stPlotlyChart .modebar-group {
+            background: transparent !important;
+        }
+        
+        /* Main content adjustments */
+        .main .block-container {
+            padding-top: 100px !important;
+            padding-left: 0px !important;
+            padding-right: 0px !important;
+            max-width: 100% !important;
+        }
+        
         /* Hide Streamlit elements */
         #MainMenu {visibility: hidden !important;}
         footer {visibility: hidden !important;}
         header {visibility: hidden !important;}
         .stDeployButton {display: none !important;}
         
-        /* Mobile responsive */
+        /* Responsive design for smaller screens */
+        @media (max-width: 1200px) {
+            .header-section {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            
+            .controls-container {
+                width: 100%;
+                justify-content: flex-start;
+                gap: 16px;
+            }
+            
+            .control-group {
+                min-width: 100px;
+            }
+        }
+        
         @media (max-width: 768px) {
-            section[data-testid="stSidebar"] {
-                display: none !important;
+            .professional-header {
+                height: 70px !important;
+                padding: 0 20px !important;
+            }
+            
+            .brand-text h1 {
+                font-size: 22px !important;
             }
             
             .main .block-container {
-                padding-left: 20px !important;
+                padding-top: 90px !important;
+            }
+            
+            .controls-container {
+                gap: 12px;
+            }
+            
+            .control-group {
+                min-width: 90px;
             }
         }
     </style>
-    
-    <script>
-    function initAutoCollapsingSidebar() {
-        const sidebar = document.querySelector('section[data-testid="stSidebar"]');
-        const mainContainer = document.querySelector('.main .block-container');
-        
-        if (!sidebar) {
-            console.log('Sidebar not found, retrying...');
-            setTimeout(initAutoCollapsingSidebar, 500);
-            return;
-        }
-        
-        // Create collapse indicator
-        let indicator = sidebar.querySelector('.sidebar-collapse-indicator');
-        if (!indicator) {
-            indicator = document.createElement('div');
-            indicator.className = 'sidebar-collapse-indicator';
-            indicator.innerHTML = '📊\\n📈\\n🔗';
-            sidebar.appendChild(indicator);
-        }
-        
-        // Set initial collapsed state
-        sidebar.classList.add('collapsed');
-        sidebar.classList.remove('expanded');
-        
-        // Mouse enter - expand
-        sidebar.addEventListener('mouseenter', function() {
-            sidebar.classList.remove('collapsed');
-            sidebar.classList.add('expanded');
-            if (mainContainer) {
-                mainContainer.classList.add('main-content-expanded');
-            }
-        });
-        
-        // Mouse leave - collapse
-        sidebar.addEventListener('mouseleave', function() {
-            sidebar.classList.remove('expanded');
-            sidebar.classList.add('collapsed');
-            if (mainContainer) {
-                mainContainer.classList.remove('main-content-expanded');
-            }
-        });
-        
-        console.log('Auto-collapsing sidebar initialized successfully!');
-    }
-    
-    // Initialize when DOM is ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initAutoCollapsingSidebar);
-    } else {
-        initAutoCollapsingSidebar();
-    }
-    
-    // Also initialize after a delay to handle Streamlit's dynamic loading
-    setTimeout(initAutoCollapsingSidebar, 1000);
-    setTimeout(initAutoCollapsingSidebar, 2000);
-    </script>
     """, unsafe_allow_html=True)
 
 def render_clean_header(user_name=None, user_role=None, show_auth=True):
