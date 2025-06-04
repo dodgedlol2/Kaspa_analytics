@@ -384,32 +384,13 @@ def render_custom_css_with_sidebar():
             line-height: 1;
         }
         
-        /* SIMPLIFIED: More targeted selectbox styling */
-        div[data-baseweb="select"] {
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
-            border: 2px solid rgba(100, 116, 139, 0.3) !important;
-            border-radius: 12px !important;
-            backdrop-filter: blur(15px) !important;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
-        }
+        /* ENHANCED: More aggressive selectbox styling to match original design */
         
-        div[data-baseweb="select"]:hover {
-            border-color: #00d4ff !important;
-            box-shadow: 0 8px 32px rgba(0, 212, 255, 0.2), 0 0 0 1px rgba(0, 212, 255, 0.3) !important;
-            transform: translateY(-2px) !important;
-        }
-        
-        div[data-baseweb="select"] > div {
-            background: transparent !important;
-            color: #f1f5f9 !important;
-            font-weight: 600 !important;
-            font-size: 13px !important;
-            padding: 8px 16px !important;
-        }
-        
-        /* Target Streamlit selectbox more specifically */
-        .stSelectbox > div > div {
+        /* Target all possible selectbox containers */
+        .stSelectbox,
+        .stSelectbox > div,
+        .stSelectbox > div > div,
+        .stSelectbox > div > div > div {
             background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
             border: 2px solid rgba(100, 116, 139, 0.3) !important;
             border-radius: 12px !important;
@@ -417,41 +398,133 @@ def render_custom_css_with_sidebar():
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
             min-height: 40px !important;
+            width: 150px !important;
+            max-width: 250px !important;
+            min-width: 100px !important;
         }
         
+        /* Hover states for selectboxes */
+        .stSelectbox:hover,
+        .stSelectbox > div:hover,
         .stSelectbox > div > div:hover {
             border-color: #00d4ff !important;
             box-shadow: 0 8px 32px rgba(0, 212, 255, 0.2), 0 0 0 1px rgba(0, 212, 255, 0.3) !important;
             transform: translateY(-2px) !important;
         }
         
-        .stSelectbox > div > div > div {
+        /* Text content styling */
+        .stSelectbox > div > div > div,
+        .stSelectbox div[role="button"],
+        .stSelectbox span {
             color: #f1f5f9 !important;
             font-weight: 600 !important;
             font-size: 13px !important;
             padding: 8px 16px !important;
+            background: transparent !important;
         }
         
-        /* Style dropdown menu */
-        div[data-baseweb="popover"] {
+        /* Target data-baseweb select elements more aggressively */
+        div[data-baseweb="select"],
+        div[data-baseweb="select"] > div,
+        div[data-baseweb="select"] > div > div,
+        div[data-baseweb="select"] > div > div > div {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
+            border: 2px solid rgba(100, 116, 139, 0.3) !important;
+            border-radius: 12px !important;
+            backdrop-filter: blur(15px) !important;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+            min-height: 40px !important;
+            color: #f1f5f9 !important;
+            font-weight: 600 !important;
+            font-size: 13px !important;
+        }
+        
+        /* Hover for data-baseweb elements */
+        div[data-baseweb="select"]:hover,
+        div[data-baseweb="select"]:hover > div,
+        div[data-baseweb="select"]:hover > div > div {
+            border-color: #00d4ff !important;
+            box-shadow: 0 8px 32px rgba(0, 212, 255, 0.2), 0 0 0 1px rgba(0, 212, 255, 0.3) !important;
+            transform: translateY(-2px) !important;
+        }
+        
+        /* Target the button/dropdown trigger specifically */
+        .stSelectbox button,
+        .stSelectbox div[role="button"] {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
+            border: 2px solid rgba(100, 116, 139, 0.3) !important;
+            border-radius: 12px !important;
+            backdrop-filter: blur(15px) !important;
+            color: #f1f5f9 !important;
+            font-weight: 600 !important;
+            font-size: 13px !important;
+            padding: 8px 16px !important;
+            min-height: 40px !important;
+            width: 100% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+        }
+        
+        /* Ensure dropdown arrow is visible and styled */
+        .stSelectbox button svg,
+        .stSelectbox svg {
+            display: block !important;
+            visibility: visible !important;
+            color: #94a3b8 !important;
+            width: 16px !important;
+            height: 16px !important;
+            margin-left: auto !important;
+        }
+        
+        /* Style the dropdown menu when opened */
+        div[data-baseweb="popover"],
+        div[data-baseweb="popover"] > div,
+        div[data-baseweb="menu"],
+        div[data-baseweb="menu"] > div,
+        ul[role="listbox"] {
             background: rgba(15, 20, 25, 0.98) !important;
             backdrop-filter: blur(25px) !important;
             border: 1px solid rgba(0, 212, 255, 0.3) !important;
             border-radius: 12px !important;
             box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4) !important;
+            margin-top: 4px !important;
         }
         
-        li[role="option"] {
+        /* Style dropdown options */
+        li[role="option"],
+        div[role="option"] {
             background: transparent !important;
             color: #e2e8f0 !important;
             padding: 12px 16px !important;
             font-weight: 500 !important;
+            font-size: 13px !important;
             transition: all 0.2s ease !important;
+            border-radius: 8px !important;
+            margin: 2px 4px !important;
         }
         
-        li[role="option"]:hover {
+        li[role="option"]:hover,
+        div[role="option"]:hover {
             background: rgba(0, 212, 255, 0.1) !important;
             color: #00d4ff !important;
+        }
+        
+        /* Additional targeting for stubborn elements */
+        [data-testid*="stSelectbox"] {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
+            border: 2px solid rgba(100, 116, 139, 0.3) !important;
+            border-radius: 12px !important;
+        }
+        
+        /* Force override with attribute selectors */
+        [class*="css-"][class*="e1fqkh3o"] > div,
+        [class*="css-"][class*="e1fqkh3o"] > div > div {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
+            border: 2px solid rgba(100, 116, 139, 0.3) !important;
+            border-radius: 12px !important;
+            color: #f1f5f9 !important;
         }
         
         .chart-content {
