@@ -416,17 +416,30 @@ fig.update_layout(
                     method="relayout"
                 )
             ]),
-            pad={"r": 10, "t": 10},
-            showactive=False,  # Disable automatic active styling
-            x=0.08,  # Move right about 1cm (roughly 8% from left)
-            xanchor="left",
-            y=0.98,
+            pad={"r": 15, "t": 8, "b": 8, "l": 15},
+            showactive=False,
+            x=0.08,
+            xanchor="left", 
+            y=0.95,
             yanchor="top",
-            bgcolor="rgba(51, 65, 85, 0.8)",
-            bordercolor="rgba(148, 163, 184, 0.4)",
-            borderwidth=1,
-            font=dict(color="#e2e8f0", size=11)
+            bgcolor="rgba(0, 0, 0, 0)",  # Transparent background
+            bordercolor="rgba(0, 0, 0, 0)",  # No border
+            borderwidth=0,
+            font=dict(color="#94a3b8", size=12, family="Inter")
         ),
+    ],
+    annotations=[
+        dict(
+            text="Scale:",
+            x=0.02,
+            y=0.95,
+            xref="paper",
+            yref="paper",
+            showarrow=False,
+            font=dict(color="#64748b", size=11, family="Inter"),
+            xanchor="left",
+            yanchor="top"
+        )
     ]
 )
 
