@@ -1,3 +1,15 @@
+import streamlit as st
+from datetime import datetime
+
+def render_page_config(page_title="Kaspa Analytics Pro", page_icon="💎"):
+    """Set consistent page config across all pages"""
+    st.set_page_config(
+        page_title=page_title,
+        page_icon=page_icon,
+        layout="wide",
+        initial_sidebar_state="expanded"
+    )
+
 def render_custom_css_with_sidebar():
     """Enhanced CSS with working auto-collapsing sidebar functionality using JavaScript"""
     st.markdown("""
@@ -538,3 +550,86 @@ def render_custom_css_with_sidebar():
     setTimeout(initAutoCollapsingSidebar, 2000);
     </script>
     """, unsafe_allow_html=True)
+
+def render_clean_header(user_name=None, user_role=None, show_auth=True):
+    """Render a clean header with just branding and auth"""
+    
+    # Build auth section
+    if user_name:
+        user_initials = "".join([name[0].upper() for name in user_name.split()[:2]])
+        auth_html = f'<div style="display: flex; align-items: center; gap: 10px; background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(100, 116, 139, 0.3); border-radius: 12px; padding: 8px 12px;"><div style="width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 14px;">{user_initials}</div><div><div style="font-size: 13px; font-weight: 600; color: #f1f5f9;">{user_name}</div><div style="font-size: 11px; color: #64748b;">{user_role or "Free Plan"}</div></div></div>'
+    else:
+        auth_html = '<div class="auth-section"><button class="login-button"><i class="fas fa-sign-in-alt"></i> Login</button><button class="signup-button"><i class="fas fa-rocket"></i> Get Started</button></div>' if show_auth else ""
+    
+    header_html = f'''
+    <div class="professional-header">
+        <div class="header-content">
+            <div class="brand-section">
+                <div class="logo"><i class="fas fa-gem"></i></div>
+                <div class="brand-text">
+                    <h1>KaspaMetrics</h1>
+                </div>
+            </div>
+            {auth_html}
+        </div>
+    </div>
+    '''
+    
+    st.markdown(header_html, unsafe_allow_html=True)
+
+def render_beautiful_sidebar(current_page="Price"):
+    """Super simple clean text sidebar - no complex functionality"""
+    
+    # Simple navigation structure with Font Awesome icons
+    navigation = [
+        {
+            "head": '<i class="fas fa-chart-line"></i> MARKET METRICS',
+            "items": [
+                '<i class="fas fa-dollar-sign"></i> PRICE',
+                '<i class="fas fa-coins"></i> MARKET CAP', 
+                '<i class="fas fa-chart-bar"></i> TRADING VOLUME',
+                '<i class="fas fa-layer-group"></i> SUPPLY'
+            ]
+        },
+        {
+            "head": '<i class="fas fa-hammer"></i> MINING',
+            "items": [
+                '<i class="fas fa-bolt"></i> HASHRATE',
+                '<i class="fas fa-puzzle-piece"></i> DIFFICULTY', 
+                '<i class="fas fa-money-bill-wave"></i> MINING REVENUE'
+            ]
+        },
+        {
+            "head": '<i class="fas fa-network-wired"></i> NETWORK',
+            "items": [
+                '<i class="fas fa-exchange-alt"></i> TRANSACTIONS',
+                '<i class="fas fa-wallet"></i> ADDRESSES',
+                '<i class="fas fa-cube"></i> BLOCKS'
+            ]
+        }
+    ]
+    
+    # Build simple HTML
+    sidebar_html = ""
+    
+    for section in navigation:
+        # Head metric
+        sidebar_html += f'<div class="head-metric">{section["head"]}</div>'
+        
+        # Sub metrics
+        for item in section["items"]:
+            active_class = "active" if "PRICE" in item and current_page == "Price" else ""
+            sidebar_html += f'<div class="sub-metric {active_class}">{item}</div>'
+    
+    # Render in sidebar
+    with st.sidebar:
+        st.markdown(sidebar_html, unsafe_allow_html=True)
+
+def render_simple_page_header(title, subtitle=None):
+    """Simple page header without breadcrumbs"""
+    
+    subtitle_html = f'<p style="color: #94a3b8; font-size: 16px; margin: 8px 0 0 0;">{subtitle}</p>' if subtitle else ""
+    
+    page_header_html = f'<div style="padding: 0 0 32px 0;"><h1 style="color: #f1f5f9; font-size: 36px; font-weight: 800; margin: 0;">{title}</h1>{subtitle_html}</div>'
+    
+    st.markdown(page_header_html, unsafe_allow_html=True)
