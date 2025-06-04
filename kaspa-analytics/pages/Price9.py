@@ -189,54 +189,7 @@ st.markdown("""
         background: transparent !important;
     }
     
-    /* Custom styling for Plotly updatemenus buttons */
-    .js-plotly-plot .updatemenu-button,
-    .plotly .updatemenu-button,
-    [data-title*="updatemenu"] button,
-    .updatemenu-button {
-        background: rgba(30, 41, 59, 0.9) !important;
-        border: 1px solid rgba(100, 116, 139, 0.3) !important;
-        color: #cbd5e1 !important;
-        transition: none !important;
-        position: relative !important;
-        transform: none !important;
-    }
-    
-    .js-plotly-plot .updatemenu-button:hover,
-    .plotly .updatemenu-button:hover,
-    [data-title*="updatemenu"] button:hover,
-    .updatemenu-button:hover {
-        background: rgba(51, 65, 85, 0.9) !important;
-        border-color: rgba(148, 163, 184, 0.5) !important;
-    }
-    
-    .js-plotly-plot .updatemenu-button.active,
-    .js-plotly-plot .updatemenu-button[aria-pressed="true"],
-    .plotly .updatemenu-button.active,
-    .plotly .updatemenu-button[aria-pressed="true"],
-    [data-title*="updatemenu"] button.active,
-    [data-title*="updatemenu"] button[aria-pressed="true"],
-    .updatemenu-button.active,
-    .updatemenu-button[aria-pressed="true"] {
-        background: rgba(71, 85, 105, 0.9) !important;
-        border-color: rgba(148, 163, 184, 0.7) !important;
-        color: #e2e8f0 !important;
-        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2) !important;
-        transform: none !important;
-    }
-    
-    .js-plotly-plot .updatemenu-container,
-    .plotly .updatemenu-container {
-        position: absolute !important;
-        transform: none !important;
-    }
-    
-    /* Prevent any white backgrounds */
-    .js-plotly-plot .updatemenu-button *,
-    .plotly .updatemenu-button *,
-    [data-title*="updatemenu"] button * {
-        background: transparent !important;
-    }
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -464,16 +417,15 @@ fig.update_layout(
                 )
             ]),
             pad={"r": 10, "t": 10},
-            showactive=True,
-            x=0.01,
+            showactive=False,  # Disable automatic active styling
+            x=0.08,  # Move right about 1cm (roughly 8% from left)
             xanchor="left",
             y=0.98,
             yanchor="top",
-            bgcolor="rgba(30, 41, 59, 0.9)",
-            bordercolor="rgba(100, 116, 139, 0.3)",
+            bgcolor="rgba(51, 65, 85, 0.8)",
+            bordercolor="rgba(148, 163, 184, 0.4)",
             borderwidth=1,
-            font=dict(color="#cbd5e1", size=11),
-            active=1  # Start with Log selected
+            font=dict(color="#e2e8f0", size=11)
         ),
     ]
 )
