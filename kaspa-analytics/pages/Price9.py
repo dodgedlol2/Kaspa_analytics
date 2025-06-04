@@ -102,7 +102,57 @@ with middle_space:
 with ctrl_col1:
     st.markdown('<div class="control-group"><div class="control-label">Price Scale</div>', unsafe_allow_html=True)
     y_scale = st.selectbox("", ["Linear", "Log"], index=1, label_visibility="collapsed", key="price_y_scale_select")
-    st.markdown('</div>', unsafe_allow_html=True)
+    # Add diagnostic script to identify spacing issues
+st.markdown("""
+<script>
+setTimeout(function() {
+    console.log('=== SPACING DIAGNOSTIC ===');
+    
+    // Check header position
+    const header = document.querySelector('.professional-header');
+    if (header) {
+        console.log('Header height:', header.offsetHeight);
+        console.log('Header top:', header.offsetTop);
+        console.log('Header computed style:', window.getComputedStyle(header).top);
+    }
+    
+    // Check main container
+    const main = document.querySelector('.main');
+    if (main) {
+        console.log('Main padding-top:', window.getComputedStyle(main).paddingTop);
+        console.log('Main margin-top:', window.getComputedStyle(main).marginTop);
+    }
+    
+    // Check block container
+    const blockContainer = document.querySelector('.main .block-container');
+    if (blockContainer) {
+        console.log('Block container padding-top:', window.getComputedStyle(blockContainer).paddingTop);
+        console.log('Block container margin-top:', window.getComputedStyle(blockContainer).marginTop);
+        console.log('Block container offset top:', blockContainer.offsetTop);
+    }
+    
+    // Check first content element
+    const firstContent = document.querySelector('.main .block-container > div:first-child');
+    if (firstContent) {
+        console.log('First content margin-top:', window.getComputedStyle(firstContent).marginTop);
+        console.log('First content padding-top:', window.getComputedStyle(firstContent).paddingTop);
+        console.log('First content offset top:', firstContent.offsetTop);
+    }
+    
+    // Check header section
+    const headerSection = document.querySelector('.header-section');
+    if (headerSection) {
+        console.log('Header section margin-top:', window.getComputedStyle(headerSection).marginTop);
+        console.log('Header section padding-top:', window.getComputedStyle(headerSection).paddingTop);
+        console.log('Header section offset top:', headerSection.offsetTop);
+    }
+    
+    console.log('=== END DIAGNOSTIC ===');
+}, 1000);
+</script>
+""", unsafe_allow_html=True)
+
+st.markdown('</div>', unsafe_allow_html=True)
 
 # JavaScript to reinforce the exact original styling and fix scrollbar issues
 st.markdown("""
