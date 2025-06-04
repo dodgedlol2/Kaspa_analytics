@@ -4,4 +4,4 @@ numpy>=1.26.0
 gspread>=6.0.0
 scikit-learn>=1.0.0
 plotly>=5.18.0
-streamlit-lightweight-charts>=0.1.0
+streamlit-on-Hover-tabs==0.0.2
