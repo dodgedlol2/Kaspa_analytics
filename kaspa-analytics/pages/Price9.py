@@ -104,17 +104,16 @@ with ctrl_col1:
     y_scale = st.selectbox("", ["Linear", "Log"], index=1, label_visibility="collapsed", key="price_y_scale_select")
     st.markdown('</div>', unsafe_allow_html=True)
 
-# Enhanced JavaScript to match original styling exactly
+# JavaScript to reinforce the exact original styling
 st.markdown("""
 <script>
 setTimeout(function() {
-    // Target the exact selectbox structure from your original code
-    const selectboxes = document.querySelectorAll('.stSelectbox > div:first-child > div:first-child, .main .stSelectbox > div > div');
+    // Target using your exact original selector
+    const selectboxes = document.querySelectorAll('.stSelectbox > div > div');
     
     selectboxes.forEach(selectbox => {
-        // Only style if not already styled
-        if (!selectbox.hasAttribute('data-original-styled')) {
-            // Apply exact original styling
+        // Apply your exact original styling
+        if (!selectbox.hasAttribute('data-exact-styled')) {
             selectbox.style.background = 'linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%)';
             selectbox.style.border = '2px solid rgba(100, 116, 139, 0.3)';
             selectbox.style.borderRadius = '12px';
@@ -125,9 +124,9 @@ setTimeout(function() {
             selectbox.style.width = '150px';
             selectbox.style.maxWidth = '250px';
             selectbox.style.minWidth = '100px';
-            selectbox.setAttribute('data-original-styled', 'true');
+            selectbox.setAttribute('data-exact-styled', 'true');
             
-            // Add exact original hover effects
+            // Add your exact original hover effects
             selectbox.addEventListener('mouseenter', () => {
                 selectbox.style.borderColor = '#00d4ff';
                 selectbox.style.boxShadow = '0 8px 32px rgba(0, 212, 255, 0.2), 0 0 0 1px rgba(0, 212, 255, 0.3)';
@@ -140,67 +139,18 @@ setTimeout(function() {
                 selectbox.style.transform = 'translateY(0)';
             });
             
-            // Style the text content exactly like original
-            const textElement = selectbox.querySelector('div:first-child');
-            if (textElement) {
-                textElement.style.color = '#f1f5f9';
-                textElement.style.fontWeight = '600';
-                textElement.style.fontSize = '13px';
-                textElement.style.padding = '8px 16px';
-                textElement.style.background = 'transparent';
+            // Style the text content exactly like your original
+            const textDiv = selectbox.querySelector('div');
+            if (textDiv) {
+                textDiv.style.color = '#f1f5f9';
+                textDiv.style.fontWeight = '600';
+                textDiv.style.fontSize = '13px';
+                textDiv.style.padding = '8px 16px';
+                textDiv.style.background = 'transparent';
             }
         }
     });
-    
-    // Also target any baseweb selects with original specs
-    const basewebSelects = document.querySelectorAll('div[data-baseweb="select"]:not(div[data-baseweb="select"] div[data-baseweb="select"])');
-    basewebSelects.forEach(select => {
-        if (!select.hasAttribute('data-original-styled')) {
-            select.style.background = 'linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%)';
-            select.style.border = '2px solid rgba(100, 116, 139, 0.3)';
-            select.style.borderRadius = '12px';
-            select.style.backdropFilter = 'blur(15px)';
-            select.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
-            select.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.2)';
-            select.style.minHeight = '26px';
-            select.style.width = '150px';
-            select.style.maxWidth = '250px';
-            select.style.minWidth = '100px';
-            select.setAttribute('data-original-styled', 'true');
-            
-            // Original hover effects
-            select.addEventListener('mouseenter', () => {
-                select.style.borderColor = '#00d4ff';
-                select.style.boxShadow = '0 8px 32px rgba(0, 212, 255, 0.2), 0 0 0 1px rgba(0, 212, 255, 0.3)';
-                select.style.transform = 'translateY(-2px)';
-            });
-            
-            select.addEventListener('mouseleave', () => {
-                select.style.borderColor = 'rgba(100, 116, 139, 0.3)';
-                select.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.2)';
-                select.style.transform = 'translateY(0)';
-            });
-        }
-    });
 }, 500);
-
-// Run again after a longer delay to catch any late-loading elements
-setTimeout(function() {
-    // Repeat the styling process for any elements that might have loaded late
-    const lateSelectboxes = document.querySelectorAll('.stSelectbox > div > div:not([data-original-styled])');
-    lateSelectboxes.forEach(selectbox => {
-        if (selectbox.offsetParent !== null) { // Only style visible elements
-            selectbox.style.background = 'linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%)';
-            selectbox.style.border = '2px solid rgba(100, 116, 139, 0.3)';
-            selectbox.style.borderRadius = '12px';
-            selectbox.style.backdropFilter = 'blur(15px)';
-            selectbox.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
-            selectbox.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.2)';
-            selectbox.style.minHeight = '26px';
-            selectbox.setAttribute('data-original-styled', 'true');
-        }
-    });
-}, 1500);
 </script>
 """, unsafe_allow_html=True)
 
