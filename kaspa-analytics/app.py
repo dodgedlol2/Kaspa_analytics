@@ -2,48 +2,32 @@ import streamlit as st
 import sys
 import os
 
-# Debug the import path
-current_dir = os.path.dirname(__file__)
-components_path = os.path.join(current_dir, 'components')
-
-st.write(f"Current directory: {current_dir}")
-st.write(f"Components path: {components_path}")
-st.write(f"Components path exists: {os.path.exists(components_path)}")
-
 # Add the components directory to the path
-sys.path.append(components_path)
+sys.path.append(os.path.join(os.path.dirname(__file__), 'components'))
 
-st.write(f"Python path: {sys.path}")
+from shared_components import render_hover_tabs_sidebar
 
-# Try to import
-try:
-    import shared_components
-    st.success("✅ shared_components imported successfully")
-    
-    # Check what functions are available
-    functions = [func for func in dir(shared_components) if not func.startswith('_')]
-    st.write(f"Available functions: {functions}")
-    
-    # Test specific function
-    if hasattr(shared_components, 'render_hover_tabs_sidebar'):
-        st.success("✅ render_hover_tabs_sidebar function found")
-        
-        # Try to use it
-        try:
-            selected = shared_components.render_hover_tabs_sidebar()
-            st.write(f"Function returned: {selected}")
-        except Exception as e:
-            st.error(f"Error calling function: {e}")
-    else:
-        st.error("❌ render_hover_tabs_sidebar function NOT found")
-        
-except Exception as e:
-    st.error(f"❌ Error importing shared_components: {e}")
+st.set_page_config(
+    page_title="Kaspa Network Analytics",
+    page_icon="🔍",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
-# Also test the hover tabs package
-try:
-    from st_on_hover_tabs import on_hover_tabs
-    st.success("✅ st_on_hover_tabs imported successfully")
-except Exception as e:
-    st.error(f"❌ st_on_hover_tabs import failed: {e}")
-    st.info("Make sure 'streamlit-on-Hover-tabs==0.0.2' is in your requirements.txt")
+# Simple test
+st.title("🔍 Kaspa Network Analytics")
+st.write("Testing the hover tabs navigation...")
+
+# Use the hover tabs sidebar
+selected_page = render_hover_tabs_sidebar()
+
+# Show what was selected
+st.write(f"**Selected page:** {selected_page}")
+
+# Simple routing
+if selected_page and selected_page != "Home":
+    st.info(f"You selected: {selected_page}")
+    st.write("Navigation is working! ✅")
+else:
+    st.write("Welcome to the home page!")
+    st.write("Try clicking on different tabs in the sidebar.")
