@@ -104,53 +104,60 @@ with ctrl_col1:
     y_scale = st.selectbox("", ["Linear", "Log"], index=1, label_visibility="collapsed", key="price_y_scale_select")
     st.markdown('</div>', unsafe_allow_html=True)
 
-# Add JavaScript to force selectbox styling after Streamlit renders
+# Simplified JavaScript - target only the outermost container
 st.markdown("""
 <script>
 setTimeout(function() {
-    // Target all selectbox containers
-    const selectboxes = document.querySelectorAll('.stSelectbox, [data-baseweb="select"]');
+    // Target only the main selectbox containers, not nested elements
+    const selectboxes = document.querySelectorAll('.stSelectbox > div:first-child > div:first-child');
     
     selectboxes.forEach(selectbox => {
-        // Apply styling to the selectbox and its children
-        const applyStyles = (element) => {
-            if (element && element.style) {
-                element.style.background = 'linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%)';
-                element.style.border = '2px solid rgba(100, 116, 139, 0.3)';
-                element.style.borderRadius = '12px';
-                element.style.backdropFilter = 'blur(15px)';
-                element.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.2)';
-                element.style.color = '#f1f5f9';
-                element.style.fontWeight = '600';
-                element.style.fontSize = '13px';
-                element.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
-                element.style.minHeight = '40px';
-            }
-        };
-        
-        // Apply to the selectbox itself
-        applyStyles(selectbox);
-        
-        // Apply to child elements
-        const children = selectbox.querySelectorAll('div, button, span');
-        children.forEach(child => {
-            if (child.getAttribute('role') === 'button' || child.closest('[role="button"]')) {
-                applyStyles(child);
-            }
-        });
-        
-        // Add hover effects
-        selectbox.addEventListener('mouseenter', () => {
-            selectbox.style.borderColor = '#00d4ff';
-            selectbox.style.boxShadow = '0 8px 32px rgba(0, 212, 255, 0.2), 0 0 0 1px rgba(0, 212, 255, 0.3)';
-            selectbox.style.transform = 'translateY(-2px)';
-        });
-        
-        selectbox.addEventListener('mouseleave', () => {
-            selectbox.style.borderColor = 'rgba(100, 116, 139, 0.3)';
+        // Only style if not already styled (prevent double-styling)
+        if (!selectbox.hasAttribute('data-styled')) {
+            selectbox.style.background = 'linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%)';
+            selectbox.style.border = '2px solid rgba(100, 116, 139, 0.3)';
+            selectbox.style.borderRadius = '12px';
+            selectbox.style.backdropFilter = 'blur(15px)';
             selectbox.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.2)';
-            selectbox.style.transform = 'translateY(0)';
-        });
+            selectbox.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+            selectbox.style.minHeight = '40px';
+            selectbox.setAttribute('data-styled', 'true');
+            
+            // Add hover effects only to the main container
+            selectbox.addEventListener('mouseenter', () => {
+                selectbox.style.borderColor = '#00d4ff';
+                selectbox.style.boxShadow = '0 8px 32px rgba(0, 212, 255, 0.2), 0 0 0 1px rgba(0, 212, 255, 0.3)';
+                selectbox.style.transform = 'translateY(-2px)';
+            });
+            
+            selectbox.addEventListener('mouseleave', () => {
+                selectbox.style.borderColor = 'rgba(100, 116, 139, 0.3)';
+                selectbox.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.2)';
+                selectbox.style.transform = 'translateY(0)';
+            });
+            
+            // Ensure text is styled properly
+            const textElement = selectbox.querySelector('div:first-child');
+            if (textElement) {
+                textElement.style.color = '#f1f5f9';
+                textElement.style.fontWeight = '600';
+                textElement.style.fontSize = '13px';
+                textElement.style.padding = '8px 16px';
+            }
+        }
+    });
+    
+    // Also target any data-baseweb selects (but only outermost)
+    const basewebSelects = document.querySelectorAll('div[data-baseweb="select"]:not(div[data-baseweb="select"] div[data-baseweb="select"])');
+    basewebSelects.forEach(select => {
+        if (!select.hasAttribute('data-styled')) {
+            select.style.background = 'linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%)';
+            select.style.border = '2px solid rgba(100, 116, 139, 0.3)';
+            select.style.borderRadius = '12px';
+            select.style.backdropFilter = 'blur(15px)';
+            select.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.2)';
+            select.setAttribute('data-styled', 'true');
+        }
     });
 }, 500);
 </script>
