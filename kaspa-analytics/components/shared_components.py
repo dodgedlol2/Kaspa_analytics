@@ -214,13 +214,27 @@ def render_custom_css_with_sidebar():
             background: linear-gradient(135deg, #00d4ff 0%, #00aadd 100%) !important;
         }
         
-        /* Ultra-simple clean text sidebar */
+        /* Ultra-professional sidebar with matching gradient */
         section[data-testid="stSidebar"] {
-            background: rgba(10, 14, 26, 0.95) !important;
-            border-right: 1px solid rgba(0, 212, 255, 0.15) !important;
+            background: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 50%, #0f1419 100%) !important;
+            border-right: 1px solid rgba(100, 116, 139, 0.2) !important;
             margin-top: 100px !important;
             backdrop-filter: blur(25px) !important;
             box-shadow: 8px 0 32px rgba(0, 0, 0, 0.4) !important;
+            position: relative !important;
+        }
+        
+        /* Add subtle gradient overlay for extra depth */
+        section[data-testid="stSidebar"]::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, rgba(0, 212, 255, 0.02) 0%, transparent 30%, transparent 70%, rgba(0, 212, 255, 0.02) 100%);
+            pointer-events: none;
+            z-index: 1;
         }
         
         /* Fix sidebar collapse/expand button positioning */
@@ -228,17 +242,21 @@ def render_custom_css_with_sidebar():
             top: 110px !important;
             left: 8px !important;
             z-index: 999999998 !important;
-            background: rgba(15, 20, 25, 0.9) !important;
-            border: 1px solid rgba(0, 212, 255, 0.3) !important;
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
+            border: 1px solid rgba(100, 116, 139, 0.3) !important;
             border-radius: 8px !important;
             width: 32px !important;
             height: 32px !important;
+            backdrop-filter: blur(15px) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
         }
         
-        /* Hide default Streamlit sidebar content */
+        /* Ensure sidebar content is above the overlay */
         section[data-testid="stSidebar"] > div {
             background: transparent !important;
             padding: 16px 12px !important;
+            position: relative !important;
+            z-index: 2 !important;
         }
         
         /* Hide Streamlit's default navigation */
