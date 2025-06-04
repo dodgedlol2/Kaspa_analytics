@@ -397,7 +397,36 @@ fig.update_layout(
         bordercolor='rgba(0, 212, 255, 0.5)',
         font=dict(color='#e2e8f0', size=11),
         align='left'
-    )
+    ),
+    updatemenus=[
+        dict(
+            type="buttons",
+            direction="left",
+            buttons=list([
+                dict(
+                    args=[{"yaxis.type": "linear"}],
+                    label="Linear",
+                    method="relayout"
+                ),
+                dict(
+                    args=[{"yaxis.type": "log"}],
+                    label="Log",
+                    method="relayout"
+                )
+            ]),
+            pad={"r": 10, "t": 10},
+            showactive=True,
+            x=0.01,
+            xanchor="left",
+            y=0.98,
+            yanchor="top",
+            bgcolor="rgba(30, 41, 59, 0.9)",
+            bordercolor="rgba(100, 116, 139, 0.3)",
+            borderwidth=1,
+            font=dict(color="#f1f5f9", size=11),
+            active=1  # Start with Log selected
+        ),
+    ]
 )
 
 # Display chart
@@ -414,7 +443,7 @@ with st.container():
             'width': 1400,
             'scale': 2
         }
-    })
+    }, key="price_chart")
 
 # Calculate comprehensive metrics
 if len(df_30_days_ago) > 0:
