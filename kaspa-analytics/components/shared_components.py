@@ -435,11 +435,10 @@ def render_custom_css_with_sidebar():
             height: 16px !important;
         }
         
-        /* Style the dropdown menu when opened - FIXED scrollbar issue */
-        div[data-baseweb="popover"],
-        div[data-baseweb="popover"] > div,
-        div[data-baseweb="menu"],
-        ul[role="listbox"] {
+        /* Style the dropdown menu when opened - FIXED nested panels */
+        
+        /* Target only the outermost popover container */
+        div[data-baseweb="popover"]:not(div[data-baseweb="popover"] div[data-baseweb="popover"]) {
             background: rgba(15, 20, 25, 0.98) !important;
             backdrop-filter: blur(25px) !important;
             border: 1px solid rgba(0, 212, 255, 0.3) !important;
@@ -453,9 +452,38 @@ def render_custom_css_with_sidebar():
             overflow-y: hidden !important;
         }
         
+        /* Reset all nested elements inside popover to prevent double styling */
+        div[data-baseweb="popover"] div[data-baseweb="popover"],
+        div[data-baseweb="popover"] > div,
+        div[data-baseweb="popover"] > div > div,
+        div[data-baseweb="menu"],
+        div[data-baseweb="menu"] > div {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            backdrop-filter: none !important;
+            border-radius: 0 !important;
+        }
+        
+        /* Target the list container specifically */
+        ul[role="listbox"] {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            backdrop-filter: none !important;
+            padding: 4px !important;
+            margin: 0 !important;
+            max-height: none !important;
+            overflow: visible !important;
+        }
+        
         /* Specifically target the scrollable container inside popover */
         div[data-baseweb="popover"] div[role="presentation"],
         div[data-baseweb="menu"] div[role="presentation"] {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            backdrop-filter: none !important;
             max-height: none !important;
             overflow: visible !important;
             overflow-y: visible !important;
@@ -484,6 +512,8 @@ def render_custom_css_with_sidebar():
             margin: 2px 4px !important;
             white-space: nowrap !important;
             flex-shrink: 0 !important;
+            border: none !important;
+            box-shadow: none !important;
         }
         
         li[role="option"]:hover,
