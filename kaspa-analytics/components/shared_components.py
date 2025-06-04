@@ -214,11 +214,11 @@ def render_custom_css_with_sidebar():
             background: linear-gradient(135deg, #00d4ff 0%, #00aadd 100%) !important;
         }
         
-        /* Ultra-professional sidebar with matching gradient */
+        /* Ultra-professional sidebar with matching gradient - FIXED gap */
         section[data-testid="stSidebar"] {
             background: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 50%, #0f1419 100%) !important;
             border-right: 1px solid rgba(100, 116, 139, 0.2) !important;
-            margin-top: 100px !important;
+            margin-top: 80px !important;
             backdrop-filter: blur(25px) !important;
             box-shadow: 8px 0 32px rgba(0, 0, 0, 0.4) !important;
             position: relative !important;
@@ -239,7 +239,7 @@ def render_custom_css_with_sidebar():
         
         /* Fix sidebar collapse/expand button positioning */
         button[data-testid="collapsedControl"] {
-            top: 110px !important;
+            top: 90px !important;
             left: 8px !important;
             z-index: 999999998 !important;
             background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
