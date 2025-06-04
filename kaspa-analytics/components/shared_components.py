@@ -84,7 +84,7 @@ def render_custom_css_with_sidebar():
             }
         }
         
-        /* Professional Header - Updated to match price page styling */
+        /* Professional Header - Improved layout and gradient */
         .professional-header {
             position: fixed !important;
             top: 0 !important;
@@ -92,10 +92,10 @@ def render_custom_css_with_sidebar():
             right: 0 !important;
             width: 100vw !important;
             height: 80px !important;
-            background: rgba(10, 14, 26, 0.95) !important;
+            background: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 50%, #0f1419 100%) !important;
             backdrop-filter: blur(25px) !important;
-            border-bottom: 1px solid rgba(0, 212, 255, 0.15) !important;
-            padding: 0 40px !important;
+            border-bottom: 1px solid rgba(100, 116, 139, 0.2) !important;
+            padding: 0 60px !important;
             z-index: 999999999 !important;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
             display: flex !important;
@@ -108,14 +108,15 @@ def render_custom_css_with_sidebar():
             align-items: center !important;
             justify-content: space-between !important;
             width: 100% !important;
-            max-width: 1400px !important;
-            margin: 0 auto !important;
+            max-width: none !important;
         }
         
+        /* Brand section - moved more to the left */
         .brand-section {
             display: flex !important;
             align-items: center !important;
             gap: 15px !important;
+            flex: 0 0 auto !important;
         }
         
         /* Updated logo with blue/cyan theme only */
@@ -148,7 +149,12 @@ def render_custom_css_with_sidebar():
             pointer-events: none;
         }
         
-        /* Updated brand text with matching colors */
+        /* Simplified brand text - removed subtitle */
+        .brand-text {
+            display: flex !important;
+            flex-direction: column !important;
+        }
+        
         .brand-text h1 {
             font-size: 26px !important;
             font-weight: 800 !important;
@@ -160,19 +166,13 @@ def render_custom_css_with_sidebar():
             text-shadow: 0 0 20px rgba(0, 212, 255, 0.1) !important;
         }
         
-        .brand-subtitle {
-            font-size: 11px !important;
-            color: #64748b !important;
-            font-weight: 500 !important;
-            text-transform: uppercase !important;
-            letter-spacing: 1px !important;
-            margin-top: 2px !important;
-        }
-        
+        /* Auth section - moved more to the right */
         .auth-section {
             display: flex !important;
             align-items: center !important;
             gap: 12px !important;
+            flex: 0 0 auto !important;
+            margin-left: auto !important;
         }
         
         /* Updated login button to match theme */
@@ -684,7 +684,7 @@ def render_clean_header(user_name=None, user_role=None, show_auth=True):
     # Build auth section
     if user_name:
         user_initials = "".join([name[0].upper() for name in user_name.split()[:2]])
-        auth_html = f'<div style="display: flex; align-items: center; gap: 10px; background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(100, 116, 139, 0.3); border-radius: 12px; padding: 8px 12px;"><div style="width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, #00d4ff 0%, #ff00a8 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 14px;">{user_initials}</div><div><div style="font-size: 13px; font-weight: 600; color: #f1f5f9;">{user_name}</div><div style="font-size: 11px; color: #64748b;">{user_role or "Free Plan"}</div></div></div>'
+        auth_html = f'<div style="display: flex; align-items: center; gap: 10px; background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(100, 116, 139, 0.3); border-radius: 12px; padding: 8px 12px;"><div style="width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 14px;">{user_initials}</div><div><div style="font-size: 13px; font-weight: 600; color: #f1f5f9;">{user_name}</div><div style="font-size: 11px; color: #64748b;">{user_role or "Free Plan"}</div></div></div>'
     else:
         auth_html = '<div class="auth-section"><button class="login-button"><i class="fas fa-sign-in-alt"></i> Login</button><button class="signup-button"><i class="fas fa-rocket"></i> Get Started</button></div>' if show_auth else ""
     
@@ -695,7 +695,6 @@ def render_clean_header(user_name=None, user_role=None, show_auth=True):
                 <div class="logo"><i class="fas fa-gem"></i></div>
                 <div class="brand-text">
                     <h1>KaspaMetrics</h1>
-                    <div class="brand-subtitle">Advanced Market Intelligence Platform</div>
                 </div>
             </div>
             {auth_html}
