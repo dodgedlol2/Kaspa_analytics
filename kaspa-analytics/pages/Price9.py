@@ -5,6 +5,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 import sys
 import os
+from components.shared_components import render_page_config, render_custom_css_with_sidebar, render_clean_header, render_beautiful_sidebar
 
 # Add the parent directory to the Python path to find components folder
 current_dir = os.path.dirname(os.path.abspath(__file__))
