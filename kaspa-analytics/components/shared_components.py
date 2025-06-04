@@ -1,17 +1,5 @@
-import streamlit as st
-from datetime import datetime
-
-def render_page_config(page_title="Kaspa Analytics Pro", page_icon="💎"):
-    """Set consistent page config across all pages"""
-    st.set_page_config(
-        page_title=page_title,
-        page_icon=page_icon,
-        layout="wide",
-        initial_sidebar_state="expanded"
-    )
-
 def render_custom_css_with_sidebar():
-    """Enhanced CSS with auto-collapsing sidebar functionality"""
+    """Enhanced CSS with working auto-collapsing sidebar functionality using JavaScript"""
     st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -51,40 +39,7 @@ def render_custom_css_with_sidebar():
             50% { opacity: 0.8; transform: translateX(20px) translateY(-20px); }
         }
         
-        @keyframes shimmer {
-            0% {
-                background-position: -200% center;
-                text-shadow: 0 0 10px rgba(241, 245, 249, 0.3);
-            }
-            50% {
-                text-shadow: 
-                    0 0 20px rgba(0, 212, 255, 0.6),
-                    0 0 30px rgba(0, 212, 255, 0.4),
-                    0 0 40px rgba(0, 212, 255, 0.2);
-            }
-            100% {
-                background-position: 200% center;
-                text-shadow: 0 0 10px rgba(241, 245, 249, 0.3);
-            }
-        }
-        
-        @keyframes glow {
-            0%, 100% {
-                text-shadow: 
-                    0 0 10px rgba(241, 245, 249, 0.3),
-                    0 0 20px rgba(0, 212, 255, 0.2),
-                    0 0 30px rgba(0, 212, 255, 0.1);
-            }
-            50% {
-                text-shadow: 
-                    0 0 20px rgba(241, 245, 249, 0.5),
-                    0 0 30px rgba(0, 212, 255, 0.4),
-                    0 0 40px rgba(0, 212, 255, 0.3),
-                    0 0 50px rgba(0, 212, 255, 0.2);
-            }
-        }
-        
-        /* Professional Header - Improved layout and gradient */
+        /* Professional Header */
         .professional-header {
             position: fixed !important;
             top: 0 !important;
@@ -111,7 +66,6 @@ def render_custom_css_with_sidebar():
             max-width: none !important;
         }
         
-        /* Brand section - moved more to the left */
         .brand-section {
             display: flex !important;
             align-items: center !important;
@@ -119,7 +73,6 @@ def render_custom_css_with_sidebar():
             flex: 0 0 auto !important;
         }
         
-        /* Updated logo with blue/cyan theme only */
         .logo {
             width: 45px !important;
             height: 45px !important;
@@ -136,7 +89,6 @@ def render_custom_css_with_sidebar():
             overflow: hidden !important;
         }
         
-        /* Add a subtle inner glow to the logo */
         .logo::before {
             content: '';
             position: absolute;
@@ -149,7 +101,6 @@ def render_custom_css_with_sidebar():
             pointer-events: none;
         }
         
-        /* Simplified brand text - removed subtitle */
         .brand-text {
             display: flex !important;
             flex-direction: column !important;
@@ -166,7 +117,6 @@ def render_custom_css_with_sidebar():
             text-shadow: 0 0 20px rgba(0, 212, 255, 0.1) !important;
         }
         
-        /* Auth section - moved more to the right */
         .auth-section {
             display: flex !important;
             align-items: center !important;
@@ -175,7 +125,6 @@ def render_custom_css_with_sidebar():
             margin-left: auto !important;
         }
         
-        /* Updated login button to match theme */
         .login-button {
             background: transparent !important;
             border: 1px solid rgba(100, 116, 139, 0.4) !important;
@@ -194,7 +143,6 @@ def render_custom_css_with_sidebar():
             background: rgba(0, 212, 255, 0.05) !important;
         }
         
-        /* Updated signup button with blue theme only */
         .signup-button {
             background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%) !important;
             border: none !important;
@@ -214,39 +162,28 @@ def render_custom_css_with_sidebar():
             background: linear-gradient(135deg, #00d4ff 0%, #00aadd 100%) !important;
         }
         
-        /* AUTO-COLLAPSING SIDEBAR - The Magic Happens Here */
+        /* AUTO-COLLAPSING SIDEBAR - Base styles */
         section[data-testid="stSidebar"] {
             background: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 50%, #0f1419 100%) !important;
             border-right: 1px solid rgba(100, 116, 139, 0.2) !important;
             margin-top: 80px !important;
             backdrop-filter: blur(25px) !important;
             box-shadow: 8px 0 32px rgba(0, 0, 0, 0.4) !important;
-            position: fixed !important;
-            left: 0 !important;
-            top: 80px !important;
-            bottom: 0 !important;
-            width: 60px !important; /* Collapsed width */
-            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            position: relative !important;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
             overflow: hidden !important;
-            z-index: 999 !important;
         }
         
-        /* Expanded state on hover */
-        section[data-testid="stSidebar"]:hover {
-            width: 280px !important; /* Expanded width */
+        /* Collapsed state - set by JavaScript */
+        section[data-testid="stSidebar"].collapsed {
+            width: 60px !important;
+            min-width: 60px !important;
         }
         
-        /* Add subtle gradient overlay for extra depth */
-        section[data-testid="stSidebar"]::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(180deg, rgba(0, 212, 255, 0.02) 0%, transparent 30%, transparent 70%, rgba(0, 212, 255, 0.02) 100%);
-            pointer-events: none;
-            z-index: 1;
+        /* Expanded state - set by JavaScript */
+        section[data-testid="stSidebar"].expanded {
+            width: 280px !important;
+            min-width: 280px !important;
         }
         
         /* Sidebar content container */
@@ -255,43 +192,43 @@ def render_custom_css_with_sidebar():
             padding: 16px 12px !important;
             position: relative !important;
             z-index: 2 !important;
-            width: 280px !important; /* Always full width content */
             transition: opacity 0.3s ease !important;
         }
         
-        /* Content opacity when collapsed */
-        section[data-testid="stSidebar"]:not(:hover) > div {
+        /* Content hidden when collapsed */
+        section[data-testid="stSidebar"].collapsed > div {
             opacity: 0 !important;
+            pointer-events: none !important;
         }
         
         /* Content visible when expanded */
-        section[data-testid="stSidebar"]:hover > div {
+        section[data-testid="stSidebar"].expanded > div {
             opacity: 1 !important;
+            pointer-events: auto !important;
         }
         
-        /* Add collapsed icons */
-        section[data-testid="stSidebar"]:not(:hover)::after {
-            content: '📊\\A📈\\A🔗';
-            white-space: pre;
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 18px;
-            line-height: 50px;
-            z-index: 4;
-            opacity: 1;
-            transition: opacity 0.3s ease;
-            text-align: center;
-            pointer-events: none;
+        /* Collapse indicator overlay */
+        .sidebar-collapse-indicator {
+            position: absolute !important;
+            top: 20px !important;
+            left: 50% !important;
+            transform: translateX(-50%) !important;
+            font-size: 18px !important;
+            line-height: 50px !important;
+            z-index: 4 !important;
+            opacity: 1 !important;
+            transition: opacity 0.3s ease !important;
+            text-align: center !important;
+            pointer-events: none !important;
+            white-space: pre !important;
         }
         
-        /* Hide collapsed icons on hover */
-        section[data-testid="stSidebar"]:hover::after {
-            opacity: 0;
+        /* Hide indicator when expanded */
+        section[data-testid="stSidebar"].expanded .sidebar-collapse-indicator {
+            opacity: 0 !important;
         }
         
-        /* Hide Streamlit's default navigation elements */
+        /* Hide Streamlit's default elements */
         nav[data-testid="stSidebarNav"] {
             display: none !important;
         }
@@ -300,27 +237,11 @@ def render_custom_css_with_sidebar():
             display: none !important;
         }
         
-        section[data-testid="stSidebar"] .css-1d391kg {
-            display: none !important;
-        }
-        
         button[data-testid="collapsedControl"] {
             display: none !important;
         }
         
-        /* CRITICAL: Preserve selectbox dropdown buttons in main content */
-        .main .stSelectbox button {
-            display: block !important;
-            visibility: visible !important;
-        }
-        
-        /* Ensure dropdown arrows are visible */
-        .main .stSelectbox svg {
-            display: block !important;
-            visibility: visible !important;
-        }
-        
-        /* Head metrics styling */
+        /* Navigation styles */
         .head-metric {
             font-size: 12px !important;
             font-weight: 600 !important;
@@ -357,7 +278,6 @@ def render_custom_css_with_sidebar():
             color: #cbd5e1 !important;
         }
         
-        /* Sub metrics styling */
         .sub-metric {
             font-size: 12px !important;
             font-weight: 600 !important;
@@ -398,20 +318,21 @@ def render_custom_css_with_sidebar():
             color: #00d4ff !important;
         }
         
-        /* Chart section styling */
-        .chart-section {
-            margin: 12px 40px 28px 40px;
-            background: rgba(30, 41, 59, 0.4);
-            backdrop-filter: blur(25px);
-            border: none;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
-            position: relative;
-            transition: all 0.3s ease;
+        /* Main content adjustments */
+        .main .block-container {
+            padding-top: 100px !important;
+            padding-left: 80px !important;
+            padding-right: 20px !important;
+            max-width: 100% !important;
+            transition: padding-left 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
         }
         
-        /* Header section with controls */
+        /* Adjusted main content when sidebar expanded */
+        .main-content-expanded {
+            padding-left: 300px !important;
+        }
+        
+        /* Rest of your existing styles */
         .header-section {
             padding: 15px 40px 15px 40px;
             background: transparent;
@@ -440,15 +361,6 @@ def render_custom_css_with_sidebar():
             line-height: 1.2;
         }
         
-        .controls-container {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-            flex-wrap: wrap;
-            flex: 1;
-            justify-content: flex-end;
-        }
-        
         .control-group {
             display: flex;
             flex-direction: column;
@@ -467,7 +379,7 @@ def render_custom_css_with_sidebar():
             line-height: 1;
         }
         
-        /* EXACT ORIGINAL: Match your exact original dropdown styling */
+        /* Selectbox styling */
         .stSelectbox > div > div {
             background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
             border: 2px solid rgba(100, 116, 139, 0.3) !important;
@@ -495,119 +407,7 @@ def render_custom_css_with_sidebar():
             background: transparent !important;
         }
         
-        /* Reset any deeper nested elements to prevent conflicts */
-        .stSelectbox > div > div > div > div,
-        .stSelectbox > div > div > div > div > div {
-            background: transparent !important;
-            border: none !important;
-            box-shadow: none !important;
-            backdrop-filter: none !important;
-            transform: none !important;
-        }
-        
-        /* Ensure dropdown arrow is visible and styled */
-        .stSelectbox button,
-        .stSelectbox svg {
-            display: block !important;
-            visibility: visible !important;
-            background: transparent !important;
-            border: none !important;
-            color: #94a3b8 !important;
-            width: 16px !important;
-            height: 16px !important;
-        }
-        
-        /* Style the dropdown menu when opened - FIXED nested panels */
-        div[data-baseweb="popover"]:not(div[data-baseweb="popover"] div[data-baseweb="popover"]) {
-            background: rgba(15, 20, 25, 0.98) !important;
-            backdrop-filter: blur(25px) !important;
-            border: 1px solid rgba(0, 212, 255, 0.3) !important;
-            border-radius: 12px !important;
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4) !important;
-            margin-top: 4px !important;
-            max-height: none !important;
-            height: auto !important;
-            overflow: visible !important;
-            overflow-x: hidden !important;
-            overflow-y: hidden !important;
-        }
-        
-        /* Reset all nested elements inside popover to prevent double styling */
-        div[data-baseweb="popover"] div[data-baseweb="popover"],
-        div[data-baseweb="popover"] > div,
-        div[data-baseweb="popover"] > div > div,
-        div[data-baseweb="menu"],
-        div[data-baseweb="menu"] > div {
-            background: transparent !important;
-            border: none !important;
-            box-shadow: none !important;
-            backdrop-filter: none !important;
-            border-radius: 0 !important;
-        }
-        
-        /* Target the list container specifically */
-        ul[role="listbox"] {
-            background: transparent !important;
-            border: none !important;
-            box-shadow: none !important;
-            backdrop-filter: none !important;
-            padding: 4px !important;
-            margin: 0 !important;
-            max-height: none !important;
-            overflow: visible !important;
-        }
-        
-        /* Specifically target the scrollable container inside popover */
-        div[data-baseweb="popover"] div[role="presentation"],
-        div[data-baseweb="menu"] div[role="presentation"] {
-            background: transparent !important;
-            border: none !important;
-            box-shadow: none !important;
-            backdrop-filter: none !important;
-            max-height: none !important;
-            overflow: visible !important;
-            overflow-y: visible !important;
-            scrollbar-width: none !important;
-            -ms-overflow-style: none !important;
-        }
-        
-        /* Hide any scrollbars that might appear */
-        div[data-baseweb="popover"] ::-webkit-scrollbar,
-        div[data-baseweb="menu"] ::-webkit-scrollbar {
-            display: none !important;
-            width: 0 !important;
-            height: 0 !important;
-        }
-        
-        /* Style dropdown options - ensure they don't cause overflow */
-        li[role="option"],
-        div[role="option"] {
-            background: transparent !important;
-            color: #e2e8f0 !important;
-            padding: 12px 16px !important;
-            font-weight: 500 !important;
-            font-size: 13px !important;
-            transition: all 0.2s ease !important;
-            border-radius: 8px !important;
-            margin: 2px 4px !important;
-            white-space: nowrap !important;
-            flex-shrink: 0 !important;
-            border: none !important;
-            box-shadow: none !important;
-        }
-        
-        li[role="option"]:hover,
-        div[role="option"]:hover {
-            background: rgba(0, 212, 255, 0.1) !important;
-            color: #00d4ff !important;
-        }
-        
-        .chart-content {
-            padding: 8px 28px;
-            position: relative;
-        }
-        
-        /* Metric cards styling */
+        /* Metric cards */
         .metric-card {
             background: rgba(30, 41, 59, 0.4) !important;
             backdrop-filter: blur(25px) !important;
@@ -663,178 +463,78 @@ def render_custom_css_with_sidebar():
             color: #ff4757 !important;
         }
         
-        .stPlotlyChart {
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
-        }
-        
-        .stPlotlyChart .modebar {
-            background: transparent !important;
-            transform: translateY(10px) !important;
-        }
-        
-        .stPlotlyChart .modebar-group {
-            background: transparent !important;
-        }
-        
-        /* Main content adjustments - account for collapsed sidebar */
-        .main .block-container {
-            padding-top: 100px !important;
-            padding-left: 80px !important; /* Space for collapsed sidebar + margin */
-            padding-right: 20px !important;
-            max-width: 100% !important;
-            transition: padding-left 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        }
-        
-        /* Adjust main content when sidebar is hovered - using adjacent sibling selector */
-        section[data-testid="stSidebar"]:hover ~ div .main .block-container {
-            padding-left: 300px !important; /* Space for expanded sidebar + margin */
-        }
-        
         /* Hide Streamlit elements */
         #MainMenu {visibility: hidden !important;}
         footer {visibility: hidden !important;}
         header {visibility: hidden !important;}
         .stDeployButton {display: none !important;}
         
-        /* Responsive design for smaller screens */
-        @media (max-width: 1200px) {
-            .header-section {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 12px;
-            }
-            
-            .controls-container {
-                width: 100%;
-                justify-content: flex-start;
-                gap: 16px;
-            }
-            
-            .control-group {
-                min-width: 100px;
-            }
-            
-            .main .block-container {
-                padding-left: 80px !important;
-            }
-            
-            section[data-testid="stSidebar"]:hover ~ div .main .block-container {
-                padding-left: 300px !important;
-            }
-        }
-        
+        /* Mobile responsive */
         @media (max-width: 768px) {
-            .professional-header {
-                height: 70px !important;
-                padding: 0 20px !important;
-            }
-            
-            .brand-text h1 {
-                font-size: 22px !important;
-            }
-            
-            .main .block-container {
-                padding-top: 90px !important;
-                padding-left: 20px !important;
-            }
-            
-            .controls-container {
-                gap: 12px;
-            }
-            
-            .control-group {
-                min-width: 90px;
-            }
-            
-            /* Hide sidebar on mobile */
             section[data-testid="stSidebar"] {
                 display: none !important;
             }
+            
+            .main .block-container {
+                padding-left: 20px !important;
+            }
         }
     </style>
-    """, unsafe_allow_html=True)
-
-def render_clean_header(user_name=None, user_role=None, show_auth=True):
-    """Render a clean header with just branding and auth"""
     
-    # Build auth section
-    if user_name:
-        user_initials = "".join([name[0].upper() for name in user_name.split()[:2]])
-        auth_html = f'<div style="display: flex; align-items: center; gap: 10px; background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(100, 116, 139, 0.3); border-radius: 12px; padding: 8px 12px;"><div style="width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 14px;">{user_initials}</div><div><div style="font-size: 13px; font-weight: 600; color: #f1f5f9;">{user_name}</div><div style="font-size: 11px; color: #64748b;">{user_role or "Free Plan"}</div></div></div>'
-    else:
-        auth_html = '<div class="auth-section"><button class="login-button"><i class="fas fa-sign-in-alt"></i> Login</button><button class="signup-button"><i class="fas fa-rocket"></i> Get Started</button></div>' if show_auth else ""
-    
-    header_html = f'''
-    <div class="professional-header">
-        <div class="header-content">
-            <div class="brand-section">
-                <div class="logo"><i class="fas fa-gem"></i></div>
-                <div class="brand-text">
-                    <h1>KaspaMetrics</h1>
-                </div>
-            </div>
-            {auth_html}
-        </div>
-    </div>
-    '''
-    
-    st.markdown(header_html, unsafe_allow_html=True)
-
-def render_beautiful_sidebar(current_page="Price"):
-    """Super simple clean text sidebar - no complex functionality"""
-    
-    # Simple navigation structure with Font Awesome icons
-    navigation = [
-        {
-            "head": '<i class="fas fa-chart-line"></i> MARKET METRICS',
-            "items": [
-                '<i class="fas fa-dollar-sign"></i> PRICE',
-                '<i class="fas fa-coins"></i> MARKET CAP', 
-                '<i class="fas fa-chart-bar"></i> TRADING VOLUME',
-                '<i class="fas fa-layer-group"></i> SUPPLY'
-            ]
-        },
-        {
-            "head": '<i class="fas fa-hammer"></i> MINING',
-            "items": [
-                '<i class="fas fa-bolt"></i> HASHRATE',
-                '<i class="fas fa-puzzle-piece"></i> DIFFICULTY', 
-                '<i class="fas fa-money-bill-wave"></i> MINING REVENUE'
-            ]
-        },
-        {
-            "head": '<i class="fas fa-network-wired"></i> NETWORK',
-            "items": [
-                '<i class="fas fa-exchange-alt"></i> TRANSACTIONS',
-                '<i class="fas fa-wallet"></i> ADDRESSES',
-                '<i class="fas fa-cube"></i> BLOCKS'
-            ]
-        }
-    ]
-    
-    # Build simple HTML
-    sidebar_html = ""
-    
-    for section in navigation:
-        # Head metric
-        sidebar_html += f'<div class="head-metric">{section["head"]}</div>'
+    <script>
+    function initAutoCollapsingSidebar() {
+        const sidebar = document.querySelector('section[data-testid="stSidebar"]');
+        const mainContainer = document.querySelector('.main .block-container');
         
-        # Sub metrics
-        for item in section["items"]:
-            active_class = "active" if "PRICE" in item and current_page == "Price" else ""
-            sidebar_html += f'<div class="sub-metric {active_class}">{item}</div>'
+        if (!sidebar) {
+            console.log('Sidebar not found, retrying...');
+            setTimeout(initAutoCollapsingSidebar, 500);
+            return;
+        }
+        
+        // Create collapse indicator
+        let indicator = sidebar.querySelector('.sidebar-collapse-indicator');
+        if (!indicator) {
+            indicator = document.createElement('div');
+            indicator.className = 'sidebar-collapse-indicator';
+            indicator.innerHTML = '📊\\n📈\\n🔗';
+            sidebar.appendChild(indicator);
+        }
+        
+        // Set initial collapsed state
+        sidebar.classList.add('collapsed');
+        sidebar.classList.remove('expanded');
+        
+        // Mouse enter - expand
+        sidebar.addEventListener('mouseenter', function() {
+            sidebar.classList.remove('collapsed');
+            sidebar.classList.add('expanded');
+            if (mainContainer) {
+                mainContainer.classList.add('main-content-expanded');
+            }
+        });
+        
+        // Mouse leave - collapse
+        sidebar.addEventListener('mouseleave', function() {
+            sidebar.classList.remove('expanded');
+            sidebar.classList.add('collapsed');
+            if (mainContainer) {
+                mainContainer.classList.remove('main-content-expanded');
+            }
+        });
+        
+        console.log('Auto-collapsing sidebar initialized successfully!');
+    }
     
-    # Render in sidebar
-    with st.sidebar:
-        st.markdown(sidebar_html, unsafe_allow_html=True)
-
-def render_simple_page_header(title, subtitle=None):
-    """Simple page header without breadcrumbs"""
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initAutoCollapsingSidebar);
+    } else {
+        initAutoCollapsingSidebar();
+    }
     
-    subtitle_html = f'<p style="color: #94a3b8; font-size: 16px; margin: 8px 0 0 0;">{subtitle}</p>' if subtitle else ""
-    
-    page_header_html = f'<div style="padding: 0 0 32px 0;"><h1 style="color: #f1f5f9; font-size: 36px; font-weight: 800; margin: 0;">{title}</h1>{subtitle_html}</div>'
-    
-    st.markdown(page_header_html, unsafe_allow_html=True)
+    // Also initialize after a delay to handle Streamlit's dynamic loading
+    setTimeout(initAutoCollapsingSidebar, 1000);
+    setTimeout(initAutoCollapsingSidebar, 2000);
+    </script>
+    """, unsafe_allow_html=True)
