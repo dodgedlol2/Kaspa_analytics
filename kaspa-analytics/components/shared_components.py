@@ -384,10 +384,9 @@ def render_custom_css_with_sidebar():
             line-height: 1;
         }
         
-        /* ORIGINAL STYLE: Exact match to your original dropdown styling */
+        /* EXACT ORIGINAL: Match your exact original dropdown styling */
         
-        /* Target only the main selectbox container with original specifications */
-        .stSelectbox > div:first-child > div:first-child {
+        .stSelectbox > div > div {
             background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
             border: 2px solid rgba(100, 116, 139, 0.3) !important;
             border-radius: 12px !important;
@@ -400,15 +399,21 @@ def render_custom_css_with_sidebar():
             min-width: 100px !important;
         }
         
-        /* Original hover state with exact transform and glow */
-        .stSelectbox > div:first-child > div:first-child:hover {
+        .stSelectbox > div > div:hover {
             border-color: #00d4ff !important;
             box-shadow: 0 8px 32px rgba(0, 212, 255, 0.2), 0 0 0 1px rgba(0, 212, 255, 0.3) !important;
-            transform: translateY(-2px) !important;
+            transform: translateY(-2px);
         }
         
-        /* Reset all inner nested elements */
-        .stSelectbox > div > div > div,
+        .stSelectbox > div > div > div {
+            color: #f1f5f9 !important;
+            font-weight: 600 !important;
+            font-size: 13px !important;
+            padding: 8px 16px !important;
+            background: transparent !important;
+        }
+        
+        /* Reset any deeper nested elements to prevent conflicts */
         .stSelectbox > div > div > div > div,
         .stSelectbox > div > div > div > div > div {
             background: transparent !important;
@@ -418,75 +423,7 @@ def render_custom_css_with_sidebar():
             transform: none !important;
         }
         
-        /* Original text styling with exact specs */
-        .stSelectbox > div > div > div:first-child {
-            color: #f1f5f9 !important;
-            font-weight: 600 !important;
-            font-size: 13px !important;
-            padding: 8px 16px !important;
-            background: transparent !important;
-        }
-        
-        /* Alternative targeting for the main selectbox container */
-        .main .stSelectbox > div > div {
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
-            border: 2px solid rgba(100, 116, 139, 0.3) !important;
-            border-radius: 12px !important;
-            backdrop-filter: blur(15px) !important;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
-            min-height: 26px !important;
-            width: 150px !important;
-            max-width: 250px !important;
-            min-width: 100px !important;
-        }
-        
-        .main .stSelectbox > div > div:hover {
-            border-color: #00d4ff !important;
-            box-shadow: 0 8px 32px rgba(0, 212, 255, 0.2), 0 0 0 1px rgba(0, 212, 255, 0.3) !important;
-            transform: translateY(-2px) !important;
-        }
-        
-        .main .stSelectbox > div > div > div {
-            color: #f1f5f9 !important;
-            font-weight: 600 !important;
-            font-size: 13px !important;
-            padding: 8px 16px !important;
-            background: transparent !important;
-        }
-        
-        /* Target data-baseweb select with original styling */
-        div[data-baseweb="select"]:not(div[data-baseweb="select"] div[data-baseweb="select"]) {
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
-            border: 2px solid rgba(100, 116, 139, 0.3) !important;
-            border-radius: 12px !important;
-            backdrop-filter: blur(15px) !important;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
-            min-height: 26px !important;
-            width: 150px !important;
-            max-width: 250px !important;
-            min-width: 100px !important;
-        }
-        
-        /* Original hover for data-baseweb */
-        div[data-baseweb="select"]:not(div[data-baseweb="select"] div[data-baseweb="select"]):hover {
-            border-color: #00d4ff !important;
-            box-shadow: 0 8px 32px rgba(0, 212, 255, 0.2), 0 0 0 1px rgba(0, 212, 255, 0.3) !important;
-            transform: translateY(-2px) !important;
-        }
-        
-        /* Reset nested data-baseweb elements */
-        div[data-baseweb="select"] div[data-baseweb="select"],
-        div[data-baseweb="select"] div[data-baseweb="select"] > div {
-            background: transparent !important;
-            border: none !important;
-            box-shadow: none !important;
-            backdrop-filter: none !important;
-            transform: none !important;
-        }
-        
-        /* Ensure dropdown arrow matches original */
+        /* Ensure dropdown arrow is visible and styled */
         .stSelectbox button,
         .stSelectbox svg {
             display: block !important;
@@ -498,7 +435,7 @@ def render_custom_css_with_sidebar():
             height: 16px !important;
         }
         
-        /* Original dropdown menu styling */
+        /* Style the dropdown menu when opened */
         div[data-baseweb="popover"] {
             background: rgba(15, 20, 25, 0.98) !important;
             backdrop-filter: blur(25px) !important;
@@ -508,7 +445,7 @@ def render_custom_css_with_sidebar():
             margin-top: 4px !important;
         }
         
-        /* Original dropdown options */
+        /* Style dropdown options */
         li[role="option"],
         div[role="option"] {
             background: transparent !important;
@@ -525,17 +462,6 @@ def render_custom_css_with_sidebar():
         div[role="option"]:hover {
             background: rgba(0, 212, 255, 0.1) !important;
             color: #00d4ff !important;
-        }
-        
-        /* Force the exact dimensions and styling from your original control-group */
-        .control-group .stSelectbox {
-            min-width: 120px !important;
-        }
-        
-        .control-group .stSelectbox > div > div {
-            width: 150px !important;
-            max-width: 250px !important;
-            min-width: 100px !important;
         }
         
         .chart-content {
