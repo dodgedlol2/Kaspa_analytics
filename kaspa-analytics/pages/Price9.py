@@ -198,81 +198,117 @@ setTimeout(() => {
 </script>
 """, unsafe_allow_html=True)
 
-# Instead of using st.columns which creates spacing, let's try a different approach
-st.markdown("""
-<div style="display: flex; align-items: center; justify-content: space-between; padding: 5px 40px; margin: 0; gap: 15px; flex-wrap: wrap;">
-    <div style="flex: 0 0 auto;">
-        <h1 style="color: #ffffff; font-size: 16px; font-weight: 700; margin: 0; letter-spacing: 0.5px; text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);">Kaspa Price</h1>
-    </div>
-    <div style="flex: 1;"></div>
-    <div style="display: flex; gap: 20px; align-items: flex-end;">
-        <div id="price-scale-container" style="display: flex; flex-direction: column; gap: 3px; min-width: 120px;">
-            <div style="font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin: 0; padding: 0;">Price Scale</div>
-        </div>
-        <div id="time-scale-container" style="display: flex; flex-direction: column; gap: 3px; min-width: 120px;">
-            <div style="font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin: 0; padding: 0;">Time Scale</div>
-        </div>
-        <div id="time-period-container" style="display: flex; flex-direction: column; gap: 3px; min-width: 120px;">
-            <div style="font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin: 0; padding: 0;">Time Period</div>
-        </div>
-        <div id="power-law-container" style="display: flex; flex-direction: column; gap: 3px; min-width: 120px;">
-            <div style="font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin: 0; padding: 0;">Power Law</div>
-        </div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
+# Use the original column structure but with aggressive spacing fixes
+left_space, title_col, middle_space, ctrl_col1, ctrl_col2, ctrl_col3, ctrl_col4 = st.columns([0.1, 1, 5, 1, 1, 1, 1])
 
-# Create selectboxes normally and use JavaScript to move them
-y_scale = st.selectbox("", ["Linear", "Log"], index=1, label_visibility="collapsed", key="price_y_scale_select")
-x_scale_type = st.selectbox("", ["Linear", "Log"], index=0, label_visibility="collapsed", key="price_x_scale_select")
-time_range = st.selectbox("", ["1W", "1M", "3M", "6M", "1Y", "All"], index=5, label_visibility="collapsed", key="price_time_range_select")
-show_power_law = st.selectbox("", ["Hide", "Show"], index=1, label_visibility="collapsed", key="price_power_law_select")
+# Left invisible spacing column
+with left_space:
+    st.empty()  # Creates invisible space to the left of title
 
-# JavaScript to move selectboxes into the custom layout
+# Title column
+with title_col:
+    st.markdown('<div class="title-container"><h1 class="main-title">Kaspa Price</h1></div>', unsafe_allow_html=True)
+
+# Middle invisible spacing column
+with middle_space:
+    st.empty()  # Creates invisible space between title and controls
+
+# Control columns
+with ctrl_col1:
+    st.markdown('<div class="control-group"><div class="control-label">Price Scale</div>', unsafe_allow_html=True)
+    y_scale = st.selectbox("", ["Linear", "Log"], index=1, label_visibility="collapsed", key="price_y_scale_select")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+with ctrl_col2:
+    st.markdown('<div class="control-group"><div class="control-label">Time Scale</div>', unsafe_allow_html=True)
+    x_scale_type = st.selectbox("", ["Linear", "Log"], index=0, label_visibility="collapsed", key="price_x_scale_select")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+with ctrl_col3:
+    st.markdown('<div class="control-group"><div class="control-label">Time Period</div>', unsafe_allow_html=True)
+    time_range = st.selectbox("", ["1W", "1M", "3M", "6M", "1Y", "All"], index=5, label_visibility="collapsed", key="price_time_range_select")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+with ctrl_col4:
+    st.markdown('<div class="control-group"><div class="control-label">Power Law</div>', unsafe_allow_html=True)
+    show_power_law = st.selectbox("", ["Hide", "Show"], index=1, label_visibility="collapsed", key="price_power_law_select")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+# AGGRESSIVE: Target the specific column row that contains our selectboxes
 st.markdown("""
 <script>
 setTimeout(function() {
-    console.log('=== MOVING SELECTBOXES TO CUSTOM LAYOUT ===');
+    console.log('=== ULTRA-AGGRESSIVE COLUMN SPACING FIX ===');
     
-    // Get all selectboxes
-    const selectboxes = document.querySelectorAll('.stSelectbox');
-    console.log('Found', selectboxes.length, 'selectboxes');
+    // Target the specific row containing our selectboxes
+    const columns = document.querySelectorAll('[data-testid="column"]');
+    const selectboxColumns = [];
     
-    if (selectboxes.length >= 4) {
-        // Move each selectbox to its corresponding container
-        const containers = [
-            'price-scale-container',
-            'time-scale-container', 
-            'time-period-container',
-            'power-law-container'
-        ];
-        
-        containers.forEach((containerId, index) => {
-            const container = document.getElementById(containerId);
-            const selectbox = selectboxes[index];
+    // Find columns that contain selectboxes
+    columns.forEach((column, index) => {
+        if (column.querySelector('.stSelectbox')) {
+            selectboxColumns.push(column);
             
-            if (container && selectbox) {
-                // Remove any spacing from the selectbox
-                selectbox.style.margin = '0';
-                selectbox.style.padding = '0';
-                
-                // Append the selectbox to the custom container
-                container.appendChild(selectbox);
-                console.log('Moved selectbox', index + 1, 'to', containerId);
+            // Nuclear spacing removal for this column
+            column.style.cssText = 'margin: 0 !important; padding: 0 !important; margin-top: 0 !important; margin-bottom: 0 !important; padding-top: 0 !important; padding-bottom: 0 !important;';
+            
+            // Target the parent row
+            if (column.parentElement) {
+                column.parentElement.style.cssText = 'margin: 0 !important; padding: 0 !important; margin-top: 0 !important; margin-bottom: 0 !important; gap: 15px !important;';
             }
-        });
-        
-        // Hide any remaining empty column containers
-        const columns = document.querySelectorAll('[data-testid="column"]');
-        columns.forEach(column => {
-            if (!column.querySelector('.stSelectbox')) {
-                column.style.display = 'none';
+            
+            // Target grandparent (the row container)
+            if (column.parentElement && column.parentElement.parentElement) {
+                column.parentElement.parentElement.style.cssText = 'margin: 0 !important; padding: 0 !important; margin-top: 0 !important; margin-bottom: 0 !important;';
             }
-        });
+            
+            console.log('Fixed selectbox column', index + 1);
+        }
+    });
+    
+    console.log('Fixed', selectboxColumns.length, 'selectbox columns');
+    
+    // Target any row that contains our selectboxes
+    const rows = document.querySelectorAll('.row-widget');
+    rows.forEach(row => {
+        if (row.querySelector('.stSelectbox')) {
+            row.style.cssText = 'margin: 0 !important; padding: 0 !important;';
+            console.log('Fixed selectbox row');
+        }
+    });
+    
+    // Find and eliminate any container with excessive spacing
+    const allContainers = document.querySelectorAll('div');
+    let fixedCount = 0;
+    allContainers.forEach(container => {
+        const computedStyle = window.getComputedStyle(container);
+        const marginTop = parseFloat(computedStyle.marginTop);
+        const paddingTop = parseFloat(computedStyle.paddingTop);
         
-        console.log('Custom layout applied successfully');
-    }
-}, 1000);
+        // If this container has more than 20px spacing and contains selectboxes
+        if ((marginTop > 20 || paddingTop > 20) && container.querySelector('.stSelectbox')) {
+            container.style.marginTop = '0';
+            container.style.paddingTop = '0';
+            fixedCount++;
+        }
+    });
+    
+    console.log('Fixed', fixedCount, 'containers with excessive spacing');
+    console.log('=== ULTRA-AGGRESSIVE FIX COMPLETE ===');
+}, 500);
+
+// Run multiple times to catch dynamic content
+setTimeout(() => {
+    const selectboxRows = document.querySelectorAll('.row-widget');
+    selectboxRows.forEach(row => {
+        if (row.querySelector('.stSelectbox')) {
+            row.style.margin = '0';
+            row.style.padding = '0';
+        }
+    });
+}, 1500);
 </script>
 """, unsafe_allow_html=True)
 
