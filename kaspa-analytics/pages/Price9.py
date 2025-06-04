@@ -2,40 +2,9 @@ import streamlit as st
 import plotly.graph_objects as go
 import numpy as np
 import pandas as pd
+from utils import fit_power_law, load_price_data
 from datetime import datetime, timedelta
-import sys
-import os
-
-# Add the parent directory to the Python path to find components folder
-current_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.dirname(current_dir)
-components_dir = os.path.join(parent_dir, 'components')
-sys.path.append(parent_dir)
-sys.path.append(components_dir)
-
-try:
-    from components.shared_components import render_page_config, render_custom_css_with_sidebar, render_clean_header, render_beautiful_sidebar
-except ImportError:
-    try:
-        # Alternative import if the above doesn't work
-        import importlib.util
-        spec = importlib.util.spec_from_file_location("shared_components", os.path.join(components_dir, "shared_components.py"))
-        shared_components = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(shared_components)
-        render_page_config = shared_components.render_page_config
-        render_custom_css_with_sidebar = shared_components.render_custom_css_with_sidebar
-        render_clean_header = shared_components.render_clean_header
-        render_beautiful_sidebar = shared_components.render_beautiful_sidebar
-    except Exception as e:
-        st.error(f"Cannot import shared_components from components folder. Error: {str(e)}")
-        st.error(f"Looking in: {components_dir}")
-        st.stop()
-
-try:
-    from utils import fit_power_law, load_price_data
-except ImportError:
-    st.error("Cannot import utils. Please ensure utils.py is available.")
-    st.stop()
+from shared_components import render_page_config, render_custom_css_with_sidebar, render_clean_header, render_beautiful_sidebar
 
 # Set page config
 render_page_config(
@@ -82,6 +51,82 @@ else:
 # Header section with title and controls on the same line
 st.markdown('<div class="header-section">', unsafe_allow_html=True)
 
+# JavaScript for ultra-aggressive spacing fixes (moved from the other file)
+st.markdown("""
+<script>
+setTimeout(function() {
+    console.log('=== ULTRA-AGGRESSIVE COLUMN SPACING FIX ===');
+    
+    // Target the specific row containing our selectboxes
+    const columns = document.querySelectorAll('[data-testid="column"]');
+    const selectboxColumns = [];
+    
+    // Find columns that contain selectboxes
+    columns.forEach((column, index) => {
+        if (column.querySelector('.stSelectbox')) {
+            selectboxColumns.push(column);
+            
+            // Nuclear spacing removal for this column
+            column.style.cssText = 'margin: 0 !important; padding: 0 !important; margin-top: 0 !important; margin-bottom: 0 !important; padding-top: 0 !important; padding-bottom: 0 !important;';
+            
+            // Target the parent row
+            if (column.parentElement) {
+                column.parentElement.style.cssText = 'margin: 0 !important; padding: 0 !important; margin-top: 0 !important; margin-bottom: 0 !important; gap: 15px !important;';
+            }
+            
+            // Target grandparent (the row container)
+            if (column.parentElement && column.parentElement.parentElement) {
+                column.parentElement.parentElement.style.cssText = 'margin: 0 !important; padding: 0 !important; margin-top: 0 !important; margin-bottom: 0 !important;';
+            }
+            
+            console.log('Fixed selectbox column', index + 1);
+        }
+    });
+    
+    console.log('Fixed', selectboxColumns.length, 'selectbox columns');
+    
+    // Target any row that contains our selectboxes
+    const rows = document.querySelectorAll('.row-widget');
+    rows.forEach(row => {
+        if (row.querySelector('.stSelectbox')) {
+            row.style.cssText = 'margin: 0 !important; padding: 0 !important;';
+            console.log('Fixed selectbox row');
+        }
+    });
+    
+    // Find and eliminate any container with excessive spacing
+    const allContainers = document.querySelectorAll('div');
+    let fixedCount = 0;
+    allContainers.forEach(container => {
+        const computedStyle = window.getComputedStyle(container);
+        const marginTop = parseFloat(computedStyle.marginTop);
+        const paddingTop = parseFloat(computedStyle.paddingTop);
+        
+        // If this container has more than 20px spacing and contains selectboxes
+        if ((marginTop > 20 || paddingTop > 20) && container.querySelector('.stSelectbox')) {
+            container.style.marginTop = '0';
+            container.style.paddingTop = '0';
+            fixedCount++;
+        }
+    });
+    
+    console.log('Fixed', fixedCount, 'containers with excessive spacing');
+    console.log('=== ULTRA-AGGRESSIVE FIX COMPLETE ===');
+}, 500);
+
+// Run multiple times to catch dynamic content
+setTimeout(() => {
+    const selectboxRows = document.querySelectorAll('.row-widget');
+    selectboxRows.forEach(row => {
+        if (row.querySelector('.stSelectbox')) {
+            row.style.margin = '0';
+            row.style.padding = '0';
+        }
+    });
+}, 1500);
+</script>
+""", unsafe_allow_html=True)
+
 # Column structure with spacing controls:
 # [Left Space] [Title] [Middle Space] [Controls: Price Scale | Time Scale | Time Period | Power Law]
 left_space, title_col, middle_space, ctrl_col1, ctrl_col2, ctrl_col3, ctrl_col4 = st.columns([0.1, 1, 5, 1, 1, 1, 1])
@@ -102,280 +147,7 @@ with middle_space:
 with ctrl_col1:
     st.markdown('<div class="control-group"><div class="control-label">Price Scale</div>', unsafe_allow_html=True)
     y_scale = st.selectbox("", ["Linear", "Log"], index=1, label_visibility="collapsed", key="price_y_scale_select")
-    # COMPREHENSIVE spacing fix with JavaScript
-st.markdown("""
-<script>
-setTimeout(function() {
-    console.log('=== COMPREHENSIVE SPACING FIX ===');
-    
-    // Function to remove all spacing from an element
-    function removeSpacing(element) {
-        if (element && element.style) {
-            element.style.margin = '0';
-            element.style.padding = '0';
-            element.style.marginTop = '0';
-            element.style.marginBottom = '0';
-            element.style.paddingTop = '0';
-            element.style.paddingBottom = '0';
-        }
-    }
-    
-    // Remove spacing from ALL possible containers
-    const spacingTargets = [
-        '.main .block-container > div',
-        '.main .block-container > div > div',
-        '.element-container',
-        '.stMarkdown',
-        '.stSelectbox',
-        '.stSelectbox > div',
-        '.stSelectbox > div > div',
-        'div[data-testid="column"]',
-        '.control-group',
-        '.stPlotlyChart'
-    ];
-    
-    spacingTargets.forEach(selector => {
-        const elements = document.querySelectorAll(selector);
-        elements.forEach(removeSpacing);
-        console.log('Removed spacing from', elements.length, selector, 'elements');
-    });
-    
-    // Specifically target the header section
-    const headerSection = document.querySelector('.header-section');
-    if (headerSection) {
-        headerSection.style.margin = '0';
-        headerSection.style.marginTop = '0';
-        headerSection.style.marginBottom = '0';
-        headerSection.style.paddingTop = '5px';
-        headerSection.style.paddingBottom = '5px';
-        console.log('Fixed header section spacing');
-    }
-    
-    // Target the chart content area
-    const chartContent = document.querySelector('.chart-content');
-    if (chartContent) {
-        chartContent.style.paddingTop = '0';
-        chartContent.style.marginTop = '0';
-        console.log('Fixed chart content spacing');
-    }
-    
-    // Target chart section
-    const chartSection = document.querySelector('.chart-section');
-    if (chartSection) {
-        chartSection.style.marginTop = '5px';
-        console.log('Fixed chart section spacing');
-    }
-    
-    // Remove spacing from any container that might have it
-    const allDivs = document.querySelectorAll('.main div');
-    let spacingRemoved = 0;
-    allDivs.forEach(div => {
-        const computedStyle = window.getComputedStyle(div);
-        if (parseFloat(computedStyle.marginTop) > 10 || parseFloat(computedStyle.paddingTop) > 10) {
-            div.style.marginTop = '0';
-            div.style.paddingTop = '0';
-            spacingRemoved++;
-        }
-    });
-    console.log('Removed extra spacing from', spacingRemoved, 'additional elements');
-    
-    console.log('=== SPACING FIX COMPLETE ===');
-}, 500);
-
-// Run the fix multiple times to catch dynamic content
-setTimeout(() => {
-    const headerSection = document.querySelector('.header-section');
-    const chartContent = document.querySelector('.chart-content');
-    
-    if (headerSection) {
-        headerSection.style.marginBottom = '0';
-    }
-    if (chartContent) {
-        chartContent.style.paddingTop = '0';
-        chartContent.style.marginTop = '0';
-    }
-}, 1500);
-</script>
-""", unsafe_allow_html=True)
-
-# Simple JavaScript to style selectboxes and remove any unwanted spacing
-st.markdown("""
-<script>
-setTimeout(function() {
-    // Style selectboxes with your original styling
-    const selectboxes = document.querySelectorAll('.stSelectbox > div > div');
-    
-    selectboxes.forEach(selectbox => {
-        if (!selectbox.hasAttribute('data-styled')) {
-            selectbox.style.background = 'linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%)';
-            selectbox.style.border = '2px solid rgba(100, 116, 139, 0.3)';
-            selectbox.style.borderRadius = '12px';
-            selectbox.style.backdropFilter = 'blur(15px)';
-            selectbox.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
-            selectbox.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.2)';
-            selectbox.style.minHeight = '26px';
-            selectbox.style.width = '150px';
-            selectbox.setAttribute('data-styled', 'true');
-            
-            selectbox.addEventListener('mouseenter', () => {
-                selectbox.style.borderColor = '#00d4ff';
-                selectbox.style.boxShadow = '0 8px 32px rgba(0, 212, 255, 0.2), 0 0 0 1px rgba(0, 212, 255, 0.3)';
-                selectbox.style.transform = 'translateY(-2px)';
-            });
-            
-            selectbox.addEventListener('mouseleave', () => {
-                selectbox.style.borderColor = 'rgba(100, 116, 139, 0.3)';
-                selectbox.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.2)';
-                selectbox.style.transform = 'translateY(0)';
-            });
-            
-            const textDiv = selectbox.querySelector('div');
-            if (textDiv) {
-                textDiv.style.color = '#f1f5f9';
-                textDiv.style.fontWeight = '600';
-                textDiv.style.fontSize = '13px';
-                textDiv.style.padding = '8px 16px';
-            }
-        }
-    });
-    
-    console.log('Styled', selectboxes.length, 'selectboxes');
-}, 500);
-</script>
-""", unsafe_allow_html=True)
-
-# JavaScript to reinforce the exact original styling and fix scrollbar issues
-st.markdown("""
-<script>
-setTimeout(function() {
-    // Target using your exact original selector
-    const selectboxes = document.querySelectorAll('.stSelectbox > div > div');
-    
-    selectboxes.forEach(selectbox => {
-        // Apply your exact original styling
-        if (!selectbox.hasAttribute('data-exact-styled')) {
-            selectbox.style.background = 'linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%)';
-            selectbox.style.border = '2px solid rgba(100, 116, 139, 0.3)';
-            selectbox.style.borderRadius = '12px';
-            selectbox.style.backdropFilter = 'blur(15px)';
-            selectbox.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
-            selectbox.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.2)';
-            selectbox.style.minHeight = '26px';
-            selectbox.style.width = '150px';
-            selectbox.style.maxWidth = '250px';
-            selectbox.style.minWidth = '100px';
-            selectbox.setAttribute('data-exact-styled', 'true');
-            
-            // Add your exact original hover effects
-            selectbox.addEventListener('mouseenter', () => {
-                selectbox.style.borderColor = '#00d4ff';
-                selectbox.style.boxShadow = '0 8px 32px rgba(0, 212, 255, 0.2), 0 0 0 1px rgba(0, 212, 255, 0.3)';
-                selectbox.style.transform = 'translateY(-2px)';
-            });
-            
-            selectbox.addEventListener('mouseleave', () => {
-                selectbox.style.borderColor = 'rgba(100, 116, 139, 0.3)';
-                selectbox.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.2)';
-                selectbox.style.transform = 'translateY(0)';
-            });
-            
-            // Style the text content exactly like your original
-            const textDiv = selectbox.querySelector('div');
-            if (textDiv) {
-                textDiv.style.color = '#f1f5f9';
-                textDiv.style.fontWeight = '600';
-                textDiv.style.fontSize = '13px';
-                textDiv.style.padding = '8px 16px';
-                textDiv.style.background = 'transparent';
-            }
-        }
-    });
-    
-    // Fix dropdown menus to prevent scrollbars and nested styling
-    const fixDropdownScrollbars = () => {
-        // Target only outermost popovers
-        const outerPopovers = document.querySelectorAll('div[data-baseweb="popover"]:not(div[data-baseweb="popover"] div[data-baseweb="popover"])');
-        outerPopovers.forEach(popover => {
-            // Style only the outermost popover
-            if (!popover.hasAttribute('data-dropdown-styled')) {
-                popover.style.background = 'rgba(15, 20, 25, 0.98)';
-                popover.style.backdropFilter = 'blur(25px)';
-                popover.style.border = '1px solid rgba(0, 212, 255, 0.3)';
-                popover.style.borderRadius = '12px';
-                popover.style.boxShadow = '0 12px 40px rgba(0, 0, 0, 0.4)';
-                popover.style.marginTop = '4px';
-                popover.style.maxHeight = 'none';
-                popover.style.height = 'auto';
-                popover.style.overflow = 'visible';
-                popover.style.overflowY = 'visible';
-                popover.setAttribute('data-dropdown-styled', 'true');
-                
-                // Reset all nested elements to prevent double styling
-                const nestedElements = popover.querySelectorAll('div, ul');
-                nestedElements.forEach(element => {
-                    if (element !== popover) { // Don't reset the outermost element
-                        element.style.background = 'transparent';
-                        element.style.border = 'none';
-                        element.style.boxShadow = 'none';
-                        element.style.backdropFilter = 'none';
-                        element.style.borderRadius = '0';
-                        element.style.maxHeight = 'none';
-                        element.style.overflow = 'visible';
-                        element.style.overflowY = 'visible';
-                    }
-                });
-            }
-        });
-        
-        // Also fix any menu elements
-        const menus = document.querySelectorAll('[data-baseweb="menu"]');
-        menus.forEach(menu => {
-            menu.style.background = 'transparent';
-            menu.style.border = 'none';
-            menu.style.boxShadow = 'none';
-            menu.style.backdropFilter = 'none';
-        });
-        
-        // Fix list containers
-        const listboxes = document.querySelectorAll('ul[role="listbox"]');
-        listboxes.forEach(listbox => {
-            listbox.style.background = 'transparent';
-            listbox.style.border = 'none';
-            listbox.style.boxShadow = 'none';
-            listbox.style.backdropFilter = 'none';
-            listbox.style.padding = '4px';
-            listbox.style.margin = '0';
-        });
-    };
-    
-    // Run immediately and on any DOM changes
-    fixDropdownScrollbars();
-    
-    // Use MutationObserver to catch dynamically created dropdown menus
-    const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-            if (mutation.addedNodes.length > 0) {
-                // Check if any dropdown menus were added
-                mutation.addedNodes.forEach(node => {
-                    if (node.nodeType === 1) { // Element node
-                        if (node.querySelector && (node.querySelector('[data-baseweb="popover"]') || node.querySelector('[data-baseweb="menu"]'))) {
-                            setTimeout(fixDropdownScrollbars, 50);
-                        }
-                    }
-                });
-            }
-        });
-    });
-    
-    // Start observing
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true
-    });
-    
-}, 500);
-</script>
-""", unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 with ctrl_col2:
     st.markdown('<div class="control-group"><div class="control-label">Time Scale</div>', unsafe_allow_html=True)
