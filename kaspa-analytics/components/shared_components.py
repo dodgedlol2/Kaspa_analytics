@@ -11,7 +11,7 @@ def render_page_config(page_title="Kaspa Analytics Pro", page_icon="💎"):
     )
 
 def render_custom_css_with_sidebar():
-    """Enhanced CSS with beautiful sidebar dropdowns and glow effects"""
+    """Enhanced CSS with beautiful sidebar dropdowns and glow effects - FIXED VERSION"""
     st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -49,6 +49,39 @@ def render_custom_css_with_sidebar():
         @keyframes backgroundShift {
             0%, 100% { opacity: 1; transform: translateX(0px) translateY(0px); }
             50% { opacity: 0.8; transform: translateX(20px) translateY(-20px); }
+        }
+        
+        @keyframes shimmer {
+            0% {
+                background-position: -200% center;
+                text-shadow: 0 0 10px rgba(241, 245, 249, 0.3);
+            }
+            50% {
+                text-shadow: 
+                    0 0 20px rgba(0, 212, 255, 0.6),
+                    0 0 30px rgba(0, 212, 255, 0.4),
+                    0 0 40px rgba(0, 212, 255, 0.2);
+            }
+            100% {
+                background-position: 200% center;
+                text-shadow: 0 0 10px rgba(241, 245, 249, 0.3);
+            }
+        }
+        
+        @keyframes glow {
+            0%, 100% {
+                text-shadow: 
+                    0 0 10px rgba(241, 245, 249, 0.3),
+                    0 0 20px rgba(0, 212, 255, 0.2),
+                    0 0 30px rgba(0, 212, 255, 0.1);
+            }
+            50% {
+                text-shadow: 
+                    0 0 20px rgba(241, 245, 249, 0.5),
+                    0 0 30px rgba(0, 212, 255, 0.4),
+                    0 0 40px rgba(0, 212, 255, 0.3),
+                    0 0 50px rgba(0, 212, 255, 0.2);
+            }
         }
         
         /* Professional Header */
@@ -163,16 +196,16 @@ def render_custom_css_with_sidebar():
         section[data-testid="stSidebar"] {
             background: rgba(10, 14, 26, 0.95) !important;
             border-right: 1px solid rgba(0, 212, 255, 0.15) !important;
-            margin-top: 100px !important; /* Moved down from 80px to 100px */
+            margin-top: 100px !important;
             backdrop-filter: blur(25px) !important;
             box-shadow: 8px 0 32px rgba(0, 0, 0, 0.4) !important;
         }
         
         /* Fix sidebar collapse/expand button positioning */
         button[data-testid="collapsedControl"] {
-            top: 110px !important; /* Position below header */
-            left: 8px !important; /* Ensure it's visible when collapsed */
-            z-index: 999999998 !important; /* Lower than header but visible */
+            top: 110px !important;
+            left: 8px !important;
+            z-index: 999999998 !important;
             background: rgba(15, 20, 25, 0.9) !important;
             border: 1px solid rgba(0, 212, 255, 0.3) !important;
             border-radius: 8px !important;
@@ -193,85 +226,38 @@ def render_custom_css_with_sidebar():
             padding: 16px 12px !important;
         }
         
-        /* AGGRESSIVE HIDING OF VIEW MORE/LESS BUTTONS */
+        /* FIXED: More targeted hiding - only hide navigation-related buttons in sidebar */
         
-        /* Hide all minimal buttons in sidebar */
-        section[data-testid="stSidebar"] button[data-testid="baseButton-minimal"] {
-            display: none !important;
-        }
-        
-        /* Hide buttons containing "View" text */
-        section[data-testid="stSidebar"] button:contains("View") {
-            display: none !important;
-        }
-        
-        /* Hide the entire container of View buttons */
-        section[data-testid="stSidebar"] .css-1vq4p4l {
-            display: none !important;
-        }
-        
-        section[data-testid="stSidebar"] .css-1rs6os.edgvbvh3 {
-            display: none !important;
-        }
-        
-        /* Hide any button with "more" or "less" text */
-        section[data-testid="stSidebar"] button[title*="View"] {
-            display: none !important;
-        }
-        
-        section[data-testid="stSidebar"] button[aria-label*="View"] {
-            display: none !important;
-        }
-        
-        /* Nuclear option - hide ALL buttons except collapse button */
-        section[data-testid="stSidebar"] button:not([data-testid="collapsedControl"]) {
-            display: none !important;
-        }
-        
-        /* But make sure collapse button stays visible */
-        button[data-testid="collapsedControl"] {
-            display: block !important;
-        }
-        
-        /* HIDE ALL STREAMLIT DEFAULT NAVIGATION */
-        .css-1d391kg .css-1v3fvcr {
-            display: none !important;
-        }
-        
-        .css-1d391kg .css-17eq0hr {
-            display: none !important;
-        }
-        
-        /* Hide Streamlit's page navigation completely */
+        /* Hide Streamlit's default navigation */
         nav[data-testid="stSidebarNav"] {
             display: none !important;
         }
         
-        .css-1dp5vir {
+        /* Hide specific navigation buttons but preserve dropdown functionality */
+        section[data-testid="stSidebar"] button[data-testid="baseButton-minimal"]:has(span:contains("View")) {
             display: none !important;
         }
         
-        /* Hide any Streamlit sidebar navigation */
-        section[data-testid="stSidebar"] nav {
+        /* Hide radio buttons for navigation */
+        section[data-testid="stSidebar"] .stRadio {
             display: none !important;
         }
         
-        section[data-testid="stSidebar"] ul {
+        /* Hide any navigation selectboxes in sidebar */
+        section[data-testid="stSidebar"] .stSelectbox[data-testid*="nav"] {
             display: none !important;
         }
         
-        section[data-testid="stSidebar"] .css-17eq0hr {
-            display: none !important;
+        /* CRITICAL: Preserve selectbox dropdown buttons in main content */
+        .main .stSelectbox button {
+            display: block !important;
+            visibility: visible !important;
         }
         
-        /* Hide radio buttons if they appear */
-        .stRadio {
-            display: none !important;
-        }
-        
-        /* Hide selectbox navigation if it exists */
-        .stSelectbox {
-            display: none !important;
+        /* Ensure dropdown arrows are visible */
+        .main .stSelectbox svg {
+            display: block !important;
+            visibility: visible !important;
         }
         
         /* Head metrics styling - same as your current Market Metrics */
@@ -350,11 +336,203 @@ def render_custom_css_with_sidebar():
             color: #00d4ff !important;
         }
         
+        /* MERGED STYLES FROM PRICE PAGE */
+        
+        /* Chart section styling */
+        .chart-section {
+            margin: 12px 40px 28px 40px;
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(25px);
+            border: none;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        /* Header section with controls */
+        .header-section {
+            padding: 15px 40px 15px 40px;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .title-container {
+            flex: 0 0 auto;
+        }
+        
+        .main-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #ffffff;
+            margin: 0;
+            letter-spacing: 0.5px;
+            text-align: left;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+            position: relative;
+            white-space: nowrap;
+            line-height: 1.2;
+        }
+        
+        .controls-container {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+            flex: 1;
+            justify-content: flex-end;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            min-width: 120px;
+        }
+        
+        .control-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0;
+            white-space: nowrap;
+            line-height: 1;
+        }
+        
+        /* CRITICAL: Enhanced selectbox styling that preserves functionality */
+        .main .stSelectbox > div > div {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
+            border: 2px solid rgba(100, 116, 139, 0.3) !important;
+            border-radius: 12px !important;
+            backdrop-filter: blur(15px) !important;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+            min-height: 26px !important;
+            width: 150px !important;
+            max-width: 250px !important;
+            min-width: 100px !important;
+        }
+        
+        .main .stSelectbox > div > div:hover {
+            border-color: #00d4ff !important;
+            box-shadow: 0 8px 32px rgba(0, 212, 255, 0.2), 0 0 0 1px rgba(0, 212, 255, 0.3) !important;
+            transform: translateY(-2px);
+        }
+        
+        .main .stSelectbox > div > div > div {
+            color: #f1f5f9 !important;
+            font-weight: 600 !important;
+            font-size: 13px !important;
+            padding: 8px 16px !important;
+        }
+        
+        /* Ensure dropdown arrow is visible and styled */
+        .main .stSelectbox button {
+            display: flex !important;
+            visibility: visible !important;
+            background: transparent !important;
+            border: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+        
+        .main .stSelectbox svg {
+            display: block !important;
+            visibility: visible !important;
+            color: #94a3b8 !important;
+            width: 16px !important;
+            height: 16px !important;
+        }
+        
+        .chart-content {
+            padding: 8px 28px;
+            position: relative;
+        }
+        
+        /* Metric cards styling */
+        .metric-card {
+            background: rgba(30, 41, 59, 0.4) !important;
+            backdrop-filter: blur(25px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+            border-radius: 16px !important;
+            padding: 24px !important;
+            position: relative !important;
+            overflow: hidden !important;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            cursor: pointer !important;
+            margin-bottom: 16px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2) !important;
+        }
+        
+        .metric-card:hover {
+            border-color: rgba(0, 212, 255, 0.4) !important;
+            box-shadow: 0 8px 32px rgba(0, 212, 255, 0.15), 0 0 0 1px rgba(0, 212, 255, 0.2) !important;
+            transform: translateY(-3px) !important;
+            background: rgba(30, 41, 59, 0.6) !important;
+        }
+        
+        .metric-label {
+            color: #94a3b8 !important;
+            font-size: 12px !important;
+            font-weight: 600 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 1px !important;
+            margin-bottom: 10px !important;
+        }
+        
+        .metric-value {
+            color: #f1f5f9 !important;
+            font-size: 28px !important;
+            font-weight: 800 !important;
+            line-height: 1.1 !important;
+            margin-bottom: 6px !important;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+        }
+        
+        .metric-delta {
+            font-size: 14px !important;
+            font-weight: 700 !important;
+            margin-bottom: 8px;
+        }
+        
+        .metric-delta.positive {
+            color: #00ff88 !important;
+        }
+        
+        .metric-delta.negative {
+            color: #ff4757 !important;
+        }
+        
+        .stPlotlyChart {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+        }
+        
+        .stPlotlyChart .modebar {
+            background: transparent !important;
+            transform: translateY(10px) !important;
+        }
+        
+        .stPlotlyChart .modebar-group {
+            background: transparent !important;
+        }
+        
         /* Main content adjustments */
         .main .block-container {
             padding-top: 100px !important;
-            padding-left: 20px !important;
-            padding-right: 20px !important;
+            padding-left: 0px !important;
+            padding-right: 0px !important;
             max-width: 100% !important;
         }
         
@@ -364,7 +542,25 @@ def render_custom_css_with_sidebar():
         header {visibility: hidden !important;}
         .stDeployButton {display: none !important;}
         
-        /* Mobile responsive */
+        /* Responsive design for smaller screens */
+        @media (max-width: 1200px) {
+            .header-section {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            
+            .controls-container {
+                width: 100%;
+                justify-content: flex-start;
+                gap: 16px;
+            }
+            
+            .control-group {
+                min-width: 100px;
+            }
+        }
+        
         @media (max-width: 768px) {
             .professional-header {
                 height: 70px !important;
@@ -377,6 +573,14 @@ def render_custom_css_with_sidebar():
             
             .main .block-container {
                 padding-top: 90px !important;
+            }
+            
+            .controls-container {
+                gap: 12px;
+            }
+            
+            .control-group {
+                min-width: 90px;
             }
         }
     </style>
