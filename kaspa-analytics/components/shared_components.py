@@ -11,7 +11,7 @@ def render_page_config(page_title="Kaspa Analytics Pro", page_icon="💎"):
     )
 
 def render_custom_css_with_sidebar():
-    """Enhanced CSS with beautiful sidebar dropdowns and glow effects - SIMPLIFIED VERSION"""
+    """Enhanced CSS with auto-collapsing sidebar functionality"""
     st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -214,14 +214,26 @@ def render_custom_css_with_sidebar():
             background: linear-gradient(135deg, #00d4ff 0%, #00aadd 100%) !important;
         }
         
-        /* Ultra-professional sidebar with matching gradient - FIXED gap */
+        /* AUTO-COLLAPSING SIDEBAR - The Magic Happens Here */
         section[data-testid="stSidebar"] {
             background: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 50%, #0f1419 100%) !important;
             border-right: 1px solid rgba(100, 116, 139, 0.2) !important;
             margin-top: 80px !important;
             backdrop-filter: blur(25px) !important;
             box-shadow: 8px 0 32px rgba(0, 0, 0, 0.4) !important;
-            position: relative !important;
+            position: fixed !important;
+            left: 0 !important;
+            top: 80px !important;
+            bottom: 0 !important;
+            width: 60px !important; /* Collapsed width */
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            overflow: hidden !important;
+            z-index: 999 !important;
+        }
+        
+        /* Expanded state on hover */
+        section[data-testid="stSidebar"]:hover {
+            width: 280px !important; /* Expanded width */
         }
         
         /* Add subtle gradient overlay for extra depth */
@@ -237,35 +249,62 @@ def render_custom_css_with_sidebar():
             z-index: 1;
         }
         
-        /* Fix sidebar collapse/expand button positioning */
-        button[data-testid="collapsedControl"] {
-            top: 90px !important;
-            left: 8px !important;
-            z-index: 999999998 !important;
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
-            border: 1px solid rgba(100, 116, 139, 0.3) !important;
-            border-radius: 8px !important;
-            width: 32px !important;
-            height: 32px !important;
-            backdrop-filter: blur(15px) !important;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
-        }
-        
-        /* Ensure sidebar content is above the overlay */
+        /* Sidebar content container */
         section[data-testid="stSidebar"] > div {
             background: transparent !important;
             padding: 16px 12px !important;
             position: relative !important;
             z-index: 2 !important;
+            width: 280px !important; /* Always full width content */
+            transition: opacity 0.3s ease !important;
         }
         
-        /* Hide Streamlit's default navigation */
+        /* Content opacity when collapsed */
+        section[data-testid="stSidebar"]:not(:hover) > div {
+            opacity: 0 !important;
+        }
+        
+        /* Content visible when expanded */
+        section[data-testid="stSidebar"]:hover > div {
+            opacity: 1 !important;
+        }
+        
+        /* Add collapsed icons */
+        section[data-testid="stSidebar"]:not(:hover)::after {
+            content: '📊\\A📈\\A🔗';
+            white-space: pre;
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 18px;
+            line-height: 50px;
+            z-index: 4;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+            text-align: center;
+            pointer-events: none;
+        }
+        
+        /* Hide collapsed icons on hover */
+        section[data-testid="stSidebar"]:hover::after {
+            opacity: 0;
+        }
+        
+        /* Hide Streamlit's default navigation elements */
         nav[data-testid="stSidebarNav"] {
             display: none !important;
         }
         
-        /* Hide radio buttons for navigation */
         section[data-testid="stSidebar"] .stRadio {
+            display: none !important;
+        }
+        
+        section[data-testid="stSidebar"] .css-1d391kg {
+            display: none !important;
+        }
+        
+        button[data-testid="collapsedControl"] {
             display: none !important;
         }
         
@@ -294,6 +333,7 @@ def render_custom_css_with_sidebar():
             display: flex !important;
             align-items: center !important;
             gap: 8px !important;
+            white-space: nowrap !important;
         }
         
         .head-metric:hover {
@@ -310,6 +350,7 @@ def render_custom_css_with_sidebar():
             width: 16px !important;
             text-align: center !important;
             transition: color 0.2s ease !important;
+            flex-shrink: 0 !important;
         }
         
         .head-metric:hover i {
@@ -329,6 +370,7 @@ def render_custom_css_with_sidebar():
             display: flex !important;
             align-items: center !important;
             gap: 8px !important;
+            white-space: nowrap !important;
         }
         
         .sub-metric:hover {
@@ -345,6 +387,7 @@ def render_custom_css_with_sidebar():
             width: 16px !important;
             text-align: center !important;
             transition: color 0.2s ease !important;
+            flex-shrink: 0 !important;
         }
         
         .sub-metric:hover i {
@@ -425,7 +468,6 @@ def render_custom_css_with_sidebar():
         }
         
         /* EXACT ORIGINAL: Match your exact original dropdown styling */
-        
         .stSelectbox > div > div {
             background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
             border: 2px solid rgba(100, 116, 139, 0.3) !important;
@@ -476,8 +518,6 @@ def render_custom_css_with_sidebar():
         }
         
         /* Style the dropdown menu when opened - FIXED nested panels */
-        
-        /* Target only the outermost popover container */
         div[data-baseweb="popover"]:not(div[data-baseweb="popover"] div[data-baseweb="popover"]) {
             background: rgba(15, 20, 25, 0.98) !important;
             backdrop-filter: blur(25px) !important;
@@ -638,12 +678,18 @@ def render_custom_css_with_sidebar():
             background: transparent !important;
         }
         
-        /* Main content adjustments */
+        /* Main content adjustments - account for collapsed sidebar */
         .main .block-container {
             padding-top: 100px !important;
-            padding-left: 0px !important;
-            padding-right: 0px !important;
+            padding-left: 80px !important; /* Space for collapsed sidebar + margin */
+            padding-right: 20px !important;
             max-width: 100% !important;
+            transition: padding-left 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+        
+        /* Adjust main content when sidebar is hovered - using adjacent sibling selector */
+        section[data-testid="stSidebar"]:hover ~ div .main .block-container {
+            padding-left: 300px !important; /* Space for expanded sidebar + margin */
         }
         
         /* Hide Streamlit elements */
@@ -669,6 +715,14 @@ def render_custom_css_with_sidebar():
             .control-group {
                 min-width: 100px;
             }
+            
+            .main .block-container {
+                padding-left: 80px !important;
+            }
+            
+            section[data-testid="stSidebar"]:hover ~ div .main .block-container {
+                padding-left: 300px !important;
+            }
         }
         
         @media (max-width: 768px) {
@@ -683,6 +737,7 @@ def render_custom_css_with_sidebar():
             
             .main .block-container {
                 padding-top: 90px !important;
+                padding-left: 20px !important;
             }
             
             .controls-container {
@@ -691,6 +746,11 @@ def render_custom_css_with_sidebar():
             
             .control-group {
                 min-width: 90px;
+            }
+            
+            /* Hide sidebar on mobile */
+            section[data-testid="stSidebar"] {
+                display: none !important;
             }
         }
     </style>
