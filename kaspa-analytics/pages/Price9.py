@@ -104,7 +104,7 @@ with ctrl_col1:
     y_scale = st.selectbox("", ["Linear", "Log"], index=1, label_visibility="collapsed", key="price_y_scale_select")
     st.markdown('</div>', unsafe_allow_html=True)
 
-# JavaScript to reinforce the exact original styling
+# JavaScript to reinforce the exact original styling and fix scrollbar issues
 st.markdown("""
 <script>
 setTimeout(function() {
@@ -150,6 +150,54 @@ setTimeout(function() {
             }
         }
     });
+    
+    // Fix dropdown menus to prevent scrollbars
+    const fixDropdownScrollbars = () => {
+        const popovers = document.querySelectorAll('[data-baseweb="popover"], [data-baseweb="menu"]');
+        popovers.forEach(popover => {
+            // Remove any height restrictions that cause scrollbars
+            popover.style.maxHeight = 'none';
+            popover.style.height = 'auto';
+            popover.style.overflow = 'visible';
+            popover.style.overflowY = 'visible';
+            
+            // Find any nested scrollable containers
+            const scrollableContainers = popover.querySelectorAll('[role="presentation"], div');
+            scrollableContainers.forEach(container => {
+                container.style.maxHeight = 'none';
+                container.style.overflow = 'visible';
+                container.style.overflowY = 'visible';
+                container.style.scrollbarWidth = 'none';
+                container.style.msOverflowStyle = 'none';
+            });
+        });
+    };
+    
+    // Run immediately and on any DOM changes
+    fixDropdownScrollbars();
+    
+    // Use MutationObserver to catch dynamically created dropdown menus
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.addedNodes.length > 0) {
+                // Check if any dropdown menus were added
+                mutation.addedNodes.forEach(node => {
+                    if (node.nodeType === 1) { // Element node
+                        if (node.querySelector && (node.querySelector('[data-baseweb="popover"]') || node.querySelector('[data-baseweb="menu"]'))) {
+                            setTimeout(fixDropdownScrollbars, 50);
+                        }
+                    }
+                });
+            }
+        });
+    });
+    
+    // Start observing
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+    
 }, 500);
 </script>
 """, unsafe_allow_html=True)
