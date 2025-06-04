@@ -384,13 +384,10 @@ def render_custom_css_with_sidebar():
             line-height: 1;
         }
         
-        /* ENHANCED: More aggressive selectbox styling to match original design */
+        /* FIXED: Precise selectbox styling - target only the outer container */
         
-        /* Target all possible selectbox containers */
-        .stSelectbox,
-        .stSelectbox > div,
-        .stSelectbox > div > div,
-        .stSelectbox > div > div > div {
+        /* Target only the main selectbox container, not nested divs */
+        .stSelectbox > div:first-child > div:first-child {
             background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
             border: 2px solid rgba(100, 116, 139, 0.3) !important;
             border-radius: 12px !important;
@@ -403,19 +400,25 @@ def render_custom_css_with_sidebar():
             min-width: 100px !important;
         }
         
-        /* Hover states for selectboxes */
-        .stSelectbox:hover,
-        .stSelectbox > div:hover,
-        .stSelectbox > div > div:hover {
+        /* Hover state for the main container only */
+        .stSelectbox > div:first-child > div:first-child:hover {
             border-color: #00d4ff !important;
             box-shadow: 0 8px 32px rgba(0, 212, 255, 0.2), 0 0 0 1px rgba(0, 212, 255, 0.3) !important;
             transform: translateY(-2px) !important;
         }
         
-        /* Text content styling */
+        /* Reset styling for inner elements to prevent nesting issues */
         .stSelectbox > div > div > div,
-        .stSelectbox div[role="button"],
-        .stSelectbox span {
+        .stSelectbox > div > div > div > div,
+        .stSelectbox > div > div > div > div > div {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            backdrop-filter: none !important;
+        }
+        
+        /* Style only the text content */
+        .stSelectbox > div > div > div:first-child {
             color: #f1f5f9 !important;
             font-weight: 600 !important;
             font-size: 13px !important;
@@ -423,11 +426,8 @@ def render_custom_css_with_sidebar():
             background: transparent !important;
         }
         
-        /* Target data-baseweb select elements more aggressively */
-        div[data-baseweb="select"],
-        div[data-baseweb="select"] > div,
-        div[data-baseweb="select"] > div > div,
-        div[data-baseweb="select"] > div > div > div {
+        /* Target data-baseweb select - be very specific */
+        div[data-baseweb="select"]:not(div[data-baseweb="select"] div[data-baseweb="select"]) {
             background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
             border: 2px solid rgba(100, 116, 139, 0.3) !important;
             border-radius: 12px !important;
@@ -435,55 +435,35 @@ def render_custom_css_with_sidebar():
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
             min-height: 40px !important;
-            color: #f1f5f9 !important;
-            font-weight: 600 !important;
-            font-size: 13px !important;
         }
         
-        /* Hover for data-baseweb elements */
-        div[data-baseweb="select"]:hover,
-        div[data-baseweb="select"]:hover > div,
-        div[data-baseweb="select"]:hover > div > div {
+        /* Reset nested data-baseweb elements */
+        div[data-baseweb="select"] div[data-baseweb="select"] {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            backdrop-filter: none !important;
+        }
+        
+        /* Hover for data-baseweb - only outermost */
+        div[data-baseweb="select"]:not(div[data-baseweb="select"] div[data-baseweb="select"]):hover {
             border-color: #00d4ff !important;
             box-shadow: 0 8px 32px rgba(0, 212, 255, 0.2), 0 0 0 1px rgba(0, 212, 255, 0.3) !important;
             transform: translateY(-2px) !important;
         }
         
-        /* Target the button/dropdown trigger specifically */
+        /* Ensure dropdown arrow is visible */
         .stSelectbox button,
-        .stSelectbox div[role="button"] {
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
-            border: 2px solid rgba(100, 116, 139, 0.3) !important;
-            border-radius: 12px !important;
-            backdrop-filter: blur(15px) !important;
-            color: #f1f5f9 !important;
-            font-weight: 600 !important;
-            font-size: 13px !important;
-            padding: 8px 16px !important;
-            min-height: 40px !important;
-            width: 100% !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: space-between !important;
-        }
-        
-        /* Ensure dropdown arrow is visible and styled */
-        .stSelectbox button svg,
         .stSelectbox svg {
             display: block !important;
             visibility: visible !important;
+            background: transparent !important;
+            border: none !important;
             color: #94a3b8 !important;
-            width: 16px !important;
-            height: 16px !important;
-            margin-left: auto !important;
         }
         
         /* Style the dropdown menu when opened */
-        div[data-baseweb="popover"],
-        div[data-baseweb="popover"] > div,
-        div[data-baseweb="menu"],
-        div[data-baseweb="menu"] > div,
-        ul[role="listbox"] {
+        div[data-baseweb="popover"] {
             background: rgba(15, 20, 25, 0.98) !important;
             backdrop-filter: blur(25px) !important;
             border: 1px solid rgba(0, 212, 255, 0.3) !important;
@@ -509,22 +489,6 @@ def render_custom_css_with_sidebar():
         div[role="option"]:hover {
             background: rgba(0, 212, 255, 0.1) !important;
             color: #00d4ff !important;
-        }
-        
-        /* Additional targeting for stubborn elements */
-        [data-testid*="stSelectbox"] {
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
-            border: 2px solid rgba(100, 116, 139, 0.3) !important;
-            border-radius: 12px !important;
-        }
-        
-        /* Force override with attribute selectors */
-        [class*="css-"][class*="e1fqkh3o"] > div,
-        [class*="css-"][class*="e1fqkh3o"] > div > div {
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%) !important;
-            border: 2px solid rgba(100, 116, 139, 0.3) !important;
-            border-radius: 12px !important;
-            color: #f1f5f9 !important;
         }
         
         .chart-content {
