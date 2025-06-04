@@ -198,18 +198,15 @@ setTimeout(() => {
 </script>
 """, unsafe_allow_html=True)
 
-st.markdown('</div>', unsafe_allow_html=True)
-
-# JavaScript to reinforce the exact original styling and fix scrollbar issues
+# Simple JavaScript to style selectboxes and remove any unwanted spacing
 st.markdown("""
 <script>
 setTimeout(function() {
-    // Target using your exact original selector
+    // Style selectboxes with your original styling
     const selectboxes = document.querySelectorAll('.stSelectbox > div > div');
     
     selectboxes.forEach(selectbox => {
-        // Apply your exact original styling
-        if (!selectbox.hasAttribute('data-exact-styled')) {
+        if (!selectbox.hasAttribute('data-styled')) {
             selectbox.style.background = 'linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.9) 100%)';
             selectbox.style.border = '2px solid rgba(100, 116, 139, 0.3)';
             selectbox.style.borderRadius = '12px';
@@ -218,11 +215,8 @@ setTimeout(function() {
             selectbox.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.2)';
             selectbox.style.minHeight = '26px';
             selectbox.style.width = '150px';
-            selectbox.style.maxWidth = '250px';
-            selectbox.style.minWidth = '100px';
-            selectbox.setAttribute('data-exact-styled', 'true');
+            selectbox.setAttribute('data-styled', 'true');
             
-            // Add your exact original hover effects
             selectbox.addEventListener('mouseenter', () => {
                 selectbox.style.borderColor = '#00d4ff';
                 selectbox.style.boxShadow = '0 8px 32px rgba(0, 212, 255, 0.2), 0 0 0 1px rgba(0, 212, 255, 0.3)';
@@ -235,100 +229,17 @@ setTimeout(function() {
                 selectbox.style.transform = 'translateY(0)';
             });
             
-            // Style the text content exactly like your original
             const textDiv = selectbox.querySelector('div');
             if (textDiv) {
                 textDiv.style.color = '#f1f5f9';
                 textDiv.style.fontWeight = '600';
                 textDiv.style.fontSize = '13px';
                 textDiv.style.padding = '8px 16px';
-                textDiv.style.background = 'transparent';
             }
         }
     });
     
-    // Fix dropdown menus to prevent scrollbars and nested styling
-    const fixDropdownScrollbars = () => {
-        // Target only outermost popovers
-        const outerPopovers = document.querySelectorAll('div[data-baseweb="popover"]:not(div[data-baseweb="popover"] div[data-baseweb="popover"])');
-        outerPopovers.forEach(popover => {
-            // Style only the outermost popover
-            if (!popover.hasAttribute('data-dropdown-styled')) {
-                popover.style.background = 'rgba(15, 20, 25, 0.98)';
-                popover.style.backdropFilter = 'blur(25px)';
-                popover.style.border = '1px solid rgba(0, 212, 255, 0.3)';
-                popover.style.borderRadius = '12px';
-                popover.style.boxShadow = '0 12px 40px rgba(0, 0, 0, 0.4)';
-                popover.style.marginTop = '4px';
-                popover.style.maxHeight = 'none';
-                popover.style.height = 'auto';
-                popover.style.overflow = 'visible';
-                popover.style.overflowY = 'visible';
-                popover.setAttribute('data-dropdown-styled', 'true');
-                
-                // Reset all nested elements to prevent double styling
-                const nestedElements = popover.querySelectorAll('div, ul');
-                nestedElements.forEach(element => {
-                    if (element !== popover) { // Don't reset the outermost element
-                        element.style.background = 'transparent';
-                        element.style.border = 'none';
-                        element.style.boxShadow = 'none';
-                        element.style.backdropFilter = 'none';
-                        element.style.borderRadius = '0';
-                        element.style.maxHeight = 'none';
-                        element.style.overflow = 'visible';
-                        element.style.overflowY = 'visible';
-                    }
-                });
-            }
-        });
-        
-        // Also fix any menu elements
-        const menus = document.querySelectorAll('[data-baseweb="menu"]');
-        menus.forEach(menu => {
-            menu.style.background = 'transparent';
-            menu.style.border = 'none';
-            menu.style.boxShadow = 'none';
-            menu.style.backdropFilter = 'none';
-        });
-        
-        // Fix list containers
-        const listboxes = document.querySelectorAll('ul[role="listbox"]');
-        listboxes.forEach(listbox => {
-            listbox.style.background = 'transparent';
-            listbox.style.border = 'none';
-            listbox.style.boxShadow = 'none';
-            listbox.style.backdropFilter = 'none';
-            listbox.style.padding = '4px';
-            listbox.style.margin = '0';
-        });
-    };
-    
-    // Run immediately and on any DOM changes
-    fixDropdownScrollbars();
-    
-    // Use MutationObserver to catch dynamically created dropdown menus
-    const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-            if (mutation.addedNodes.length > 0) {
-                // Check if any dropdown menus were added
-                mutation.addedNodes.forEach(node => {
-                    if (node.nodeType === 1) { // Element node
-                        if (node.querySelector && (node.querySelector('[data-baseweb="popover"]') || node.querySelector('[data-baseweb="menu"]'))) {
-                            setTimeout(fixDropdownScrollbars, 50);
-                        }
-                    }
-                });
-            }
-        });
-    });
-    
-    // Start observing
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true
-    });
-    
+    console.log('Styled', selectboxes.length, 'selectboxes');
 }, 500);
 </script>
 """, unsafe_allow_html=True)
