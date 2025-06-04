@@ -198,7 +198,83 @@ setTimeout(() => {
 </script>
 """, unsafe_allow_html=True)
 
-st.markdown('</div>', unsafe_allow_html=True)
+# Instead of using st.columns which creates spacing, let's try a different approach
+st.markdown("""
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 5px 40px; margin: 0; gap: 15px; flex-wrap: wrap;">
+    <div style="flex: 0 0 auto;">
+        <h1 style="color: #ffffff; font-size: 16px; font-weight: 700; margin: 0; letter-spacing: 0.5px; text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);">Kaspa Price</h1>
+    </div>
+    <div style="flex: 1;"></div>
+    <div style="display: flex; gap: 20px; align-items: flex-end;">
+        <div id="price-scale-container" style="display: flex; flex-direction: column; gap: 3px; min-width: 120px;">
+            <div style="font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin: 0; padding: 0;">Price Scale</div>
+        </div>
+        <div id="time-scale-container" style="display: flex; flex-direction: column; gap: 3px; min-width: 120px;">
+            <div style="font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin: 0; padding: 0;">Time Scale</div>
+        </div>
+        <div id="time-period-container" style="display: flex; flex-direction: column; gap: 3px; min-width: 120px;">
+            <div style="font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin: 0; padding: 0;">Time Period</div>
+        </div>
+        <div id="power-law-container" style="display: flex; flex-direction: column; gap: 3px; min-width: 120px;">
+            <div style="font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; margin: 0; padding: 0;">Power Law</div>
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# Create selectboxes normally and use JavaScript to move them
+y_scale = st.selectbox("", ["Linear", "Log"], index=1, label_visibility="collapsed", key="price_y_scale_select")
+x_scale_type = st.selectbox("", ["Linear", "Log"], index=0, label_visibility="collapsed", key="price_x_scale_select")
+time_range = st.selectbox("", ["1W", "1M", "3M", "6M", "1Y", "All"], index=5, label_visibility="collapsed", key="price_time_range_select")
+show_power_law = st.selectbox("", ["Hide", "Show"], index=1, label_visibility="collapsed", key="price_power_law_select")
+
+# JavaScript to move selectboxes into the custom layout
+st.markdown("""
+<script>
+setTimeout(function() {
+    console.log('=== MOVING SELECTBOXES TO CUSTOM LAYOUT ===');
+    
+    // Get all selectboxes
+    const selectboxes = document.querySelectorAll('.stSelectbox');
+    console.log('Found', selectboxes.length, 'selectboxes');
+    
+    if (selectboxes.length >= 4) {
+        // Move each selectbox to its corresponding container
+        const containers = [
+            'price-scale-container',
+            'time-scale-container', 
+            'time-period-container',
+            'power-law-container'
+        ];
+        
+        containers.forEach((containerId, index) => {
+            const container = document.getElementById(containerId);
+            const selectbox = selectboxes[index];
+            
+            if (container && selectbox) {
+                // Remove any spacing from the selectbox
+                selectbox.style.margin = '0';
+                selectbox.style.padding = '0';
+                
+                // Append the selectbox to the custom container
+                container.appendChild(selectbox);
+                console.log('Moved selectbox', index + 1, 'to', containerId);
+            }
+        });
+        
+        // Hide any remaining empty column containers
+        const columns = document.querySelectorAll('[data-testid="column"]');
+        columns.forEach(column => {
+            if (!column.querySelector('.stSelectbox')) {
+                column.style.display = 'none';
+            }
+        });
+        
+        console.log('Custom layout applied successfully');
+    }
+}, 1000);
+</script>
+""", unsafe_allow_html=True)
 
 # JavaScript to reinforce the exact original styling and fix scrollbar issues
 st.markdown("""
