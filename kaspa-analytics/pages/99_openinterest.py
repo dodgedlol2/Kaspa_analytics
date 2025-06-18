@@ -19,13 +19,6 @@ data = {
 df = pd.DataFrame(data)
 df['date'] = pd.to_datetime(df['date'])
 
-# Set genesis date
-genesis_date = pd.to_datetime('2021-11-07')
-df['days_from_genesis'] = (df['date'] - genesis_date).dt.days
-
-# Remove negative days (before genesis)
-df = df[df['days_from_genesis'] >= 0]
-
 # Power-law calculation function
 def calculate_powerlaw(x_data, y_data):
     # Remove zero or negative values for log transformation
@@ -47,108 +40,244 @@ def calculate_powerlaw(x_data, y_data):
     
     return a, b, r2, x_data, y_data
 
-# Calculate power-law
-a, b, r2, x_data, y_data = calculate_powerlaw(
-    df['days_from_genesis'].values,
-    df['openinterest'].values
-)
+def create_analysis(genesis_date_str, title_suffix):
+    # Set genesis date
+    genesis_date = pd.to_datetime(genesis_date_str)
+    df_temp = df.copy()
+    df_temp['days_from_genesis'] = (df_temp['date'] - genesis_date).dt.days
+    
+    # Remove negative days (before genesis)
+    df_temp = df_temp[df_temp['days_from_genesis'] >= 0]
+    
+    # Calculate power-law
+    a, b, r2, x_data, y_data = calculate_powerlaw(
+        df_temp['days_from_genesis'].values,
+        df_temp['openinterest'].values
+    )
+    
+    return df_temp, a, b, r2, x_data, y_data, genesis_date
 
 # Streamlit app
 st.title('Open Interest Power-Law Analysis')
+
+# Analysis 1: Genesis date 2021-11-07
 st.markdown("""
-### Power-law fit for open interest over time
-Using genesis date: 2021-11-07
+### Power-law fit for open interest over time (Genesis: 2021-11-07)
 """)
 
-# Show parameters
-col1, col2, col3 = st.columns(3)
-col1.metric("Power-law exponent (slope)", f"{b:.3f}")
-col2.metric("Coefficient (a)", f"{a:.3f}")
-col3.metric("R² score", f"{r2:.3f}")
+df1, a1, b1, r2_1, x_data1, y_data1, genesis_date1 = create_analysis('2021-11-07', '1')
 
-# Create plot
-fig = go.Figure()
+# Show parameters for first analysis
+col1, col2, col3 = st.columns(3)
+col1.metric("Power-law exponent (slope)", f"{b1:.3f}")
+col2.metric("Coefficient (a)", f"{a1:.3f}")
+col3.metric("R² score", f"{r2_1:.3f}")
+
+# Create plot for first analysis
+fig1 = go.Figure()
 
 # Add actual data
-fig.add_trace(go.Scatter(
-    x=df['date'],
-    y=df['openinterest'],
+fig1.add_trace(go.Scatter(
+    x=df1['date'],
+    y=df1['openinterest'],
     mode='lines+markers',
     name='Open Interest',
     line=dict(color='#00FFCC')
 ))
 
 # Add power-law fit
-x_fit = np.linspace(min(x_data), max(x_data), 100)
-y_fit = a * np.power(x_fit, b)
-fit_dates = [genesis_date + pd.Timedelta(days=int(d)) for d in x_fit]
+x_fit1 = np.linspace(min(x_data1), max(x_data1), 100)
+y_fit1 = a1 * np.power(x_fit1, b1)
+fit_dates1 = [genesis_date1 + pd.Timedelta(days=int(d)) for d in x_fit1]
 
-fig.add_trace(go.Scatter(
-    x=fit_dates,
-    y=y_fit,
+fig1.add_trace(go.Scatter(
+    x=fit_dates1,
+    y=y_fit1,
     mode='lines',
     name='Power-Law Fit',
     line=dict(color='orange', dash='dot')
 ))
 
 # Add deviation bands
-fig.add_trace(go.Scatter(
-    x=fit_dates,
-    y=y_fit * 0.4,  # -60%
+fig1.add_trace(go.Scatter(
+    x=fit_dates1,
+    y=y_fit1 * 0.4,  # -60%
     mode='lines',
     name='Lower Bound (-60%)',
     line=dict(color='lightgray', dash='dot')
 ))
 
-fig.add_trace(go.Scatter(
-    x=fit_dates,
-    y=y_fit * 2.2,  # +120%
+fig1.add_trace(go.Scatter(
+    x=fit_dates1,
+    y=y_fit1 * 2.2,  # +120%
     mode='lines',
     name='Upper Bound (+120%)',
     line=dict(color='lightgray', dash='dot')
 ))
 
 # Update layout
-fig.update_layout(
+fig1.update_layout(
     xaxis_title='Date',
     yaxis_title='Open Interest',
     yaxis_type='log',
     template='plotly_dark',
-    hovermode='x unified'
+    hovermode='x unified',
+    title='Genesis: 2021-11-07'
 )
 
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig1, use_container_width=True)
 
-# Log-log plot
-st.markdown("### Log-log plot")
-fig_log = go.Figure()
+# Analysis 2: Genesis date 2022-11-28
+st.markdown("""
+### Power-law fit for open interest over time (Genesis: 2022-11-28)
+""")
 
-fig_log.add_trace(go.Scatter(
-    x=x_data,
-    y=y_data,
-    mode='markers',
-    name='Actual Data',
-    marker=dict(color='#00FFCC')
+df2, a2, b2, r2_2, x_data2, y_data2, genesis_date2 = create_analysis('2022-11-28', '2')
+
+# Show parameters for second analysis
+col1, col2, col3 = st.columns(3)
+col1.metric("Power-law exponent (slope)", f"{b2:.3f}")
+col2.metric("Coefficient (a)", f"{a2:.3f}")
+col3.metric("R² score", f"{r2_2:.3f}")
+
+# Create plot for second analysis
+fig2 = go.Figure()
+
+# Add actual data
+fig2.add_trace(go.Scatter(
+    x=df2['date'],
+    y=df2['openinterest'],
+    mode='lines+markers',
+    name='Open Interest',
+    line=dict(color='#00FFCC')
 ))
 
-fig_log.add_trace(go.Scatter(
-    x=x_fit,
-    y=y_fit,
+# Add power-law fit
+x_fit2 = np.linspace(min(x_data2), max(x_data2), 100)
+y_fit2 = a2 * np.power(x_fit2, b2)
+fit_dates2 = [genesis_date2 + pd.Timedelta(days=int(d)) for d in x_fit2]
+
+fig2.add_trace(go.Scatter(
+    x=fit_dates2,
+    y=y_fit2,
     mode='lines',
     name='Power-Law Fit',
-    line=dict(color='orange')
+    line=dict(color='orange', dash='dot')
 ))
 
-fig_log.update_layout(
-    xaxis_title='Days from Genesis (log scale)',
-    yaxis_title='Open Interest (log scale)',
-    xaxis_type='log',
+# Add deviation bands
+fig2.add_trace(go.Scatter(
+    x=fit_dates2,
+    y=y_fit2 * 0.4,  # -60%
+    mode='lines',
+    name='Lower Bound (-60%)',
+    line=dict(color='lightgray', dash='dot')
+))
+
+fig2.add_trace(go.Scatter(
+    x=fit_dates2,
+    y=y_fit2 * 2.2,  # +120%
+    mode='lines',
+    name='Upper Bound (+120%)',
+    line=dict(color='lightgray', dash='dot')
+))
+
+# Update layout
+fig2.update_layout(
+    xaxis_title='Date',
+    yaxis_title='Open Interest',
     yaxis_type='log',
-    template='plotly_dark'
+    template='plotly_dark',
+    hovermode='x unified',
+    title='Genesis: 2022-11-28'
 )
 
-st.plotly_chart(fig_log, use_container_width=True)
+st.plotly_chart(fig2, use_container_width=True)
+
+# Comparison section
+st.markdown("### Comparison of Both Genesis Dates")
+
+comparison_data = {
+    'Genesis Date': ['2021-11-07', '2022-11-28'],
+    'Power-law Exponent (b)': [f"{b1:.3f}", f"{b2:.3f}"],
+    'Coefficient (a)': [f"{a1:.3f}", f"{a2:.3f}"],
+    'R² Score': [f"{r2_1:.3f}", f"{r2_2:.3f}"],
+    'Data Points': [len(df1), len(df2)]
+}
+
+comparison_df = pd.DataFrame(comparison_data)
+st.table(comparison_df)
+
+# Log-log plots
+st.markdown("### Log-log plots comparison")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    st.markdown("#### Genesis: 2021-11-07")
+    fig_log1 = go.Figure()
+    
+    fig_log1.add_trace(go.Scatter(
+        x=x_data1,
+        y=y_data1,
+        mode='markers',
+        name='Actual Data',
+        marker=dict(color='#00FFCC')
+    ))
+    
+    fig_log1.add_trace(go.Scatter(
+        x=x_fit1,
+        y=y_fit1,
+        mode='lines',
+        name='Power-Law Fit',
+        line=dict(color='orange')
+    ))
+    
+    fig_log1.update_layout(
+        xaxis_title='Days from Genesis (log scale)',
+        yaxis_title='Open Interest (log scale)',
+        xaxis_type='log',
+        yaxis_type='log',
+        template='plotly_dark',
+        height=400
+    )
+    
+    st.plotly_chart(fig_log1, use_container_width=True)
+
+with col2:
+    st.markdown("#### Genesis: 2022-11-28")
+    fig_log2 = go.Figure()
+    
+    fig_log2.add_trace(go.Scatter(
+        x=x_data2,
+        y=y_data2,
+        mode='markers',
+        name='Actual Data',
+        marker=dict(color='#00FFCC')
+    ))
+    
+    fig_log2.add_trace(go.Scatter(
+        x=x_fit2,
+        y=y_fit2,
+        mode='lines',
+        name='Power-Law Fit',
+        line=dict(color='orange')
+    ))
+    
+    fig_log2.update_layout(
+        xaxis_title='Days from Genesis (log scale)',
+        yaxis_title='Open Interest (log scale)',
+        xaxis_type='log',
+        yaxis_type='log',
+        template='plotly_dark',
+        height=400
+    )
+    
+    st.plotly_chart(fig_log2, use_container_width=True)
 
 # Show raw data
 if st.checkbox('Show raw data'):
-    st.dataframe(df)
+    st.markdown("#### Data with Genesis: 2021-11-07")
+    st.dataframe(df1)
+    st.markdown("#### Data with Genesis: 2022-11-28")
+    st.dataframe(df2)
