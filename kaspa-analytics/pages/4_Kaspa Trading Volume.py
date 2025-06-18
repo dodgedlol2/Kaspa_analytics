@@ -499,3 +499,82 @@ evo_fig.update_layout(
 )
 
 st.plotly_chart(evo_fig, use_container_width=True)
+
+
+# ====== OPEN INTEREST CHART ======
+st.markdown('<div class="title-spacing"><h2>Open Interest</h2></div>', unsafe_allow_html=True)
+st.divider()
+
+# Open Interest data
+open_interest_data = {
+    'Date': [
+        '2023-08-05', '2023-09-05', '2023-10-05', '2023-11-05', '2023-12-05',
+        '2024-01-05', '2024-02-05', '2024-03-05', '2024-04-05', '2024-05-05',
+        '2024-06-05', '2024-07-05', '2024-08-05', '2024-09-05', '2024-10-05',
+        '2024-11-05', '2024-12-05', '2025-01-05', '2025-02-05', '2025-03-05',
+        '2025-04-05', '2025-05-05', '2025-06-05'
+    ],
+    'Open_Interest': [
+        1.21, 1.94, 4.69, 7.56, 32.19, 23.28, 19.35, 51.37, 39.39, 30.1,
+        71.24, 55.11, 76.75, 62.28, 80.17, 72.6, 131, 142.35, 97.3, 81.4,
+        78.29, 135.92, 128.85
+    ]
+}
+
+oi_df = pd.DataFrame(open_interest_data)
+oi_df['Date'] = pd.to_datetime(oi_df['Date'])
+
+# Create Open Interest chart
+oi_fig = go.Figure()
+
+oi_fig.add_trace(go.Scatter(
+    x=oi_df['Date'],
+    y=oi_df['Open_Interest'],
+    mode='lines+markers',
+    name='Open Interest',
+    line=dict(color='#00FFCC', width=2.5),
+    marker=dict(color='#00FFCC', size=6),
+    hovertemplate='<b>Date</b>: %{x|%Y-%m-%d}<br><b>Open Interest</b>: %{y:.2f}<extra></extra>'
+))
+
+oi_fig.update_layout(
+    plot_bgcolor='#262730',
+    paper_bgcolor='#262730',
+    font_color='#e0e0e0',
+    hovermode='x unified',
+    height=400,
+    margin=dict(l=20, r=20, t=60, b=100),
+    yaxis_title='Open Interest',
+    xaxis_title='Date',
+    xaxis=dict(
+        showgrid=True,
+        gridwidth=1,
+        gridcolor='rgba(255, 255, 255, 0.1)',
+        linecolor='#3A3C4A',
+        zerolinecolor='#3A3C4A'
+    ),
+    yaxis=dict(
+        showgrid=True,
+        gridwidth=1,
+        gridcolor='rgba(255, 255, 255, 0.1)',
+        minor=dict(
+            ticklen=6,
+            gridcolor='rgba(255, 255, 255, 0.05)',
+            gridwidth=0.5
+        ),
+        linecolor='#3A3C4A',
+        zerolinecolor='#3A3C4A',
+        color='#00FFCC'
+    ),
+    hoverlabel=dict(
+        bgcolor='#262730',
+        bordercolor='#3A3C4A',
+        font_color='#e0e0e0'
+    )
+)
+
+st.plotly_chart(oi_fig, use_container_width=True)
+
+# ====== POWER LAW EVOLUTION CHART ======
+st.markdown('<div class="title-spacing"><h2>Power Law Parameter Evolution</h2></div>', unsafe_allow_html=True)
+st.divider()
