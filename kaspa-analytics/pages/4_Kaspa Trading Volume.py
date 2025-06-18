@@ -505,6 +505,25 @@ st.plotly_chart(evo_fig, use_container_width=True)
 st.markdown('<div class="title-spacing"><h2>Open Interest</h2></div>', unsafe_allow_html=True)
 st.divider()
 
+# Open Interest controls
+oi_col_spacer_left, oi_col1, oi_col2, oi_spacer = st.columns([0.35, 1, 1, 10])
+
+with oi_col1:
+    st.markdown('<div class="control-label">Y-Scale</div>', unsafe_allow_html=True)
+    oi_y_scale_options = ["Linear", "Log"]
+    oi_y_scale = st.selectbox("OI Y-Scale", oi_y_scale_options,
+                              index=0,
+                              label_visibility="collapsed", key="oi_y_scale_select")
+
+with oi_col2:
+    st.markdown('<div class="control-label">X-Scale</div>', unsafe_allow_html=True)
+    oi_x_scale_options = ["Linear", "Log"]
+    oi_x_scale = st.selectbox("OI X-Scale", oi_x_scale_options,
+                              index=0,
+                              label_visibility="collapsed", key="oi_x_scale_select")
+
+st.divider()
+
 # Open Interest data
 open_interest_data = {
     'Date': [
@@ -524,17 +543,30 @@ open_interest_data = {
 oi_df = pd.DataFrame(open_interest_data)
 oi_df['Date'] = pd.to_datetime(oi_df['Date'])
 
+# Add days from genesis for log scale (assuming genesis date from your volume data)
+genesis_date = volume_df['Date'].iloc[0]  # Use the same genesis date as your volume data
+oi_df['days_from_genesis'] = (oi_df['Date'] - genesis_date).dt.days
+
 # Create Open Interest chart
 oi_fig = go.Figure()
 
+# Determine x-axis values based on scale selection
+if oi_x_scale == "Log":
+    oi_x_values = oi_df['days_from_genesis']
+    oi_x_title = "Days Since Genesis (Log Scale)"
+else:
+    oi_x_values = oi_df['Date']
+    oi_x_title = "Date"
+
 oi_fig.add_trace(go.Scatter(
-    x=oi_df['Date'],
+    x=oi_x_values,
     y=oi_df['Open_Interest'],
     mode='lines+markers',
     name='Open Interest',
     line=dict(color='#00FFCC', width=2.5),
     marker=dict(color='#00FFCC', size=6),
-    hovertemplate='<b>Date</b>: %{x|%Y-%m-%d}<br><b>Open Interest</b>: %{y:.2f}<extra></extra>'
+    hovertemplate='<b>Date</b>: %{text|%Y-%m-%d}<br><b>Open Interest</b>: %{y:.2f}<extra></extra>',
+    text=oi_df['Date']
 ))
 
 oi_fig.update_layout(
@@ -545,15 +577,9 @@ oi_fig.update_layout(
     height=400,
     margin=dict(l=20, r=20, t=60, b=100),
     yaxis_title='Open Interest',
-    xaxis_title='Date',
+    xaxis_title=oi_x_title,
     xaxis=dict(
-        showgrid=True,
-        gridwidth=1,
-        gridcolor='rgba(255, 255, 255, 0.1)',
-        linecolor='#3A3C4A',
-        zerolinecolor='#3A3C4A'
-    ),
-    yaxis=dict(
+        type="log" if oi_x_scale == "Log" else None,
         showgrid=True,
         gridwidth=1,
         gridcolor='rgba(255, 255, 255, 0.1)',
@@ -561,7 +587,20 @@ oi_fig.update_layout(
             ticklen=6,
             gridcolor='rgba(255, 255, 255, 0.05)',
             gridwidth=0.5
-        ),
+        ) if oi_x_scale == "Log" else None,
+        linecolor='#3A3C4A',
+        zerolinecolor='#3A3C4A'
+    ),
+    yaxis=dict(
+        type="log" if oi_y_scale == "Log" else "linear",
+        showgrid=True,
+        gridwidth=1,
+        gridcolor='rgba(255, 255, 255, 0.1)',
+        minor=dict(
+            ticklen=6,
+            gridcolor='rgba(255, 255, 255, 0.05)',
+            gridwidth=0.5
+        ) if oi_y_scale == "Log" else None,
         linecolor='#3A3C4A',
         zerolinecolor='#3A3C4A',
         color='#00FFCC'
